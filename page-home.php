@@ -21,6 +21,12 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 ?>
 <main class="home">
 
+	<?php if ( current_user_can( 'edit_posts' ) && ! $hero_title && ! $steps && ! $services ) : ?>
+		<div style="background:#fff3cd;border:1px solid #ffe69c;padding:12px 20px;margin:20px;border-radius:8px;">
+			Contenuti non ancora inseriti — vai su <strong>Pagine → Home → Modifica</strong> e compila i campi Carbon Fields (Hero, Come funziona, Servizi Popolari, ecc.). Questo avviso lo vedi solo da loggato.
+		</div>
+	<?php endif; ?>
+
 	<section class="hero">
 		<?php if ( $hero_title ) : ?><h1><?php echo esc_html( $hero_title ); ?></h1><?php endif; ?>
 		<?php if ( $hero_subtitle ) : ?><p><?php echo esc_html( $hero_subtitle ); ?></p><?php endif; ?>

@@ -2,5 +2,165 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.1.0
+Version: 0.2.0
 */
+
+:root {
+	--tp-primary: #00C896;
+	--tp-bg-soft: #F0FBF7;
+	--tp-text: #1A1A1A;
+	--tp-white: #FFFFFF;
+	--tp-border: #E2E8E6;
+	--tp-radius: 12px;
+	--tp-max-width: 1120px;
+	--tp-gap: 24px;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	margin: 0;
+	font-family: 'Inter', system-ui, -apple-system, sans-serif;
+	color: var(--tp-text);
+	line-height: 1.5;
+}
+
+img {
+	max-width: 100%;
+	display: block;
+}
+
+a {
+	color: var(--tp-primary);
+	text-decoration: none;
+}
+
+main.home > section {
+	max-width: var(--tp-max-width);
+	margin: 0 auto;
+	padding: 48px 20px;
+}
+
+/* Hero */
+.hero {
+	text-align: center;
+	background: var(--tp-bg-soft);
+	padding: 64px 20px;
+	border-radius: 0 0 var(--tp-radius) var(--tp-radius);
+}
+.hero h1 {
+	font-size: clamp(28px, 4vw, 44px);
+	margin: 0 0 12px;
+}
+.hero p {
+	font-size: 18px;
+	max-width: 640px;
+	margin: 0 auto 16px;
+	opacity: .85;
+}
+.hero .trust-badge {
+	display: inline-block;
+	background: var(--tp-white);
+	border: 1px solid var(--tp-border);
+	border-radius: 999px;
+	padding: 6px 16px;
+	font-size: 14px;
+}
+
+/* Come funziona */
+.how-it-works {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: var(--tp-gap);
+}
+.how-it-works .step {
+	text-align: center;
+}
+.how-it-works .step img {
+	border-radius: var(--tp-radius);
+	margin: 0 auto 16px;
+}
+.how-it-works .step h3 {
+	margin: 0 0 8px;
+}
+
+/* Servizi popolari */
+.popular-services {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: var(--tp-gap);
+}
+.service-card {
+	border: 1px solid var(--tp-border);
+	border-radius: var(--tp-radius);
+	padding: 20px;
+}
+.service-card img {
+	border-radius: var(--tp-radius);
+	margin-bottom: 12px;
+}
+.service-card h3 {
+	margin: 0 0 8px;
+}
+.service-card a {
+	font-weight: 600;
+}
+
+/* Social proof */
+.social-proof {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+	gap: var(--tp-gap);
+}
+.social-proof blockquote {
+	margin: 0;
+	background: var(--tp-bg-soft);
+	border-radius: var(--tp-radius);
+	padding: 20px;
+}
+.social-proof cite {
+	display: block;
+	margin-top: 12px;
+	font-weight: 600;
+	font-style: normal;
+}
+
+/* Zone coperte */
+.zones {
+	text-align: center;
+}
+.zones img {
+	margin: 24px auto 0;
+	border-radius: var(--tp-radius);
+}
+
+/* FAQ */
+.faq-item {
+	border-bottom: 1px solid var(--tp-border);
+	padding: 16px 0;
+}
+.faq-item h4 {
+	margin: 0 0 8px;
+}
+
+/* CTA finale */
+.cta-final {
+	text-align: center;
+	background: var(--tp-primary);
+	color: var(--tp-white);
+	border-radius: var(--tp-radius);
+}
+.cta-final h2 {
+	margin: 0 0 12px;
+}
+.cta-final .button {
+	display: inline-block;
+	background: var(--tp-white);
+	color: var(--tp-primary);
+	font-weight: 600;
+	padding: 12px 28px;
+	border-radius: 999px;
+	margin-top: 16px;
+}
