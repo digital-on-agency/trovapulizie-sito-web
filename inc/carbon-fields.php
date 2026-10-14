@@ -7,7 +7,8 @@ add_action( 'carbon_fields_register_fields', function () {
 	Container::make( 'post_meta', __( 'Home — Sezioni' ) )
 		->where( 'post_template', '=', 'page-home.php' )
 		->add_tab( __( 'Hero' ), array(
-			Field::make( 'text', 'hero_title', __( 'Titolo' ) ),
+			Field::make( 'textarea', 'hero_title', __( 'Titolo' ) )
+				->set_help_text( __( 'Un&#39;invio a capo = una riga nel titolo (il Figma ha 3 righe: "Prenota pulizie" / "professionali" / "In 2 minuti").' ) ),
 			Field::make( 'textarea', 'hero_subtitle', __( 'Sottotitolo' ) ),
 			Field::make( 'text', 'hero_trust_badge', __( 'Trust badge' ) ),
 		) )

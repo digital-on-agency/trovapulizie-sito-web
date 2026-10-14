@@ -28,10 +28,45 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 	<?php endif; ?>
 
 	<section class="hero">
-		<?php if ( $hero_title ) : ?><h1><?php echo esc_html( $hero_title ); ?></h1><?php endif; ?>
-		<?php if ( $hero_subtitle ) : ?><p><?php echo esc_html( $hero_subtitle ); ?></p><?php endif; ?>
-		<?php if ( $hero_trust_badge ) : ?><span class="trust-badge"><?php echo esc_html( $hero_trust_badge ); ?></span><?php endif; ?>
-		<!-- widget lead/ricerca va qui, vedi ADR-001 -->
+		<div class="hero__box"></div>
+		<div class="hero__content">
+			<?php if ( $hero_trust_badge ) : ?>
+				<div class="trust-badge">
+					<span class="trust-badge__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+					<span class="trust-badge__text"><?php echo esc_html( $hero_trust_badge ); ?></span>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( $hero_title ) : ?>
+				<h1><?php echo nl2br( esc_html( $hero_title ) ); ?></h1>
+			<?php endif; ?>
+
+			<?php if ( $hero_subtitle ) : ?>
+				<p class="hero__subtitle"><?php echo nl2br( esc_html( $hero_subtitle ) ); ?></p>
+			<?php endif; ?>
+
+			<!-- Search bar: markup statico, widget JS reale da collegare — vedi ADR-001 -->
+			<div class="hero__search-bar">
+				<div class="hero__search-field hero__search-field--service">
+					<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/icons/ic-servizio.svg' ); ?>" alt="" class="hero__search-icon">
+					<span>Pulizia casa</span>
+					<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/icons/chevron.svg' ); ?>" alt="" class="hero__search-chevron">
+				</div>
+				<div class="hero__search-divider"></div>
+				<div class="hero__search-field hero__search-field--address">
+					<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/icons/ic-pin.svg' ); ?>" alt="" class="hero__search-icon">
+					<span class="hero__search-placeholder">Inserisci il tuo indirizzo</span>
+				</div>
+				<button type="button" class="tp-btn tp-btn--primary tp-btn--lg hero__search-submit">
+					<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/icons/ic-search.svg' ); ?>" alt="" class="hero__search-icon hero__search-icon--white">
+					Cerca
+				</button>
+			</div>
+		</div>
+		<?php get_template_part( 'template-parts/phone-mockup', null, array(
+			'screen' => get_stylesheet_directory_uri() . '/assets/img/hero-phone-screen.png',
+			'class'  => 'hero__phone',
+		) ); ?>
 	</section>
 
 	<?php if ( $steps ) : ?>
