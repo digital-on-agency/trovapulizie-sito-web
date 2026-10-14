@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Storyboard schermo — Come funziona</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+	html, body { margin: 0; background: #fff; }
+	body { width: 1170px; height: 2532px; overflow: hidden; position: relative; font-family: Poppins, system-ui, sans-serif; }
+	.layer { position: absolute; inset: 0; will-change: transform, opacity; }
+	.screen { position: absolute; left: 0; top: 0; width: 1170px; height: 2532px; display: block; }
+	.abs { position: absolute; }
+	#typedBox { left: 182px; top: 600px; width: 790px; height: 86px; background: #fff; display: none; align-items: center; }
+	#typed { font: 400 30px/1 Poppins; color: #1f2937; white-space: nowrap; }
+	#caret { width: 3px; height: 38px; background: #00C896; margin-left: 4px; }
+	.press { border-radius: 60px; background: #000; opacity: 0; pointer-events: none; }
+	#cardHi { left: 51px; top: 683px; width: 1076px; height: 579px; border: 5px solid #00C896; border-radius: 28px; box-sizing: border-box; opacity: 0; }
+	#thanks { background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; }
+	#thanks .circle { width: 300px; height: 300px; border-radius: 50%; background: #00C896; display: flex; align-items: center; justify-content: center; }
+	#thanks svg { width: 170px; height: 170px; }
+	#thanks h1 { margin: 70px 0 20px; font: 700 62px/1.15 Poppins; color: #1f2937; text-align: center; }
+	#thanks p { margin: 0; font: 400 34px/1.4 Poppins; color: #6b7280; text-align: center; max-width: 820px; }
+	#band { opacity: 0; }
+	#band img { object-fit: cover; }
+</style>
+</head>
+<body>
+	<div id="s1" class="layer">
+		<img class="screen" src="../../assets/img/screen-step1-servizio.png" alt="">
+		<img id="casaNeutral" class="abs" src="../../assets/img/tiles/tile-casa-neutral.png" style="left:119px;top:765px;width:192px;height:192px" alt="">
+		<div id="typedBox" class="abs"><span id="typed"></span><span id="caret"></span></div>
+		<div id="searchPress" class="abs press" style="left:990px;top:573px;width:131px;height:131px;border-radius:50%"></div>
+	</div>
+	<div id="s2" class="layer">
+		<img class="screen" src="../../assets/img/screen-step2-cleaner.png" alt="">
+		<div id="cardHi" class="abs"></div>
+		<div id="prenotaPress" class="abs press" style="left:113px;top:1113px;width:952px;height:107px;border-radius:54px"></div>
+	</div>
+	<div id="s3" class="layer">
+		<img class="screen" src="../../assets/img/screen-step3-conferma.png" alt="">
+		<div id="payPress" class="abs press" style="left:87px;top:2360px;width:996px;height:110px;border-radius:55px"></div>
+	</div>
+	<div id="thanks" class="layer">
+		<div class="circle"><svg viewBox="0 0 100 100" fill="none"><path id="check" d="M26 52 L44 69 L76 34" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+		<h1>Prenotazione confermata!</h1>
+		<p>Laura Bianchi arriverà mercoledì 8 aprile alle 09:00 in Via Tuscolana 118.</p>
+	</div>
+	<div id="band" class="layer"><img class="screen" src="../../assets/img/visual-band.png" alt=""></div>
+
+<script type="module">
+	import { T, ADDRESS, ramp, easeOut } from '../../assets/js/screen-timeline.js';
+	const $ = id => document.getElementById(id);
+	const W = 1170;
+	const checkLen = $('check').getTotalLength();
+	$('check').style.strokeDasharray = checkLen;
+
+	function pressFx(el, t, t0, dur = 0.32) {
+		const v = ramp(t, t0, t0 + dur);
+		const k = Math.sin(v * Math.PI);
+		el.style.opacity = (0.14 * k).toFixed(3);
+		el.style.transform = 'scale(' + (1 - 0.06 * k).toFixed(4) + ')';
+	}
+	function slideIn(el, t, t0, dur) {
+		const v = easeOut(ramp(t, t0, t0 + dur));
+		el.style.transform = 'translateX(' + ((1 - v) * W).toFixed(1) + 'px)';
+		el.style.visibility = t >= t0 ? 'visible' : 'hidden';
+	}
+
+	window.seek = function (t) {
+		// Segmento 1 — home: Casa neutra finche' non viene selezionata, digitazione, tap cerca
+		$('casaNeutral').style.opacity = t < T.s1.select ? 1 : 0;
+		const typing = ramp(t, T.s1.typeStart, T.s1.typeEnd);
+		const n = Math.round(typing * ADDRESS.length);
+		const showBox = t >= T.s1.typeStart - 0.2;
+		$('typedBox').style.display = showBox ? 'flex' : 'none';
+		$('typed').textContent = ADDRESS.slice(0, n);
+		$('caret').style.visibility = (showBox && t < T.s1.press && Math.floor(t * 2.5) % 2 === 0) ? 'visible' : 'hidden';
+		pressFx($('searchPress'), t, T.s1.press);
+
+		// Segmento 2 — risultati: slide-in, evidenzia card, tap prenota
+		slideIn($('s2'), t, T.s2.start, T.s2.slide);
+		$('cardHi').style.opacity = ramp(t, T.s2.highlight, T.s2.highlight + 0.2) * (1 - ramp(t, T.s3.start - 0.1, T.s3.start));
+		pressFx($('prenotaPress'), t, T.s2.press);
+
+		// Segmento 3 — conferma: slide-in, tap paga, thank you, fade immagine
+		slideIn($('s3'), t, T.s3.start, T.s3.slide);
+		pressFx($('payPress'), t, T.s3.press);
+		const th = easeOut(ramp(t, T.s3.thanks, T.s3.thanks + 0.3));
+		$('thanks').style.opacity = th;
+		$('thanks').style.visibility = th > 0 ? 'visible' : 'hidden';
+		$('thanks').style.transform = 'scale(' + (0.96 + 0.04 * th).toFixed(4) + ')';
+		const circle = easeOut(ramp(t, T.s3.thanks + 0.1, T.s3.thanks + 0.5));
+		$('thanks').querySelector('.circle').style.transform = 'scale(' + circle.toFixed(4) + ')';
+		const draw = easeOut(ramp(t, T.s3.thanks + 0.45, T.s3.thanks + 1.0));
+		$('check').style.strokeDashoffset = (checkLen * (1 - draw)).toFixed(2);
+		$('band').style.opacity = ramp(t, T.s3.bandStart, T.s3.bandEnd);
+	};
+	window.seek(0);
+	window.storyboardReady = true;
+</script>
+</body>
+</html>
