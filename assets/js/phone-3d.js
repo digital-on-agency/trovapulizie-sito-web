@@ -105,8 +105,11 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 	let pending = false;
 	function render() { pending = false; renderer.render(scene, camera); }
 	function requestRender() { if (!pending) { pending = true; requestAnimationFrame(render); } }
+	// Il primo frame arriva alla texture solo dopo un seek: a 0 esatto Chrome e Safari lasciano lo schermo nero
+	function primeFrame() { if (video.currentTime < 0.001) video.currentTime = 0.001; else { tex.needsUpdate = true; requestRender(); } }
 	video.addEventListener('seeked', function () { tex.needsUpdate = true; requestRender(); });
-	video.addEventListener('loadeddata', requestRender);
+	video.addEventListener('loadeddata', primeFrame);
+	if (video.readyState >= 2) primeFrame();
 
 	// p: { x px, y frazione viewport, ry/rx/rz gradi (convenzione CSS), s scala }
 	function setPose(p, sx, vh) {
