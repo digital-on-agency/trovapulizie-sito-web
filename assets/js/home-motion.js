@@ -74,6 +74,7 @@
 
 	var duration = 0;
 	function seek(q) {
+		if (phone3d && phone3d.setProgress) phone3d.setProgress(q);
 		if (!duration) return;
 		var t = Math.min(q * duration, duration - 0.04);
 		if (Math.abs(video.currentTime - t) > 0.02) video.currentTime = t;
@@ -103,7 +104,7 @@
 			scrub: 0.5,
 			invalidateOnRefresh: true,
 			onRefresh: function (self) { p0 = Math.max(0, Math.min(1, (sectionTop() - self.start) / (self.end - self.start))); },
-			snap: {
+			snap: /[?&]nosnap/.test(location.search) ? undefined : {
 				snapTo: function (p) {
 					if (p < p0) return p;
 					var k = Math.round((p - p0) / (1 - p0) * 3);

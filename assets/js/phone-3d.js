@@ -106,6 +106,54 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 	island.position.set(0, sh / 2 - PHONE.h * 0.045, frontZ + 0.003);
 	group.add(screen, glass, island);
 
+	// Overlay che escono dallo schermo (tile servizi, card cleaner): piani sopra il vetro, sollevati lungo Z dalla timeline condivisa
+	const qs = new URL(import.meta.url).search;
+	const tl = await import('./screen-timeline.js' + qs);
+	const base = new URL('../../', import.meta.url).href.replace(/\/$/, '');
+	const loader = new THREE.TextureLoader();
+	const texOf = file => { const t = loader.load(base + '/assets/img/tiles/' + file); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
+	const shadowTex = (() => {
+		const c = document.createElement('canvas'); c.width = c.height = 128;
+		const g = c.getContext('2d'); const grd = g.createRadialGradient(64, 64, 8, 64, 64, 64);
+		grd.addColorStop(0, 'rgba(10,20,30,0.9)'); grd.addColorStop(1, 'rgba(10,20,30,0)');
+		g.fillStyle = grd; g.fillRect(0, 0, 128, 128);
+		return new THREE.CanvasTexture(c);
+	})();
+	const LIFT = 0.14, Z0 = frontZ + 0.006;
+	function overlay(file, u, v, w, h, r) {
+		const m = new THREE.Mesh(plateGeometry(w, h, r), new THREE.MeshBasicMaterial({ map: texOf(file), transparent: true, toneMapped: false, depthWrite: false }));
+		const s = new THREE.Mesh(new THREE.PlaneGeometry(w * 1.6, h * 1.6), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
+		const x = (u - 0.5) * sw, y = (0.5 - v) * sh;
+		m.position.set(x, y, Z0); s.position.set(x, y - h * 0.1, Z0 - 0.0005);
+		m.renderOrder = 3; s.renderOrder = 2; m.visible = s.visible = false;
+		group.add(s, m);
+		return { m, s };
+	}
+	function setLift(o, lift) {
+		const on = lift > 0.002;
+		o.m.visible = o.s.visible = on;
+		if (!on) return;
+		o.m.position.z = Z0 + lift * LIFT;
+		o.m.scale.setScalar(1 + 0.1 * lift);
+		o.s.material.opacity = 0.45 * lift;
+		o.s.scale.setScalar(1 + 0.35 * lift);
+	}
+	const tw = tl.TILE_SIZE[0] * sw, th = tl.TILE_SIZE[1] * sh;
+	const tiles = {};
+	Object.keys(tl.TILES).forEach(name => { tiles[name] = overlay('tile-' + name + '.png', tl.TILES[name][0], tl.TILES[name][1], tw, th, tw * 0.19); });
+	const casaNeutral = texOf('tile-casa-neutral.png'), casaSelected = tiles.casa.m.material.map;
+	const card = overlay('card-laura.png', tl.CARD.x + tl.CARD.w / 2, tl.CARD.y + tl.CARD.h / 2, tl.CARD.w * sw, tl.CARD.h * sh, 0.02);
+
+	// q = progress del pin (0..1) -> tempo del video sulla timeline condivisa
+	function setProgress(q) {
+		const t = Math.max(0, Math.min(1, q)) * tl.T.total;
+		Object.keys(tiles).forEach(name => setLift(tiles[name], t < tl.T.s2.start ? tl.tileLift(name, t) : 0));
+		const map = t < tl.T.s1.select ? casaNeutral : casaSelected;
+		if (tiles.casa.m.material.map !== map) { tiles.casa.m.material.map = map; tiles.casa.m.material.needsUpdate = true; }
+		setLift(card, t >= tl.T.s2.start && t < tl.T.s3.start ? tl.cardLift(t) : 0);
+		requestRender();
+	}
+
 	const unitPerPx = PHONE.h / phonePx;
 	let pending = false;
 	function render() { pending = false; renderer.render(scene, camera); }
@@ -125,5 +173,5 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 	}
 
 	requestRender();
-	return { setPose, render: requestRender };
+	return { setPose, setProgress, render: requestRender };
 }
