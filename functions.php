@@ -13,6 +13,14 @@ add_action( 'wp_enqueue_scripts', function () {
 	}
 } );
 
+// Importmap per Three.js (ADR-002): stessa versione e stessa CDN per core e addons, solo sulla Home
+add_action( 'wp_head', function () {
+	if ( ! is_page_template( 'page-home.php' ) ) {
+		return;
+	}
+	echo '<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>' . "\n";
+}, 1 );
+
 add_action( 'init', function () {
 	remove_action( 'wp_head', 'wp_generator' );
 } );

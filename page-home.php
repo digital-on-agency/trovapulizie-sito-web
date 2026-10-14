@@ -71,13 +71,14 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 				</button>
 			</div>
 		</div>
-		<div class="hero__phone" id="hiw-phone-pin">
+		<div class="hero__phone" id="hiw-phone-pin" data-theme="<?php echo esc_attr( $theme_uri ); ?>" data-ver="<?php echo esc_attr( wp_get_theme()->get( 'Version' ) ); ?>" data-model="<?php echo esc_attr( carbon_get_the_post_meta( 'phone_model_url' ) ); ?>">
 			<?php get_template_part( 'template-parts/phone-mockup', null, array(
 				'screen' => $hiw_poster ?: $theme_uri . '/assets/img/hero-phone-screen.png',
 				'video'  => $hiw_video,
 				'poster' => $hiw_poster,
 				'id'     => 'hiw-phone',
 			) ); ?>
+			<div class="hero__phone-3d" aria-hidden="true"></div>
 		</div>
 	</section>
 

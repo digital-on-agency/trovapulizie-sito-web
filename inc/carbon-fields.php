@@ -32,6 +32,13 @@ add_action( 'carbon_fields_register_fields', function () {
 					Field::make( 'image', 'image', __( 'Schermo telefono (mobile e reduced-motion)' ) ),
 				) ),
 		) )
+		->add_tab( __( 'Telefono 3D' ), array(
+			Field::make( 'file', 'phone_model_url', __( 'Modello GLB (opzionale)' ) )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Telefono generico senza marchio, formato .glb, consigliato < 2 MB. Vuoto = corpo procedurale.' ) ),
+			Field::make( 'text', 'phone_model_credit', __( 'Credito autore (footer)' ) )
+				->set_help_text( __( 'Obbligatorio per modelli CC-BY, es. "Modello 3D: Nome Autore (Sketchfab), CC BY 4.0".' ) ),
+		) )
 		->add_tab( __( 'Banda Visual' ), array(
 			Field::make( 'image', 'visual_band_image', __( 'Immagine' ) )
 				->set_value_type( 'url' )

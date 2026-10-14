@@ -37,11 +37,34 @@
 		for (var i = 0; i < KEYS.length; i++) o[KEYS[i]] = lerp(a[KEYS[i]], b[KEYS[i]], t);
 		return o;
 	}
+	var phone3d = null;
+	var lastRaw = null;
+	var lastPose = null;
 	function apply(p) {
 		var sx = Math.min(1, window.innerWidth / 1440);
 		var kv = Math.min(1, window.innerHeight / 980);
 		var s = p.s * (1 + (kv - 1) * p.k);
+		lastRaw = p;
+		lastPose = { x: p.x, y: p.y, ry: p.ry, rx: p.rx, rz: p.rz, s: s };
+		if (phone3d) { phone3d.setPose(lastPose, sx, window.innerHeight); return; }
 		phone.style.transform = 'translate(' + (p.x * sx) + 'px,' + (p.y * window.innerHeight) + 'px) rotateY(' + p.ry + 'deg) rotateX(' + p.rx + 'deg) rotateZ(' + p.rz + 'deg) scale(' + s + ')';
+	}
+
+	function hasWebGL2() {
+		try { var c = document.createElement('canvas'); return !!(window.WebGL2RenderingContext && c.getContext('webgl2')); } catch (e) { return false; }
+	}
+	function boot3d() {
+		var host = pinEl.querySelector('.hero__phone-3d');
+		if (!host || !video || !hasWebGL2() || !pinEl.dataset.theme) return;
+		import(pinEl.dataset.theme + '/assets/js/phone-3d.js?ver=' + (pinEl.dataset.ver || '0')).then(function (mod) {
+			return mod.createPhone3D({ container: host, video: video, modelUrl: pinEl.dataset.model || '', phonePx: 608, width: 720, height: 960 });
+		}).then(function (api) {
+			phone3d = api;
+			pinEl.classList.add('is-3d');
+			phone.style.transform = '';
+			apply(lastRaw || POSES.hero);
+			if (video.readyState >= 2) video.currentTime = Math.max(video.currentTime, 0.001);
+		}).catch(function (e) { console.warn('phone-3d non disponibile, resta il phone CSS', e); });
 	}
 	function setStep(q) {
 		var active = q < 1 / 3 ? 0 : q < 2 / 3 ? 1 : 2;
@@ -67,6 +90,8 @@
 			video.preload = 'auto';
 			video.load();
 		}
+
+		boot3d();
 
 		var p0 = 0;
 		ScrollTrigger.create({
