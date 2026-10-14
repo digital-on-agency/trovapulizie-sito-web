@@ -49,7 +49,7 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 
 	const key = new THREE.DirectionalLight(0xffffff, 1.4);
 	key.position.set(-2, 3, 4);
-	scene.add(key, new THREE.AmbientLight(0xffffff, 0.15));
+	scene.add(key, new THREE.AmbientLight(0xffffff, 0.06));
 
 	const group = new THREE.Group();
 	group.rotation.order = 'YXZ';
@@ -80,7 +80,12 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 			depth: PHONE.d - bevel * 2, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4, curveSegments: 24
 		});
 		geo.translate(0, 0, -(PHONE.d - bevel * 2) / 2);
-		const body = new THREE.Mesh(geo, new THREE.MeshPhysicalMaterial({ color: 0x1a1c21, metalness: 0.75, roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.2 }));
+		// Gruppo 0 = facce frontale/posteriore (cornice attorno allo schermo): nero opaco, niente riflesso grigio da fermo.
+		// Gruppo 1 = fianchi + bevel: metallo con riflesso ambiente.
+		const body = new THREE.Mesh(geo, [
+			new THREE.MeshPhysicalMaterial({ color: 0x08090c, metalness: 0.25, roughness: 0.6, envMapIntensity: 0.35 }),
+			new THREE.MeshPhysicalMaterial({ color: 0x1a1c21, metalness: 0.75, roughness: 0.3, clearcoat: 0.6, clearcoatRoughness: 0.2 })
+		]);
 		group.add(body);
 	}
 
