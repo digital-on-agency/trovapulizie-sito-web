@@ -23,9 +23,9 @@
 	// k = quanto la posa segue il canvas Figma di 980px (le pose pinnate si riducono su viewport piu' bassi, la hero no).
 	var POSES = {
 		hero: { x: 0, y: 0, ry: 0, rx: 0, rz: 0, s: 1, k: 0 },
-		s1: { x: -15, y: 0.054, ry: -24, rx: 6, rz: -12, s: 0.93, k: 1 },
-		s2: { x: -15, y: 0.047, ry: 24, rx: 6, rz: 12, s: 0.93, k: 1 },
-		s3: { x: -62, y: 0.088, ry: -12, rx: 4, rz: -6, s: 0.96, k: 1 },
+		s1: { x: -15, y: 0.054, ry: -24, rx: 6, rz: -12, s: 1, k: 1 },
+		s2: { x: -15, y: 0.047, ry: 24, rx: 6, rz: 12, s: 1, k: 1 },
+		s3: { x: -62, y: 0.088, ry: -12, rx: 4, rz: -6, s: 1.02, k: 1 },
 		out: { x: 0, y: 0, ry: 0, rx: 0, rz: 0, s: 1, k: 1 }
 	};
 	var SEQ = [POSES.s1, POSES.s2, POSES.s3, POSES.out];
