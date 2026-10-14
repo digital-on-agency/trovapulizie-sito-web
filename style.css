@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.3.0
+Version: 0.4.0
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -377,22 +377,158 @@ main.home > section {
 	}
 }
 
-/* Come funziona */
+/* Come funziona — Figma 3750:3099 / 3798:1087 / 3828:1157 (canvas 1440x980), ADR-002 */
 .how-it-works {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-	gap: var(--tp-gap);
+	position: relative;
+	max-width: none;
+	padding: 0;
 }
-.how-it-works .step {
+.how-it-works__sticky {
+	position: relative;
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: 72px 20px 48px;
+}
+.how-it-works__title {
+	margin: 0;
+	font-size: 34px;
+	font-weight: 700;
+	color: var(--tp-text-heading);
 	text-align: center;
 }
-.how-it-works .step img {
-	border-radius: var(--tp-radius-xl);
-	margin: 0 auto 16px;
+.how-it-works__subtitle {
+	margin: 4px 0 0;
+	font-size: 16px;
+	color: var(--tp-text-body);
+	text-align: center;
 }
-.how-it-works .step h3 {
-	margin: 0 0 8px;
+.how-it-works__steps {
+	list-style: none;
+	margin: 48px 0 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: var(--tp-gap);
+}
+.how-it-works__step {
+	display: grid;
+	grid-template-columns: 44px 1fr;
+	column-gap: 16px;
+	align-items: start;
+}
+.how-it-works__badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	border-radius: 22px;
+	background: var(--tp-primary);
+	color: var(--tp-white);
+	font-size: 18px;
+	font-weight: 700;
+}
+.how-it-works__text h3 {
+	margin: 0 0 6px;
+	font-size: 20px;
+	font-weight: 600;
 	color: var(--tp-text-heading);
+}
+.how-it-works__text p {
+	margin: 0;
+	font-size: 15px;
+	color: var(--tp-text-placeholder);
+}
+.how-it-works__phone-static {
+	grid-column: 1 / -1;
+	margin-top: 24px;
+	transform: scale(0.6);
+	transform-origin: top left;
+	height: 365px;
+}
+
+/* Motion desktop (classe messa dal JS solo se >=768px e no reduced-motion) */
+.motion-ok .hero__phone {
+	z-index: 5;
+}
+.motion-ok .how-it-works {
+	height: 400vh;
+}
+.motion-ok .how-it-works__sticky {
+	position: sticky;
+	top: 0;
+	height: 100vh;
+	padding: 0;
+}
+.motion-ok .how-it-works__title {
+	position: absolute;
+	top: 7.3%;
+	left: 0;
+	right: 0;
+}
+.motion-ok .how-it-works__subtitle {
+	position: absolute;
+	top: calc(7.3% + 50px);
+	left: 0;
+	right: 0;
+}
+.motion-ok .how-it-works__steps {
+	display: block;
+	margin: 0;
+}
+.motion-ok .how-it-works__step {
+	position: absolute;
+	width: 360px;
+	max-width: 24vw;
+	opacity: 0.55;
+	transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.motion-ok .how-it-works__step.is-active {
+	opacity: 1;
+}
+.motion-ok .how-it-works__step--1 { left: 6.7%; top: 30.6%; }
+.motion-ok .how-it-works__step--2 { left: 62.5%; top: 48%; }
+.motion-ok .how-it-works__step--3 { left: 6.7%; top: 67.3%; }
+.motion-ok .how-it-works__phone-static {
+	display: none;
+}
+.motion-ok #hiw-phone {
+	will-change: transform;
+}
+
+/* Banda Visual — Figma 3828:1187 (punto di atterraggio zoom-through, ADR-002 F3) */
+.visual-band {
+	max-width: none;
+	padding: 0;
+}
+.visual-band__media {
+	position: relative;
+	height: 759px;
+	border-radius: var(--tp-radius-xl);
+	overflow: hidden;
+}
+.visual-band__media img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.visual-band__label {
+	position: absolute;
+	left: 20px;
+	bottom: 20px;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--tp-white);
+}
+
+@media (max-width: 782px) {
+	.how-it-works__steps {
+		grid-template-columns: 1fr;
+	}
+	.visual-band__media {
+		height: 240px;
+		border-radius: 0;
+	}
 }
 
 /* Servizi popolari */

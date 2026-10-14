@@ -7,7 +7,15 @@ get_header();
 $hero_title       = carbon_get_the_post_meta( 'hero_title' );
 $hero_subtitle    = carbon_get_the_post_meta( 'hero_subtitle' );
 $hero_trust_badge = carbon_get_the_post_meta( 'hero_trust_badge' );
+$hiw_title        = carbon_get_the_post_meta( 'how_it_works_title' );
+$hiw_subtitle     = carbon_get_the_post_meta( 'how_it_works_subtitle' );
+$hiw_video        = carbon_get_the_post_meta( 'how_it_works_video' );
+$hiw_poster       = carbon_get_the_post_meta( 'how_it_works_poster' );
 $steps            = carbon_get_the_post_meta( 'how_it_works_steps' );
+$visual_image     = carbon_get_the_post_meta( 'visual_band_image' );
+$visual_label     = carbon_get_the_post_meta( 'visual_band_label' );
+$theme_uri        = get_stylesheet_directory_uri();
+$step_fallbacks   = array( 'screen-step1-servizio.png', 'screen-step2-cleaner.png', 'screen-step3-conferma.png' );
 $services         = carbon_get_the_post_meta( 'popular_services' );
 $reviews          = carbon_get_the_post_meta( 'reviews' );
 $zones_title      = carbon_get_the_post_meta( 'zones_title' );
@@ -63,21 +71,49 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 				</button>
 			</div>
 		</div>
-		<?php get_template_part( 'template-parts/phone-mockup', null, array(
-			'screen' => get_stylesheet_directory_uri() . '/assets/img/hero-phone-screen.png',
-			'class'  => 'hero__phone',
-		) ); ?>
+		<div class="hero__phone" id="hiw-phone-pin">
+			<?php get_template_part( 'template-parts/phone-mockup', null, array(
+				'screen' => $hiw_poster ?: $theme_uri . '/assets/img/hero-phone-screen.png',
+				'video'  => $hiw_video,
+				'poster' => $hiw_poster,
+				'id'     => 'hiw-phone',
+			) ); ?>
+		</div>
 	</section>
 
 	<?php if ( $steps ) : ?>
-	<section class="how-it-works">
-		<?php foreach ( $steps as $step ) : ?>
-			<div class="step">
-				<?php if ( ! empty( $step['image'] ) ) : ?><img src="<?php echo esc_url( wp_get_attachment_url( $step['image'] ) ); ?>" alt=""><?php endif; ?>
-				<h3><?php echo esc_html( $step['title'] ?? '' ); ?></h3>
-				<p><?php echo esc_html( $step['description'] ?? '' ); ?></p>
-			</div>
-		<?php endforeach; ?>
+	<section class="how-it-works" id="come-funziona">
+		<div class="how-it-works__sticky">
+			<?php if ( $hiw_title ) : ?><h2 class="how-it-works__title"><?php echo esc_html( $hiw_title ); ?></h2><?php endif; ?>
+			<?php if ( $hiw_subtitle ) : ?><p class="how-it-works__subtitle"><?php echo esc_html( $hiw_subtitle ); ?></p><?php endif; ?>
+			<ol class="how-it-works__steps">
+				<?php foreach ( array_slice( $steps, 0, 3 ) as $i => $step ) :
+					$n      = $i + 1;
+					$screen = ! empty( $step['image'] ) ? wp_get_attachment_url( $step['image'] ) : $theme_uri . '/assets/img/' . $step_fallbacks[ $i ];
+				?>
+				<li class="how-it-works__step how-it-works__step--<?php echo $n; ?><?php echo 1 === $n ? ' is-active' : ''; ?>" data-step="<?php echo $n; ?>">
+					<span class="how-it-works__badge"><?php echo $n; ?></span>
+					<div class="how-it-works__text">
+						<h3><?php echo esc_html( $step['title'] ?? '' ); ?></h3>
+						<p><?php echo esc_html( $step['description'] ?? '' ); ?></p>
+					</div>
+					<?php get_template_part( 'template-parts/phone-mockup', null, array(
+						'screen' => $screen,
+						'class'  => 'how-it-works__phone-static',
+					) ); ?>
+				</li>
+				<?php endforeach; ?>
+			</ol>
+		</div>
+	</section>
+	<?php endif; ?>
+
+	<?php if ( $visual_image ) : ?>
+	<section class="visual-band" id="visual-band">
+		<div class="visual-band__media">
+			<img src="<?php echo esc_url( $visual_image ); ?>" alt="">
+			<?php if ( $visual_label ) : ?><span class="visual-band__label"><?php echo esc_html( $visual_label ); ?></span><?php endif; ?>
+		</div>
 	</section>
 	<?php endif; ?>
 

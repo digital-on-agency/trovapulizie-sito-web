@@ -13,13 +13,31 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'text', 'hero_trust_badge', __( 'Trust badge' ) ),
 		) )
 		->add_tab( __( 'Come funziona' ), array(
+			Field::make( 'text', 'how_it_works_title', __( 'Titolo sezione' ) )
+				->set_default_value( 'Come funziona' ),
+			Field::make( 'text', 'how_it_works_subtitle', __( 'Sottotitolo' ) )
+				->set_default_value( 'Prenoti in 2 minuti. Guarda il flusso mentre scorri.' ),
+			Field::make( 'file', 'how_it_works_video', __( 'Video schermo telefono (mp4 muto)' ) )
+				->set_type( 'video' )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Desktop: scorre con lo scroll (3 step a terzi, ultimo frame = immagine Banda Visual). Vincoli completi in ADR-002.' ) ),
+			Field::make( 'image', 'how_it_works_poster', __( 'Poster video (primo frame)' ) )
+				->set_value_type( 'url' ),
 			Field::make( 'complex', 'how_it_works_steps', __( 'Step' ) )
 				->set_layout( 'tabbed-vertical' )
+				->set_max( 3 )
 				->add_fields( array(
 					Field::make( 'text', 'title', __( 'Titolo' ) ),
 					Field::make( 'textarea', 'description', __( 'Descrizione' ) ),
-					Field::make( 'image', 'image', __( 'Immagine' ) ),
+					Field::make( 'image', 'image', __( 'Schermo telefono (mobile e reduced-motion)' ) ),
 				) ),
+		) )
+		->add_tab( __( 'Banda Visual' ), array(
+			Field::make( 'image', 'visual_band_image', __( 'Immagine' ) )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Deve coincidere con l&#39;ultimo frame del video Come funziona (zoom-through).' ) ),
+			Field::make( 'text', 'visual_band_label', __( 'Etichetta overlay' ) )
+				->set_default_value( 'Pulizia casa' ),
 		) )
 		->add_tab( __( 'Servizi Popolari' ), array(
 			Field::make( 'complex', 'popular_services', __( 'Servizi' ) )
