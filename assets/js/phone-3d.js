@@ -119,7 +119,7 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 		g.fillStyle = grd; g.fillRect(0, 0, 128, 128);
 		return new THREE.CanvasTexture(c);
 	})();
-	const LIFT = 0.14, Z0 = frontZ + 0.006;
+	const LIFT = 0.14, Z0 = frontZ + 0.0045;
 	function overlay(file, u, v, w, h, r) {
 		const m = new THREE.Mesh(plateGeometry(w, h, r), new THREE.MeshBasicMaterial({ map: texOf(file), transparent: true, toneMapped: false, depthWrite: false }));
 		const s = new THREE.Mesh(new THREE.PlaneGeometry(w * 1.6, h * 1.6), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
@@ -130,7 +130,7 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 		return { m, s };
 	}
 	function setLift(o, lift) {
-		const on = lift > 0.002;
+		const on = lift > 0.001;
 		o.m.visible = o.s.visible = on;
 		if (!on) return;
 		o.m.position.z = Z0 + lift * LIFT;

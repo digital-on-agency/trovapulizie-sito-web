@@ -48,9 +48,23 @@
 	<div id="band" class="layer"><img class="screen" src="../../assets/img/visual-band.png" alt=""></div>
 
 <script type="module">
-	import { T, ADDRESS, ramp, easeOut } from '../../assets/js/screen-timeline.js';
+	import { T, ADDRESS, TILES, tileLift, cardLift, ramp, easeOut } from '../../assets/js/screen-timeline.js';
 	const $ = id => document.getElementById(id);
 	const W = 1170;
+
+	// Mentre una tile/card e' sollevata in 3D, nel video il suo posto resta vuoto (niente sdoppiamento)
+	const patches = {};
+	Object.keys(TILES).forEach(name => {
+		const d = document.createElement('div');
+		d.className = 'abs';
+		d.style.cssText = 'left:' + Math.round(TILES[name][0] * W - 96) + 'px;top:' + Math.round(TILES[name][1] * 2532 - 96) + 'px;width:192px;height:192px;background:#fff;display:none';
+		$('s1').appendChild(d);
+		patches[name] = d;
+	});
+	const cardPatch = document.createElement('div');
+	cardPatch.className = 'abs';
+	cardPatch.style.cssText = 'left:33px;top:665px;width:1112px;height:615px;background:#f7f8fa;display:none';
+	$('s2').insertBefore(cardPatch, $('cardHi'));
 	const checkLen = $('check').getTotalLength();
 	$('check').style.strokeDasharray = checkLen;
 
@@ -69,6 +83,8 @@
 	window.seek = function (t) {
 		// Segmento 1 — home: Casa neutra finche' non viene selezionata, digitazione, tap cerca
 		$('casaNeutral').style.opacity = t < T.s1.select ? 1 : 0;
+		Object.keys(patches).forEach(name => { patches[name].style.display = (t < T.s2.start && tileLift(name, t) > 0.01) ? 'block' : 'none'; });
+		cardPatch.style.display = cardLift(t) > 0.01 ? 'block' : 'none';
 		const typing = ramp(t, T.s1.typeStart, T.s1.typeEnd);
 		const n = Math.round(typing * ADDRESS.length);
 		const showBox = t >= T.s1.typeStart - 0.2;

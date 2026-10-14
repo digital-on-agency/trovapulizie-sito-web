@@ -2,7 +2,7 @@
    sia l'overlay 3D (phone-3d.js). Tempi in secondi sul video; i terzi del pin cadono a total/3 e 2*total/3. */
 export const T = {
 	total: 12.6,
-	s1: { tilesStart: 0.4, tilesEnd: 2.4, select: 2.4, typeStart: 2.6, typeEnd: 3.6, press: 3.7 },
+	s1: { tilesStart: 0.3, tilesEnd: 2.8, select: 2.8, typeStart: 2.9, typeEnd: 3.65, press: 3.75 },
 	s2: { start: 4.0, slide: 0.3, cardStart: 5.0, cardEnd: 6.6, highlight: 6.5, press: 7.0 },
 	s3: { start: 8.0, slide: 0.3, press: 9.3, thanks: 9.9, bandStart: 11.4, bandEnd: 12.0 }
 };
@@ -25,22 +25,25 @@ export const easeInOut = v => (v < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2
 export const ramp = (t, a, b) => clamp01((t - a) / (b - a));
 export const bump = (t, a, b) => Math.sin(ramp(t, a, b) * Math.PI);
 
-// Sollevamento (0..1) della tile `name` al tempo t: sequenza alternata, l'ultima (casa) resta su e scende prima del tap cerca
+const smooth = v => v * v * (3 - 2 * v);
+
+// Sollevamento (0..1) della tile `name` al tempo t: sequenza alternata (campane sinusoidali sovrapposte),
+// l'ultima (casa) sale e resta su, poi scende prima del tap cerca
 export function tileLift(name, t) {
 	const { tilesStart, tilesEnd, press } = T.s1;
-	const n = TILE_ORDER.length, step = (tilesEnd - tilesStart) / n, win = step * 1.8;
+	const n = TILE_ORDER.length, step = (tilesEnd - tilesStart) / n, win = step * 2.0;
 	let lift = 0;
 	TILE_ORDER.forEach((tile, i) => {
 		if (tile !== name) return;
 		const a = tilesStart + i * step;
-		if (i === n - 1) lift = Math.max(lift, ramp(t, a, a + step) * (1 - ramp(t, tilesEnd + 0.6, press)));
+		if (i === n - 1) lift = Math.max(lift, smooth(ramp(t, a, a + step)) * (1 - smooth(ramp(t, tilesEnd + 0.5, press))));
 		else lift = Math.max(lift, bump(t, a, a + win));
 	});
-	return easeInOut(lift);
+	return lift;
 }
 
 // Sollevamento (0..1) della card cleaner nel segmento 2
 export function cardLift(t) {
 	const { cardStart, cardEnd } = T.s2;
-	return easeInOut(Math.min(ramp(t, cardStart, cardStart + 0.5), 1 - ramp(t, cardEnd - 0.5, cardEnd)));
+	return Math.min(smooth(ramp(t, cardStart, cardStart + 0.6)), smooth(1 - ramp(t, cardEnd - 0.6, cardEnd)));
 }

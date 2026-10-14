@@ -72,12 +72,21 @@
 		section.classList.toggle('is-state-2', active === 1);
 	}
 
+	// Un seek alla volta: impostare currentTime mentre un seek e' in corso lo accoda e il video scatta
 	var duration = 0;
+	var targetTime = null;
+	function pump() {
+		if (targetTime === null || video.seeking) return;
+		var t = targetTime;
+		targetTime = null;
+		if (Math.abs(video.currentTime - t) > 0.012) video.currentTime = t;
+	}
 	function seek(q) {
 		if (phone3d && phone3d.setProgress) phone3d.setProgress(q);
 		if (!duration) return;
 		var t = Math.min(q * duration, duration - 0.04);
-		if (Math.abs(video.currentTime - t) > 0.02) video.currentTime = t;
+		targetTime = Math.round(t * 24) / 24;
+		pump();
 	}
 
 	function sectionTop() { return section.getBoundingClientRect().top + window.scrollY; }
@@ -88,6 +97,7 @@
 		if (video) {
 			video.pause();
 			video.addEventListener('loadedmetadata', function () { duration = video.duration; });
+			video.addEventListener('seeked', pump);
 			video.preload = 'auto';
 			video.load();
 		}
@@ -101,7 +111,7 @@
 			end: function () { return sectionTop() + section.offsetHeight - window.innerHeight; },
 			pin: pinEl,
 			pinSpacing: false,
-			scrub: 0.5,
+			scrub: 0.7,
 			invalidateOnRefresh: true,
 			onRefresh: function (self) { p0 = Math.max(0, Math.min(1, (sectionTop() - self.start) / (self.end - self.start))); },
 			snap: /[?&]nosnap/.test(location.search) ? undefined : {
