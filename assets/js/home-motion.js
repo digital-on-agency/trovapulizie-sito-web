@@ -19,22 +19,29 @@
 	// Centro del phone rispetto al centro viewport: x in px (canvas 1440), y in frazione di viewport (canvas 980).
 	// Posizioni misurate sui render Figma degli stati (le x/y dei nodi ruotati nei metadata sono pre-rotazione, non il bbox).
 	// Fonte: 3743:3095 (hero), 3750:3099 (S1), 3798:1087 (S2), 3828:1157 (S3), 3828:1198 (outro).
+	// Rotazioni in prospettiva vera (ry/rx/rz) accordate a occhio sulle silhouette Figma: il Figma e' piatto (rotate+skew), qui il volume e' reale.
+	// k = quanto la posa segue il canvas Figma di 980px (le pose pinnate si riducono su viewport piu' bassi, la hero no).
 	var POSES = {
-		hero: { x: 0, y: 0, rot: 0, skew: 0, sy: 1 },
-		s1: { x: -15, y: 0.054, rot: -14.75, skew: 10.04, sy: 0.98 },
-		s2: { x: -15, y: 0.047, rot: 14.75, skew: -10.04, sy: 0.98 },
-		s3: { x: -62, y: 0.088, rot: -8.14, skew: 6.61, sy: 0.99 },
-		out: { x: 0, y: 0, rot: 0, skew: 0, sy: 1 }
+		hero: { x: 0, y: 0, ry: 0, rx: 0, rz: 0, s: 1, k: 0 },
+		s1: { x: -15, y: 0.054, ry: -24, rx: 6, rz: -12, s: 0.93, k: 1 },
+		s2: { x: -15, y: 0.047, ry: 24, rx: 6, rz: 12, s: 0.93, k: 1 },
+		s3: { x: -62, y: 0.088, ry: -12, rx: 4, rz: -6, s: 0.96, k: 1 },
+		out: { x: 0, y: 0, ry: 0, rx: 0, rz: 0, s: 1, k: 1 }
 	};
 	var SEQ = [POSES.s1, POSES.s2, POSES.s3, POSES.out];
+	var KEYS = ['x', 'y', 'ry', 'rx', 'rz', 's', 'k'];
 
 	function lerp(a, b, t) { return a + (b - a) * t; }
 	function mix(a, b, t) {
-		return { x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), rot: lerp(a.rot, b.rot, t), skew: lerp(a.skew, b.skew, t), sy: lerp(a.sy, b.sy, t) };
+		var o = {};
+		for (var i = 0; i < KEYS.length; i++) o[KEYS[i]] = lerp(a[KEYS[i]], b[KEYS[i]], t);
+		return o;
 	}
 	function apply(p) {
 		var sx = Math.min(1, window.innerWidth / 1440);
-		phone.style.transform = 'translate(' + (p.x * sx) + 'px,' + (p.y * window.innerHeight) + 'px) rotate(' + p.rot + 'deg) skewX(' + p.skew + 'deg) scaleY(' + p.sy + ')';
+		var kv = Math.min(1, window.innerHeight / 980);
+		var s = p.s * (1 + (kv - 1) * p.k);
+		phone.style.transform = 'translate(' + (p.x * sx) + 'px,' + (p.y * window.innerHeight) + 'px) rotateY(' + p.ry + 'deg) rotateX(' + p.rx + 'deg) rotateZ(' + p.rz + 'deg) scale(' + s + ')';
 	}
 	function setStep(q) {
 		var active = q < 1 / 3 ? 0 : q < 2 / 3 ? 1 : 2;

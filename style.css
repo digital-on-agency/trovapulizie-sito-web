@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.4.1
+Version: 0.4.3
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -130,17 +130,33 @@ a {
 	padding: 18px;
 }
 
-/* Phone mockup — Figma node 3743:3095 (bezel CSS, schermo = immagine o video) */
+/* Phone mockup — Figma node 3743:3095. Volume vero: faccia frontale + 10 strati translateZ (spessore 10px), ruota in prospettiva (ADR-002) */
 .tp-phone {
 	position: relative;
 	width: 294px;
 	height: 608px;
-	padding: 12px;
-	background: #0D0F14;
+	transform-style: preserve-3d;
+}
+.tp-phone__layer,
+.tp-phone__face {
+	position: absolute;
+	inset: 0;
 	border-radius: 52px;
+	backface-visibility: hidden;
+}
+.tp-phone__layer {
+	transform: translateZ(var(--z));
+	background: linear-gradient(90deg, #3a3d44 0%, #16181c 18%, #16181c 82%, #3a3d44 100%);
+}
+.tp-phone__layer:first-child {
 	box-shadow: 0 30px 55px 0 rgba(13, 26, 20, 0.3);
 }
-.tp-phone::before {
+.tp-phone__face {
+	padding: 12px;
+	background: #0D0F14;
+	transform: translateZ(0);
+}
+.tp-phone__face::before {
 	content: '';
 	position: absolute;
 	top: 20px;
@@ -152,7 +168,17 @@ a {
 	border-radius: 13px;
 	z-index: 2;
 }
+.tp-phone__face::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: 52px;
+	pointer-events: none;
+	background: linear-gradient(115deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 38%, rgba(0, 0, 0, 0) 62%, rgba(0, 0, 0, 0.14) 100%);
+	z-index: 3;
+}
 .tp-phone__screen {
+	position: relative;
 	width: 100%;
 	height: 100%;
 	border-radius: 42px;
@@ -349,6 +375,7 @@ a {
 .hero__phone {
 	position: relative;
 	z-index: 1;
+	perspective: 1400px;
 }
 
 @media (max-width: 782px) {
