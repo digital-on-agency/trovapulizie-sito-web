@@ -120,29 +120,31 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 		return new THREE.CanvasTexture(c);
 	})();
 	const LIFT = 0.14, Z0 = frontZ + 0.0045;
-	function overlay(file, u, v, w, h, r) {
-		const m = new THREE.Mesh(plateGeometry(w, h, r), new THREE.MeshBasicMaterial({ map: texOf(file), transparent: true, toneMapped: false, depthWrite: false }));
-		const s = new THREE.Mesh(new THREE.PlaneGeometry(w * 1.6, h * 1.6), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
+	function overlay(file, u, v, w, h) {
+		const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: texOf(file), transparent: true, toneMapped: false, depthWrite: false }));
+		const s = new THREE.Mesh(new THREE.PlaneGeometry(w * 1.25, h * 1.25), new THREE.MeshBasicMaterial({ map: shadowTex, transparent: true, opacity: 0, depthWrite: false, toneMapped: false }));
 		const x = (u - 0.5) * sw, y = (0.5 - v) * sh;
-		m.position.set(x, y, Z0); s.position.set(x, y - h * 0.1, Z0 - 0.0005);
+		m.position.set(x, y, Z0); s.position.set(x, y, Z0 - 0.0005);
 		m.renderOrder = 3; s.renderOrder = 2; m.visible = s.visible = false;
 		group.add(s, m);
-		return { m, s };
+		return { m, s, x, y, w, h };
 	}
+	// Ombra fisica: un oggetto che si alza proietta un'ombra piu' diffusa, piu' chiara e spostata (luce da alto-sinistra)
 	function setLift(o, lift) {
 		const on = lift > 0.001;
 		o.m.visible = o.s.visible = on;
 		if (!on) return;
 		o.m.position.z = Z0 + lift * LIFT;
-		o.m.scale.setScalar(1 + 0.1 * lift);
-		o.s.material.opacity = 0.45 * lift;
+		o.m.scale.setScalar(1 + 0.08 * lift);
+		o.s.material.opacity = 0.42 * lift * (1 - 0.5 * lift);
 		o.s.scale.setScalar(1 + 0.35 * lift);
+		o.s.position.set(o.x + o.w * 0.06 * lift, o.y - o.h * (0.04 + 0.1 * lift), Z0 - 0.0005);
 	}
 	const tw = tl.TILE_SIZE[0] * sw, th = tl.TILE_SIZE[1] * sh;
 	const tiles = {};
-	Object.keys(tl.TILES).forEach(name => { tiles[name] = overlay('tile-' + name + '.png', tl.TILES[name][0], tl.TILES[name][1], tw, th, tw * 0.19); });
-	const casaNeutral = texOf('tile-casa-neutral.png'), casaSelected = tiles.casa.m.material.map;
-	const card = overlay('card-laura.png', tl.CARD.x + tl.CARD.w / 2, tl.CARD.y + tl.CARD.h / 2, tl.CARD.w * sw, tl.CARD.h * sh, 0.02);
+	Object.keys(tl.TILES).forEach(name => { tiles[name] = overlay('unit-' + name + '.png', tl.TILES[name][0], tl.TILES[name][1], tw, th); });
+	const casaNeutral = texOf('unit-casa-neutral.png'), casaSelected = tiles.casa.m.material.map;
+	const card = overlay('card-laura.png', tl.CARD.x + tl.CARD.w / 2, tl.CARD.y + tl.CARD.h / 2, tl.CARD.w * sw, tl.CARD.h * sh);
 
 	// q = progress del pin (0..1) -> tempo del video sulla timeline condivisa
 	function setProgress(q) {

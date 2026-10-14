@@ -27,7 +27,7 @@
 <body>
 	<div id="s1" class="layer">
 		<img class="screen" src="../../assets/img/screen-step1-servizio.png" alt="">
-		<img id="casaNeutral" class="abs" src="../../assets/img/tiles/tile-casa-neutral.png" style="left:119px;top:765px;width:192px;height:192px" alt="">
+		<img id="casaNeutral" class="abs" src="../../assets/img/tiles/unit-casa-neutral.png" style="left:65px;top:765px;width:300px;height:264px" alt="">
 		<div id="typedBox" class="abs"><span id="typed"></span><span id="caret"></span></div>
 		<div id="searchPress" class="abs press" style="left:990px;top:573px;width:131px;height:131px;border-radius:50%"></div>
 	</div>
@@ -57,7 +57,7 @@
 	Object.keys(TILES).forEach(name => {
 		const d = document.createElement('div');
 		d.className = 'abs';
-		d.style.cssText = 'left:' + Math.round(TILES[name][0] * W - 96) + 'px;top:' + Math.round(TILES[name][1] * 2532 - 96) + 'px;width:192px;height:192px;background:#fff;display:none';
+		d.style.cssText = 'left:' + Math.round(TILES[name][0] * W - 150) + 'px;top:' + Math.round(TILES[name][1] * 2532 - 132) + 'px;width:300px;height:264px;background:#fff;display:none';
 		$('s1').appendChild(d);
 		patches[name] = d;
 	});
