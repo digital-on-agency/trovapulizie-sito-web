@@ -17,12 +17,13 @@
 	var GSAP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/';
 
 	// Centro del phone rispetto al centro viewport: x in px (canvas 1440), y in frazione di viewport (canvas 980).
-	// Fonte: Figma 3743:3095 (hero), 3750:3121 (S1), 3798:1103 (S2), 3828:1179 (S3), 3828:1225 (outro).
+	// Posizioni misurate sui render Figma degli stati (le x/y dei nodi ruotati nei metadata sono pre-rotazione, non il bbox).
+	// Fonte: 3743:3095 (hero), 3750:3099 (S1), 3798:1087 (S2), 3828:1157 (S3), 3828:1198 (outro).
 	var POSES = {
 		hero: { x: 0, y: 0, rot: 0, skew: 0, sy: 1 },
-		s1: { x: -14, y: 0.13, rot: -14.75, skew: 10.04, sy: 0.98 },
-		s2: { x: 241, y: 0.047, rot: 14.75, skew: -10.04, sy: 0.98 },
-		s3: { x: -61, y: 0.131, rot: -8.14, skew: 6.61, sy: 0.99 },
+		s1: { x: -15, y: 0.054, rot: -14.75, skew: 10.04, sy: 0.98 },
+		s2: { x: -15, y: 0.047, rot: 14.75, skew: -10.04, sy: 0.98 },
+		s3: { x: -62, y: 0.088, rot: -8.14, skew: 6.61, sy: 0.99 },
 		out: { x: 0, y: 0, rot: 0, skew: 0, sy: 1 }
 	};
 	var SEQ = [POSES.s1, POSES.s2, POSES.s3, POSES.out];
@@ -38,6 +39,7 @@
 	function setStep(q) {
 		var active = q < 1 / 3 ? 0 : q < 2 / 3 ? 1 : 2;
 		for (var i = 0; i < steps.length; i++) steps[i].classList.toggle('is-active', i === active);
+		section.classList.toggle('is-state-2', active === 1);
 	}
 
 	var duration = 0;
