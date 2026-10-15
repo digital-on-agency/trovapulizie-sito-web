@@ -39,6 +39,13 @@ $reviews_args     = array(
 $zones_title      = carbon_get_the_post_meta( 'zones_title' );
 $zones_desc       = carbon_get_the_post_meta( 'zones_description' );
 $zones_map        = carbon_get_the_post_meta( 'zones_map_image' );
+$zones_args       = array(
+	'title'        => $zones_title,
+	'description'  => $zones_desc,
+	'map'          => $zones_map,
+	'coming_label' => carbon_get_the_post_meta( 'zones_coming_label' ),
+	'cities'       => preg_split( '/\r\n|\r|\n/', (string) carbon_get_the_post_meta( 'zones_coming_cities' ) ),
+);
 $faq_items        = carbon_get_the_post_meta( 'faq_items' );
 $faq_title        = carbon_get_the_post_meta( 'faq_title' );
 $cta_title        = carbon_get_the_post_meta( 'cta_title' );
@@ -149,11 +156,7 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 		<?php get_template_part( 'template-parts/reviews-marquee', null, $reviews_args ); ?>
 	<?php endif; ?>
 
-	<section class="zones">
-		<?php if ( $zones_title ) : ?><h2><?php echo esc_html( $zones_title ); ?></h2><?php endif; ?>
-		<?php if ( $zones_desc ) : ?><p><?php echo esc_html( $zones_desc ); ?></p><?php endif; ?>
-		<?php if ( $zones_map ) : ?><img src="<?php echo esc_url( wp_get_attachment_url( $zones_map ) ); ?>" alt="Mappa zone coperte"><?php endif; ?>
-	</section>
+		<?php get_template_part( 'template-parts/zones-map', null, $zones_args ); ?>
 
 	<?php if ( $faq_items ) : ?>
 		<?php get_template_part( 'template-parts/faq-accordion', null, array( 'title' => $faq_title, 'items' => $faq_items ) ); ?>

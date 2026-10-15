@@ -102,9 +102,16 @@ add_action( 'carbon_fields_register_fields', function () {
 				) ),
 		) )
 		->add_tab( __( 'Dove Siamo Attivi' ), array(
-			Field::make( 'text', 'zones_title', __( 'Titolo' ) ),
-			Field::make( 'textarea', 'zones_description', __( 'Descrizione' ) ),
-			Field::make( 'image', 'zones_map_image', __( 'Mappa' ) ),
+			Field::make( 'text', 'zones_title', __( 'Titolo' ) )
+				->set_default_value( 'Dove siamo attivi' ),
+			Field::make( 'text', 'zones_description', __( 'Testo sotto la mappa' ) )
+				->set_default_value( 'Trova professionisti delle pulizie nella tua città.' ),
+			Field::make( 'image', 'zones_map_image', __( 'Mappa (raster)' ) )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Vuota = mappa di Roma del Figma, con le zone verdi (Centro e Prati) e l&#39;alone animato. Con una mappa diversa le zone verdi non vengono mostrate.' ) ),
+			Field::make( 'text', 'zones_coming_label', __( 'Etichetta citta in arrivo' ) )
+				->set_default_value( 'Prossimamente' ),
+			Field::make( 'textarea', 'zones_coming_cities', __( 'Citta in arrivo (una per riga)' ) ),
 		) )
 		->add_tab( __( 'FAQ' ), array(
 			Field::make( 'text', 'faq_title', __( 'Titolo' ) )

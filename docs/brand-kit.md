@@ -89,6 +89,15 @@ Vedi `style.css` sezione "Componenti base":
   gap 22; avatar 56px tondo; indice "01 / 06" 12px Medium `--tp-text-body`; autore 13px Medium `--tp-text-body`;
   testo 19px/27px Medium `#171B26`. Gap fra card 28px. Il Figma usa Inter per l'indice: reso in Poppins per coerenza.
 
+## Sezione Dove siamo attivi (`3564:114`, 15/10)
+
+- Sfondo `#F7F8FA`, padding 80, contenuto 1280px, gap verticale 32.
+- Titolo 32px / Bold / `#111827`; testo sotto la mappa 16px `#6B737F`; etichetta "Prossimamente" 15px SemiBold
+  `#6B737F`; chip citta' bianche, bordo `--tp-border`, raggio 8, padding 8/16, 14px Medium `#6B737F`.
+- Mappa raster 1280x714 (`assets/img/zones-map-roma.jpg`, 1376px dal Figma) con overlay reali: Centro
+  (`zones-overlay-centro.png`, box 471x352 a 441,189, opacita' 0.8) e Prati (`zones-overlay-prati.jpg`, box
+  540x659 a 84,-103, darken 0.7, immagine al 124% spostata di -10.2%). I file sono quadrati 1024px: cover.
+
 ## Come aggiornare questo file
 
 Ogni volta che si fetcha un nuovo nodo Figma con valori di colore/font/radius non ancora

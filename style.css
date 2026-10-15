@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.11.0
+Version: 0.12.0
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -1226,13 +1226,233 @@ a {
 	}
 }
 
-/* Zone coperte */
+/* =========================
+   Dove siamo attivi — Figma 3564:114 (mobile 4023:1007). Mappa raster 1280x714 con due overlay reali del Figma
+   (Centro 471x352 a 441,189; Prati 540x659 a 84,-103, darken 70%) in percentuale. Motion spec §7: titolo, mappa
+   fade+scale .98, overlay fade+pulse, sottotitolo, etichetta, citta' in stagger 80 ms; alone radar in loop.
+   ========================= */
 .zones {
+	max-width: none;
+	padding: 80px 20px;
+	background: #F7F8FA;
 	text-align: center;
 }
-.zones img {
-	margin: 24px auto 0;
-	border-radius: var(--tp-radius-xl);
+.zones__inner {
+	max-width: 1280px;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 32px;
+}
+.zones__title {
+	margin: 0;
+	font-size: 32px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: #111827;
+}
+.zones__map {
+	position: relative;
+	width: 100%;
+	aspect-ratio: 1280 / 714;
+	overflow: hidden;
+}
+.zones__map-img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.zones__overlay {
+	position: absolute;
+	overflow: hidden;
+	pointer-events: none;
+}
+.zones__overlay img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover; /* i file del Figma sono quadrati 1024px: Centro ritagliato al box, Prati scalato al 124% */
+}
+.zones__overlay--centro {
+	left: 34.45%;
+	top: 26.47%;
+	width: 36.81%;
+	height: 49.27%;
+	opacity: 0.8;
+}
+.zones__overlay--prati {
+	left: 6.56%;
+	top: -14.43%;
+	width: 42.19%;
+	height: 92.3%;
+	opacity: 0.7;
+	mix-blend-mode: darken;
+}
+.zones__overlay--prati img {
+	left: -10.2%;
+	width: 124.33%;
+}
+/* Alone radar sul centro di Roma (centro dell'overlay Centro): discreto, 2,5 s, solo con motion */
+.zones__radar {
+	position: absolute;
+	left: 52.85%;
+	top: 51.1%;
+	width: 60px;
+	height: 60px;
+	margin: -30px 0 0 -30px;
+	border-radius: 50%;
+	background: rgba(0, 200, 150, 0.35);
+	opacity: 0;
+	pointer-events: none;
+}
+.zones__desc {
+	margin: 0;
+	font-size: 16px;
+	color: #6B737F;
+}
+.zones__coming {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	width: 100%;
+}
+.zones__coming-label {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: #6B737F;
+}
+.zones__cities {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 8px;
+}
+.zones__city {
+	padding: 8px 16px;
+	background: var(--tp-white);
+	border: 1px solid var(--tp-border);
+	border-radius: var(--tp-radius-sm);
+	font-size: 14px;
+	font-weight: 500;
+	color: #6B737F;
+	transition: transform 0.25s ease, border-color 0.25s ease, opacity 0.5s ease;
+}
+.zones__city:hover {
+	transform: translateY(-2px);
+	border-color: var(--tp-primary);
+}
+/* Sequenza d'ingresso */
+.zones__title,
+.zones__desc,
+.zones__coming-label {
+	opacity: 0;
+	transform: translateY(12px);
+	transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.zones__map {
+	opacity: 0;
+	transform: scale(0.98);
+	transition: opacity 0.7s ease 0.1s, transform 0.7s ease 0.1s;
+}
+.zones__overlay {
+	opacity: 0;
+}
+.zones__city {
+	opacity: 0;
+	transform: scale(0.9);
+}
+.zones.is-in .zones__title,
+.zones.is-in .zones__desc,
+.zones.is-in .zones__coming-label {
+	opacity: 1;
+	transform: none;
+}
+.zones.is-in .zones__map {
+	opacity: 1;
+	transform: none;
+}
+.zones.is-in .zones__desc {
+	transition-delay: 0.5s;
+}
+.zones.is-in .zones__coming-label {
+	transition-delay: 0.6s;
+}
+.zones.is-in .zones__overlay--centro {
+	animation: zones-overlay-in 0.9s ease-out 0.7s forwards;
+}
+.zones.is-in .zones__overlay--prati {
+	animation: zones-overlay-in 0.9s ease-out 0.85s forwards;
+	animation-fill-mode: forwards;
+}
+.zones.is-in .zones__overlay--centro {
+	--zones-op: 0.8;
+}
+.zones.is-in .zones__overlay--prati {
+	--zones-op: 0.7;
+}
+@keyframes zones-overlay-in {
+	0% { opacity: 0; transform: scale(1); }
+	55% { opacity: var(--zones-op, 0.8); transform: scale(1.06); }
+	100% { opacity: var(--zones-op, 0.8); transform: scale(1); }
+}
+.zones.is-in .zones__radar {
+	animation: zones-radar 2.5s ease-out 1.8s infinite;
+}
+@keyframes zones-radar {
+	0% { opacity: 0.45; transform: scale(0.5); }
+	100% { opacity: 0; transform: scale(3); }
+}
+.zones.is-in .zones__city {
+	opacity: 1;
+	transform: none;
+	transition: transform 0.4s ease calc(0.7s + var(--i, 0) * 80ms), opacity 0.4s ease calc(0.7s + var(--i, 0) * 80ms), border-color 0.25s ease;
+}
+.zones.is-in .zones__city:hover {
+	transition-delay: 0s;
+}
+@media (max-width: 782px) {
+	.zones {
+		padding: 56px 20px;
+	}
+	.zones__inner {
+		gap: 24px;
+	}
+	.zones__title {
+		font-size: 26px;
+	}
+	.zones__radar {
+		display: none;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.zones__title,
+	.zones__desc,
+	.zones__coming-label,
+	.zones__map,
+	.zones__city {
+		opacity: 1 !important;
+		transform: none !important;
+		transition: none !important;
+	}
+	.zones__overlay--centro {
+		opacity: 0.8 !important;
+	}
+	.zones__overlay--prati {
+		opacity: 0.7 !important;
+	}
+	.zones__overlay,
+	.zones__radar {
+		animation: none !important;
+	}
 }
 
 /* =========================
