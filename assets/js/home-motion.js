@@ -36,9 +36,10 @@
 		hero: { x: 0, y: 0, ry: 0, rx: 0, rz: 0, s: 1, k: 0 },
 		// 15/10: +0.035 di y sulle pose pinnate: il testo scende di 72px sotto la navbar (CSS --hiw-offset) e il
 		// telefono lo segue in parte, cosi' lo spazio sopra il titolo e sotto il telefono si equivalgono
-		s1: { x: -15, y: 0.089, ry: -24, rx: 6, rz: -12, s: 1, k: 1 },
-		s2: { x: -15, y: 0.082, ry: 24, rx: 6, rz: 12, s: 1, k: 1 },
-		s3: { x: -62, y: 0.123, ry: -12, rx: 4, rz: -6, s: 1.02, k: 1 },
+		// 15/10 sera: telefono al 95% nelle pose pinnate e +0.02 di y, per piu' aria fra sottotitolo e telefono
+		s1: { x: -15, y: 0.109, ry: -24, rx: 6, rz: -12, s: 0.95, k: 1 },
+		s2: { x: -15, y: 0.102, ry: 24, rx: 6, rz: 12, s: 0.95, k: 1 },
+		s3: { x: -62, y: 0.143, ry: -12, rx: 4, rz: -6, s: 0.97, k: 1 },
 		out: { x: 0, y: 0, ry: 0, rx: 0, rz: 0, s: 1, k: 1 }
 	};
 	var SEQ = [POSES.s1, POSES.s2, POSES.s3, POSES.out];
