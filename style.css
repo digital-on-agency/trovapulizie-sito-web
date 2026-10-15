@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.16.0
+Version: 0.16.1
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -201,7 +201,7 @@ a {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	height: 60px;
+	height: 72px; /* 15/10: da 60 a 72, contenuto centrato in verticale */
 	padding: 0 80px;
 	background: var(--tp-white);
 }
@@ -257,7 +257,7 @@ a {
 	position: absolute;
 	inset: 24px 40px auto 40px;
 	/* 759px da Figma, ma mai oltre la prima schermata: navbar 60 + 24 sopra + 24 sotto */
-	height: min(759px, calc(100vh - 108px));
+	height: min(759px, calc(100vh - 120px)); /* navbar 72 + 24 sopra + 24 sotto */
 	max-width: 1360px;
 	margin: 0 auto;
 	left: 0;
@@ -426,7 +426,7 @@ a {
 @media (max-width: 782px) {
 	.hero__box {
 		inset: 16px 16px auto 16px;
-		height: min(620px, calc(100vh - 92px));
+		height: min(620px, calc(100vh - 104px));
 	}
 	.hero h1 {
 		font-size: 32px;
@@ -533,7 +533,7 @@ a {
 	padding: 0;
 	/* Le posizioni in percentuale sotto vengono dai frame Figma (980px, senza navbar): l'offset sposta tutto il
 	   testo sotto la navbar sticky (60px) e lascia circa 72px d'aria, come gli 80px sopra il titolo nel Figma */
-	--hiw-offset: 72px;
+	--hiw-offset: 84px; /* navbar 72: resta ~73px d'aria sopra il titolo */
 }
 .motion-ok .how-it-works__title {
 	position: absolute;
