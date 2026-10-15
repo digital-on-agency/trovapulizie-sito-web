@@ -45,13 +45,16 @@
 	// k = quanto la posa segue il canvas Figma di 980px (le pose pinnate si riducono su viewport piu' bassi, la hero no).
 	var POSES = {
 		hero: { x: 0, y: 0, ry: 0, rx: 0, rz: 0, s: 1, k: 0 },
-		// 15/10: +0.035 di y sulle pose pinnate: il testo scende di 72px sotto la navbar (CSS --hiw-offset) e il
-		// telefono lo segue in parte, cosi' lo spazio sopra il titolo e sotto il telefono si equivalgono
-		// 15/10 sera: telefono al 95% nelle pose pinnate e +0.02 di y, per piu' aria fra sottotitolo e telefono
-		s1: { x: -15, y: 0.109, ry: -24, rx: 6, rz: -12, s: 0.95, k: 1 },
-		s2: { x: -15, y: 0.102, ry: 24, rx: 6, rz: 12, s: 0.95, k: 1 },
-		s3: { x: -62, y: 0.143, ry: -12, rx: 4, rz: -6, s: 0.97, k: 1 },
-		out: { x: 0, y: 0, ry: 0, rx: 0, rz: 0, s: 1, k: 1 }
+		// 15/10 notte (richiesta di Guido): telefono piu' grande e oscillazione ridotta. Le pose del Figma
+		// (ry +-24, rz +-12, x fino a -62, y fino a 0.143) facevano ballare il telefono a ogni cambio di stato
+		// e distraevano dal contenuto dello schermo, che e' il punto della sezione. Qui le rotazioni sono
+		// circa dimezzate, x e y quasi costanti: cambia la posa, non la posizione.
+		s1: { x: -10, y: 0.075, ry: -10, rx: 3, rz: -5, s: 1.2, k: 1 },
+		s2: { x: -10, y: 0.075, ry: 10, rx: 3, rz: 5, s: 1.2, k: 1 },
+		s3: { x: -20, y: 0.085, ry: -5, rx: 2, rz: -3, s: 1.22, k: 1 },
+		// La posa finale (raddrizzata, da cui parte lo zoom-through) tiene la stessa scala degli stati:
+		// con s: 1 il telefono rimpiccioliva di colpo nell'ultimo segmento, subito prima dello zoom.
+		out: { x: 0, y: 0, ry: 0, rx: 0, rz: 0, s: 1.2, k: 1 }
 	};
 	var SEQ = [POSES.s1, POSES.s2, POSES.s3, POSES.out];
 	var KEYS = ['x', 'y', 'ry', 'rx', 'rz', 's', 'k'];
@@ -238,10 +241,13 @@
 			onUpdate: function (self) {
 				var p = self.progress;
 				if (p <= p0) {
-					apply(mix(POSES.hero, POSES.s1, p0 ? p / p0 : 1));
+					var h = p0 ? p / p0 : 1;
+					apply(mix(POSES.hero, POSES.s1, h));
 					seek(0);
 					setStep(0);
-					setTextFade(1);
+					// Titolo e step compaiono mentre il telefono scende dalla hero, invece di essere gia' li':
+					// la sezione si presenta quando il telefono arriva, non prima (Guido, 15/10 notte).
+					setTextFade(easeInOut(Math.max(0, Math.min(1, (h - 0.35) / 0.5))));
 					return;
 				}
 				var u = (p - p0) / (1 - p0) * pinUnits();

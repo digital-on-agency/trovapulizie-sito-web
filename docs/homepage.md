@@ -106,7 +106,7 @@ GSAP 3.13 + ScrollTrigger si caricano da cdnjs solo quando la sezione entra a me
 
 | Intervallo (u = viewport scrollati da `sectionTop`) | Cosa succede | Chi lo guida |
 |---|---|---|
-| prima del pin (`p < p0`) | handoff: il telefono va dalla posa hero alla posa s1 | trigger A |
+| prima del pin (`p < p0`) | handoff: il telefono va dalla posa hero alla posa s1 e `--hiw-text-fade` sale da 0 a 1 nell'ultimo 65% del tragitto: titolo e step compaiono quando il telefono arriva, non prima | trigger A |
 | 0 - 3 | video scrubbed; `q = u/3` in 0..1; step attivo = terzo corrente; pose s1 -> s2 -> s3 -> out | trigger A |
 | q 0.82 - 0.94 | `--hiw-text-fade` 1 -> 0: titolo e step sfumano mentre il telefono si raddrizza | trigger A |
 | 3 - 4 | zoom-through: l'overlay parte dal rettangolo esatto dello schermo (`screenRect()`) e cresce fino al viewport | trigger A (`zoom(z)`) |
@@ -131,6 +131,13 @@ dopo un salto: per questo in `onUpdate` lo zoom non viene toccato se la card ha 
 (convenzione CSS), scala, `k` = quanto la posa si riduce su viewport piu' bassi di 980px. Misurate sui render
 Figma degli stati (`3743:3095` hero, `3750:3099` s1, `3798:1087` s2, `3828:1157` s3, `3828:1198` outro).
 [ATTENZIONE] Le x/y dei nodi ruotati nei metadata Figma sono pre-rotazione: non coincidono con il bbox.
+
+**Scostamento voluto dal Figma (15/10 notte, Guido)**: le pose del design facevano ballare troppo il
+telefono (ry +-24, rz +-12, x fino a -62, y fino a 0.143) e distraevano dal contenuto dello schermo, che e'
+il punto della sezione. Oggi le rotazioni sono circa dimezzate (ry +-10, rz +-5) e x e y quasi costanti:
+cambia la posa, non la posizione. La scala e' passata da 0.95 a 1.2 e `--hiw-offset` da `navbar + 12px` a
+24px, cosi' il titolo sale e lo spazio recuperato va al telefono. Anche la posa finale `out` sta a 1.2:
+con 1 il telefono rimpiccioliva di colpo nell'ultimo segmento, subito prima dello zoom.
 Le stesse pose valgono per il ramo CSS (`transform` sul bezel) e per il ramo 3D (`setPose` in `phone-3d.js`).
 
 ### Schermo del telefono
@@ -163,7 +170,7 @@ blocco unico in coda a `style.css` che azzera transizioni e animazioni di tutte 
 
 | Sezione | Figma | Template | JS | Note di implementazione |
 |---|---|---|---|---|
-| Navbar | `3564:5` | `header.php` | - | Altezza `--tp-navbar-h` (72px); da questo token derivano l'altezza del box hero e `--hiw-offset`. Link nascosti sotto 960px, nessun menu mobile |
+| Navbar | `3564:5`, mobile `4018:965` | `header.php` | - | Altezza `--tp-navbar-h`: 72px desktop, 65px sotto 1024 (il token si ridefinisce, non l'altezza della barra). Sotto soglia: hamburger e pannello |
 | Hero | `3564:17` | inline | `hero-video.js` | Box con foto `hero-box.png` + scrim verde (`::after`) + video timelapse con `preload="none"`: lo carica il JS solo senza reduced-motion, `is-playing` lo fa sfumare sopra la foto, resta sull'ultimo frame. Search bar = markup statico (il widget reale e' in ADR-001) |
 | Servizi popolari | `3828:1079` | `services-popular.php` | `services-tabs.js` | Tab con `role="tab"`, frecce sinistra/destra, indicatore che scivola (`has-indicator`/`is-ready`), card tutte nella stessa cella grid e solo quella attiva visibile (`is-active`, `is-enter` per il rise). Icone tab = SVG a maschera (`tp_icon_span`, utility `.tp-icon-mask`). Mascotte decorativa che entra da destra. La prima card ospita il video dello zoom (§4) |
 | Social proof | `3564:96` | `reviews-marquee.php` | - | Marquee CSS 40 s con il set di card duplicato (`aria-hidden` sul secondo), pausa in hover. Il contenitore non usa `overflow: hidden` per non tagliare ombre e lift. Badge con logo Google (`google-g.svg`) |

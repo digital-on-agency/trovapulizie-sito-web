@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.22.1
+Version: 0.23.2
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -720,9 +720,10 @@ a {
 	top: 0;
 	height: 100vh;
 	padding: 0;
-	/* Le posizioni in percentuale sotto vengono dai frame Figma (980px, senza navbar): l'offset sposta tutto il
-	   testo sotto la navbar sticky (60px) e lascia circa 72px d'aria, come gli 80px sopra il titolo nel Figma */
-	--hiw-offset: calc(var(--tp-navbar-h) + 12px); /* resta ~73px d'aria sopra il titolo */
+	/* Le posizioni in percentuale sotto vengono dai frame Figma (980px, senza navbar). L'offset tiene il testo
+	   sotto la navbar sticky: 15/10 notte ridotto da navbar+12 a 24px, cosi' il titolo sale e lo spazio
+	   recuperato va al telefono, che nel frattempo e' cresciuto (POSES in home-motion.js). */
+	--hiw-offset: 24px;
 }
 .motion-ok .how-it-works__title {
 	position: absolute;
