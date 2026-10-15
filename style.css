@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.10.0
+Version: 0.10.1
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -1021,7 +1021,7 @@ a {
 .reviews {
 	position: relative;
 	max-width: none;
-	padding: 95px 0 115px;
+	padding: 95px 0 67px; /* + 48px di padding del marquee = 115px come nel Figma */
 	background: var(--tp-white);
 	overflow: hidden;
 }
@@ -1056,8 +1056,11 @@ a {
 }
 /* Marquee: la pista contiene il set due volte (il secondo e' aria-hidden); ogni set porta il proprio gap finale,
    cosi' translateX(-50%) riallinea esattamente il primo set e il loop e' senza scatto */
+/* overflow hidden taglierebbe l'ombra delle card (32px di sfocatura) e il lift in hover: il contenitore
+   tiene un padding interno e il margine sopra e' ridotto di altrettanto */
 .reviews__marquee {
-	margin-top: 55px;
+	margin-top: 35px;
+	padding: 20px 0 48px;
 	overflow: hidden;
 }
 .reviews__track {
@@ -1159,7 +1162,7 @@ a {
 		font-size: 30px;
 	}
 	.reviews__marquee {
-		margin-top: 32px;
+		margin-top: 12px;
 	}
 	.reviews__track {
 		display: block;
