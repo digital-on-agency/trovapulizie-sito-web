@@ -74,7 +74,7 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 		<div class="hero__phone" id="hiw-phone-pin" data-theme="<?php echo esc_attr( $theme_uri ); ?>" data-ver="<?php echo esc_attr( wp_get_theme()->get( 'Version' ) ); ?>" data-model="<?php echo esc_attr( carbon_get_the_post_meta( 'phone_model_url' ) ); ?>">
 			<?php get_template_part( 'template-parts/phone-mockup', null, array(
 				'screen' => $hiw_poster ?: $theme_uri . '/assets/img/hero-phone-screen.png',
-				'video'  => $hiw_video,
+				'video'  => $hiw_video ? add_query_arg( 'ver', wp_get_theme()->get( 'Version' ), $hiw_video ) : '', // il video e' cachato 7 giorni dall'hosting: la versione del tema lo invalida
 				'poster' => $hiw_poster,
 				'id'     => 'hiw-phone',
 			) ); ?>

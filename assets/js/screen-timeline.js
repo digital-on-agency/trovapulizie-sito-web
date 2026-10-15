@@ -17,8 +17,10 @@ export const TILES = {
 	'affitti-brevi': [0.1838, 0.4973], sanitario: [0.5, 0.4973], cantiere: [0.8162, 0.4973]
 };
 export const TILE_SIZE = [300 / 1170, 264 / 2532];
-// Card "Laura Bianchi" nei risultati: box 51..1127 x 683..1262 (bottone incluso), texture con margine 18
-export const CARD = { x: 33 / 1170, y: 665 / 2532, w: 1112 / 1170, h: 615 / 2532 };
+// Card "Laura Bianchi" nei risultati (bottone incluso): box misurato sul PNG sorgente da
+// tools/screen-storyboard/cut-card.py e riscalato nello spazio video 1170x2532; la texture
+// card-laura.png ha 12 px di margine trasparente (gia' compresi in questo box)
+export const CARD = { x: 38.7 / 1170, y: 745.9 / 2532, w: 1092.6 / 1170, h: 520.1 / 2532 };
 
 export const clamp01 = v => Math.max(0, Math.min(1, v));
 export const easeOut = v => 1 - Math.pow(1 - v, 3);

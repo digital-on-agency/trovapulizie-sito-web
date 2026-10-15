@@ -111,7 +111,7 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 	const tl = await import('./screen-timeline.js' + qs);
 	const base = new URL('../../', import.meta.url).href.replace(/\/$/, '');
 	const loader = new THREE.TextureLoader();
-	const texOf = file => { const t = loader.load(base + '/assets/img/tiles/' + file); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
+	const texOf = file => { const t = loader.load(base + '/assets/img/tiles/' + file + qs); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t; };
 	const shadowTex = (() => {
 		const c = document.createElement('canvas'); c.width = c.height = 128;
 		const g = c.getContext('2d'); const grd = g.createRadialGradient(64, 64, 8, 64, 64, 64);
