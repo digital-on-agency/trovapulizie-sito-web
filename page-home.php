@@ -40,6 +40,7 @@ $zones_title      = carbon_get_the_post_meta( 'zones_title' );
 $zones_desc       = carbon_get_the_post_meta( 'zones_description' );
 $zones_map        = carbon_get_the_post_meta( 'zones_map_image' );
 $faq_items        = carbon_get_the_post_meta( 'faq_items' );
+$faq_title        = carbon_get_the_post_meta( 'faq_title' );
 $cta_title        = carbon_get_the_post_meta( 'cta_title' );
 $cta_subtitle     = carbon_get_the_post_meta( 'cta_subtitle' );
 $cta_button_text  = carbon_get_the_post_meta( 'cta_button_text' );
@@ -155,14 +156,7 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 	</section>
 
 	<?php if ( $faq_items ) : ?>
-	<section class="faq">
-		<?php foreach ( $faq_items as $item ) : ?>
-			<div class="faq-item">
-				<h4><?php echo esc_html( $item['question'] ?? '' ); ?></h4>
-				<p><?php echo esc_html( $item['answer'] ?? '' ); ?></p>
-			</div>
-		<?php endforeach; ?>
-	</section>
+		<?php get_template_part( 'template-parts/faq-accordion', null, array( 'title' => $faq_title, 'items' => $faq_items ) ); ?>
 	<?php endif; ?>
 
 	<section class="cta-final">

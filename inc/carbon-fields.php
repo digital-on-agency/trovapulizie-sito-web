@@ -107,7 +107,9 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'image', 'zones_map_image', __( 'Mappa' ) ),
 		) )
 		->add_tab( __( 'FAQ' ), array(
-			Field::make( 'complex', 'faq_items', __( 'FAQ' ) )
+			Field::make( 'text', 'faq_title', __( 'Titolo' ) )
+				->set_default_value( 'Domande frequenti' ),
+			Field::make( 'complex', 'faq_items', __( 'FAQ (la prima parte aperta; una aperta per volta)' ) )
 				->set_layout( 'tabbed-vertical' )
 				->add_fields( array(
 					Field::make( 'text', 'question', __( 'Domanda' ) ),

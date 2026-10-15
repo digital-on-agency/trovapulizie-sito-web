@@ -1,11 +1,11 @@
-// QA generica di una sezione: node tools/qa-section.js <chrome-bin> <url> <selettore> [width=1440] [out=/tmp/cdp-section.png]
+// QA generica di una sezione: node tools/qa-section.js <chrome-bin> <url> <selettore> [width=1440] [out=/tmp/cdp-section.png] [selettore-da-cliccare]
 // Porta la sezione in cima al viewport, aspetta reveal/animazioni (4 s), scatta lo screenshot e logga rect, classe is-in
 // e lo stato di eventuali animazioni CSS (animation-name/play-state del primo discendente animato).
 const { spawn } = require('child_process');
 const http = require('http');
 const fs = require('fs');
 const [BIN, URL, SEL] = process.argv.slice(2, 5);
-const W = parseInt(process.argv[5] || '1440', 10), OUT = process.argv[6] || '/tmp/cdp-section.png';
+const W = parseInt(process.argv[5] || '1440', 10), OUT = process.argv[6] || '/tmp/cdp-section.png', CLICK = process.argv[7] || '';
 const chrome = spawn(BIN, ['--headless=new', '--no-sandbox', '--autoplay-policy=no-user-gesture-required', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist', '--hide-scrollbars', '--window-size=' + W + ',980', '--remote-debugging-port=9337', '--user-data-dir=/tmp/cdp-section-profile-' + W + '', 'about:blank'], { stdio: 'ignore' });
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 function getJson(p, method) { return new Promise((res, rej) => { const req = http.request({ host: '127.0.0.1', port: 9337, path: p, method: method || 'GET' }, r => { let d = ''; r.on('data', c => d += c); r.on('end', () => { try { res(JSON.parse(d)); } catch (e) { rej(d); } }); }); req.on('error', rej); req.end(); }); }
@@ -26,5 +26,12 @@ function getJson(p, method) { return new Promise((res, rej) => { const req = htt
 	console.log('STATE', await ev(`(function(){var s=document.querySelector(${JSON.stringify(SEL)}); var b=s.getBoundingClientRect(); var an=null; s.querySelectorAll('*').forEach(function(el){ if(an) return; var cs=getComputedStyle(el); if(cs.animationName && cs.animationName!=='none') an={el:el.className, name:cs.animationName, state:cs.animationPlayState, dur:cs.animationDuration, tf:cs.transform.slice(0,40)}; }); var z=document.getElementById('hiw-zoom'); return JSON.stringify({rect:[Math.round(b.left),Math.round(b.top),Math.round(b.width),Math.round(b.height)], isIn:s.classList.contains('is-in'), anim:an, overlayOn: z? z.classList.contains('is-on') : null});})()`));
 	const shot = await send('Page.captureScreenshot', { format: 'png' });
 	fs.writeFileSync(OUT, Buffer.from(shot.result.data, 'base64'));
+	if (CLICK) {
+		await ev(`document.querySelector(${JSON.stringify(CLICK)}).click(); 'ok'`);
+		await sleep(1500);
+		const shot2 = await send('Page.captureScreenshot', { format: 'png' });
+		fs.writeFileSync(OUT.replace(/\.png$/, '-click.png'), Buffer.from(shot2.result.data, 'base64'));
+		console.log('CLICK', CLICK, await ev(`(function(){var e=document.querySelector(${JSON.stringify(CLICK)}); return JSON.stringify({expanded:e.getAttribute('aria-expanded'), open: !!e.closest('.is-open')});})()`));
+	}
 	ws.close(); chrome.kill(); process.exit(0);
 })().catch(e => { console.error('ERR', e); chrome.kill(); process.exit(1); });
