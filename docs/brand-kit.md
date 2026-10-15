@@ -80,6 +80,15 @@ Vedi `style.css` sezione "Componenti base":
 - Mascotte decorativa `4522:4705`: `assets/img/mascotte.png` 218px ruotata 17.42deg in basso a destra, tagliata
   dal bordo della sezione.
 
+## Sezione Social proof (`3564:96`, 15/10)
+
+- Sfondo bianco, contenuto 1248px; padding 95px sopra, 115px sotto.
+- Badge: sfondo `#E7FAF4`, raggio 20, padding 8/16, stelle `--tp-primary`, testo 14px Medium `--tp-text-body`.
+- Titolo: 44px / Bold / `#171B26` (piu' scuro di `--tp-text-heading`, osservato sul nodo 3837:5).
+- Card recensione 500x220: raggio 24, bordo `#E9EBEE`, ombra `0 12px 32px rgba(15,23,41,0.08)`, padding 30/32,
+  gap 22; avatar 56px tondo; indice "01 / 06" 12px Medium `--tp-text-body`; autore 13px Medium `--tp-text-body`;
+  testo 19px/27px Medium `#171B26`. Gap fra card 28px. Il Figma usa Inter per l'indice: reso in Poppins per coerenza.
+
 ## Come aggiornare questo file
 
 Ogni volta che si fetcha un nuovo nodo Figma con valori di colore/font/radius non ancora

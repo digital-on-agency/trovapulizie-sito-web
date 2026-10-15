@@ -29,6 +29,12 @@ $services_args    = array(
 	'video_first'  => $zoom_video_url, // la prima card ospita il video dello zoom-through dopo l'atterraggio
 );
 $reviews          = carbon_get_the_post_meta( 'reviews' );
+$reviews_args     = array(
+	'badge'      => carbon_get_the_post_meta( 'reviews_badge' ),
+	'badge_link' => carbon_get_the_post_meta( 'reviews_badge_link' ),
+	'title'      => carbon_get_the_post_meta( 'reviews_title' ),
+	'reviews'    => $reviews,
+);
 $zones_title      = carbon_get_the_post_meta( 'zones_title' );
 $zones_desc       = carbon_get_the_post_meta( 'zones_description' );
 $zones_map        = carbon_get_the_post_meta( 'zones_map_image' );
@@ -138,14 +144,7 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 	<?php endif; ?>
 
 	<?php if ( $reviews ) : ?>
-	<section class="social-proof">
-		<?php foreach ( $reviews as $review ) : ?>
-			<blockquote>
-				<p><?php echo esc_html( $review['review_text'] ?? '' ); ?></p>
-				<cite><?php echo esc_html( $review['author_name'] ?? '' ); ?></cite>
-			</blockquote>
-		<?php endforeach; ?>
-	</section>
+		<?php get_template_part( 'template-parts/reviews-marquee', null, $reviews_args ); ?>
 	<?php endif; ?>
 
 	<section class="zones">

@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.9.1
+Version: 0.10.0
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -1014,24 +1014,208 @@ a {
 	}
 }
 
-/* Social proof */
-.social-proof {
-	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-	gap: var(--tp-gap);
+/* =========================
+   Social proof — Figma 3564:96 (mobile 4023:1023). Motion spec §6: marquee continuo 40 s, pausa su hover,
+   mobile 3 card statiche con reveal in stagger, reduced-motion griglia ferma.
+   ========================= */
+.reviews {
+	position: relative;
+	max-width: none;
+	padding: 95px 0 115px;
+	background: var(--tp-white);
+	overflow: hidden;
 }
-.social-proof blockquote {
+.reviews__inner {
+	max-width: 1288px;
+	margin: 0 auto;
+	padding: 0 20px;
+}
+.reviews__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 16px;
+	border-radius: 20px;
+	background: #E7FAF4;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--tp-text-body);
+	text-decoration: none;
+	white-space: nowrap;
+}
+.reviews__stars {
+	color: var(--tp-primary);
+	letter-spacing: 1px;
+}
+.reviews__title {
+	margin: 20px 0 0;
+	font-size: 44px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: #171B26;
+}
+/* Marquee: la pista contiene il set due volte (il secondo e' aria-hidden); ogni set porta il proprio gap finale,
+   cosi' translateX(-50%) riallinea esattamente il primo set e il loop e' senza scatto */
+.reviews__marquee {
+	margin-top: 55px;
+	overflow: hidden;
+}
+.reviews__track {
+	display: flex;
+	width: max-content;
+	padding-left: max(20px, calc((100% - 1248px) / 2));
+	animation: reviews-marquee 40s linear infinite;
+}
+.reviews__marquee:hover .reviews__track {
+	animation-play-state: paused;
+}
+.reviews__set {
+	display: flex;
+	gap: 28px;
+	padding-right: 28px;
+}
+@keyframes reviews-marquee {
+	from { transform: translateX(0); }
+	to { transform: translateX(-50%); }
+}
+.review-card {
+	display: flex;
+	gap: 22px;
+	align-items: stretch;
+	width: 500px;
+	height: 220px;
+	padding: 30px 32px;
+	box-sizing: border-box;
+	background: var(--tp-white);
+	border: 1px solid #E9EBEE;
+	border-radius: var(--tp-radius-2xl);
+	box-shadow: 0 12px 32px 0 rgba(15, 23, 41, 0.08);
+	transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.review-card:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 20px 40px -4px rgba(15, 23, 41, 0.14);
+}
+.review-card__side {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: space-between;
+	flex: 0 0 auto;
+}
+.review-card__avatar {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+.review-card__index {
+	font-size: 12px;
+	font-weight: 500;
+	color: var(--tp-text-body);
+	white-space: nowrap;
+}
+.review-card__body {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	min-width: 0;
+	flex: 1 1 auto;
+}
+.review-card__author {
 	margin: 0;
-	background: var(--tp-bg-soft);
-	border-radius: var(--tp-radius-xl);
-	padding: 20px;
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--tp-text-body);
 }
-.social-proof cite {
-	display: block;
-	margin-top: 12px;
-	font-weight: 600;
-	font-style: normal;
-	color: var(--tp-text-heading);
+.review-card__text {
+	margin: 0;
+	font-size: 19px;
+	line-height: 27px;
+	font-weight: 500;
+	color: #171B26;
+}
+/* Reveal: badge e titolo; su mobile anche le card in stagger da 80 ms */
+.reviews__badge,
+.reviews__title {
+	opacity: 0;
+	transform: translateY(12px);
+	transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reviews__title {
+	transition-delay: 80ms;
+}
+.reviews.is-in .reviews__badge,
+.reviews.is-in .reviews__title {
+	opacity: 1;
+	transform: none;
+}
+
+@media (max-width: 782px) {
+	.reviews {
+		padding: 56px 0 64px;
+	}
+	.reviews__title {
+		font-size: 30px;
+	}
+	.reviews__marquee {
+		margin-top: 32px;
+	}
+	.reviews__track {
+		display: block;
+		width: auto;
+		padding: 0 20px;
+		animation: none;
+	}
+	.reviews__set {
+		flex-direction: column;
+		gap: 16px;
+		padding-right: 0;
+	}
+	.reviews__set[aria-hidden="true"],
+	.review-card:nth-child(n + 4) {
+		display: none;
+	}
+	.review-card {
+		width: auto;
+		height: auto;
+		padding: 22px 20px;
+		gap: 16px;
+		opacity: 0;
+		transform: translateY(12px);
+		transition: opacity 0.5s ease, transform 0.5s ease;
+		transition-delay: calc(var(--i, 0) * 80ms);
+	}
+	.reviews.is-in .review-card {
+		opacity: 1;
+		transform: none;
+	}
+	.review-card__text {
+		font-size: 17px;
+		line-height: 25px;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.reviews__track {
+		animation: none;
+		flex-wrap: wrap;
+		width: auto;
+		gap: 28px;
+		padding-right: 20px;
+	}
+	.reviews__set {
+		flex-wrap: wrap;
+	}
+	.reviews__set[aria-hidden="true"] {
+		display: none;
+	}
+	.reviews__badge,
+	.reviews__title,
+	.review-card {
+		opacity: 1 !important;
+		transform: none !important;
+		transition: none !important;
+	}
 }
 
 /* Zone coperte */

@@ -215,25 +215,33 @@
 				apply(mix(SEQ[seg], SEQ[seg + 1], q * 3 - seg));
 				seek(q);
 				setStep(q);
-				zoom(Math.max(0, Math.min(1, (u - VIDEO_VH) / ZOOM_VH)));
+				// A e' scrubbed (0.7 s di ritardo): dopo un salto oltre la sezione il suo onUpdate arriva quando la card ha
+				// gia' preso il video; in quel caso l'overlay non si tocca
+				if (!cardLive) zoom(Math.max(0, Math.min(1, (u - VIDEO_VH) / ZOOM_VH)));
 			}
 		});
-		// Trigger B (senza pin): tenuta a tutto schermo, poi rientro nella foto della prima card; alla fine della
-		// sezione (Servizi popolari in cima al viewport) il video passa alla card
-		ScrollTrigger.create({
-			trigger: section,
-			start: function () { return sectionTop() + pinUnits() * window.innerHeight; },
-			end: function () { return sectionTop() + section.offsetHeight; },
-			invalidateOnRefresh: true,
-			onEnter: function () { zoom(1); },
-			onUpdate: function (self) {
-				var b = self.progress * (section.offsetHeight / window.innerHeight - pinUnits());
-				var sh = Math.max(0, Math.min(1, (b - HOLD_VH) / SHRINK_VH));
-				if (sh <= 0) zoom(1); else shrink(sh);
-			},
-			onLeave: function () { cardTakeover(true); },
-			onEnterBack: function () { cardTakeover(false); }
-		});
+		// Oltre il pin (tenuta, rientro, atterraggio) lo stato si ricava dalla posizione di scroll a ogni update:
+		// un secondo ScrollTrigger non basta, perche' saltando oltre il suo intervallo (link, scrollIntoView, scroll
+		// rapido) non si attiva mai e non chiama ne' onLeave ne' onUpdate, lasciando l'overlay a tutto schermo.
+		function syncBeyondPin() {
+			var u = (window.scrollY - sectionTop()) / window.innerHeight;
+			var landed = pinUnits() + HOLD_VH + SHRINK_VH;
+			if (u >= landed) { cardTakeover(true); return; }
+			if (cardLive) cardTakeover(false);
+			if (u >= pinUnits() + HOLD_VH) shrink(Math.min(1, (u - pinUnits() - HOLD_VH) / SHRINK_VH));
+			else if (u >= pinUnits()) zoom(1);
+			// sotto il pin l'overlay lo guida il trigger A (scrubbed)
+		}
+		var syncQueued = false;
+		function onScroll() {
+			if (syncQueued) return;
+			syncQueued = true;
+			requestAnimationFrame(function () { syncQueued = false; syncBeyondPin(); });
+		}
+		window.addEventListener('scroll', onScroll, { passive: true });
+		window.addEventListener('resize', onScroll);
+		ScrollTrigger.addEventListener('refresh', syncBeyondPin);
+		syncBeyondPin();
 		// Prima card: il video gira solo quando la foto e' visibile (dopo l'atterraggio o arrivandoci in altro modo)
 		if (cardVideo && 'IntersectionObserver' in window) {
 			cardVideo.preload = 'auto';

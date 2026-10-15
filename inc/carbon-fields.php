@@ -83,10 +83,19 @@ add_action( 'carbon_fields_register_fields', function () {
 				) ),
 		) )
 		->add_tab( __( 'Social Proof' ), array(
-			Field::make( 'complex', 'reviews', __( 'Recensioni' ) )
+			Field::make( 'text', 'reviews_badge', __( 'Badge (es. "4.893 recensioni su Trustpilot")' ) )
+				->set_help_text( __( 'Solo dati veri: il numero deve corrispondere al profilo Trustpilot. Vuoto = niente badge.' ) ),
+			Field::make( 'text', 'reviews_badge_link', __( 'Link del badge (profilo Trustpilot)' ) ),
+			Field::make( 'text', 'reviews_title', __( 'Titolo' ) )
+				->set_default_value( 'Scelto da chi vuole il meglio' ),
+			Field::make( 'complex', 'reviews', __( 'Recensioni (desktop: scorrono in continuo; mobile: le prime 3)' ) )
 				->set_layout( 'tabbed-vertical' )
 				->add_fields( array(
-					Field::make( 'text', 'author_name', __( 'Nome' ) ),
+					Field::make( 'text', 'author_name', __( 'Nome (es. Laura M.)' ) ),
+					Field::make( 'text', 'author_city', __( 'Citta' ) ),
+					Field::make( 'image', 'avatar', __( 'Foto' ) )
+						->set_value_type( 'url' )
+						->set_help_text( __( 'Vuota = avatar del Figma a rotazione.' ) ),
 					Field::make( 'textarea', 'review_text', __( 'Testo recensione' ) ),
 				) ),
 		) )
