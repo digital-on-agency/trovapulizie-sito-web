@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.5.12
+Version: 0.6.0
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -263,11 +263,32 @@ a {
 	left: 0;
 	right: 0;
 	border-radius: 40px;
-	background-image: linear-gradient(to bottom, rgba(234, 250, 244, 0.6), rgba(209, 240, 226, 0.42)),
-		url('assets/img/hero-box.png');
+	overflow: hidden;
+	background-image: url('assets/img/hero-box.png');
 	background-size: cover;
 	background-position: center;
 	box-shadow: 0 12px 40px -8px rgba(5, 89, 61, 0.06);
+}
+/* Scrim verde chiaro sopra foto e video (stesso valore del Figma) */
+.hero__box::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to bottom, rgba(234, 250, 244, 0.6), rgba(209, 240, 226, 0.42));
+	pointer-events: none;
+}
+/* Timelapse: invisibile finche' non e' in riproduzione, poi sfuma sopra la foto; a fine clip resta l'ultimo frame (stanza in ordine) */
+.hero__video {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	opacity: 0;
+	transition: opacity 0.5s ease;
+}
+.hero__video.is-playing {
+	opacity: 1;
 }
 
 .hero__content {

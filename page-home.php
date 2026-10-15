@@ -7,6 +7,7 @@ get_header();
 $hero_title       = carbon_get_the_post_meta( 'hero_title' );
 $hero_subtitle    = carbon_get_the_post_meta( 'hero_subtitle' );
 $hero_trust_badge = carbon_get_the_post_meta( 'hero_trust_badge' );
+$hero_video       = carbon_get_the_post_meta( 'hero_video' );
 $hiw_title        = carbon_get_the_post_meta( 'how_it_works_title' );
 $hiw_subtitle     = carbon_get_the_post_meta( 'how_it_works_subtitle' );
 $hiw_video        = carbon_get_the_post_meta( 'how_it_works_video' );
@@ -36,7 +37,12 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 	<?php endif; ?>
 
 	<section class="hero">
-		<div class="hero__box"></div>
+		<div class="hero__box">
+			<?php if ( $hero_video ) : ?>
+				<!-- Timelapse disordine -> ordine: parte da JS (hero-video.js) solo senza "riduci movimento", sfuma sopra la foto e resta sull'ultimo frame -->
+				<video class="hero__video" muted playsinline preload="auto" src="<?php echo esc_url( add_query_arg( 'ver', wp_get_theme()->get( 'Version' ), $hero_video ) ); ?>" aria-hidden="true" tabindex="-1"></video>
+			<?php endif; ?>
+		</div>
 		<div class="hero__content">
 			<?php if ( $hero_trust_badge ) : ?>
 				<div class="trust-badge">

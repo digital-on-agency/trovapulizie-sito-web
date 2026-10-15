@@ -11,6 +11,10 @@ add_action( 'carbon_fields_register_fields', function () {
 				->set_help_text( __( 'Un&#39;invio a capo = una riga nel titolo (il Figma ha 3 righe: "Prenota pulizie" / "professionali" / "In 2 minuti").' ) ),
 			Field::make( 'textarea', 'hero_subtitle', __( 'Sottotitolo' ) ),
 			Field::make( 'text', 'hero_trust_badge', __( 'Trust badge' ) ),
+			Field::make( 'file', 'hero_video', __( 'Video di sfondo (mp4 muto, ~3 s)' ) )
+				->set_type( 'video' )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Timelapse da stanza in disordine a stanza in ordine. Parte da solo (muto), si ferma sull&#39;ultimo frame, sotto lo stesso scrim verde della foto. Se vuoto o con &quot;riduci movimento&quot; attivo resta la foto statica.' ) ),
 		) )
 		->add_tab( __( 'Come funziona' ), array(
 			Field::make( 'text', 'how_it_works_title', __( 'Titolo sezione' ) )
