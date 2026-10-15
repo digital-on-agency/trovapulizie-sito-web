@@ -1,4 +1,13 @@
-/* Come funziona: phone unico pinnato dalla hero, pose Figma, video scrubbed dallo scroll (ADR-002). */
+/* Come funziona (desktop): phone unico pinnato dalla hero, pose Figma, video scrubbed dallo scroll,
+   zoom-through e atterraggio nella card Servizi (ADR-002 rev. 3). Mappa completa: docs/homepage.md §4.
+
+   Parte solo con viewport >= 768px e senza "riduci movimento" (classe motion-ok su <html>); carica GSAP +
+   ScrollTrigger da CDN quando la sezione si avvicina e, con WebGL2, importa phone-3d.js (altrimenti resta il
+   bezel CSS con transform). Unita' di scroll dalla cima della sezione (viewport): 0-3 video (q = u/3, step
+   a terzi), 3-4 zoom-through, 4-4.5 tenuta, 4.5-5.5 rientro nella card, >= 5.5 card live. Il CSS
+   (.motion-ok .how-it-works { height: 550vh }) deve restare allineato alle costanti *_VH qui sotto.
+   Trigger A (ScrollTrigger, pin + scrub) guida 0-4; oltre il pin lo stato si ricalcola da scrollY in
+   syncBeyondPin() perche' un trigger mai attivato in un salto non chiama nessuna callback. */
 (function () {
 	'use strict';
 

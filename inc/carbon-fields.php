@@ -1,4 +1,19 @@
 <?php
+/**
+ * Campi editoriali del tema (Carbon Fields).
+ *
+ * - Container post_meta "Home — Sezioni": solo sulle pagine con template page-home.php, un tab per sezione
+ *   (Hero, Come funziona, Telefono 3D, Servizi Popolari, Social Proof, Dove Siamo Attivi, FAQ, CTA Finale).
+ *   Letti da page-home.php con carbon_get_the_post_meta().
+ * - Container theme_options "Footer" (menu wp-admin "Footer", page file tp-footer). Letto da footer.php con
+ *   carbon_get_theme_option().
+ * Tabella campi -> uso nei template: docs/homepage.md §3.
+ *
+ * [ATTENZIONE] Tutti i Container::make() devono stare dentro questo callback: un container registrato fuori
+ * dal hook carbon_fields_register_fields manda in fatal l'intero sito (successo il 15/10 su staging).
+ * I file e le immagini usano set_value_type('url'): i template ricevono URL, non ID di allegato
+ * (eccezione: `image` degli step, ID risolto con wp_get_attachment_url in page-home.php).
+ */
 use Carbon_Fields\Container;
 use Carbon_Fields\Field;
 

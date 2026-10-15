@@ -1,6 +1,15 @@
 <?php
 /**
  * Template Name: Home
+ *
+ * Pagina Home (Figma desktop 3564:4, mobile 4016:965). Legge i campi Carbon della tab "Home — Sezioni"
+ * (inc/carbon-fields.php), prepara un array di argomenti per sezione e renderizza nell'ordine:
+ * hero, come-funziona, overlay #hiw-zoom, servizi, recensioni, zone, faq, cta (footer da footer.php).
+ *
+ * Hero e Come funziona sono inline perche' condividono il telefono (#hiw-phone-pin, pinnato dal JS
+ * home-motion.js su desktop); le altre sezioni sono template-part riutilizzabili con $args.
+ * Ogni asset del tema passa da tp_theme_asset()/tp_versioned_url() (cache Hostinger 7 giorni).
+ * Dettagli e vincoli: docs/homepage.md.
  */
 get_header();
 

@@ -5,6 +5,22 @@ Author: Digital On
 Version: 0.17.0
 */
 
+/* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
+   1. Token (:root) e base
+   2. Componenti: bottoni, chip, icona a maschera (.tp-icon-mask), card, phone mockup (.tp-phone)
+   3. Navbar
+   4. Hero (box, scrim, timelapse, search bar, telefono, canvas 3D)
+   5. Come funziona: griglia statica, poi coreografia sotto .motion-ok (pin, step assoluti, --hiw-offset,
+      --hiw-text-fade), overlay zoom-through (.hiw-zoom)
+   6. Servizi popolari (tab + indicatore, card in crossfade, mascotte, reveal)
+   7. Social proof (badge, marquee, card)
+   8. Dove siamo attivi (mappa raster, overlay, radar, citta', sequenza d'ingresso)
+   9. FAQ (due colonne, accordion, reveal)
+   10. CTA finale
+   11. Footer
+   12. prefers-reduced-motion: blocco unico per tutte le sezioni
+   Ogni sezione ha la propria media query mobile (oggi 782px; unificazione pianificata, docs/homepage.md §10). */
+
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
 :root {
 	/* Colori */

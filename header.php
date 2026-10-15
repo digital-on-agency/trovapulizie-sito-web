@@ -1,3 +1,11 @@
+<?php
+/**
+ * Head + navbar (Figma 3564:5, mobile 4018:965). Navbar sticky alta --tp-navbar-h (style.css): da quel token
+ * derivano il box hero e l'offset di Come funziona. Link statici ad ancore di sezione (#come-funziona, #servizi,
+ * #registrati); #prezzi, #diventa-cleaner, #accedi non esistono ancora. Sotto 960px i link sono nascosti e non
+ * c'e' un menu mobile (adattamento pianificato, vedi docs/homepage.md §10).
+ */
+?>
 <!DOCTYPE html>
 <html <?php language_attributes(); ?>>
 <head>

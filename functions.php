@@ -1,4 +1,15 @@
 <?php
+/**
+ * Tema Trovapulizie: bootstrap e helper condivisi.
+ *
+ * - Helper: tp_theme_version / tp_versioned_url / tp_theme_asset (cache-busting via Version: di style.css),
+ *   tp_lines / tp_link_lines (textarea multi-riga dei campi Carbon), tp_icon_span (SVG come maschera CSS).
+ * - Enqueue: Poppins + style.css sempre; i moduli JS della Home solo sul template page-home.php, defer.
+ * - Importmap Three.js (solo Home): home-motion.js importa phone-3d.js in modo dinamico, mai altrove.
+ * - Carbon Fields: boot qui, campi in inc/carbon-fields.php.
+ *
+ * Mappa completa della Home (file, campi, sezioni, coreografia): docs/homepage.md.
+ */
 require_once __DIR__ . '/vendor/autoload.php';
 
 /* ---- Helper del tema (asset versionati, liste "una voce per riga", icone a maschera) ---- */
@@ -49,7 +60,8 @@ add_action( 'wp_enqueue_scripts', function () {
 	}
 } );
 
-// Importmap per Three.js (ADR-002): stessa versione e stessa CDN per core e addons, solo sulla Home
+// Importmap per Three.js (ADR-002): stessa versione e stessa CDN per core e addons, solo sulla Home.
+// Priorita' 1 in wp_head: l'importmap deve precedere qualunque <script type="module">.
 add_action( 'wp_head', function () {
 	if ( ! is_page_template( 'page-home.php' ) ) {
 		return;

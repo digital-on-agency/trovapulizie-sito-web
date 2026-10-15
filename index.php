@@ -1,4 +1,8 @@
 <?php
+/**
+ * Template di fallback per tutte le pagine senza template dedicato: contenuto WP nudo dentro <main>.
+ * La Home usa page-home.php; le pagine quartiere/landing avranno template propri (vedi CLAUDE.md del progetto).
+ */
 get_header();
 ?>
 <main>
