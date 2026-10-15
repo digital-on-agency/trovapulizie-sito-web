@@ -134,19 +134,28 @@ scroll (listener passivo + rAF) e a ogni `refresh`. Il trigger A, essendo scrubb
 dopo un salto: per questo in `onUpdate` lo zoom non viene toccato se la card ha gia' preso il video (`cardLive`).
 
 ### Impaginazione della sezione (desktop)
-Dopo la revisione UX del 15/10 notte: **un solo riquadro di testo** a sinistra (6.7%, largo 320) in cui i
-tre passi si alternano in dissolvenza, **indicatore 1-2-3** sopra di esso (`.hiw-progress`, stato da
-`data-step` sulla sezione, scritto da `setStep()`), **segnale di scorrimento** sotto, visibile solo sul primo
-passo, e telefono spostato a destra (`x: 120` nelle pose) per bilanciare la composizione.
+Revisione UX del 15/10 notte: **colonna editoriale a sinistra** (titolo allineato a sinistra, stepper
+verticale, segnale di scorrimento) e telefono centrato nello spazio a destra (`x: 200` nelle pose). Il
+telefono e' pinnato fuori dalla sezione, quindi la colonna non lo contiene: la sua larghezza
+(`min(38%, 560px)`) e la `x` delle pose vanno tenute coerenti a mano.
 
-Prima i tre passi stavano sparsi (1 e 3 a sinistra, 2 a destra, a 31/48/65% dell'altezza) e restavano tutti
-visibili, gli inattivi al 55%: l'occhio faceva quasi 1000px in orizzontale fra un passo e l'altro mentre il
-contenuto da guardare stava fermo al centro, e non c'era modo di sapere quanti passi fossero. Il colore dei
-paragrafi e' passato da `--tp-text-placeholder` a `--tp-text-body`: il primo dava 2,5:1 su bianco, sotto il
-minimo WCAG AA di 4,5:1.
+Lo **stepper** mostra tutti e tre i passi con il pallino numerato: quello attivo apre il proprio paragrafo
+(`grid-template-rows: 0fr -> 1fr`, l'unico modo di animare un'altezza automatica), i gia' fatti restano come
+titoli in `--tp-text-body` con il tratto di collegamento colorato, quelli da fare sono spenti. La linea che
+unisce i pallini e' insieme decorazione e indicatore di avanzamento.
 
-[ATTENZIONE] Sotto `.motion-ok` il passo e' `display: block`: la griglia `44px 1fr` della versione statica,
-con il badge nascosto, faceva finire il testo nella colonna da 44px.
+Cosa c'era prima e perche' e' cambiato: i tre passi stavano sparsi (1 e 3 a sinistra, 2 a destra, a
+31/48/65% dell'altezza), tutti visibili con gli inattivi al 55%, e fra un passo e l'altro l'occhio faceva
+quasi 1000px in orizzontale mentre il contenuto da guardare restava fermo al centro; non c'era modo di
+sapere quanti passi fossero. Una prima versione intermedia (un riquadro unico piu' barre 1-2-3) risolveva la
+lettura ma lasciava tre ancoraggi diversi — titolo centrato sul viewport, testo in alto a sinistra, telefono
+a destra — e la composizione galleggiava.
+
+Il colore dei paragrafi e' passato da `--tp-text-placeholder` a `--tp-text-body`: il primo dava 2,5:1 su
+bianco, sotto il minimo WCAG AA di 4,5:1.
+
+[ATTENZIONE] La regola base di `.how-it-works__sticky` e' `margin: 0 auto`: nella versione a colonna va
+azzerata, altrimenti la colonna stretta finisce al centro, sotto il telefono.
 
 ### Pose del telefono
 `POSES` in `home-motion.js`: x in px (canvas Figma 1440), y in frazione di viewport, rotazioni in gradi

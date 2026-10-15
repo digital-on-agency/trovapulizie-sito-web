@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.24.2
+Version: 0.25.3
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -752,92 +752,119 @@ a {
 	display: block;
 	margin: 0;
 }
-/* I tre passi occupano lo STESSO riquadro a sinistra del telefono e si alternano in dissolvenza (15/10
-   notte). Prima stavano sparsi (1 e 3 a sinistra, 2 a destra, a 31/48/65% dell'altezza) con gli inattivi
-   al 55%: l'occhio faceva quasi 1000px in orizzontale fra un passo e l'altro mentre la cosa da guardare,
-   lo schermo, stava ferma al centro. Ora i punti di attenzione sono due e fissi: testo e telefono. */
-.motion-ok .how-it-works__step {
-	position: absolute;
-	/* via la griglia badge + testo della versione statica: senza badge il testo finirebbe nella
-	   colonna da 44px e andrebbe a capo a ogni parola */
-	display: block;
-	left: 6.7%;
-	top: calc(43% + var(--hiw-offset));
-	width: 320px;
-	max-width: 26vw;
-	opacity: 0;
-	transition: opacity 260ms cubic-bezier(0.4, 0, 0.2, 1);
-}
-.motion-ok .how-it-works__step.is-active {
-	opacity: var(--hiw-text-fade, 1);
-}
-/* Il numero lo porta l'indicatore: nello slot resta il solo testo */
-.motion-ok .how-it-works__badge {
-	display: none;
-}
-.motion-ok .how-it-works__step .how-it-works__text {
-	max-width: 320px;
-}
-.motion-ok .how-it-works__text h3 {
-	font-size: 24px;
-	margin-bottom: 10px;
-}
-.motion-ok .how-it-works__text p {
-	font-size: 16px;
-	line-height: 25px;
-}
-
-/* Indicatore 1-2-3 sopra lo slot di testo: quanti passi sono e a che punto si e' */
-.motion-ok .hiw-progress {
-	display: flex;
-	gap: 12px;
-	position: absolute;
-	left: 6.7%;
-	top: calc(34% + var(--hiw-offset));
-	width: 320px;
-	max-width: 26vw;
-	margin: 0;
-	padding: 0;
-	list-style: none;
-	opacity: var(--hiw-text-fade, 1);
-}
-.hiw-progress__item {
+/* Impaginazione desktop (revisione 15/10 notte, seconda passata): una sola colonna editoriale a sinistra
+   — titolo, stepper verticale, segnale di scorrimento — e il telefono, che e' pinnato fuori dalla sezione,
+   centrato nello spazio rimasto a destra (x nelle POSES). Prima c'erano tre ancoraggi diversi (titolo
+   centrato sul viewport, testo in alto a sinistra, telefono spostato a destra) e la composizione
+   galleggiava. Lo stepper mostra tutti e tre i passi: quello attivo apre il suo paragrafo, gli altri
+   restano come titoli spenti, e la linea verticale che li unisce fa da indicatore di avanzamento. */
+.motion-ok .how-it-works__sticky {
 	display: flex;
 	flex-direction: column;
-	gap: 8px;
-	flex: 1 1 0;
+	justify-content: center;
+	/* la regola base centra il contenitore (margin: 0 auto): qui la colonna deve stare a sinistra */
+	margin: 0;
+	width: min(38%, 560px);
+	max-width: none;
+	padding: 0 0 0 6.7%;
+	opacity: var(--hiw-text-fade, 1);
 }
-.hiw-progress__bar {
-	height: 3px;
-	border-radius: 2px;
+.motion-ok .how-it-works__title {
+	position: static;
+	text-align: left;
+	font-size: 40px;
+	line-height: 48px;
+	margin: 0 0 32px;
+	opacity: 1;
+}
+.motion-ok .how-it-works__steps {
+	position: static;
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+}
+.motion-ok .how-it-works__step {
+	position: relative;
+	display: grid;
+	grid-template-columns: 40px 1fr;
+	column-gap: 18px;
+	align-items: start;
+	padding-bottom: 28px;
+	opacity: 1;
+}
+.motion-ok .how-it-works__step:last-child {
+	padding-bottom: 0;
+}
+/* Linea di collegamento fra i pallini: e' l'indicatore di avanzamento, si colora fino al passo attivo */
+.motion-ok .how-it-works__step:not(:last-child)::before {
+	content: '';
+	position: absolute;
+	left: 19px;
+	top: 40px;
+	bottom: 0;
+	width: 2px;
 	background: var(--tp-border);
-	transition: background-color 260ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.hiw-progress__n {
-	font-size: 13px;
-	font-weight: 600;
+/* solo il tratto dei passi gia' superati e' colorato: quello sotto il passo attivo e' ancora da fare */
+.motion-ok .how-it-works__step.is-done::before {
+	background: var(--tp-primary);
+}
+.motion-ok .how-it-works__badge {
+	display: inline-flex;
+	width: 40px;
+	height: 40px;
+	border-radius: 20px;
+	font-size: 16px;
+	background: var(--tp-border);
+	color: var(--tp-text-muted);
+	transition: background-color 260ms cubic-bezier(0.4, 0, 0.2, 1), color 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.motion-ok .how-it-works__step.is-done .how-it-works__badge,
+.motion-ok .how-it-works__step.is-active .how-it-works__badge {
+	background: var(--tp-primary);
+	color: var(--tp-white);
+}
+.motion-ok .how-it-works__text h3 {
+	margin: 7px 0 0;
+	font-size: 22px;
+	line-height: 28px;
 	color: var(--tp-text-muted);
 	transition: color 260ms cubic-bezier(0.4, 0, 0.2, 1);
 }
-.how-it-works[data-step="1"] .hiw-progress__item:nth-child(-n+1) .hiw-progress__bar,
-.how-it-works[data-step="2"] .hiw-progress__item:nth-child(-n+2) .hiw-progress__bar,
-.how-it-works[data-step="3"] .hiw-progress__item:nth-child(-n+3) .hiw-progress__bar {
-	background: var(--tp-primary);
-}
-.how-it-works[data-step="1"] .hiw-progress__item:nth-child(1) .hiw-progress__n,
-.how-it-works[data-step="2"] .hiw-progress__item:nth-child(2) .hiw-progress__n,
-.how-it-works[data-step="3"] .hiw-progress__item:nth-child(3) .hiw-progress__n {
+.motion-ok .how-it-works__step.is-active .how-it-works__text h3 {
 	color: var(--tp-text-heading);
 }
+/* fatto, in corso e da fare devono distinguersi fra loro, non solo dall'attivo */
+.motion-ok .how-it-works__step.is-done .how-it-works__text h3 {
+	color: var(--tp-text-body);
+}
+/* Il paragrafo del passo attivo si apre: grid-template-rows 0fr -> 1fr e' l'unico modo di animare
+   un'altezza automatica senza fissarla a mano */
+.motion-ok .how-it-works__text p {
+	display: grid;
+	grid-template-rows: 0fr;
+	margin: 0;
+	font-size: 16px;
+	line-height: 25px;
+	opacity: 0;
+	overflow: hidden;
+	transition: grid-template-rows 320ms cubic-bezier(0.4, 0, 0.2, 1), opacity 240ms linear, margin-top 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.motion-ok .how-it-works__step.is-active .how-it-works__text p {
+	grid-template-rows: 1fr;
+	margin-top: 10px;
+	opacity: 1;
+}
+.motion-ok .how-it-works__text p > * {
+	min-height: 0;
+}
 
-/* Segnale di scorrimento: solo sul primo passo, dice che e' lo scroll a muovere la sequenza */
+/* Segnale di scorrimento: in coda alla colonna, solo sul primo passo */
 .motion-ok .hiw-scrollcue {
 	display: block;
-	position: absolute;
-	left: 6.7%;
-	top: calc(43% + var(--hiw-offset) + 150px);
-	width: 18px;
-	height: 18px;
+	width: 16px;
+	height: 16px;
+	margin: 36px 0 0 12px;
 	border-right: 2px solid var(--tp-text-muted);
 	border-bottom: 2px solid var(--tp-text-muted);
 	transform: rotate(45deg);
@@ -846,7 +873,7 @@ a {
 	animation: hiw-cue 1.8s ease-in-out infinite;
 }
 .motion-ok .how-it-works[data-step="1"] .hiw-scrollcue {
-	opacity: calc(0.6 * var(--hiw-text-fade, 1));
+	opacity: 0.55;
 }
 @keyframes hiw-cue {
 	0%, 100% { translate: 0 0; }

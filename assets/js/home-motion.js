@@ -51,12 +51,12 @@
 		// circa dimezzate, x e y quasi costanti: cambia la posa, non la posizione.
 		// x positiva: col testo raccolto in un solo blocco a sinistra, il telefono si sposta a destra per
 		// bilanciare la composizione (prima restavano ~570px vuoti a destra).
-		s1: { x: 120, y: 0.075, ry: -10, rx: 3, rz: -5, s: 1.2, k: 1 },
-		s2: { x: 120, y: 0.075, ry: 10, rx: 3, rz: 5, s: 1.2, k: 1 },
-		s3: { x: 110, y: 0.085, ry: -5, rx: 2, rz: -3, s: 1.22, k: 1 },
+		s1: { x: 200, y: 0.075, ry: -10, rx: 3, rz: -5, s: 1.2, k: 1 },
+		s2: { x: 200, y: 0.075, ry: 10, rx: 3, rz: 5, s: 1.2, k: 1 },
+		s3: { x: 190, y: 0.085, ry: -5, rx: 2, rz: -3, s: 1.22, k: 1 },
 		// La posa finale (raddrizzata, da cui parte lo zoom-through) tiene la stessa scala degli stati:
 		// con s: 1 il telefono rimpiccioliva di colpo nell'ultimo segmento, subito prima dello zoom.
-		out: { x: 120, y: 0, ry: 0, rx: 0, rz: 0, s: 1.2, k: 1 }
+		out: { x: 200, y: 0, ry: 0, rx: 0, rz: 0, s: 1.2, k: 1 }
 	};
 	var SEQ = [POSES.s1, POSES.s2, POSES.s3, POSES.out];
 	var KEYS = ['x', 'y', 'ry', 'rx', 'rz', 's', 'k'];
@@ -114,7 +114,10 @@
 	}
 	function setStep(q) {
 		var active = q < 1 / 3 ? 0 : q < 2 / 3 ? 1 : 2;
-		for (var i = 0; i < steps.length; i++) steps[i].classList.toggle('is-active', i === active);
+		for (var i = 0; i < steps.length; i++) {
+			steps[i].classList.toggle('is-active', i === active);
+			steps[i].classList.toggle('is-done', i < active);
+		}
 		section.classList.toggle('is-state-2', active === 1);
 		// L'indicatore 1-2-3 e il segnale di scorrimento si accendono da qui, via CSS
 		section.setAttribute('data-step', String(active + 1));

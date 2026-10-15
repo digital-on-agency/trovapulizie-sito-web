@@ -160,7 +160,7 @@ $cta_args         = array(
 					<span class="how-it-works__badge"><?php echo $n; ?></span>
 					<div class="how-it-works__text">
 						<h3><?php echo esc_html( $step['title'] ?? '' ); ?></h3>
-						<p><?php echo esc_html( $step['description'] ?? '' ); ?></p>
+						<p><span><?php echo esc_html( $step['description'] ?? '' ); ?></span></p>
 					</div>
 					<?php
 					// Telefono del singolo passo: si vede solo nel fallback impilato (niente JS o
