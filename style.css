@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.14.0
+Version: 0.14.2
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -531,16 +531,19 @@ a {
 	top: 0;
 	height: 100vh;
 	padding: 0;
+	/* Le posizioni in percentuale sotto vengono dai frame Figma (980px, senza navbar): l'offset sposta tutto il
+	   testo sotto la navbar sticky (60px) e lascia circa 72px d'aria, come gli 80px sopra il titolo nel Figma */
+	--hiw-offset: 72px;
 }
 .motion-ok .how-it-works__title {
 	position: absolute;
-	top: 7.3%;
+	top: calc(7.3% + var(--hiw-offset));
 	left: 0;
 	right: 0;
 }
 .motion-ok .how-it-works__subtitle {
 	position: absolute;
-	top: calc(7.3% + 50px);
+	top: calc(7.3% + 50px + var(--hiw-offset));
 	left: 0;
 	right: 0;
 }
@@ -558,9 +561,9 @@ a {
 .motion-ok .how-it-works__step.is-active {
 	opacity: 1;
 }
-.motion-ok .how-it-works__step--1 { left: 6.7%; top: 30.6%; }
-.motion-ok .how-it-works__step--2 { left: 62.5%; top: 48%; }
-.motion-ok .how-it-works__step--3 { left: 6.7%; top: 67.3%; }
+.motion-ok .how-it-works__step--1 { left: 6.7%; top: calc(30.6% + var(--hiw-offset)); }
+.motion-ok .how-it-works__step--2 { left: 62.5%; top: calc(48% + var(--hiw-offset)); }
+.motion-ok .how-it-works__step--3 { left: 6.7%; top: calc(67.3% + var(--hiw-offset)); }
 .motion-ok .how-it-works__step--1 .how-it-works__text,
 .motion-ok .how-it-works__step--3 .how-it-works__text {
 	max-width: 226px;
@@ -1590,7 +1593,7 @@ a {
    ========================= */
 .cta-final {
 	max-width: none;
-	padding: 24px 20px;
+	padding: 24px 20px 72px; /* piu' aria prima del footer */
 	text-align: center;
 }
 .cta-final__card {
@@ -1700,7 +1703,7 @@ a {
 }
 @media (max-width: 782px) {
 	.cta-final {
-		padding: 16px 20px;
+		padding: 16px 20px 48px;
 	}
 	.cta-final__card {
 		flex-direction: column;
