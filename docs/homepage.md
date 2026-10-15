@@ -228,10 +228,20 @@ Hostinger (LiteSpeed) cacha HTML e asset per 7 giorni. Regola:
 
 ## 10. Breakpoint e gating motion
 
-Oggi il CSS usa `max-width` a 782, 960, 1000, 1100, 1240 px a seconda della sezione; il JS attiva la
-coreografia da 768px. Tra 768 e 782px convivono il pin (JS) e il layout a una colonna (CSS): stato rotto,
-visibile su iPad portrait. L'adattamento mobile/tablet (unificazione dei breakpoint, gate JS, layout dal
-frame Figma mobile) e' pianificato e non ancora implementato: vedi `CLAUDE.md` del progetto nel vault.
+Soglia unica a **1024px** (ADR-002 rev. 4), dichiarata una volta sola nel token `--tp-bp-desktop` su
+`:root`. Le media query di sezione usano `max-width: 1023px` (il CSS non accetta `var()` dentro `@media`,
+quindi il valore e' ripetuto a mano: cambiandolo, cambiarlo ovunque) e `home-motion.js` costruisce il
+proprio `matchMedia` leggendo quel token, cosi' CSS e JS non possono divergere.
+
+- fino a 1023px: layout impilato, nessun pin, nessun GSAP, nessun Three.js;
+- da 1024px: coreografia desktop completa.
+
+Restano le soglie fluide desktop (960, 1000, 1100, 1240px) che riducono spaziature e colonne senza
+cambiare comportamento. I tablet in orizzontale (1024-1279) restano sulla coreografia desktop, per scelta.
+
+Il telefono e' parametrico: `--tp-phone-w`, `--tp-phone-h`, `--tp-phone-radius`,
+`--tp-phone-screen-radius` (default desktop 294x608). Le varianti mobile del Figma (150x300 nella hero,
+158x320 negli step) si ottengono ridefinendo i token, senza `transform: scale()`.
 
 ## 11. QA
 
@@ -246,10 +256,15 @@ Letture: in headless le transizioni CSS avanzano solo quando si scatta uno scree
 rilanciare con attese piu' lunghe (`slow`). I numeri loggati vanno confrontati con il run precedente: un
 refactor senza cambi di comportamento deve dare gli stessi valori.
 
-## 12. Limiti noti (15/10/2026)
+## 12. Limiti noti (15/10/2026, ver 0.18.0)
 
-- Mobile e tablet non adattati: search bar hero piu' larga del viewport a 390px (pagina scorre in
-  orizzontale), navbar senza menu, Come funziona impilata ma non a layout Figma, stato rotto 768-782px.
+- Mobile e tablet adattati solo nella base (TICKET-10): niente piu' scroll orizzontale e niente piu'
+  coreografia sotto 1024px, ma il layout delle sezioni non e' ancora quello del Figma mobile
+  (`4016:965`). Da fare: navbar senza menu, hero, Come funziona impilata animata, le altre sezioni.
+  Ticket TICKET-11..21 in `spec/tickets/` nel vault.
+- `reviews__badge` sporge dal viewport a 360px (clippato, non genera scroll): lo chiude TICKET-15.
+- `screen-step1-servizio.png` viene scaricato due volte (poster del video senza `?ver`, `<img>` con
+  `?ver`): lo chiude TICKET-20.
 - Contenuti segnaposto: recensioni, badge Google, FAQ 2-5, servizi Uffici/Condomini, URL social, link
   Prezzi/Accedi/Registrati, pagine linkate dal footer non esistenti.
 - Search bar della hero statica: il widget di ricerca reale e' il widget JS di ADR-001.

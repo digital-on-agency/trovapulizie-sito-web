@@ -1,7 +1,7 @@
 /* Come funziona (desktop): phone unico pinnato dalla hero, pose Figma, video scrubbed dallo scroll,
    zoom-through e atterraggio nella card Servizi (ADR-002 rev. 3). Mappa completa: docs/homepage.md §4.
 
-   Parte solo con viewport >= 768px e senza "riduci movimento" (classe motion-ok su <html>); carica GSAP +
+   Parte solo con viewport >= --tp-bp-desktop (1024px) e senza "riduci movimento" (classe motion-ok su <html>); carica GSAP +
    ScrollTrigger da CDN quando la sezione si avvicina e, con WebGL2, importa phone-3d.js (altrimenti resta il
    bezel CSS con transform). Unita' di scroll dalla cima della sezione (viewport): 0-3 video (q = u/3, step
    a terzi), 3-4 zoom-through, 4-4.5 tenuta, 4.5-5.5 rientro nella card, >= 5.5 card live. Il CSS
@@ -11,7 +11,9 @@
 (function () {
 	'use strict';
 
-	var mq = window.matchMedia('(min-width: 768px) and (prefers-reduced-motion: no-preference)');
+	// Soglia unica con il CSS (ADR-002 rev. 4): il token --tp-bp-desktop su :root e' la sola fonte di verita'.
+	var bp = getComputedStyle(document.documentElement).getPropertyValue('--tp-bp-desktop').trim() || '1024px';
+	var mq = window.matchMedia('(min-width: ' + bp + ') and (prefers-reduced-motion: no-preference)');
 	if (!mq.matches) return;
 
 	var pinEl = document.getElementById('hiw-phone-pin');
