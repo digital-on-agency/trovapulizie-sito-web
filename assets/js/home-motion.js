@@ -94,6 +94,15 @@
 			if (video.readyState >= 2) video.currentTime = Math.max(video.currentTime, 0.001);
 		}).catch(function (e) { console.warn('phone-3d non disponibile, resta il phone CSS', e); });
 	}
+	// Comparsa di titolo e step: dipende da dove sta la sezione nel viewport, non dal trigger del pin.
+	// Il trigger A parte quando il telefono della hero e' a meta' strada, e prima di quel momento nessuno
+	// scriveva --hiw-text-fade: i testi erano gia' li' mentre salivano. 0 quando la cima della sezione e'
+	// ancora in fondo al viewport, 1 poco prima che si incolli.
+	function entryFade() {
+		var vh = window.innerHeight;
+		var d = sectionTop() - window.scrollY; // distanza della cima della sezione dal bordo alto del viewport
+		return easeInOut(Math.max(0, Math.min(1, (0.85 * vh - d) / (0.75 * vh))));
+	}
 	var lastFade = null;
 	function setTextFade(v) {
 		var f = Math.round(v * 1000) / 1000;
@@ -245,9 +254,7 @@
 					apply(mix(POSES.hero, POSES.s1, h));
 					seek(0);
 					setStep(0);
-					// Titolo e step compaiono mentre il telefono scende dalla hero, invece di essere gia' li':
-					// la sezione si presenta quando il telefono arriva, non prima (Guido, 15/10 notte).
-					setTextFade(easeInOut(Math.max(0, Math.min(1, (h - 0.35) / 0.5))));
+					setTextFade(entryFade());
 					return;
 				}
 				var u = (p - p0) / (1 - p0) * pinUnits();
@@ -268,6 +275,8 @@
 		// rapido) non si attiva mai e non chiama ne' onLeave ne' onUpdate, lasciando l'overlay a tutto schermo.
 		function syncBeyondPin() {
 			var u = (window.scrollY - sectionTop()) / window.innerHeight;
+			// Prima che il trigger A si attivi nessuno scriverebbe la dissolvenza d'ingresso: la scrive qui
+			if (u < 0) setTextFade(entryFade());
 			if (u < pinUnits() && !cardLive) return; // sotto il pin l'overlay lo guida il trigger A (scrubbed)
 			var landed = pinUnits() + HOLD_VH + SHRINK_VH;
 			if (u >= landed) { cardTakeover(true); return; }

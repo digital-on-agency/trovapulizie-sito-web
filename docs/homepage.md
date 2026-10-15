@@ -106,13 +106,20 @@ GSAP 3.13 + ScrollTrigger si caricano da cdnjs solo quando la sezione entra a me
 
 | Intervallo (u = viewport scrollati da `sectionTop`) | Cosa succede | Chi lo guida |
 |---|---|---|
-| prima del pin (`p < p0`) | handoff: il telefono va dalla posa hero alla posa s1 e `--hiw-text-fade` sale da 0 a 1 nell'ultimo 65% del tragitto: titolo e step compaiono quando il telefono arriva, non prima | trigger A |
+| avvicinamento (anche prima che il trigger A si attivi) | `--hiw-text-fade` sale da 0 a 1 man mano che la cima della sezione sale da 0.85 a 0.1 viewport: titolo e step compaiono mentre il telefono arriva, non sono gia' li' (`entryFade()`) | handler di scroll + trigger A |
+| prima del pin (`p < p0`) | handoff: il telefono va dalla posa hero alla posa s1 | trigger A |
 | 0 - 3 | video scrubbed; `q = u/3` in 0..1; step attivo = terzo corrente; pose s1 -> s2 -> s3 -> out | trigger A |
 | q 0.82 - 0.94 | `--hiw-text-fade` 1 -> 0: titolo e step sfumano mentre il telefono si raddrizza | trigger A |
 | 3 - 4 | zoom-through: l'overlay parte dal rettangolo esatto dello schermo (`screenRect()`) e cresce fino al viewport | trigger A (`zoom(z)`) |
 | 4 - 4.5 | tenuta a tutto schermo, telefono rilasciato | `syncBeyondPin()` |
 | 4.5 - 5.5 | rientro: overlay dal viewport al rettangolo della foto della prima card, velo verde che cresce | `syncBeyondPin()` (`shrink(s)`) |
 | >= 5.5 | atterraggio: `cardTakeover(true)`, la card mostra il video in loop (`is-live`), overlay spento | `syncBeyondPin()` + IntersectionObserver sulla card |
+
+[ATTENZIONE] La dissolvenza d'ingresso non puo' dipendere dal trigger del pin: quello parte quando il
+telefono della hero ha il centro al centro del viewport, cioe' quando il titolo della sezione e' gia' entrato
+da un pezzo. Finche' era legata al trigger, `--hiw-text-fade` restava al valore di default (1) e i testi si
+vedevano gia' mentre salivano. Ora `entryFade()` la calcola dalla posizione della sezione e la scrivono sia
+l'handler di scroll (prima del trigger) sia `onUpdate` (dentro l'handoff).
 
 Costanti in `home-motion.js`: `VIDEO_VH = 3`, `ZOOM_VH = 1`, `HOLD_VH = 0.5`, `SHRINK_VH = 1`. Se cambiano
 va aggiornato anche `height: 550vh` nel CSS.
