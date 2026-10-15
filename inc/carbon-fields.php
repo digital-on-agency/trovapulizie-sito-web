@@ -114,8 +114,24 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'textarea', 'zones_coming_cities', __( 'Citta in arrivo (una per riga)' ) ),
 		) )
 		->add_tab( __( 'FAQ' ), array(
+			Field::make( 'text', 'faq_eyebrow', __( 'Pillola sopra il titolo' ) )
+				->set_default_value( 'SUPPORTO' ),
 			Field::make( 'text', 'faq_title', __( 'Titolo' ) )
 				->set_default_value( 'Domande frequenti' ),
+			Field::make( 'textarea', 'faq_subtitle', __( 'Testo sotto il titolo' ) ),
+			Field::make( 'separator', 'faq_contact_sep', __( 'Card di contatto (colonna sinistra)' ) ),
+			Field::make( 'text', 'faq_contact_people', __( 'Nomi (es. Guido & Christian)' ) ),
+			Field::make( 'text', 'faq_contact_role', __( 'Ruolo (es. Fondatori)' ) ),
+			Field::make( 'image', 'faq_contact_avatar_1', __( 'Foto 1' ) )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Vuota = foto del Figma.' ) ),
+			Field::make( 'image', 'faq_contact_avatar_2', __( 'Foto 2' ) )
+				->set_value_type( 'url' ),
+			Field::make( 'text', 'faq_contact_title', __( 'Titolo card' ) ),
+			Field::make( 'textarea', 'faq_contact_text', __( 'Testo card' ) ),
+			Field::make( 'text', 'faq_contact_cta_label', __( 'Bottone: testo' ) ),
+			Field::make( 'text', 'faq_contact_cta_link', __( 'Bottone: URL' ) ),
+			Field::make( 'separator', 'faq_items_sep', __( 'Domande' ) ),
 			Field::make( 'complex', 'faq_items', __( 'FAQ (la prima parte aperta; una aperta per volta)' ) )
 				->set_layout( 'tabbed-vertical' )
 				->add_fields( array(

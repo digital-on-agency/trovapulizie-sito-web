@@ -48,6 +48,22 @@ $zones_args       = array(
 );
 $faq_items        = carbon_get_the_post_meta( 'faq_items' );
 $faq_title        = carbon_get_the_post_meta( 'faq_title' );
+$faq_args         = array(
+	'eyebrow'  => carbon_get_the_post_meta( 'faq_eyebrow' ),
+	'title'    => $faq_title,
+	'subtitle' => carbon_get_the_post_meta( 'faq_subtitle' ),
+	'items'    => $faq_items,
+	'contact'  => array(
+		'people'    => carbon_get_the_post_meta( 'faq_contact_people' ),
+		'role'      => carbon_get_the_post_meta( 'faq_contact_role' ),
+		'avatar_1'  => carbon_get_the_post_meta( 'faq_contact_avatar_1' ),
+		'avatar_2'  => carbon_get_the_post_meta( 'faq_contact_avatar_2' ),
+		'title'     => carbon_get_the_post_meta( 'faq_contact_title' ),
+		'text'      => carbon_get_the_post_meta( 'faq_contact_text' ),
+		'cta_label' => carbon_get_the_post_meta( 'faq_contact_cta_label' ),
+		'cta_link'  => carbon_get_the_post_meta( 'faq_contact_cta_link' ),
+	),
+);
 $cta_title        = carbon_get_the_post_meta( 'cta_title' );
 $cta_subtitle     = carbon_get_the_post_meta( 'cta_subtitle' );
 $cta_button_text  = carbon_get_the_post_meta( 'cta_button_text' );
@@ -167,7 +183,7 @@ $cta_args         = array(
 		<?php get_template_part( 'template-parts/zones-map', null, $zones_args ); ?>
 
 	<?php if ( $faq_items ) : ?>
-		<?php get_template_part( 'template-parts/faq-accordion', null, array( 'title' => $faq_title, 'items' => $faq_items ) ); ?>
+		<?php get_template_part( 'template-parts/faq-accordion', null, $faq_args ); ?>
 	<?php endif; ?>
 
 		<?php get_template_part( 'template-parts/cta-final', null, $cta_args ); ?>

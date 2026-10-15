@@ -98,6 +98,16 @@ Vedi `style.css` sezione "Componenti base":
   (`zones-overlay-centro.png`, box 471x352 a 441,189, opacita' 0.8) e Prati (`zones-overlay-prati.jpg`, box
   540x659 a 84,-103, darken 0.7, immagine al 124% spostata di -10.2%). I file sono quadrati 1024px: cover.
 
+## Sezione FAQ (`6375:1291`, layout B2B adottato il 15/10)
+
+- Sfondo `#F6FBF9`, padding 80, contenuto 1200px, due colonne (360 + resto) con gap 48.
+- Pillola "SUPPORTO": sfondo `#E0F9F1`, testo 12px SemiBold `#008866` tracking 1px; titolo 36px (nel Figma font
+  Baloo 2 ExtraBold, reso in Poppins 800 per coerenza); testo 15px `#6B7380`.
+- Card contatto: sfondo `#E6FFF5`, raggio 18, padding 24; avatar 46px tondi bordo bianco 2.5px sovrapposti di 14;
+  nomi 13px SemiBold `#4B5563`; titolo 17px SemiBold `#030712`; testo 14px `#4B5563`; CTA primaria 15px SemiBold.
+- Righe: bianche, bordo `--tp-border`, raggio 14, padding 20/22, gap 12; domanda 16px SemiBold `#111827`;
+  segno + grigio `#6B7380` / - verde, 20px; risposta 15px/1.55 `#6B7380`.
+
 ## Sezione CTA finale (`3564:162`, 15/10)
 
 - Card 1164x372, raggio 24, gradiente `#00C896 -> #37DBB3` (90deg), ombra `0 10px 30px rgba(15,33,26,0.08)`,

@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.15.3
+Version: 0.16.0
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -1456,37 +1456,136 @@ a {
 }
 
 /* =========================
-   FAQ — Figma 3564:134 (mobile 4024:1007). Motion spec §8: righe in stagger 60 ms, accordion con
-   grid-template-rows 0fr -> 1fr, chevron che ruota di 180 gradi, una aperta per volta, hover tinta verde 4%.
+   FAQ — Figma 6375:1291 (layout B2B adottato per la Home il 15/10). Due colonne: a sinistra pillola, titolo, testo e
+   card di contatto; a destra l'accordion con + / -. Motion spec §8: righe in stagger 60 ms, apertura con
+   grid-template-rows 0fr -> 1fr, una aperta per volta, hover tinta verde 4%.
    ========================= */
 .faq {
 	max-width: none;
 	padding: 80px 20px;
-	background: var(--tp-white);
+	background: #F6FBF9;
 }
 .faq__inner {
-	max-width: 750px;
+	display: flex;
+	align-items: flex-start;
+	gap: 48px;
+	max-width: 1200px;
 	margin: 0 auto;
 }
+.faq__aside {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 14px;
+	flex: 0 0 360px;
+	width: 360px;
+}
+.faq__eyebrow {
+	display: inline-block;
+	padding: 7px 14px;
+	border-radius: var(--tp-radius-pill);
+	background: #E0F9F1;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 1px;
+	text-transform: uppercase;
+	color: #008866;
+}
 .faq__title {
-	margin: 0 0 40px;
+	margin: 0;
 	font-size: 36px;
-	font-weight: 700;
-	line-height: 1.2;
-	text-align: center;
-	color: var(--tp-text-heading);
+	font-weight: 800;
+	line-height: 1.08;
+	color: #111827;
+}
+.faq__subtitle {
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.5;
+	color: #6B7380;
+}
+.faq__contact {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 24px;
+	border-radius: 18px;
+	background: #E6FFF5;
+}
+.faq__founders {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.faq__avatars {
+	display: flex;
+}
+.faq__avatar {
+	width: 46px;
+	height: 46px;
+	border-radius: 50%;
+	border: 2.5px solid var(--tp-white);
+	object-fit: cover;
+	background: var(--tp-white);
+}
+.faq__avatar + .faq__avatar {
+	margin-left: -14px;
+}
+.faq__founders-text {
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	font-size: 13px;
+	line-height: 1.35;
+	font-weight: 600;
+	color: #4B5563;
+}
+.faq__contact-title {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 600;
+	color: #030712;
+}
+.faq__contact-text {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.5;
+	color: #4B5563;
+}
+.faq__contact-cta {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 100%;
+	box-sizing: border-box;
+	padding: 14px 20px;
+	border-radius: var(--tp-radius-lg);
+	background: var(--tp-primary);
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--tp-white);
+	text-decoration: none;
+	transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.faq__contact-cta:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 22px -10px rgba(0, 200, 150, 0.7);
 }
 .faq__list {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
+	flex: 1 1 auto;
+	min-width: 0;
 }
 .faq__item {
 	background: var(--tp-white);
 	border: 1px solid var(--tp-border);
-	border-radius: var(--tp-radius-xl);
-	box-shadow: 0 4px 16px 0 rgba(15, 33, 26, 0.05);
-	padding: 22px 28px;
+	border-radius: 14px;
+	padding: 20px 22px;
 	transition: background-color 0.25s ease;
 }
 .faq__item:hover {
@@ -1499,32 +1598,35 @@ a {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	gap: 16px;
+	gap: 12px;
 	width: 100%;
 	padding: 0;
 	border: 0;
 	background: none;
 	font-family: var(--tp-font);
 	font-size: 16px;
-	font-weight: 500;
+	font-weight: 600;
 	line-height: 1.4;
 	text-align: left;
-	color: var(--tp-text-heading);
+	color: #111827;
 	cursor: pointer;
 }
-.faq__chevron {
-	flex: 0 0 18px;
-	width: 18px;
-	height: 18px;
-	color: var(--tp-text-body);
-	background: currentColor;
-	-webkit-mask: url('assets/icons/faq-chevron.svg') center / contain no-repeat;
-	mask: url('assets/icons/faq-chevron.svg') center / contain no-repeat;
-	transition: transform 0.3s ease, color 0.3s ease;
+.faq__toggle {
+	flex: 0 0 auto;
+	font-size: 20px;
+	font-weight: 600;
+	line-height: 1;
+	color: #6B7380;
+	transition: color 0.25s ease;
 }
-.faq__item.is-open .faq__chevron {
-	transform: rotate(180deg);
+.faq__toggle::before {
+	content: '+';
+}
+.faq__item.is-open .faq__toggle {
 	color: var(--tp-primary);
+}
+.faq__item.is-open .faq__toggle::before {
+	content: '\2212';
 }
 .faq__a {
 	display: grid;
@@ -1546,17 +1648,17 @@ a {
 .faq__a-inner p {
 	margin: 12px 0 0;
 	font-size: 15px;
-	line-height: 24px;
-	color: var(--tp-text-body);
+	line-height: 1.55;
+	color: #6B7380;
 }
-/* Reveal: titolo, poi righe in stagger da 60 ms */
-.faq__title,
+/* Reveal: colonna sinistra, poi righe in stagger da 60 ms */
+.faq__aside,
 .faq__item {
 	opacity: 0;
 	transform: translateY(12px);
 	transition: opacity 0.6s ease, transform 0.6s ease, background-color 0.25s ease;
 }
-.faq.is-in .faq__title,
+.faq.is-in .faq__aside,
 .faq.is-in .faq__item {
 	opacity: 1;
 	transform: none;
@@ -1564,33 +1666,48 @@ a {
 .faq.is-in .faq__item {
 	transition-delay: calc(80ms + var(--i, 0) * 60ms);
 }
+@media (max-width: 1000px) {
+	.faq__inner {
+		flex-direction: column;
+		gap: 28px;
+	}
+	.faq__aside {
+		flex: none;
+		width: auto;
+	}
+	.faq__contact {
+		order: 3;
+	}
+	.faq__list {
+		order: 2;
+		width: 100%;
+	}
+	.faq__aside .faq__contact {
+		order: initial;
+	}
+}
 @media (max-width: 782px) {
 	.faq {
 		padding: 56px 20px;
 	}
 	.faq__title {
-		font-size: 28px;
-		margin-bottom: 28px;
+		font-size: 30px;
 	}
 	.faq__item {
 		padding: 18px 20px;
 	}
 }
 @media (prefers-reduced-motion: reduce) {
-	.faq__title,
+	.faq__aside,
 	.faq__item,
 	.faq__a,
 	.faq__a-inner,
-	.faq__chevron {
+	.faq__toggle {
 		transition: none !important;
 		opacity: 1;
 		transform: none;
 	}
-	.faq__item.is-open .faq__chevron {
-		transform: rotate(180deg);
-	}
 }
-
 /* =========================
    CTA finale — Figma 3564:162 (mobile 4025:1007). Card 1164x372 con gradiente, mascotte col mocio in basso a
    sinistra, testo centrato nello spazio restante (padding destro 248 come nel Figma). Motion spec §9.
