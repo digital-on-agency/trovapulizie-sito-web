@@ -13,7 +13,6 @@ $args = wp_parse_args( $args ?? array(), array(
 	'subtitle'  => '',
 	'items'     => array(),
 	'contact'   => array(),
-	'theme_uri' => get_stylesheet_directory_uri(),
 ) );
 $items = array_values( array_filter( (array) $args['items'], function ( $f ) {
 	return ! empty( $f['question'] ) && ! empty( $f['answer'] );
@@ -21,7 +20,6 @@ $items = array_values( array_filter( (array) $args['items'], function ( $f ) {
 if ( ! $items ) {
 	return;
 }
-$theme_uri = $args['theme_uri'];
 $contact   = wp_parse_args( (array) $args['contact'], array(
 	'people'    => '',
 	'role'      => '',
@@ -57,8 +55,8 @@ $schema = array(
 				<?php if ( $contact['people'] || $contact['role'] ) : ?>
 				<div class="faq__founders">
 					<div class="faq__avatars" aria-hidden="true">
-						<img class="faq__avatar" src="<?php echo esc_url( $contact['avatar_1'] ?: $theme_uri . '/assets/img/founder-guido.png' ); ?>" alt="" width="46" height="46" loading="lazy">
-						<img class="faq__avatar" src="<?php echo esc_url( $contact['avatar_2'] ?: $theme_uri . '/assets/img/founder-christian.png' ); ?>" alt="" width="46" height="46" loading="lazy">
+						<img class="faq__avatar" src="<?php echo esc_url( $contact['avatar_1'] ?: tp_theme_asset( 'assets/img/founder-guido.png' ) ); ?>" alt="" width="46" height="46" loading="lazy">
+						<img class="faq__avatar" src="<?php echo esc_url( $contact['avatar_2'] ?: tp_theme_asset( 'assets/img/founder-christian.png' ) ); ?>" alt="" width="46" height="46" loading="lazy">
 					</div>
 					<p class="faq__founders-text"><?php if ( $contact['people'] ) : ?><strong><?php echo esc_html( $contact['people'] ); ?></strong><?php endif; ?><?php if ( $contact['role'] ) : ?><span><?php echo esc_html( $contact['role'] ); ?></span><?php endif; ?></p>
 				</div>

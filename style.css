@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.16.1
+Version: 0.17.0
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -37,6 +37,7 @@ Version: 0.16.1
 	/* Layout */
 	--tp-max-width: 1280px;
 	--tp-gap: 24px;
+	--tp-navbar-h: 72px; /* altezza navbar: da qui derivano il box hero e lo spazio sopra Come funziona */
 }
 
 * {
@@ -115,6 +116,14 @@ a {
 	font-size: 13px;
 	color: var(--tp-text-chip);
 	white-space: nowrap;
+}
+
+/* Icona SVG monocromatica: il file e' la maschera, il colore e' currentColor (tab servizi, social footer) */
+.tp-icon-mask {
+	display: inline-block;
+	background: currentColor;
+	-webkit-mask: var(--icon) center / contain no-repeat;
+	mask: var(--icon) center / contain no-repeat;
 }
 
 /* Card (es. card servizio) */
@@ -201,7 +210,7 @@ a {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	height: 72px; /* 15/10: da 60 a 72, contenuto centrato in verticale */
+	height: var(--tp-navbar-h);
 	padding: 0 80px;
 	background: var(--tp-white);
 }
@@ -255,9 +264,9 @@ a {
 
 .hero__box {
 	position: absolute;
-	inset: 24px 40px auto 40px;
-	/* 759px da Figma, ma mai oltre la prima schermata: navbar 60 + 24 sopra + 24 sotto */
-	height: min(759px, calc(100vh - 120px)); /* navbar 72 + 24 sopra + 24 sotto */
+	top: 24px;
+	/* 759px da Figma, ma mai oltre la prima schermata: navbar + 24 sopra + 24 sotto */
+	height: min(759px, calc(100vh - var(--tp-navbar-h) - 48px));
 	max-width: 1360px;
 	margin: 0 auto;
 	left: 0;
@@ -426,7 +435,7 @@ a {
 @media (max-width: 782px) {
 	.hero__box {
 		inset: 16px 16px auto 16px;
-		height: min(620px, calc(100vh - 104px));
+		height: min(620px, calc(100vh - var(--tp-navbar-h) - 32px));
 	}
 	.hero h1 {
 		font-size: 32px;
@@ -533,7 +542,7 @@ a {
 	padding: 0;
 	/* Le posizioni in percentuale sotto vengono dai frame Figma (980px, senza navbar): l'offset sposta tutto il
 	   testo sotto la navbar sticky (60px) e lascia circa 72px d'aria, come gli 80px sopra il titolo nel Figma */
-	--hiw-offset: 84px; /* navbar 72: resta ~73px d'aria sopra il titolo */
+	--hiw-offset: calc(var(--tp-navbar-h) + 12px); /* resta ~73px d'aria sopra il titolo */
 }
 .motion-ok .how-it-works__title {
 	position: absolute;
@@ -563,7 +572,7 @@ a {
 	transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .motion-ok .how-it-works__step.is-active {
-	opacity: calc(1 * var(--hiw-text-fade, 1));
+	opacity: var(--hiw-text-fade, 1);
 }
 .motion-ok .how-it-works__step--1 { left: 6.7%; top: calc(31% + var(--hiw-offset)); }
 .motion-ok .how-it-works__step--2 { left: auto; right: 6.7%; top: calc(48% + var(--hiw-offset)); }
@@ -744,9 +753,6 @@ a {
 .services__tab-icon {
 	width: 18px;
 	height: 18px;
-	background: currentColor;
-	-webkit-mask: var(--icon) center / contain no-repeat;
-	mask: var(--icon) center / contain no-repeat;
 }
 .services__tab-indicator {
 	position: absolute;
@@ -996,23 +1002,6 @@ a {
 		padding: 16px;
 	}
 }
-@media (prefers-reduced-motion: reduce) {
-	.services *,
-	.services *::after {
-		transition: none !important;
-	}
-	.services__titles,
-	.services__proof,
-	.services__tab,
-	.services__cards {
-		opacity: 1;
-		transform: none;
-	}
-	.services__mascot {
-		opacity: 1;
-		transform: rotate(17.42deg);
-	}
-}
 
 /* =========================
    Social proof — Figma 3564:96 (mobile 4023:1023). Motion spec §6: marquee continuo 40 s, pausa su hover,
@@ -1203,28 +1192,6 @@ a {
 		line-height: 25px;
 	}
 }
-@media (prefers-reduced-motion: reduce) {
-	.reviews__track {
-		animation: none;
-		flex-wrap: wrap;
-		width: auto;
-		gap: 28px;
-		padding-right: 20px;
-	}
-	.reviews__set {
-		flex-wrap: wrap;
-	}
-	.reviews__set[aria-hidden="true"] {
-		display: none;
-	}
-	.reviews__badge,
-	.reviews__title,
-	.review-card {
-		opacity: 1 !important;
-		transform: none !important;
-		transition: none !important;
-	}
-}
 
 /* =========================
    Dove siamo attivi — Figma 3564:114 (mobile 4023:1007). Mappa raster 1280x714 con due overlay reali del Figma
@@ -1282,14 +1249,14 @@ a {
 	top: 26.47%;
 	width: 36.81%;
 	height: 49.27%;
-	opacity: 0.8;
+	--zones-op: 0.8; /* opacita' a regime, usata dall'animazione d'ingresso e da reduced-motion */
 }
 .zones__overlay--prati {
 	left: 6.56%;
 	top: -14.43%;
 	width: 42.19%;
 	height: 92.3%;
-	opacity: 0.7;
+	--zones-op: 0.7;
 	mix-blend-mode: darken;
 }
 .zones__overlay--prati img {
@@ -1391,13 +1358,6 @@ a {
 }
 .zones.is-in .zones__overlay--prati {
 	animation: zones-overlay-in 0.9s ease-out 0.85s forwards;
-	animation-fill-mode: forwards;
-}
-.zones.is-in .zones__overlay--centro {
-	--zones-op: 0.8;
-}
-.zones.is-in .zones__overlay--prati {
-	--zones-op: 0.7;
 }
 @keyframes zones-overlay-in {
 	0% { opacity: 0; transform: scale(1); }
@@ -1431,27 +1391,6 @@ a {
 	}
 	.zones__radar {
 		display: none;
-	}
-}
-@media (prefers-reduced-motion: reduce) {
-	.zones__title,
-	.zones__desc,
-	.zones__coming-label,
-	.zones__map,
-	.zones__city {
-		opacity: 1 !important;
-		transform: none !important;
-		transition: none !important;
-	}
-	.zones__overlay--centro {
-		opacity: 0.8 !important;
-	}
-	.zones__overlay--prati {
-		opacity: 0.7 !important;
-	}
-	.zones__overlay,
-	.zones__radar {
-		animation: none !important;
 	}
 }
 
@@ -1675,15 +1614,8 @@ a {
 		flex: none;
 		width: auto;
 	}
-	.faq__contact {
-		order: 3;
-	}
 	.faq__list {
-		order: 2;
 		width: 100%;
-	}
-	.faq__aside .faq__contact {
-		order: initial;
 	}
 }
 @media (max-width: 782px) {
@@ -1695,17 +1627,6 @@ a {
 	}
 	.faq__item {
 		padding: 18px 20px;
-	}
-}
-@media (prefers-reduced-motion: reduce) {
-	.faq__aside,
-	.faq__item,
-	.faq__a,
-	.faq__a-inner,
-	.faq__toggle {
-		transition: none !important;
-		opacity: 1;
-		transform: none;
 	}
 }
 /* =========================
@@ -1854,16 +1775,6 @@ a {
 		flex-basis: auto;
 	}
 }
-@media (prefers-reduced-motion: reduce) {
-	.cta-final__card,
-	.cta-final__art,
-	.cta-final__button,
-	.cta-final__arrow {
-		opacity: 1;
-		transform: none !important;
-		transition: none !important;
-	}
-}
 
 /* =========================
    Footer — Figma 3564:167 (mobile 4026:1007). Motion spec §10: reveal colonne in stagger 60 ms, hover link
@@ -1924,12 +1835,8 @@ a {
 	color: var(--tp-primary);
 }
 .site-footer__social-icon {
-	display: block;
 	width: 24px;
 	height: 24px;
-	background: currentColor;
-	-webkit-mask: var(--icon) center / contain no-repeat;
-	mask: var(--icon) center / contain no-repeat;
 }
 .site-footer__heading {
 	margin: 0;
@@ -2065,7 +1972,77 @@ a {
 		gap: 12px 20px;
 	}
 }
+
+/* Riduci movimento: tutte le sezioni della Home in un blocco solo (stesse regole di prima, raccolte) */
 @media (prefers-reduced-motion: reduce) {
+	.services *,
+	.services *::after {
+		transition: none !important;
+	}
+	.services__titles,
+	.services__proof,
+	.services__tab,
+	.services__cards {
+		opacity: 1;
+		transform: none;
+	}
+	.services__mascot {
+		opacity: 1;
+		transform: rotate(17.42deg);
+	}
+	.reviews__track {
+		animation: none;
+		flex-wrap: wrap;
+		width: auto;
+		gap: 28px;
+		padding-right: 20px;
+	}
+	.reviews__set {
+		flex-wrap: wrap;
+	}
+	.reviews__set[aria-hidden="true"] {
+		display: none;
+	}
+	.reviews__badge,
+	.reviews__title,
+	.review-card {
+		opacity: 1 !important;
+		transform: none !important;
+		transition: none !important;
+	}
+	.zones__title,
+	.zones__desc,
+	.zones__coming-label,
+	.zones__map,
+	.zones__city {
+		opacity: 1 !important;
+		transform: none !important;
+		transition: none !important;
+	}
+	.zones__overlay {
+		opacity: var(--zones-op) !important;
+	}
+	.zones__overlay,
+	.zones__radar {
+		animation: none !important;
+	}
+	.faq__aside,
+	.faq__item,
+	.faq__a,
+	.faq__a-inner,
+	.faq__toggle {
+		transition: none !important;
+		opacity: 1;
+		transform: none;
+	}
+	.cta-final__card,
+	.cta-final__art,
+	.cta-final__button,
+	.cta-final__arrow {
+		opacity: 1;
+		transform: none !important;
+		transition: none !important;
+	}
 	.site-footer__col,
 	.site-footer__bottom {
 		opacity: 1;

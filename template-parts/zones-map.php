@@ -1,7 +1,7 @@
 <?php
 /**
- * Sezione "Dove siamo attivi" — Figma 3564:114 (mobile 4023:1007). Args: title, description, map (URL raster, vuoto =
- * mappa di Roma del tema), coming_label, cities (array di nomi), theme_uri.
+ * Sezione "Dove siamo attivi" — Figma 3564:114 (mobile 4023:1007). Args: title, description, map (URL raster; vuoto =
+ * mappa di Roma del tema con gli overlay), overlays (bool, null = solo con la mappa del tema), coming_label, cities.
  * La mappa e' un raster (spec motion §7, niente draw-in): sopra ci stanno i due overlay reali del Figma (Centro,
  * Prati) in coordinate percentuali, con fade + pulse all'ingresso e un alone radar discreto in loop su Roma.
  * Citta' "Prossimamente" come chip senza link. Reveal via reveal.js ([data-reveal]).
@@ -12,11 +12,10 @@ $args = wp_parse_args( $args ?? array(), array(
 	'map'          => '',
 	'coming_label' => '',
 	'cities'       => array(),
-	'theme_uri'    => get_stylesheet_directory_uri(),
+	'overlays'     => null, // gli overlay sono disegnati per la mappa di Roma del tema: null = solo con quella
 ) );
-$theme_uri = $args['theme_uri'];
-$map       = $args['map'] ?: $theme_uri . '/assets/img/zones-map-roma.jpg';
-$overlays  = ! $args['map'] || false !== strpos( $args['map'], '/zones-map-roma' ); // gli overlay sono disegnati per la mappa di Roma del tema
+$map      = $args['map'] ?: tp_theme_asset( 'assets/img/zones-map-roma.jpg' );
+$overlays = null === $args['overlays'] ? empty( $args['map'] ) : (bool) $args['overlays'];
 $cities    = array_values( array_filter( array_map( 'trim', (array) $args['cities'] ) ) );
 ?>
 <section class="zones" id="dove-siamo" data-reveal>
@@ -25,8 +24,8 @@ $cities    = array_values( array_filter( array_map( 'trim', (array) $args['citie
 		<div class="zones__map">
 			<img class="zones__map-img" src="<?php echo esc_url( $map ); ?>" alt="<?php esc_attr_e( 'Mappa delle zone coperte' ); ?>" loading="lazy" width="1280" height="714">
 			<?php if ( $overlays ) : ?>
-			<div class="zones__overlay zones__overlay--centro" aria-hidden="true"><img src="<?php echo esc_url( $theme_uri . '/assets/img/zones-overlay-centro.png' ); ?>" alt="" loading="lazy"></div>
-			<div class="zones__overlay zones__overlay--prati" aria-hidden="true"><img src="<?php echo esc_url( $theme_uri . '/assets/img/zones-overlay-prati.jpg' ); ?>" alt="" loading="lazy"></div>
+			<div class="zones__overlay zones__overlay--centro" aria-hidden="true"><img src="<?php echo esc_url( tp_theme_asset( 'assets/img/zones-overlay-centro.png' ) ); ?>" alt="" loading="lazy"></div>
+			<div class="zones__overlay zones__overlay--prati" aria-hidden="true"><img src="<?php echo esc_url( tp_theme_asset( 'assets/img/zones-overlay-prati.jpg' ) ); ?>" alt="" loading="lazy"></div>
 			<span class="zones__radar" aria-hidden="true"></span>
 			<?php endif; ?>
 		</div>

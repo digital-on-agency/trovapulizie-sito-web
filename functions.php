@@ -1,19 +1,51 @@
 <?php
 require_once __DIR__ . '/vendor/autoload.php';
 
+/* ---- Helper del tema (asset versionati, liste "una voce per riga", icone a maschera) ---- */
+function tp_theme_version() {
+	return wp_get_theme()->get( 'Version' );
+}
+// Aggiunge ?ver= del tema: Hostinger cacha gli asset 7 giorni, la versione del tema li invalida. '' resta ''.
+function tp_versioned_url( $url ) {
+	return $url ? add_query_arg( 'ver', tp_theme_version(), $url ) : '';
+}
+function tp_theme_asset( $rel ) {
+	return tp_versioned_url( get_stylesheet_directory_uri() . '/' . ltrim( $rel, '/' ) );
+}
+// Textarea "una voce per riga" -> array di stringhe non vuote
+function tp_lines( $text ) {
+	return array_values( array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', (string) $text ) ) ) );
+}
+// Textarea "Etichetta | URL" per riga -> array di [label, url]
+function tp_link_lines( $text ) {
+	$out = array();
+	foreach ( tp_lines( $text ) as $line ) {
+		$parts = array_map( 'trim', explode( '|', $line, 2 ) );
+		if ( $parts[0] ) {
+			$out[] = array( 'label' => $parts[0], 'url' => $parts[1] ?? '#' );
+		}
+	}
+	return $out;
+}
+// Icona SVG monocromatica resa come maschera in currentColor (classe .tp-icon-mask); '' se il file non esiste
+function tp_icon_span( $rel, $class ) {
+	if ( ! file_exists( get_stylesheet_directory() . '/' . ltrim( $rel, '/' ) ) ) {
+		return '';
+	}
+	return '<span class="' . esc_attr( $class ) . ' tp-icon-mask" style="--icon:url(\'' . esc_url( tp_theme_asset( $rel ) ) . '\')" aria-hidden="true"></span>';
+}
+
 add_action( 'after_setup_theme', function () {
 	\Carbon_Fields\Carbon_Fields::boot();
 } );
 
 add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_style( 'trovapulizie-fonts', 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap', array(), null );
-	wp_enqueue_style( 'trovapulizie-style', get_stylesheet_uri(), array( 'trovapulizie-fonts' ), wp_get_theme()->get( 'Version' ) );
+	wp_enqueue_style( 'trovapulizie-style', get_stylesheet_uri(), array( 'trovapulizie-fonts' ), tp_theme_version() );
 	if ( is_page_template( 'page-home.php' ) ) {
-		wp_enqueue_script( 'trovapulizie-home-motion', get_stylesheet_directory_uri() . '/assets/js/home-motion.js', array(), wp_get_theme()->get( 'Version' ), array( 'strategy' => 'defer', 'in_footer' => true ) );
-		wp_enqueue_script( 'trovapulizie-reveal', get_stylesheet_directory_uri() . '/assets/js/reveal.js', array(), wp_get_theme()->get( 'Version' ), array( 'strategy' => 'defer', 'in_footer' => true ) );
-		wp_enqueue_script( 'trovapulizie-faq-accordion', get_stylesheet_directory_uri() . '/assets/js/faq-accordion.js', array(), wp_get_theme()->get( 'Version' ), array( 'strategy' => 'defer', 'in_footer' => true ) );
-		wp_enqueue_script( 'trovapulizie-services-tabs', get_stylesheet_directory_uri() . '/assets/js/services-tabs.js', array(), wp_get_theme()->get( 'Version' ), array( 'strategy' => 'defer', 'in_footer' => true ) );
-		wp_enqueue_script( 'trovapulizie-hero-video', get_stylesheet_directory_uri() . '/assets/js/hero-video.js', array(), wp_get_theme()->get( 'Version' ), array( 'strategy' => 'defer', 'in_footer' => true ) );
+		foreach ( array( 'home-motion', 'reveal', 'faq-accordion', 'services-tabs', 'hero-video' ) as $handle ) {
+			wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
+		}
 	}
 } );
 

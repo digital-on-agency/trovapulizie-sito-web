@@ -5,6 +5,9 @@
 	var v = document.querySelector('.hero__video');
 	if (!v) return;
 	if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+	// preload="none" nel markup: il file si scarica solo da qui, dopo il controllo sul movimento ridotto
+	v.preload = 'auto';
+	v.load();
 	v.addEventListener('playing', function () { v.classList.add('is-playing'); }, { once: true });
 	var start = function () {
 		var p = v.play();

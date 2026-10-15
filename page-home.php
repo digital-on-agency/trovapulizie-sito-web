@@ -14,8 +14,7 @@ $hiw_video        = carbon_get_the_post_meta( 'how_it_works_video' );
 $hiw_poster       = carbon_get_the_post_meta( 'how_it_works_poster' );
 $steps            = carbon_get_the_post_meta( 'how_it_works_steps' );
 $zoom_video       = carbon_get_the_post_meta( 'how_it_works_zoom_video' );
-$zoom_video_url   = $zoom_video ? add_query_arg( 'ver', wp_get_theme()->get( 'Version' ), $zoom_video ) : '';
-$theme_uri        = get_stylesheet_directory_uri();
+$zoom_video_url   = tp_versioned_url( $zoom_video );
 $step_fallbacks   = array( 'screen-step1-servizio.png', 'screen-step2-cleaner.png', 'screen-step3-conferma.png' );
 $services         = carbon_get_the_post_meta( 'popular_services' );
 $services_args    = array(
@@ -36,21 +35,17 @@ $reviews_args     = array(
 	'title'      => carbon_get_the_post_meta( 'reviews_title' ),
 	'reviews'    => $reviews,
 );
-$zones_title      = carbon_get_the_post_meta( 'zones_title' );
-$zones_desc       = carbon_get_the_post_meta( 'zones_description' );
-$zones_map        = carbon_get_the_post_meta( 'zones_map_image' );
 $zones_args       = array(
-	'title'        => $zones_title,
-	'description'  => $zones_desc,
-	'map'          => $zones_map,
+	'title'        => carbon_get_the_post_meta( 'zones_title' ),
+	'description'  => carbon_get_the_post_meta( 'zones_description' ),
+	'map'          => carbon_get_the_post_meta( 'zones_map_image' ),
 	'coming_label' => carbon_get_the_post_meta( 'zones_coming_label' ),
-	'cities'       => preg_split( '/\r\n|\r|\n/', (string) carbon_get_the_post_meta( 'zones_coming_cities' ) ),
+	'cities'       => tp_lines( carbon_get_the_post_meta( 'zones_coming_cities' ) ),
 );
 $faq_items        = carbon_get_the_post_meta( 'faq_items' );
-$faq_title        = carbon_get_the_post_meta( 'faq_title' );
 $faq_args         = array(
 	'eyebrow'  => carbon_get_the_post_meta( 'faq_eyebrow' ),
-	'title'    => $faq_title,
+	'title'    => carbon_get_the_post_meta( 'faq_title' ),
 	'subtitle' => carbon_get_the_post_meta( 'faq_subtitle' ),
 	'items'    => $faq_items,
 	'contact'  => array(
@@ -64,15 +59,11 @@ $faq_args         = array(
 		'cta_link'  => carbon_get_the_post_meta( 'faq_contact_cta_link' ),
 	),
 );
-$cta_title        = carbon_get_the_post_meta( 'cta_title' );
-$cta_subtitle     = carbon_get_the_post_meta( 'cta_subtitle' );
-$cta_button_text  = carbon_get_the_post_meta( 'cta_button_text' );
-$cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 $cta_args         = array(
-	'title'       => $cta_title,
-	'subtitle'    => $cta_subtitle,
-	'button_text' => $cta_button_text,
-	'button_link' => $cta_button_link,
+	'title'       => carbon_get_the_post_meta( 'cta_title' ),
+	'subtitle'    => carbon_get_the_post_meta( 'cta_subtitle' ),
+	'button_text' => carbon_get_the_post_meta( 'cta_button_text' ),
+	'button_link' => carbon_get_the_post_meta( 'cta_button_link' ),
 	'note'        => carbon_get_the_post_meta( 'cta_note' ),
 	'image'       => carbon_get_the_post_meta( 'cta_image' ),
 );
@@ -89,7 +80,7 @@ $cta_args         = array(
 		<div class="hero__box">
 			<?php if ( $hero_video ) : ?>
 				<!-- Timelapse disordine -> ordine: parte da JS (hero-video.js) solo senza "riduci movimento", sfuma sopra la foto e resta sull'ultimo frame -->
-				<video class="hero__video" muted playsinline preload="auto" src="<?php echo esc_url( add_query_arg( 'ver', wp_get_theme()->get( 'Version' ), $hero_video ) ); ?>" aria-hidden="true" tabindex="-1"></video>
+				<video class="hero__video" muted playsinline preload="none" src="<?php echo esc_url( tp_versioned_url( $hero_video ) ); ?>" aria-hidden="true" tabindex="-1"></video>
 			<?php endif; ?>
 		</div>
 		<div class="hero__content">
@@ -126,10 +117,10 @@ $cta_args         = array(
 				</button>
 			</div>
 		</div>
-		<div class="hero__phone" id="hiw-phone-pin" data-theme="<?php echo esc_attr( $theme_uri ); ?>" data-ver="<?php echo esc_attr( wp_get_theme()->get( 'Version' ) ); ?>" data-model="<?php echo esc_attr( carbon_get_the_post_meta( 'phone_model_url' ) ); ?>">
+		<div class="hero__phone" id="hiw-phone-pin" data-theme="<?php echo esc_attr( get_stylesheet_directory_uri() ); ?>" data-ver="<?php echo esc_attr( tp_theme_version() ); ?>" data-model="<?php echo esc_attr( carbon_get_the_post_meta( 'phone_model_url' ) ); ?>">
 			<?php get_template_part( 'template-parts/phone-mockup', null, array(
-				'screen' => $hiw_poster ?: $theme_uri . '/assets/img/hero-phone-screen.png',
-				'video'  => $hiw_video ? add_query_arg( 'ver', wp_get_theme()->get( 'Version' ), $hiw_video ) : '', // il video e' cachato 7 giorni dall'hosting: la versione del tema lo invalida
+				'screen' => $hiw_poster ?: tp_theme_asset( 'assets/img/hero-phone-screen.png' ),
+				'video'  => $hiw_video ? tp_versioned_url( $hiw_video ) : '', // il video e' cachato 7 giorni dall'hosting: la versione del tema lo invalida
 				'poster' => $hiw_poster,
 				'id'     => 'hiw-phone',
 			) ); ?>
@@ -145,7 +136,7 @@ $cta_args         = array(
 			<ol class="how-it-works__steps">
 				<?php foreach ( array_slice( $steps, 0, 3 ) as $i => $step ) :
 					$n      = $i + 1;
-					$screen = ! empty( $step['image'] ) ? wp_get_attachment_url( $step['image'] ) : $theme_uri . '/assets/img/' . $step_fallbacks[ $i ];
+					$screen = ! empty( $step['image'] ) ? wp_get_attachment_url( $step['image'] ) : tp_theme_asset( 'assets/img/' . $step_fallbacks[ $i ] );
 				?>
 				<li class="how-it-works__step how-it-works__step--<?php echo $n; ?><?php echo 1 === $n ? ' is-active' : ''; ?>" data-step="<?php echo $n; ?>">
 					<span class="how-it-works__badge"><?php echo $n; ?></span>

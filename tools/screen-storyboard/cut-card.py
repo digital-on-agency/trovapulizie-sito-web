@@ -23,7 +23,7 @@ SRC = os.path.join(ROOT, 'assets', 'img', 'screen-step2-cleaner.png')
 OUT = os.path.join(ROOT, 'assets', 'img', 'tiles', 'card-laura.png')
 VIDEO_W, VIDEO_H = 1170, 2532
 MARGIN = 12          # px sorgente di trasparenza intorno alla card
-ZONE = (40, 0, 1140, 0)   # x0, _, x1, _: colonne in cui cercare la prima card (le righe partono dall'area grigia)
+ZONE_X = (40, 1140)  # colonne in cui cercare la prima card (le righe partono dall'area grigia)
 SS = 4               # supersampling della maschera per angoli antialiasati
 
 src = Image.open(SRC).convert('RGB')
@@ -35,7 +35,7 @@ white = (a[:, :, 0] >= 250) & (a[:, :, 1] >= 250) & (a[:, :, 2] >= 250)
 # L'area risultati e' grigia (#f7f8fa): parte da li', non dal bianco della barra di ricerca sopra
 bg = (np.abs(a[:, :, 0] - 247) <= 4) & (np.abs(a[:, :, 1] - 248) <= 4) & (np.abs(a[:, :, 2] - 250) <= 4)
 results_top = int(np.where(bg[400:, 20])[0][0]) + 400
-x0, x1 = ZONE[0], ZONE[2]
+x0, x1 = ZONE_X
 sub = white[results_top:results_top + 1000, x0:x1]
 has = sub.sum(axis=1) > 0
 first = int(np.where(has)[0][0])

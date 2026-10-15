@@ -12,12 +12,11 @@ $args = wp_parse_args( $args ?? array(), array(
 	'button_link' => '',
 	'note'        => '',
 	'image'       => '',
-	'theme_uri'   => get_stylesheet_directory_uri(),
 ) );
 if ( ! $args['title'] && ! $args['button_text'] ) {
 	return;
 }
-$image = $args['image'] ?: $args['theme_uri'] . '/assets/img/mascotte-mocio.png';
+$image = $args['image'] ?: tp_theme_asset( 'assets/img/mascotte-mocio.png' );
 ?>
 <section class="cta-final" id="registrati" data-reveal>
 	<div class="cta-final__card">

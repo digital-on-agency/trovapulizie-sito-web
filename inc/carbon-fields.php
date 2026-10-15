@@ -154,10 +154,8 @@ add_action( 'carbon_fields_register_fields', function () {
 				->set_help_text( __( 'Vuota = mascotte con il mocio del Figma.' ) ),
 		) );
 
-} );
 
-// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)
-add_action( 'carbon_fields_register_fields', function () {
+	// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)
 	Container::make( 'theme_options', __( 'Footer' ) )
 		->set_page_file( 'tp-footer' )
 		->add_fields( array(

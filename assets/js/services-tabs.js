@@ -1,5 +1,5 @@
 /* Servizi popolari: indicatore che scivola fra le tab, card in crossfade+rise (chip in stagger via CSS),
-   frecce sinistra/destra fra le tab, reveal della sezione all'ingresso nel viewport. Niente dipendenze. */
+   frecce sinistra/destra fra le tab. Il reveal della sezione lo fa reveal.js ([data-reveal]). Niente dipendenze. */
 (function () {
 	'use strict';
 	var root = document.querySelector('.services');
@@ -58,17 +58,13 @@
 			activate((active + d + tabs.length) % tabs.length, true);
 		});
 	});
-	window.addEventListener('resize', placeIndicator);
-	window.addEventListener('load', placeIndicator);
-	if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeIndicator);
+	var resizeQueued = false;
+	window.addEventListener('resize', function () {
+		if (resizeQueued) return;
+		resizeQueued = true;
+		requestAnimationFrame(function () { resizeQueued = false; placeIndicator(); });
+	});
 	placeIndicator();
-
-	if ('IntersectionObserver' in window) {
-		var io = new IntersectionObserver(function (entries) {
-			if (entries.some(function (e) { return e.isIntersecting; })) { root.classList.add('is-in'); io.disconnect(); }
-		}, { threshold: 0.15 });
-		io.observe(root);
-	} else {
-		root.classList.add('is-in');
-	}
+	// con i font web la larghezza delle tab cambia: seconda posa a font caricati
+	if (document.fonts && document.fonts.ready) document.fonts.ready.then(placeIndicator);
 })();

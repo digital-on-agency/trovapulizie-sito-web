@@ -110,7 +110,10 @@
 		pump();
 	}
 
-	function sectionTop() { return section.getBoundingClientRect().top + window.scrollY; }
+	// Posizione della sezione misurata una volta per refresh/resize, non a ogni frame di scroll
+	var secTop = 0;
+	function measureSection() { secTop = section.getBoundingClientRect().top + window.scrollY; }
+	function sectionTop() { return secTop; }
 	// Scroll pinnato dopo p0, in viewport: video + zoom (trigger A); tenuta e rientro stanno nel trigger B
 	function pinUnits() { return VIDEO_VH + ZOOM_VH; }
 	function easeInOut(v) { return v < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2; }
@@ -128,7 +131,11 @@
 		zoomEl.classList.toggle('is-on', on);
 		if (on) playSafe(zoomVideo); else if (zoomVideo) zoomVideo.pause();
 	}
+	var lastBox = '';
 	function setBox(r, radius, veil, opacity) {
+		var key = [r.left, r.top, r.width, r.height, radius, opacity, veil].map(function (n) { return Math.round(n * 100); }).join(',');
+		if (key === lastBox) return;
+		lastBox = key;
 		zoomEl.style.left = r.left + 'px';
 		zoomEl.style.top = r.top + 'px';
 		zoomEl.style.width = r.width + 'px';
@@ -139,9 +146,11 @@
 	}
 	function viewportRect() { return { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight }; }
 	function mixRect(a, b, e) { return { left: lerp(a.left, b.left, e), top: lerp(a.top, b.top, e), width: lerp(a.width, b.width, e), height: lerp(a.height, b.height, e) }; }
+	var cardRadius = null; // il raggio della card non cambia durante lo scroll: letto una volta
 	function cardRect() {
 		var b = cardVisual.getBoundingClientRect();
-		return { left: b.left, top: b.top, width: b.width, height: b.height, radius: parseFloat(getComputedStyle(cardVisual).borderRadius) || 16 };
+		if (cardRadius === null) cardRadius = parseFloat(getComputedStyle(cardVisual).borderRadius) || 16;
+		return { left: b.left, top: b.top, width: b.width, height: b.height, radius: cardRadius };
 	}
 	// z in 0..1: 0 = overlay sovrapposto allo schermo (crossfade breve), 1 = tutto il viewport
 	function zoom(z) {
@@ -166,6 +175,7 @@
 		cardLive = on;
 		cardVisual.classList.toggle('is-live', on);
 		if (on) {
+			cardVideo.preload = 'auto'; // stesso file dell'overlay (6 MB): si scarica solo quando serve davvero
 			if (zoomVideo && zoomVideo.readyState >= 1) { try { cardVideo.currentTime = zoomVideo.currentTime; } catch (e) {} }
 			playSafe(cardVideo);
 			showOverlay(false);
@@ -190,6 +200,9 @@
 		boot3d();
 		// Il video dello zoom-through (pesante) si scarica solo quando la sezione si avvicina, come il video dello schermo
 		if (zoomVideo) { zoomVideo.preload = 'auto'; zoomVideo.load(); }
+
+		measureSection();
+		ScrollTrigger.addEventListener('refreshInit', measureSection);
 
 		var p0 = 0;
 		ScrollTrigger.create({
@@ -238,12 +251,12 @@
 		// rapido) non si attiva mai e non chiama ne' onLeave ne' onUpdate, lasciando l'overlay a tutto schermo.
 		function syncBeyondPin() {
 			var u = (window.scrollY - sectionTop()) / window.innerHeight;
+			if (u < pinUnits() && !cardLive) return; // sotto il pin l'overlay lo guida il trigger A (scrubbed)
 			var landed = pinUnits() + HOLD_VH + SHRINK_VH;
 			if (u >= landed) { cardTakeover(true); return; }
 			if (cardLive) cardTakeover(false);
 			if (u >= pinUnits() + HOLD_VH) shrink(Math.min(1, (u - pinUnits() - HOLD_VH) / SHRINK_VH));
 			else if (u >= pinUnits()) zoom(1);
-			// sotto il pin l'overlay lo guida il trigger A (scrubbed)
 		}
 		var syncQueued = false;
 		function onScroll() {
@@ -257,11 +270,10 @@
 		syncBeyondPin();
 		// Prima card: il video gira solo quando la foto e' visibile (dopo l'atterraggio o arrivandoci in altro modo)
 		if (cardVideo && 'IntersectionObserver' in window) {
-			cardVideo.preload = 'auto';
 			new IntersectionObserver(function (entries) {
 				entries.forEach(function (en) {
-					if (en.isIntersecting && !zoomOn) { cardVisual.classList.add('is-live'); cardLive = true; playSafe(cardVideo); }
-					else if (!en.isIntersecting && cardLive) { cardVideo.pause(); }
+					if (en.isIntersecting && !zoomOn) cardTakeover(true);
+					else if (!en.isIntersecting && cardLive) cardVideo.pause();
 				});
 			}, { threshold: 0.05 }).observe(cardVisual);
 		}

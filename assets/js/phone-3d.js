@@ -177,9 +177,10 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 	// Rettangolo dello schermo nel viewport (px CSS) con la posa corrente: proiezione dei 4 angoli del piano
 	// schermo con la camera. Serve allo zoom-through (home-motion.js) per far partire l'overlay esattamente
 	// dallo schermo; ha senso con il phone dritto (posa out), altrimenti e' il bbox del quadrilatero.
+	const projV = new THREE.Vector3(); // riusato a ogni chiamata, screenRect gira per frame durante lo zoom
 	function screenRect() {
 		const box = renderer.domElement.getBoundingClientRect();
-		const v = new THREE.Vector3();
+		const v = projV;
 		let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 		group.updateMatrixWorld(true);
 		[[-sw / 2, sh / 2], [sw / 2, sh / 2], [sw / 2, -sh / 2], [-sw / 2, -sh / 2]].forEach(function (c) {

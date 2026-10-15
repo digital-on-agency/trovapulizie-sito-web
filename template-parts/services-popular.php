@@ -15,7 +15,6 @@ $args = wp_parse_args( $args ?? array(), array(
 	'proof_rating' => '',
 	'services'     => array(),
 	'video_first'  => '', // URL mp4: nella prima card, sotto la foto, il video dello zoom-through (desktop con motion)
-	'theme_uri'    => get_stylesheet_directory_uri(),
 ) );
 $services = array_values( array_filter( (array) $args['services'], function ( $s ) {
 	return ! empty( $s['tab_label'] );
@@ -23,10 +22,9 @@ $services = array_values( array_filter( (array) $args['services'], function ( $s
 if ( ! $services ) {
 	return;
 }
-$theme_uri = $args['theme_uri'];
 $icon_keys = array( 'casa', 'uffici', 'cantieri', 'condomini', 'sanificazione', 'affitti' );
 ?>
-<section class="services" id="servizi">
+<section class="services" id="servizi" data-reveal>
 	<div class="services__inner">
 		<header class="services__head">
 			<div class="services__titles">
@@ -36,7 +34,7 @@ $icon_keys = array( 'casa', 'uffici', 'cantieri', 'condomini', 'sanificazione', 
 			<?php if ( $args['proof_title'] || $args['proof_rating'] ) : ?>
 			<div class="services__proof">
 				<div class="services__proof-user">
-					<img class="services__proof-avatar" src="<?php echo esc_url( $args['proof_avatar'] ?: $theme_uri . '/assets/img/services-proof-avatar.jpg' ); ?>" alt="" width="40" height="40" loading="lazy">
+					<img class="services__proof-avatar" src="<?php echo esc_url( $args['proof_avatar'] ?: tp_theme_asset( 'assets/img/services-proof-avatar.jpg' ) ); ?>" alt="" width="40" height="40" loading="lazy">
 					<div class="services__proof-text">
 						<strong><?php echo esc_html( $args['proof_title'] ); ?></strong>
 						<span><?php echo esc_html( $args['proof_sub'] ); ?></span>
@@ -54,7 +52,7 @@ $icon_keys = array( 'casa', 'uffici', 'cantieri', 'condomini', 'sanificazione', 
 				$icon = in_array( $s['tab_icon'] ?? '', $icon_keys, true ) ? $s['tab_icon'] : 'casa';
 			?>
 			<button type="button" class="services__tab<?php echo 0 === $i ? ' is-active' : ''; ?>" role="tab" id="services-tab-<?php echo $i; ?>" aria-controls="services-panel-<?php echo $i; ?>" aria-selected="<?php echo 0 === $i ? 'true' : 'false'; ?>" tabindex="<?php echo 0 === $i ? '0' : '-1'; ?>" style="--i:<?php echo $i; ?>">
-				<span class="services__tab-icon" style="--icon:url('<?php echo esc_url( $theme_uri . '/assets/icons/tab-' . $icon . '.svg' ); ?>')" aria-hidden="true"></span>
+				<?php echo tp_icon_span( 'assets/icons/tab-' . $icon . '.svg', 'services__tab-icon' ); ?>
 				<?php echo esc_html( $s['tab_label'] ); ?>
 			</button>
 			<?php endforeach; ?>
@@ -62,15 +60,15 @@ $icon_keys = array( 'casa', 'uffici', 'cantieri', 'condomini', 'sanificazione', 
 
 		<div class="services__cards">
 			<?php foreach ( $services as $i => $s ) :
-				$chips = array_filter( array_map( 'trim', preg_split( '/\r\n|\r|\n/', (string) ( $s['includes'] ?? '' ) ) ) );
-				$image = ! empty( $s['card_image'] ) ? $s['card_image'] : $theme_uri . '/assets/img/services-visual-pulizia-casa.jpg';
+				$chips = tp_lines( $s['includes'] ?? '' );
+				$image = ! empty( $s['card_image'] ) ? $s['card_image'] : tp_theme_asset( 'assets/img/services-visual-pulizia-casa.jpg' );
 			?>
 			<article class="tp-card services__card<?php echo 0 === $i ? ' is-active' : ''; ?>" role="tabpanel" id="services-panel-<?php echo $i; ?>" aria-labelledby="services-tab-<?php echo $i; ?>"<?php echo 0 === $i ? '' : ' aria-hidden="true"'; ?>>
 				<div class="tp-card__panel services__includes">
 					<h3 class="services__panel-title"><?php esc_html_e( 'Cosa include' ); ?></h3>
 					<?php if ( $chips ) : ?>
 					<ul class="services__chips">
-						<?php $k = 0; foreach ( $chips as $chip ) : ?><li class="tp-chip" style="--i:<?php echo $k++; ?>"><?php echo esc_html( $chip ); ?></li><?php endforeach; ?>
+						<?php foreach ( $chips as $k => $chip ) : ?><li class="tp-chip" style="--i:<?php echo (int) $k; ?>"><?php echo esc_html( $chip ); ?></li><?php endforeach; ?>
 					</ul>
 					<?php endif; ?>
 				</div>
@@ -89,6 +87,6 @@ $icon_keys = array( 'casa', 'uffici', 'cantieri', 'condomini', 'sanificazione', 
 			<?php endforeach; ?>
 		</div>
 
-		<img class="services__mascot" src="<?php echo esc_url( $theme_uri . '/assets/img/mascotte.png' ); ?>" alt="" aria-hidden="true" width="218" height="218" loading="lazy">
+		<img class="services__mascot" src="<?php echo esc_url( tp_theme_asset( 'assets/img/mascotte.png' ) ); ?>" alt="" aria-hidden="true" width="218" height="218" loading="lazy">
 	</div>
 </section>

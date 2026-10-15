@@ -12,19 +12,7 @@ $cta_label = carbon_get_theme_option( 'footer_cta_label' );
 $cta_link  = carbon_get_theme_option( 'footer_cta_link' );
 $copyright = carbon_get_theme_option( 'footer_copyright' );
 $legal     = carbon_get_theme_option( 'footer_legal' );
-$theme_uri = get_stylesheet_directory_uri();
 $networks  = array( 'instagram' => 'Instagram', 'linkedin' => 'LinkedIn', 'tiktok' => 'TikTok', 'facebook' => 'Facebook' );
-// "Etichetta | URL" una per riga -> array di [label, url]
-$parse_links = function ( $text ) {
-	$out = array();
-	foreach ( preg_split( '/\r\n|\r|\n/', (string) $text ) as $line ) {
-		$parts = array_map( 'trim', explode( '|', $line, 2 ) );
-		if ( $parts[0] ) {
-			$out[] = array( 'label' => $parts[0], 'url' => $parts[1] ?? '#' );
-		}
-	}
-	return $out;
-};
 $phone_credit = is_page_template( 'page-home.php' ) ? carbon_get_the_post_meta( 'phone_model_credit' ) : '';
 $col_index = 0;
 ?>
@@ -37,9 +25,9 @@ $col_index = 0;
 				<?php if ( $social ) : ?>
 				<ul class="site-footer__social">
 					<?php foreach ( $social as $s ) :
-						$net = $s['network'] ?? '';
-						if ( ! isset( $networks[ $net ] ) || ! file_exists( get_stylesheet_directory() . '/assets/icons/social-' . $net . '.svg' ) ) { continue; }
-						$icon = '<span class="site-footer__social-icon" style="--icon:url(\'' . esc_url( $theme_uri . '/assets/icons/social-' . $net . '.svg' ) . '\')"></span>';
+						$net  = $s['network'] ?? '';
+						$icon = isset( $networks[ $net ] ) ? tp_icon_span( 'assets/icons/social-' . $net . '.svg', 'site-footer__social-icon' ) : '';
+						if ( ! $icon ) { continue; }
 					?>
 					<li>
 						<?php if ( ! empty( $s['url'] ) ) : ?>
@@ -52,7 +40,7 @@ $col_index = 0;
 				</ul>
 				<?php endif; ?>
 			</div>
-			<?php foreach ( $columns as $col ) : $links = $parse_links( $col['links'] ?? '' ); if ( empty( $col['title'] ) && ! $links ) { continue; } ?>
+			<?php foreach ( $columns as $col ) : $links = tp_link_lines( $col['links'] ?? '' ); if ( empty( $col['title'] ) && ! $links ) { continue; } ?>
 			<div class="site-footer__col" style="--i:<?php echo $col_index++; ?>">
 				<?php if ( ! empty( $col['title'] ) ) : ?><p class="site-footer__heading"><?php echo esc_html( $col['title'] ); ?></p><?php endif; ?>
 				<ul class="site-footer__links">
@@ -70,7 +58,7 @@ $col_index = 0;
 		<div class="site-footer__divider" aria-hidden="true"></div>
 		<div class="site-footer__bottom">
 			<p class="site-footer__copyright"><?php echo esc_html( $copyright ?: '© ' . gmdate( 'Y' ) . ' Trovapulizie S.R.L.' ); ?><?php if ( $phone_credit ) : ?> <span class="site-footer__credit"><?php echo esc_html( $phone_credit ); ?></span><?php endif; ?></p>
-			<?php $legal_links = $parse_links( $legal ); if ( $legal_links ) : ?>
+			<?php $legal_links = tp_link_lines( $legal ); if ( $legal_links ) : ?>
 			<ul class="site-footer__legal">
 				<?php foreach ( $legal_links as $l ) : ?><li><a href="<?php echo esc_url( $l['url'] ); ?>"><?php echo esc_html( $l['label'] ); ?></a></li><?php endforeach; ?>
 			</ul>

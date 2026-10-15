@@ -11,7 +11,6 @@ $args = wp_parse_args( $args ?? array(), array(
 	'badge_logo' => 'google',
 	'title'      => '',
 	'reviews'    => array(),
-	'theme_uri'  => get_stylesheet_directory_uri(),
 ) );
 $reviews = array_values( array_filter( (array) $args['reviews'], function ( $r ) {
 	return ! empty( $r['review_text'] );
@@ -19,10 +18,9 @@ $reviews = array_values( array_filter( (array) $args['reviews'], function ( $r )
 if ( ! $reviews ) {
 	return;
 }
-$theme_uri = $args['theme_uri'];
 $total     = count( $reviews );
-$render_card = function ( $r, $i ) use ( $theme_uri, $total ) {
-	$avatar = ! empty( $r['avatar'] ) ? $r['avatar'] : $theme_uri . '/assets/img/review-avatar-' . ( ( $i % 3 ) + 1 ) . '.png';
+$render_card = function ( $r, $i ) use ( $total ) {
+	$avatar = ! empty( $r['avatar'] ) ? $r['avatar'] : tp_theme_asset( 'assets/img/review-avatar-' . ( ( $i % 3 ) + 1 ) . '.png' );
 	$author = trim( (string) ( $r['author_name'] ?? '' ) );
 	$city   = trim( (string) ( $r['author_city'] ?? '' ) );
 	?>
@@ -44,7 +42,7 @@ $render_card = function ( $r, $i ) use ( $theme_uri, $total ) {
 		<?php if ( $args['badge'] ) : ?>
 			<?php $tag = $args['badge_link'] ? 'a' : 'div'; ?>
 			<<?php echo $tag; ?> class="reviews__badge"<?php if ( $args['badge_link'] ) : ?> href="<?php echo esc_url( $args['badge_link'] ); ?>" target="_blank" rel="noopener"<?php endif; ?>>
-				<?php if ( 'google' === $args['badge_logo'] ) : ?><img class="reviews__badge-logo" src="<?php echo esc_url( $theme_uri . '/assets/icons/google-g.svg' ); ?>" alt="Google" width="18" height="18"><?php endif; ?>
+				<?php if ( 'google' === $args['badge_logo'] ) : ?><img class="reviews__badge-logo" src="<?php echo esc_url( tp_theme_asset( 'assets/icons/google-g.svg' ) ); ?>" alt="Google" width="18" height="18"><?php endif; ?>
 				<span class="reviews__stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
 				<span><?php echo esc_html( $args['badge'] ); ?></span>
 			</<?php echo $tag; ?>>
