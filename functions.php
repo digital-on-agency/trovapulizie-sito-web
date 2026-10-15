@@ -53,6 +53,8 @@ add_action( 'after_setup_theme', function () {
 add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_style( 'trovapulizie-fonts', 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap', array(), null );
 	wp_enqueue_style( 'trovapulizie-style', get_stylesheet_uri(), array( 'trovapulizie-fonts' ), tp_theme_version() );
+	// nav-mobile serve su ogni pagina (la navbar e' in header.php), gli altri moduli solo sulla Home.
+	wp_enqueue_script( 'trovapulizie-nav-mobile', get_stylesheet_directory_uri() . '/assets/js/nav-mobile.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 	if ( is_page_template( 'page-home.php' ) ) {
 		foreach ( array( 'home-motion', 'hiw-stacked', 'reveal', 'faq-accordion', 'services-tabs', 'hero-video' ) as $handle ) {
 			wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );

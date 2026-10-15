@@ -50,6 +50,16 @@ const PROBE = `(() => {
 		};
 	});
 	const clip = res.filter(r => /come-funziona-step\d\.mp4/.test(r.name)).length;
+	const box = el => { if (!el) return null; const r = el.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; };
+	const burger = document.getElementById('nav-burger');
+	const nav = {
+		burger: burger ? box(burger) : null,
+		aria: burger ? burger.getAttribute('aria-expanded') : null,
+		panelHidden: document.getElementById('nav-panel') ? document.getElementById('nav-panel').hidden : null,
+		accediVisibile: !!document.querySelector('.navbar__cta .tp-btn--secondary') && getComputedStyle(document.querySelector('.navbar__cta .tp-btn--secondary')).display !== 'none',
+		h: Math.round(document.querySelector('.navbar').getBoundingClientRect().height)
+	};
+	const hero = { box: box(document.querySelector('.hero__box')), phone: box(document.querySelector('.hero .tp-phone')), bar: box(document.querySelector('.hero__search-bar')) };
 	return JSON.stringify({
 		vw: vw,
 		scrollWidth: d.scrollWidth,
@@ -60,6 +70,8 @@ const PROBE = `(() => {
 		kb: Math.round(res.reduce((s, r) => s + r.transferSize, 0) / 1024),
 		dup: dup,
 		steps: steps,
+		nav: nav,
+		hero: hero,
 		clip: clip,
 		offenders: off.slice(0, 10)
 	});
@@ -88,6 +100,15 @@ const PROBE = `(() => {
 					if (!st.lazy) errors.push('blocco ' + (i + 1) + ': il clip non e\' in data-src');
 				});
 				if (r.clip) errors.push(r.clip + ' clip gia\' richiesti in cima alla pagina');
+				// Navbar mobile (TICKET-11): barra 65, hamburger 24x24 chiuso, Accedi solo nel pannello.
+				if (r.nav.h !== 65) errors.push('navbar alta ' + r.nav.h + ', attesa 65');
+				if (!r.nav.burger || r.nav.burger[2] !== 24) errors.push('hamburger assente o non 24px');
+				if (r.nav.aria !== 'false' || r.nav.panelHidden !== true) errors.push('pannello non chiuso al caricamento');
+				if (r.nav.accediVisibile) errors.push('Accedi visibile nella barra: va nel pannello');
+				// Hero mobile (TICKET-12): box 270 di altezza e telefono 150x300 che ne sporge sotto.
+				if (!r.hero.box || r.hero.box[3] !== 270) errors.push('box hero alto ' + (r.hero.box && r.hero.box[3]) + ', atteso 270');
+				if (!r.hero.phone || r.hero.phone[2] !== 150 || r.hero.phone[3] !== 300) errors.push('telefono hero ' + JSON.stringify(r.hero.phone) + ', atteso 150x300');
+				if (r.hero.phone && r.hero.box && r.hero.phone[1] + r.hero.phone[3] <= r.hero.box[1] + r.hero.box[3]) errors.push('il telefono non sporge sotto il box della hero');
 			}
 			// I doppioni restano un avviso finche' non viene eseguito TICKET-20 (peso dei media).
 			const avvisi = r.dup.length ? ['scaricate piu\' volte: ' + r.dup.join(', ')] : [];

@@ -29,6 +29,7 @@ Stato al 15/10/2026: desktop completo (ver. tema 0.17.0). Mobile e tablet non an
 | `template-parts/zones-map.php` | Sezione Dove siamo attivi (mappa raster + overlay + citta' in arrivo) |
 | `template-parts/faq-accordion.php` | Sezione FAQ (colonna contatto + accordion + JSON-LD) |
 | `template-parts/cta-final.php` | Sezione CTA finale |
+| `assets/js/nav-mobile.js` | Menu mobile della navbar (l'unico modulo caricato su tutte le pagine, non solo la Home) |
 | `assets/js/*.js` | Un modulo per comportamento, nessun bundler, nessuna dipendenza fra moduli tranne `phone-3d.js` -> `screen-timeline.js` (vedi §4) |
 | `assets/img/`, `assets/icons/`, `assets/video/` | Asset del tema usati come fallback quando il campo WP e' vuoto (vedi §7) |
 | `tools/` | Script di QA headless, pipeline del video dello schermo, encoding video. Non vanno sul server (vedi `tools/README.md`) |
@@ -243,6 +244,17 @@ Il telefono e' parametrico: `--tp-phone-w`, `--tp-phone-h`, `--tp-phone-radius`,
 `--tp-phone-screen-radius` (default desktop 294x608). Le varianti mobile del Figma (150x300 nella hero,
 158x320 negli step) si ottengono ridefinendo i token, senza `transform: scale()`.
 
+**Navbar sotto 1024px** (Figma `4018:965`): la barra scende a 65px ridefinendo il token `--tp-navbar-h`
+(non l'altezza della barra: cosi' seguono box della hero, `scroll-margin-top` delle sezioni e posizione del
+pannello). Restano logo, Registrati e l'hamburger; le voci di menu e Accedi stanno in `#nav-panel`, aperto
+da `assets/js/nav-mobile.js` (chiusura con tocco fuori, Esc o scelta di una voce; il focus entra nel
+pannello e torna all'hamburger). Le voci hanno una sola sorgente in `header.php` (`$tp_nav_links`).
+
+**Hero sotto 1024px** (Figma `4018:973`): struttura diversa dal desktop. Li' il testo sta sopra la foto a
+tutta sezione; qui il testo e' su bianco, la foto e' un box alto 270 in flusso sotto, e il telefono
+(150x300) sporge dal bordo inferiore del box con un `margin-top` negativo di 168 (= 270 - 102 del Figma).
+La search bar va su tre righe con il divisore orizzontale e Cerca a tutta larghezza.
+
 **Come funziona sotto 1024px** (Figma `4020:965`): tre blocchi impilati, nessun pin. Lo stesso markup del
 desktop cambia solo per CSS; ogni passo ha il proprio clip, che `assets/js/hiw-stacked.js` assegna
 (`data-src` -> `src`) e avvia quando il blocco entra nel viewport, una volta sola e un blocco per volta.
@@ -270,9 +282,9 @@ refactor senza cambi di comportamento deve dare gli stessi valori.
 
 ## 12. Limiti noti (15/10/2026, ver 0.18.0)
 
-- Mobile e tablet: fatti la base (TICKET-10) e Come funziona impilata animata (TICKET-13). Restano al
-  layout desktop: navbar (nessun menu), hero, servizi, recensioni, mappa, FAQ, CTA, footer.
-  Ticket TICKET-11, 12, 14..21 in `spec/tickets/` nel vault.
+- Mobile e tablet: fatti base (TICKET-10), navbar (11), hero (12) e Come funziona impilata animata (13).
+  Restano al layout desktop: servizi, recensioni, mappa, FAQ, CTA, footer.
+  Ticket TICKET-14..21 in `spec/tickets/` nel vault.
 - `reviews__badge` sporge dal viewport a 360px (clippato, non genera scroll): lo chiude TICKET-15.
 - Gli screen PNG a piena risoluzione non sono piu' caricati dalla pagina (restano per lo storyboard):
   i poster dei passi ora sono i fotogrammi dei clip. Il peso a 390px e' sceso da 1508 a 1323 KB.
