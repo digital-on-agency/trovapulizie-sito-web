@@ -64,6 +64,22 @@ Vedi `style.css` sezione "Componenti base":
 - `.tp-chip` — chip "Cosa include"
 - `.tp-card` — card servizio (bordo + radius 24px, contenuto libero)
 
+## Sezione Servizi popolari (`3828:1079`, 15/10)
+
+- Sfondo sezione: `--tp-bg-soft` full-bleed; contenuto 1248px (96px di margine a 1440).
+- Titolo sezione: 36px / Bold / `--tp-text-heading`; sottotitolo 17px / Regular / `#9CA3AF`.
+- Social proof: avatar 40px tondo; riga 1 13px SemiBold; riga 2 12px `#9CA3AF`; divisore 1x34 `--tp-border-card`;
+  stella `#FFB826` 16px Bold; "4,9 valutazione media" 14px SemiBold.
+- Tab a pillola: raggio **22px**, padding 10/18/10/16, gap 8, icona 18px (`assets/icons/tab-*.svg`, tratto
+  `#6B7380`, resa come mask in `currentColor`); attiva = `--tp-primary` + testo bianco SemiBold; inattiva =
+  bianco + bordo `--tp-border-card` + testo `--tp-text-chip` Medium 14px.
+- Card servizio 1248x360: `.tp-card` (raggio 24, padding 20, gap 20); pannelli `.tp-card__panel` da 320px
+  (raggio 16, padding 18); Visual con velo `rgba(0,200,150,0.5)` ed etichetta 15px SemiBold bianca in basso a
+  sinistra (20/20); titolo card 22px Bold; descrizione 14px `--tp-text-muted`; riga in evidenza 13px Medium
+  `--tp-primary`; CTA larghezza piena, raggio 12, padding 13, 15px SemiBold.
+- Mascotte decorativa `4522:4705`: `assets/img/mascotte.png` 218px ruotata 17.42deg in basso a destra, tagliata
+  dal bordo della sezione.
+
 ## Come aggiornare questo file
 
 Ogni volta che si fetcha un nuovo nodo Figma con valori di colore/font/radius non ancora

@@ -55,14 +55,38 @@ add_action( 'carbon_fields_register_fields', function () {
 				->set_help_text( __( 'Primo frame = Immagine qui sopra. Desktop: esce dallo schermo del telefono a fine Come funziona (zoom-through) e diventa la banda a tutto schermo, in loop. Mobile e &quot;riduci movimento&quot;: resta l&#39;immagine.' ) ),
 		) )
 		->add_tab( __( 'Servizi Popolari' ), array(
-			Field::make( 'complex', 'popular_services', __( 'Servizi' ) )
+			Field::make( 'text', 'services_title', __( 'Titolo sezione' ) )
+				->set_default_value( 'Servizi popolari nella tua zona' ),
+			Field::make( 'text', 'services_subtitle', __( 'Sottotitolo' ) )
+				->set_default_value( 'Trova professionisti verificati vicino a te.' ),
+			Field::make( 'image', 'services_proof_avatar', __( 'Social proof: avatar' ) )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Vuoto = avatar del Figma.' ) ),
+			Field::make( 'text', 'services_proof_title', __( 'Social proof: riga 1' ) )
+				->set_default_value( 'Ottimo servizio' ),
+			Field::make( 'text', 'services_proof_sub', __( 'Social proof: riga 2' ) )
+				->set_default_value( '100% soddisfatti' ),
+			Field::make( 'text', 'services_proof_rating', __( 'Social proof: valutazione' ) )
+				->set_default_value( '4,9 valutazione media' ),
+			Field::make( 'complex', 'popular_services', __( 'Servizi (una tab ciascuno, max 6)' ) )
 				->set_layout( 'tabbed-vertical' )
+				->set_max( 6 )
 				->add_fields( array(
 					Field::make( 'text', 'tab_label', __( 'Etichetta tab' ) ),
+					Field::make( 'select', 'tab_icon', __( 'Icona tab' ) )
+						->set_options( array( 'casa' => 'Casa', 'uffici' => 'Uffici', 'cantieri' => 'Cantieri / a fondo', 'condomini' => 'Condomini', 'sanificazione' => 'Sanificazione', 'affitti' => 'Affitti brevi' ) ),
+					Field::make( 'textarea', 'includes', __( 'Cosa include (una voce per riga)' ) ),
 					Field::make( 'text', 'card_title', __( 'Titolo card' ) ),
 					Field::make( 'textarea', 'card_description', __( 'Descrizione card' ) ),
-					Field::make( 'image', 'card_image', __( 'Immagine card' ) ),
-					Field::make( 'text', 'link', __( 'Link' ) ),
+					Field::make( 'text', 'highlight', __( 'Riga in evidenza (verde)' ) )
+						->set_help_text( __( 'Es. "Più richiesto: pulizia settimanale ricorrente".' ) ),
+					Field::make( 'image', 'card_image', __( 'Foto' ) )
+						->set_value_type( 'url' )
+						->set_help_text( __( 'Vuota = foto Pulizia casa del Figma. Sotto c&#39;e&#39; sempre il velo verde.' ) ),
+					Field::make( 'text', 'visual_label', __( 'Etichetta sulla foto' ) ),
+					Field::make( 'text', 'link', __( 'Link CTA' ) ),
+					Field::make( 'text', 'link_text', __( 'Testo CTA' ) )
+						->set_default_value( 'Prenota ora' ),
 				) ),
 		) )
 		->add_tab( __( 'Social Proof' ), array(

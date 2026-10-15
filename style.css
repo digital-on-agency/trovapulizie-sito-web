@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.7.0
+Version: 0.8.0
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -658,11 +658,381 @@ a {
 	}
 }
 
-/* Servizi popolari */
-.popular-services {
+/* =========================
+   Servizi popolari — Figma 3828:1079 (stati tab 6306:890 / 6306:958 / 6306:1026)
+   Sfondo full-bleed, contenuto 1248px (96px di margine a 1440). Motion spec §5.
+   ========================= */
+.services {
+	position: relative;
+	max-width: none;
+	padding: 72px 0 96px;
+	background: var(--tp-bg-soft);
+	overflow: hidden;
+}
+.services__inner {
+	position: relative;
+	max-width: 1288px;
+	margin: 0 auto;
+	padding: 0 20px;
+}
+.services__head {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 24px;
+}
+.services__title {
+	margin: 0;
+	max-width: 560px;
+	font-size: 36px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--tp-text-heading);
+}
+.services__subtitle {
+	margin: 16px 0 0;
+	font-size: 17px;
+	line-height: 1.4;
+	color: var(--tp-text-placeholder);
+}
+.services__proof {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	margin-top: 12px;
+	flex-shrink: 0;
+}
+.services__proof-user {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.services__proof-avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+.services__proof-text {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	white-space: nowrap;
+}
+.services__proof-text strong {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--tp-text-heading);
+}
+.services__proof-text span {
+	font-size: 12px;
+	color: var(--tp-text-placeholder);
+}
+.services__proof-divider {
+	width: 1px;
+	height: 34px;
+	background: var(--tp-border-card);
+}
+.services__proof-rating {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--tp-text-heading);
+	white-space: nowrap;
+}
+.services__star {
+	font-size: 16px;
+	font-weight: 700;
+	color: #FFB826;
+}
+
+/* Tab a pillola: l'indicatore verde scivola sotto la tab attiva (translateX), non appare/scompare */
+.services__tabs {
+	position: relative;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 44px;
+}
+.services__tab {
+	position: relative;
+	z-index: 1;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px 18px 10px 16px;
+	border-radius: 22px;
+	border: 1px solid var(--tp-border-card);
+	background: var(--tp-white);
+	font-family: var(--tp-font);
+	font-size: 14px;
+	font-weight: 500;
+	line-height: 1.2;
+	color: var(--tp-text-chip);
+	cursor: pointer;
+	transition: color 0.25s ease, border-color 0.25s ease, background-color 0.25s ease;
+}
+.services__tab:hover {
+	border-color: var(--tp-primary);
+}
+.services__tab.is-active {
+	color: var(--tp-white);
+	font-weight: 600;
+	border-color: transparent;
+	background: transparent;
+}
+.services__tabs:not(.has-indicator) .services__tab.is-active {
+	background: var(--tp-primary);
+}
+.services__tab-icon {
+	width: 18px;
+	height: 18px;
+	background: currentColor;
+	-webkit-mask: var(--icon) center / contain no-repeat;
+	mask: var(--icon) center / contain no-repeat;
+}
+.services__tab-indicator {
+	position: absolute;
+	left: 0;
+	top: 0;
+	z-index: 0;
+	width: 0;
+	height: 0;
+	border-radius: 22px;
+	background: var(--tp-primary);
+	opacity: 0;
+}
+.services__tabs.has-indicator .services__tab-indicator {
+	opacity: 1;
+}
+.services__tabs.is-ready .services__tab-indicator {
+	transition: transform 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), width 0.32s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.2s ease;
+}
+
+/* Card: tutte nella stessa cella, solo quella attiva visibile; cambio tab = crossfade + rise */
+.services__cards {
 	display: grid;
-	grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-	gap: var(--tp-gap);
+	margin-top: 42px;
+}
+.services__card {
+	grid-area: 1 / 1;
+	display: flex;
+	align-items: stretch;
+	gap: 20px;
+	height: 360px;
+	opacity: 0;
+	visibility: hidden;
+	transform: translateY(-8px);
+	pointer-events: none;
+	transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+}
+.services__card.is-enter {
+	transform: translateY(8px);
+	transition: none;
+}
+.services__card.is-active {
+	opacity: 1;
+	visibility: visible;
+	transform: none;
+	pointer-events: auto;
+	transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s;
+}
+.services__includes,
+.services__desc {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	flex: 0 0 320px;
+	width: 320px;
+	min-width: 0;
+}
+.services__desc {
+	gap: 12px;
+}
+.services__panel-title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--tp-text-heading);
+}
+.services__chips {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+.services__chips .tp-chip {
+	transition: transform 0.25s ease, border-color 0.25s ease, opacity 0.25s ease;
+}
+.services__card:not(.is-active) .tp-chip {
+	opacity: 0;
+	transform: translateY(6px);
+}
+.services__card.is-active .tp-chip {
+	transition-delay: calc(var(--i, 0) * 40ms);
+}
+.services__card.is-active .tp-chip:hover {
+	transition-delay: 0s;
+	transform: translateY(-2px);
+	border-color: var(--tp-primary);
+}
+.services__visual {
+	position: relative;
+	flex: 1 1 auto;
+	min-width: 0;
+	border-radius: var(--tp-radius-xl);
+	overflow: hidden;
+}
+.services__visual img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.services__visual::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 200, 150, 0.5);
+}
+.services__visual-label {
+	position: absolute;
+	left: 20px;
+	bottom: 20px;
+	z-index: 1;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--tp-white);
+}
+.services__card-title {
+	margin: 0;
+	font-size: 22px;
+	font-weight: 700;
+	line-height: 1.3;
+	color: var(--tp-text-heading);
+}
+.services__card-text {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.5;
+	color: var(--tp-text-muted);
+}
+.services__highlight {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.5;
+	color: var(--tp-primary);
+}
+.services__cta {
+	margin-top: auto;
+	width: 100%;
+	padding: 13px 20px;
+	font-size: 15px;
+	font-weight: 600;
+	border-radius: var(--tp-radius-lg);
+	transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.services__cta:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 12px 22px -10px rgba(0, 200, 150, 0.7);
+}
+/* Mascotte decorativa (4522:4705): 218px ruotata di 17.42deg, sborda a destra e viene tagliata dalla sezione come nel Figma */
+.services__mascot {
+	position: absolute;
+	left: 1180px;
+	top: 439px;
+	width: 218px;
+	height: 218px;
+	transform: rotate(17.42deg);
+	pointer-events: none;
+}
+
+/* Reveal all'ingresso (stagger): titoli, social proof +80ms, tab +160ms (+40ms ciascuna), card +240ms con scale 0.98 -> 1 */
+.services__titles,
+.services__proof,
+.services__tab,
+.services__cards {
+	opacity: 0;
+	transform: translateY(12px);
+	transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.services__cards {
+	transform: translateY(12px) scale(0.98);
+}
+.services.is-in .services__titles,
+.services.is-in .services__proof,
+.services.is-in .services__tab,
+.services.is-in .services__cards {
+	opacity: 1;
+	transform: none;
+}
+.services.is-in .services__proof {
+	transition-delay: 80ms;
+}
+.services.is-in .services__tab {
+	transition-delay: calc(160ms + var(--i, 0) * 40ms);
+}
+.services.is-in .services__cards {
+	transition-delay: 240ms;
+}
+
+@media (max-width: 1240px) {
+	.services__mascot {
+		display: none;
+	}
+}
+@media (max-width: 1100px) {
+	.services__head {
+		flex-direction: column;
+	}
+	.services__card {
+		height: auto;
+		flex-direction: column;
+	}
+	.services__includes,
+	.services__desc {
+		flex: none;
+		width: auto;
+	}
+	.services__visual {
+		order: -1;
+		height: 240px;
+	}
+}
+@media (max-width: 782px) {
+	.services {
+		padding: 48px 0 56px;
+	}
+	.services__title {
+		font-size: 28px;
+	}
+	.services__tabs {
+		margin-top: 28px;
+	}
+	.services__cards {
+		margin-top: 24px;
+	}
+	.services__card {
+		padding: 16px;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.services *,
+	.services *::after {
+		transition: none !important;
+	}
+	.services__titles,
+	.services__proof,
+	.services__tab,
+	.services__cards {
+		opacity: 1;
+		transform: none;
+	}
 }
 
 /* Social proof */

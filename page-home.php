@@ -20,6 +20,15 @@ $visual_video_url = $visual_video ? add_query_arg( 'ver', wp_get_theme()->get( '
 $theme_uri        = get_stylesheet_directory_uri();
 $step_fallbacks   = array( 'screen-step1-servizio.png', 'screen-step2-cleaner.png', 'screen-step3-conferma.png' );
 $services         = carbon_get_the_post_meta( 'popular_services' );
+$services_args    = array(
+	'title'        => carbon_get_the_post_meta( 'services_title' ),
+	'subtitle'     => carbon_get_the_post_meta( 'services_subtitle' ),
+	'proof_avatar' => carbon_get_the_post_meta( 'services_proof_avatar' ),
+	'proof_title'  => carbon_get_the_post_meta( 'services_proof_title' ),
+	'proof_sub'    => carbon_get_the_post_meta( 'services_proof_sub' ),
+	'proof_rating' => carbon_get_the_post_meta( 'services_proof_rating' ),
+	'services'     => $services,
+);
 $reviews          = carbon_get_the_post_meta( 'reviews' );
 $zones_title      = carbon_get_the_post_meta( 'zones_title' );
 $zones_desc       = carbon_get_the_post_meta( 'zones_description' );
@@ -133,16 +142,7 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 	<?php endif; ?>
 
 	<?php if ( $services ) : ?>
-	<section class="popular-services">
-		<?php foreach ( $services as $service ) : ?>
-			<div class="service-card" data-tab="<?php echo esc_attr( $service['tab_label'] ?? '' ); ?>">
-				<?php if ( ! empty( $service['card_image'] ) ) : ?><img src="<?php echo esc_url( wp_get_attachment_url( $service['card_image'] ) ); ?>" alt=""><?php endif; ?>
-				<h3><?php echo esc_html( $service['card_title'] ?? '' ); ?></h3>
-				<p><?php echo esc_html( $service['card_description'] ?? '' ); ?></p>
-				<?php if ( ! empty( $service['link'] ) ) : ?><a href="<?php echo esc_url( $service['link'] ); ?>">Scopri di più</a><?php endif; ?>
-			</div>
-		<?php endforeach; ?>
-	</section>
+		<?php get_template_part( 'template-parts/services-popular', null, $services_args ); ?>
 	<?php endif; ?>
 
 	<?php if ( $reviews ) : ?>
