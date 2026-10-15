@@ -178,6 +178,8 @@
 		}
 
 		boot3d();
+		// Il video dello zoom-through (pesante) si scarica solo quando la sezione si avvicina, come il video dello schermo
+		if (zoomVideo) { zoomVideo.preload = 'auto'; zoomVideo.load(); }
 
 		var p0 = 0;
 		ScrollTrigger.create({

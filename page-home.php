@@ -128,7 +128,7 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 	<?php if ( $zoom_video_url ) : ?>
 		<!-- Zoom-through (ADR-002 rev. 3): overlay fisso che cresce dallo schermo del telefono a tutto il viewport e poi rientra nella foto della prima card di Servizi popolari (home-motion.js) -->
 		<div id="hiw-zoom" class="hiw-zoom" aria-hidden="true">
-			<video class="hiw-zoom__video" muted loop playsinline preload="auto" src="<?php echo esc_url( $zoom_video_url ); ?>" tabindex="-1"></video>
+			<video class="hiw-zoom__video" muted loop playsinline preload="none" src="<?php echo esc_url( $zoom_video_url ); ?>" tabindex="-1"></video>
 			<span class="hiw-zoom__veil"></span>
 		</div>
 	<?php endif; ?>
