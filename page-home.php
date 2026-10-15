@@ -144,6 +144,13 @@ $cta_args         = array(
 		<div class="how-it-works__sticky">
 			<?php if ( $hiw_title ) : ?><h2 class="how-it-works__title"><?php echo esc_html( $hiw_title ); ?></h2><?php endif; ?>
 			<?php if ( $hiw_subtitle ) : ?><p class="how-it-works__subtitle"><?php echo esc_html( $hiw_subtitle ); ?></p><?php endif; ?>
+			<?php // Indicatore 1-2-3 (solo coreografia desktop): dice quanti passi sono e a che punto si e'.
+			// Lo stato attivo arriva da data-step sulla sezione, scritto da home-motion.js. ?>
+			<ol class="hiw-progress" aria-hidden="true">
+				<li class="hiw-progress__item"><span class="hiw-progress__bar"></span><span class="hiw-progress__n">1</span></li>
+				<li class="hiw-progress__item"><span class="hiw-progress__bar"></span><span class="hiw-progress__n">2</span></li>
+				<li class="hiw-progress__item"><span class="hiw-progress__bar"></span><span class="hiw-progress__n">3</span></li>
+			</ol>
 			<ol class="how-it-works__steps">
 				<?php foreach ( array_slice( $steps, 0, 3 ) as $i => $step ) :
 					$n      = $i + 1;
@@ -165,6 +172,7 @@ $cta_args         = array(
 				</li>
 				<?php endforeach; ?>
 			</ol>
+			<span class="hiw-scrollcue" aria-hidden="true"></span>
 			<?php
 			// Sequenza mobile (ADR-002 rev. 5): un solo telefono sticky, le tre schermate in crossfade
 			// guidate dallo scroll (assets/js/hiw-sequence.js). Senza JS o con reduced-motion resta

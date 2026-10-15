@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.23.3
+Version: 0.24.2
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -681,7 +681,9 @@ a {
 .how-it-works__text p {
 	margin: 0;
 	font-size: 15px;
-	color: var(--tp-text-placeholder);
+	/* era --tp-text-placeholder (#9CA3AF): 2,5:1 su bianco, sotto il minimo AA di 4,5:1. --tp-text-body
+	   (#6B7280) sta a 4,8:1 ed e' leggibile anche su schermo luminoso. */
+	color: var(--tp-text-body);
 }
 .how-it-works__phone-static {
 	/* fallback statico desktop (reduced-motion): stessa resa del vecchio scale(0.6), ma dai token */
@@ -706,6 +708,13 @@ a {
 }
 .hiw-seq__screen[data-seq="0"] {
 	opacity: 1;
+}
+
+/* Indicatore di avanzamento e segnale di scorrimento: esistono solo nella coreografia desktop
+   (senza pin non c'e' niente da indicare, i tre passi si leggono tutti). */
+.hiw-progress,
+.hiw-scrollcue {
+	display: none;
 }
 
 /* Motion desktop (classe messa dal JS solo da --tp-bp-desktop in su e senza reduced-motion) */
@@ -743,23 +752,105 @@ a {
 	display: block;
 	margin: 0;
 }
-/* Step: 1 e 3 sul margine sinistro del contenuto, 2 sul margine destro (simmetrico rispetto al phone), tutti
-   larghi 220 px, a 31 / 48 / 65 % dell'altezza; nessuna traslazione al cambio stato (Guido 15/10) */
+/* I tre passi occupano lo STESSO riquadro a sinistra del telefono e si alternano in dissolvenza (15/10
+   notte). Prima stavano sparsi (1 e 3 a sinistra, 2 a destra, a 31/48/65% dell'altezza) con gli inattivi
+   al 55%: l'occhio faceva quasi 1000px in orizzontale fra un passo e l'altro mentre la cosa da guardare,
+   lo schermo, stava ferma al centro. Ora i punti di attenzione sono due e fissi: testo e telefono. */
 .motion-ok .how-it-works__step {
 	position: absolute;
-	width: 280px; /* badge + gap + testo da 220 */
+	/* via la griglia badge + testo della versione statica: senza badge il testo finirebbe nella
+	   colonna da 44px e andrebbe a capo a ogni parola */
+	display: block;
+	left: 6.7%;
+	top: calc(43% + var(--hiw-offset));
+	width: 320px;
 	max-width: 26vw;
-	opacity: calc(0.55 * var(--hiw-text-fade, 1));
-	transition: opacity 200ms cubic-bezier(0.4, 0, 0.2, 1);
+	opacity: 0;
+	transition: opacity 260ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .motion-ok .how-it-works__step.is-active {
 	opacity: var(--hiw-text-fade, 1);
 }
-.motion-ok .how-it-works__step--1 { left: 6.7%; top: calc(31% + var(--hiw-offset)); }
-.motion-ok .how-it-works__step--2 { left: auto; right: 6.7%; top: calc(48% + var(--hiw-offset)); }
-.motion-ok .how-it-works__step--3 { left: 6.7%; top: calc(65% + var(--hiw-offset)); }
+/* Il numero lo porta l'indicatore: nello slot resta il solo testo */
+.motion-ok .how-it-works__badge {
+	display: none;
+}
 .motion-ok .how-it-works__step .how-it-works__text {
-	max-width: 220px;
+	max-width: 320px;
+}
+.motion-ok .how-it-works__text h3 {
+	font-size: 24px;
+	margin-bottom: 10px;
+}
+.motion-ok .how-it-works__text p {
+	font-size: 16px;
+	line-height: 25px;
+}
+
+/* Indicatore 1-2-3 sopra lo slot di testo: quanti passi sono e a che punto si e' */
+.motion-ok .hiw-progress {
+	display: flex;
+	gap: 12px;
+	position: absolute;
+	left: 6.7%;
+	top: calc(34% + var(--hiw-offset));
+	width: 320px;
+	max-width: 26vw;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	opacity: var(--hiw-text-fade, 1);
+}
+.hiw-progress__item {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	flex: 1 1 0;
+}
+.hiw-progress__bar {
+	height: 3px;
+	border-radius: 2px;
+	background: var(--tp-border);
+	transition: background-color 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hiw-progress__n {
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--tp-text-muted);
+	transition: color 260ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.how-it-works[data-step="1"] .hiw-progress__item:nth-child(-n+1) .hiw-progress__bar,
+.how-it-works[data-step="2"] .hiw-progress__item:nth-child(-n+2) .hiw-progress__bar,
+.how-it-works[data-step="3"] .hiw-progress__item:nth-child(-n+3) .hiw-progress__bar {
+	background: var(--tp-primary);
+}
+.how-it-works[data-step="1"] .hiw-progress__item:nth-child(1) .hiw-progress__n,
+.how-it-works[data-step="2"] .hiw-progress__item:nth-child(2) .hiw-progress__n,
+.how-it-works[data-step="3"] .hiw-progress__item:nth-child(3) .hiw-progress__n {
+	color: var(--tp-text-heading);
+}
+
+/* Segnale di scorrimento: solo sul primo passo, dice che e' lo scroll a muovere la sequenza */
+.motion-ok .hiw-scrollcue {
+	display: block;
+	position: absolute;
+	left: 6.7%;
+	top: calc(43% + var(--hiw-offset) + 150px);
+	width: 18px;
+	height: 18px;
+	border-right: 2px solid var(--tp-text-muted);
+	border-bottom: 2px solid var(--tp-text-muted);
+	transform: rotate(45deg);
+	opacity: 0;
+	transition: opacity 300ms linear;
+	animation: hiw-cue 1.8s ease-in-out infinite;
+}
+.motion-ok .how-it-works[data-step="1"] .hiw-scrollcue {
+	opacity: calc(0.6 * var(--hiw-text-fade, 1));
+}
+@keyframes hiw-cue {
+	0%, 100% { translate: 0 0; }
+	50% { translate: 0 6px; }
 }
 .motion-ok .how-it-works__phone-static {
 	display: none;
@@ -2243,6 +2334,9 @@ a {
 
 /* Riduci movimento: tutte le sezioni della Home in un blocco solo (stesse regole di prima, raccolte) */
 @media (prefers-reduced-motion: reduce) {
+	.hiw-scrollcue {
+		animation: none;
+	}
 	.services *,
 	.services *::after {
 		transition: none !important;

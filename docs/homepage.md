@@ -133,6 +133,21 @@ ScrollTrigger non ha un evento `update` globale. Quindi oltre il pin lo stato si
 scroll (listener passivo + rAF) e a ogni `refresh`. Il trigger A, essendo scrubbed, puo' arrivare in ritardo
 dopo un salto: per questo in `onUpdate` lo zoom non viene toccato se la card ha gia' preso il video (`cardLive`).
 
+### Impaginazione della sezione (desktop)
+Dopo la revisione UX del 15/10 notte: **un solo riquadro di testo** a sinistra (6.7%, largo 320) in cui i
+tre passi si alternano in dissolvenza, **indicatore 1-2-3** sopra di esso (`.hiw-progress`, stato da
+`data-step` sulla sezione, scritto da `setStep()`), **segnale di scorrimento** sotto, visibile solo sul primo
+passo, e telefono spostato a destra (`x: 120` nelle pose) per bilanciare la composizione.
+
+Prima i tre passi stavano sparsi (1 e 3 a sinistra, 2 a destra, a 31/48/65% dell'altezza) e restavano tutti
+visibili, gli inattivi al 55%: l'occhio faceva quasi 1000px in orizzontale fra un passo e l'altro mentre il
+contenuto da guardare stava fermo al centro, e non c'era modo di sapere quanti passi fossero. Il colore dei
+paragrafi e' passato da `--tp-text-placeholder` a `--tp-text-body`: il primo dava 2,5:1 su bianco, sotto il
+minimo WCAG AA di 4,5:1.
+
+[ATTENZIONE] Sotto `.motion-ok` il passo e' `display: block`: la griglia `44px 1fr` della versione statica,
+con il badge nascosto, faceva finire il testo nella colonna da 44px.
+
 ### Pose del telefono
 `POSES` in `home-motion.js`: x in px (canvas Figma 1440), y in frazione di viewport, rotazioni in gradi
 (convenzione CSS), scala, `k` = quanto la posa si riduce su viewport piu' bassi di 980px. Misurate sui render
