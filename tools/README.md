@@ -37,6 +37,8 @@ rigenerare il video.
 ## Encoding
 
 - `hero-video-encode.sh <sorgente.mp4> [durata=3] [larghezza=1600]` -> `assets/video/hero-timelapse.mp4`
+- `step-clips-encode.sh` -> i tre clip mobile `assets/video/come-funziona-step{1,2,3}.mp4` piu' i poster
+  `assets/img/come-funziona-step{1,2,3}-poster.jpg`, tagliati sui tempi di `screen-timeline.js`
 - `zoom-video-encode.sh <sorgente.mp4> [larghezza=2560] [crf=19]` -> `assets/video/come-funziona-zoom.mp4` +
   primo frame in `assets/img/come-funziona-zoom-frame.jpg`
 

@@ -38,6 +38,18 @@ const PROBE = `(() => {
 		if (seen[f] && seen[f] !== r.name) { if (dup.indexOf(f) < 0) dup.push(f); } else seen[f] = r.name;
 	});
 	const hiw = document.querySelector('.how-it-works');
+	const steps = [].map.call(document.querySelectorAll('.how-it-works__step'), el => {
+		const ph = el.querySelector('.tp-phone');
+		const txt = el.querySelector('.how-it-works__text p');
+		const v = el.querySelector('video');
+		return {
+			w: Math.round(el.getBoundingClientRect().width),
+			phone: ph ? Math.round(ph.getBoundingClientRect().width) + 'x' + Math.round(ph.getBoundingClientRect().height) : null,
+			testo: txt ? Math.round(txt.getBoundingClientRect().width) : null,
+			lazy: !!(v && v.getAttribute('data-src'))
+		};
+	});
+	const clip = res.filter(r => /come-funziona-step\d\.mp4/.test(r.name)).length;
 	return JSON.stringify({
 		vw: vw,
 		scrollWidth: d.scrollWidth,
@@ -47,6 +59,8 @@ const PROBE = `(() => {
 		cdn: res.filter(r => /cdnjs|jsdelivr/.test(r.name)).map(r => r.name.split('/').pop()),
 		kb: Math.round(res.reduce((s, r) => s + r.transferSize, 0) / 1024),
 		dup: dup,
+		steps: steps,
+		clip: clip,
 		offenders: off.slice(0, 10)
 	});
 })()`;
@@ -65,6 +79,16 @@ const PROBE = `(() => {
 			if (!desktop && r.cdn.length) errors.push('risorse CDN richieste sotto soglia: ' + r.cdn.join(', '));
 			// 550vh di sezione pinnata sono oltre 5 viewport; la versione impilata del Figma ne misura circa 2.
 			if (!desktop && r.hiwHeight > 2.5 * 844) errors.push('Come funziona alta ' + r.hiwHeight + 'px: sembra ancora la sezione pinnata');
+			// Come funziona impilata (TICKET-13): tre blocchi col telefono mobile e i clip non ancora richiesti
+			// finche' il blocco non entra nel viewport. In cima alla pagina nessun clip deve essere stato chiesto.
+			if (!desktop) {
+				if (r.steps.length !== 3) errors.push('blocchi Come funziona: ' + r.steps.length + ', attesi 3');
+				r.steps.forEach((st, i) => {
+					if (st.phone !== '158x320') errors.push('blocco ' + (i + 1) + ': telefono ' + st.phone + ', atteso 158x320');
+					if (!st.lazy) errors.push('blocco ' + (i + 1) + ': il clip non e\' in data-src');
+				});
+				if (r.clip) errors.push(r.clip + ' clip gia\' richiesti in cima alla pagina');
+			}
 			// I doppioni restano un avviso finche' non viene eseguito TICKET-20 (peso dei media).
 			const avvisi = r.dup.length ? ['scaricate piu\' volte: ' + r.dup.join(', ')] : [];
 			const esito = errors.length ? 'KO' : 'ok';

@@ -24,7 +24,9 @@ $hiw_poster       = carbon_get_the_post_meta( 'how_it_works_poster' );
 $steps            = carbon_get_the_post_meta( 'how_it_works_steps' );
 $zoom_video       = carbon_get_the_post_meta( 'how_it_works_zoom_video' );
 $zoom_video_url   = tp_versioned_url( $zoom_video );
-$step_fallbacks   = array( 'screen-step1-servizio.png', 'screen-step2-cleaner.png', 'screen-step3-conferma.png' );
+// Poster dei tre passi: fotogrammi dei clip mobile (tools/step-clips-encode.sh), non piu' i PNG a piena
+// risoluzione del Figma, che pesavano 86-97 KB l'uno dentro uno schermo largo 146 px.
+$step_fallbacks   = array( 'come-funziona-step1-poster.jpg', 'come-funziona-step2-poster.jpg', 'come-funziona-step3-poster.jpg' );
 $services         = carbon_get_the_post_meta( 'popular_services' );
 $services_args    = array(
 	'title'        => carbon_get_the_post_meta( 'services_title' ),
@@ -153,8 +155,15 @@ $cta_args         = array(
 						<h3><?php echo esc_html( $step['title'] ?? '' ); ?></h3>
 						<p><?php echo esc_html( $step['description'] ?? '' ); ?></p>
 					</div>
-					<?php get_template_part( 'template-parts/phone-mockup', null, array(
+					<?php
+					// Sotto 1024px ogni passo ha il proprio clip, caricato da hiw-stacked.js quando il blocco
+					// entra nel viewport (ADR-002 rev. 4). Su desktop il telefono e' quello pinnato della hero
+					// e questi restano nascosti, quindi il data-src non costa nulla.
+					get_template_part( 'template-parts/phone-mockup', null, array(
 						'screen' => $screen,
+						'poster' => $screen,
+						'video'  => tp_theme_asset( 'assets/video/come-funziona-step' . $n . '.mp4' ),
+						'lazy'   => true,
 						'class'  => 'how-it-works__phone-static',
 					) ); ?>
 				</li>

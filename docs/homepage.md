@@ -23,7 +23,7 @@ Stato al 15/10/2026: desktop completo (ver. tema 0.17.0). Mobile e tablet non an
 | `footer.php` | Footer da Theme Options + `wp_footer()` |
 | `page-home.php` | Template Home: legge i campi, prepara gli array `$..._args`, renderizza Hero e Come funziona inline, le altre sezioni via `get_template_part` |
 | `index.php` | Template di fallback per le altre pagine (contenuto WP nudo) |
-| `template-parts/phone-mockup.php` | Bezel CSS del telefono (`.tp-phone`) con schermo = `<video>` o `<img>` |
+| `template-parts/phone-mockup.php` | Bezel CSS del telefono (`.tp-phone`) con schermo = `<video>` o `<img>`; con `lazy` il video esce in `data-src` |
 | `template-parts/services-popular.php` | Sezione Servizi popolari (tab + card) |
 | `template-parts/reviews-marquee.php` | Sezione Social proof (badge + marquee di recensioni) |
 | `template-parts/zones-map.php` | Sezione Dove siamo attivi (mappa raster + overlay + citta' in arrivo) |
@@ -243,6 +243,18 @@ Il telefono e' parametrico: `--tp-phone-w`, `--tp-phone-h`, `--tp-phone-radius`,
 `--tp-phone-screen-radius` (default desktop 294x608). Le varianti mobile del Figma (150x300 nella hero,
 158x320 negli step) si ottengono ridefinendo i token, senza `transform: scale()`.
 
+**Come funziona sotto 1024px** (Figma `4020:965`): tre blocchi impilati, nessun pin. Lo stesso markup del
+desktop cambia solo per CSS; ogni passo ha il proprio clip, che `assets/js/hiw-stacked.js` assegna
+(`data-src` -> `src`) e avvia quando il blocco entra nel viewport, una volta sola e un blocco per volta.
+Con reduced-motion, senza IntersectionObserver o con autoplay negato restano i poster, che sono uno stato
+corretto: la sezione si legge comunque come il Figma.
+
+I tre clip vengono da `tools/step-clips-encode.sh`, che taglia `come-funziona.mp4` sui confini semantici
+di `T` in `assets/js/screen-timeline.js` (0-4,0 / 4,0-8,0 / 8,0-11,4) e non ai terzi aritmetici: a 4,2 e
+8,4 i tagli cadevano dentro una transizione gia' iniziata. L'ultimo clip si ferma prima di `bandStart`
+perche' la dissolvenza sulla foto appartiene allo zoom-through, che su mobile non esiste. Cambiando i
+tempi del video desktop vanno rigenerati i clip.
+
 ## 11. QA
 
 Script in `tools/` (Node 22, Chromium di Playwright in cache, CDP; dettagli in `tools/README.md`):
@@ -258,13 +270,12 @@ refactor senza cambi di comportamento deve dare gli stessi valori.
 
 ## 12. Limiti noti (15/10/2026, ver 0.18.0)
 
-- Mobile e tablet adattati solo nella base (TICKET-10): niente piu' scroll orizzontale e niente piu'
-  coreografia sotto 1024px, ma il layout delle sezioni non e' ancora quello del Figma mobile
-  (`4016:965`). Da fare: navbar senza menu, hero, Come funziona impilata animata, le altre sezioni.
-  Ticket TICKET-11..21 in `spec/tickets/` nel vault.
+- Mobile e tablet: fatti la base (TICKET-10) e Come funziona impilata animata (TICKET-13). Restano al
+  layout desktop: navbar (nessun menu), hero, servizi, recensioni, mappa, FAQ, CTA, footer.
+  Ticket TICKET-11, 12, 14..21 in `spec/tickets/` nel vault.
 - `reviews__badge` sporge dal viewport a 360px (clippato, non genera scroll): lo chiude TICKET-15.
-- `screen-step1-servizio.png` viene scaricato due volte (poster del video senza `?ver`, `<img>` con
-  `?ver`): lo chiude TICKET-20.
+- Gli screen PNG a piena risoluzione non sono piu' caricati dalla pagina (restano per lo storyboard):
+  i poster dei passi ora sono i fotogrammi dei clip. Il peso a 390px e' sceso da 1508 a 1323 KB.
 - Contenuti segnaposto: recensioni, badge Google, FAQ 2-5, servizi Uffici/Condomini, URL social, link
   Prezzi/Accedi/Registrati, pagine linkate dal footer non esistenti.
 - Search bar della hero statica: il widget di ricerca reale e' il widget JS di ADR-001.

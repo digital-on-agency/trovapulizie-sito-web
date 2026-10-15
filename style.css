@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.18.0
+Version: 0.19.2
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -492,6 +492,12 @@ a {
 	}
 }
 
+/* Le sezioni sono bersaglio dei link ad ancora della navbar: senza questo il titolo finisce sotto la
+   navbar sticky (alta --tp-navbar-h) quando si salta alla sezione. */
+:where(main.home > section) {
+	scroll-margin-top: var(--tp-navbar-h);
+}
+
 /* Come funziona — Figma 3750:3099 / 3798:1087 / 3828:1157 (canvas 1440x980), ADR-002 */
 .how-it-works {
 	position: relative;
@@ -555,11 +561,13 @@ a {
 	color: var(--tp-text-placeholder);
 }
 .how-it-works__phone-static {
+	/* fallback statico desktop (reduced-motion): stessa resa del vecchio scale(0.6), ma dai token */
+	--tp-phone-w: 176px;
+	--tp-phone-h: 365px;
+	--tp-phone-radius: 31px;
+	--tp-phone-screen-radius: 25px;
 	grid-column: 1 / -1;
 	margin-top: 24px;
-	transform: scale(0.6);
-	transform-origin: top left;
-	height: 365px;
 }
 
 /* Motion desktop (classe messa dal JS solo da --tp-bp-desktop in su e senza reduced-motion) */
@@ -650,9 +658,49 @@ a {
 	opacity: 0;
 }
 
+/* Mobile e tablet: tre blocchi impilati, Figma 4020:965 (blocchi 350x482, badge 44, testo 300, phone
+   158x320, nessun pin). Il clip di ogni passo lo avvia hiw-stacked.js. ADR-002 rev. 4, TICKET-13. */
 @media (max-width: 1023px) {
+	.how-it-works__sticky {
+		max-width: 390px;
+		padding: 48px 20px 0;
+	}
+	.how-it-works__title {
+		font-size: 30px;
+		line-height: 45px;
+	}
 	.how-it-works__steps {
-		grid-template-columns: 1fr;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 44px;
+		margin-top: 44px;
+	}
+	.how-it-works__step {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		width: 100%;
+		max-width: 350px;
+		text-align: center;
+	}
+	.how-it-works__text {
+		margin-top: 14px;
+	}
+	.how-it-works__text p {
+		max-width: 300px;
+		margin: 0 auto;
+		font-size: 15px;
+		line-height: 23px;
+	}
+	.how-it-works__phone-static {
+		--tp-phone-w: 158px;
+		--tp-phone-h: 320px;
+		--tp-phone-radius: 28px;
+		--tp-phone-screen-radius: 22px;
+		margin-top: 14px;
+		/* niente height qui: .tp-phone prende l'altezza dal token --tp-phone-h (una regola height
+		   su questo stesso elemento lo azzererebbe, i figli sono in position: absolute) */
 	}
 }
 
