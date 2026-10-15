@@ -139,3 +139,38 @@ add_action( 'carbon_fields_register_fields', function () {
 		) );
 
 } );
+
+// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)
+add_action( 'carbon_fields_register_fields', function () {
+	Container::make( 'theme_options', __( 'Footer' ) )
+		->set_page_file( 'tp-footer' )
+		->add_fields( array(
+			Field::make( 'text', 'footer_brand_text', __( 'Wordmark' ) )
+				->set_default_value( 'trovapulizie' ),
+			Field::make( 'textarea', 'footer_tagline', __( 'Tagline (2 righe)' ) )
+				->set_rows( 2 ),
+			Field::make( 'complex', 'footer_social', __( 'Social' ) )
+				->set_layout( 'tabbed-horizontal' )
+				->add_fields( array(
+					Field::make( 'select', 'network', __( 'Rete' ) )
+						->set_options( array( 'instagram' => 'Instagram', 'linkedin' => 'LinkedIn', 'tiktok' => 'TikTok', 'facebook' => 'Facebook' ) ),
+					Field::make( 'text', 'url', __( 'URL profilo' ) )
+						->set_help_text( __( 'Vuoto = icona mostrata senza link.' ) ),
+				) ),
+			Field::make( 'complex', 'footer_columns', __( 'Colonne di link' ) )
+				->set_layout( 'tabbed-horizontal' )
+				->set_max( 3 )
+				->add_fields( array(
+					Field::make( 'text', 'title', __( 'Titolo colonna' ) ),
+					Field::make( 'textarea', 'links', __( 'Link (una riga per link: Etichetta | URL)' ) ),
+				) ),
+			Field::make( 'textarea', 'footer_cta_text', __( 'Box cleaner: testo (2 righe)' ) )
+				->set_rows( 2 ),
+			Field::make( 'text', 'footer_cta_label', __( 'Box cleaner: etichetta link' ) )
+				->set_default_value( 'Unisciti al team' ),
+			Field::make( 'text', 'footer_cta_link', __( 'Box cleaner: URL' ) ),
+			Field::make( 'text', 'footer_copyright', __( 'Riga copyright' ) )
+				->set_help_text( __( 'Vuota = anno corrente + Trovapulizie S.R.L.' ) ),
+			Field::make( 'textarea', 'footer_legal', __( 'Link legali (una riga per link: Etichetta | URL)' ) ),
+		) );
+} );

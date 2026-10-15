@@ -106,6 +106,14 @@ Vedi `style.css` sezione "Componenti base":
 - Titolo 36px Bold bianco; sottotitolo 17px/26px bianco; bottone bianco 17px SemiBold `--tp-text-heading`,
   padding 18/40, raggio 12, freccia 18px; nota 14px `--tp-border` (#EBEDF0).
 
+## Footer (`3564:167`, 15/10)
+
+- Sfondo `#111827`, padding 56/80/40, contenuto 1280px; testo colonne 14px `#9CA3AF`, titoli colonna 14px SemiBold
+  bianco, gap link 12; wordmark 22px Bold `--tp-primary`; tagline 14px/22px; social 24px bianco al 70%.
+- Box cleaner: sfondo `#1F2938`, bordo `rgba(0,200,150,0.3)`, raggio 12, padding 24, testo 15px Medium bianco,
+  link 14px SemiBold `--tp-primary`. Divisore `#384251`. Riga legale 13px `--tp-text-body`, link a 24px di gap.
+- Contenuti in Theme Options > Footer (Carbon Fields `theme_options`, file pagina `tp-footer`).
+
 ## Come aggiornare questo file
 
 Ogni volta che si fetcha un nuovo nodo Figma con valori di colore/font/radius non ancora
