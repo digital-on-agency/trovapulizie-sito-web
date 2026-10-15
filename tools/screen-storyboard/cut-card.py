@@ -23,7 +23,7 @@ SRC = os.path.join(ROOT, 'assets', 'img', 'screen-step2-cleaner.png')
 OUT = os.path.join(ROOT, 'assets', 'img', 'tiles', 'card-laura.png')
 VIDEO_W, VIDEO_H = 1170, 2532
 MARGIN = 12          # px sorgente di trasparenza intorno alla card
-ZONE = (40, 730, 1140, 1300)   # x0, y0, x1, y1 sorgente: zona in cui cercare la prima card
+ZONE = (40, 0, 1140, 0)   # x0, _, x1, _: colonne in cui cercare la prima card (le righe partono dall'area grigia)
 SS = 4               # supersampling della maschera per angoli antialiasati
 
 src = Image.open(SRC).convert('RGB')
@@ -32,12 +32,20 @@ sx, sy = VIDEO_W / W, VIDEO_H / H
 a = np.array(src).astype(int)
 white = (a[:, :, 0] >= 250) & (a[:, :, 1] >= 250) & (a[:, :, 2] >= 250)
 
-x0, y0, x1, y1 = ZONE
-sub = white[y0:y1, x0:x1]
-rows = np.where(sub.sum(axis=1) > 0)[0]
-cols = np.where(sub.sum(axis=0) > 0)[0]
-top, bot = y0 + rows[0], y0 + rows[-1]
-left, right = x0 + cols[0], x0 + cols[-1]
+# L'area risultati e' grigia (#f7f8fa): parte da li', non dal bianco della barra di ricerca sopra
+bg = (np.abs(a[:, :, 0] - 247) <= 4) & (np.abs(a[:, :, 1] - 248) <= 4) & (np.abs(a[:, :, 2] - 250) <= 4)
+results_top = int(np.where(bg[400:, 20])[0][0]) + 400
+x0, x1 = ZONE[0], ZONE[2]
+sub = white[results_top:results_top + 1000, x0:x1]
+has = sub.sum(axis=1) > 0
+first = int(np.where(has)[0][0])
+last = first
+while last + 1 < len(has) and has[last + 1]:
+    last += 1
+top, bot = results_top + first, results_top + last
+mid = (top + bot) // 2
+run = np.where(white[mid, x0:x1])[0]
+left, right = x0 + run[0], x0 + run[-1]
 radius = int(np.where(white[top, :])[0][0] - left)
 cw, ch = right - left + 1, bot - top + 1
 
