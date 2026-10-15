@@ -15,6 +15,8 @@ $hiw_poster       = carbon_get_the_post_meta( 'how_it_works_poster' );
 $steps            = carbon_get_the_post_meta( 'how_it_works_steps' );
 $visual_image     = carbon_get_the_post_meta( 'visual_band_image' );
 $visual_label     = carbon_get_the_post_meta( 'visual_band_label' );
+$visual_video     = carbon_get_the_post_meta( 'visual_band_video' );
+$visual_video_url = $visual_video ? add_query_arg( 'ver', wp_get_theme()->get( 'Version' ), $visual_video ) : '';
 $theme_uri        = get_stylesheet_directory_uri();
 $step_fallbacks   = array( 'screen-step1-servizio.png', 'screen-step2-cleaner.png', 'screen-step3-conferma.png' );
 $services         = carbon_get_the_post_meta( 'popular_services' );
@@ -115,10 +117,16 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 	</section>
 	<?php endif; ?>
 
+	<?php if ( $visual_image && $visual_video_url ) : ?>
+		<!-- Zoom-through: overlay fisso che cresce dallo schermo del telefono a tutto il viewport (home-motion.js), stesso video della banda -->
+		<video id="hiw-zoom" class="hiw-zoom" muted loop playsinline preload="auto" src="<?php echo esc_url( $visual_video_url ); ?>" aria-hidden="true" tabindex="-1"></video>
+	<?php endif; ?>
+
 	<?php if ( $visual_image ) : ?>
 	<section class="visual-band" id="visual-band">
 		<div class="visual-band__media">
 			<img src="<?php echo esc_url( $visual_image ); ?>" alt="">
+			<?php if ( $visual_video_url ) : ?><video class="visual-band__video" muted loop playsinline preload="none" poster="<?php echo esc_url( $visual_image ); ?>" src="<?php echo esc_url( $visual_video_url ); ?>" aria-hidden="true" tabindex="-1"></video><?php endif; ?>
 			<?php if ( $visual_label ) : ?><span class="visual-band__label"><?php echo esc_html( $visual_label ); ?></span><?php endif; ?>
 		</div>
 	</section>

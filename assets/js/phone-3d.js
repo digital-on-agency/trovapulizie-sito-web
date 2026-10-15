@@ -174,6 +174,22 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 		requestRender();
 	}
 
+	// Rettangolo dello schermo nel viewport (px CSS) con la posa corrente: proiezione dei 4 angoli del piano
+	// schermo con la camera. Serve allo zoom-through (home-motion.js) per far partire l'overlay esattamente
+	// dallo schermo; ha senso con il phone dritto (posa out), altrimenti e' il bbox del quadrilatero.
+	function screenRect() {
+		const box = renderer.domElement.getBoundingClientRect();
+		const v = new THREE.Vector3();
+		let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+		group.updateMatrixWorld(true);
+		[[-sw / 2, sh / 2], [sw / 2, sh / 2], [sw / 2, -sh / 2], [-sw / 2, -sh / 2]].forEach(function (c) {
+			v.set(c[0], c[1], screen.position.z).applyMatrix4(group.matrixWorld).project(camera);
+			const px = box.left + (v.x + 1) / 2 * box.width, py = box.top + (1 - v.y) / 2 * box.height;
+			minX = Math.min(minX, px); maxX = Math.max(maxX, px); minY = Math.min(minY, py); maxY = Math.max(maxY, py);
+		});
+		return { left: minX, top: minY, width: maxX - minX, height: maxY - minY, radius: sr * (maxX - minX) / sw };
+	}
+
 	requestRender();
-	return { setPose, setProgress, render: requestRender };
+	return { setPose, setProgress, render: requestRender, screenRect };
 }

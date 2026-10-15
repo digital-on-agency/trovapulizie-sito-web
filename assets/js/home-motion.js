@@ -14,6 +14,14 @@
 
 	var video = phone.querySelector('video');
 	var steps = section.querySelectorAll('[data-step]');
+	// Zoom-through (ADR-002 punto 5, rev. 3): dopo i 3 terzi del video, 1 viewport di scroll in cui il video della
+	// banda Visual cresce dal rettangolo esatto dello schermo 3D a tutto il viewport (trigger A, col pin). Poi 1
+	// viewport di tenuta (trigger B, senza pin): l'overlay resta a tutto schermo mentre phone e sezione scorrono via
+	// sotto, finche' la banda (in flusso, full-screen) arriva in cima e prende il posto dell'overlay.
+	var zoomEl = document.getElementById('hiw-zoom');
+	var band = document.getElementById('visual-band');
+	var bandVideo = band ? band.querySelector('.visual-band__video') : null;
+	var VIDEO_VH = 3, ZOOM_VH = 1;
 	var GSAP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/';
 
 	// Centro del phone rispetto al centro viewport: x in px (canvas 1440), y in frazione di viewport (canvas 980).
@@ -90,6 +98,48 @@
 	}
 
 	function sectionTop() { return section.getBoundingClientRect().top + window.scrollY; }
+	// Scroll pinnato dopo p0, in viewport: la sezione meno l'ultimo viewport (la tenuta, trigger B)
+	function vhUnits() { return (section.offsetHeight - window.innerHeight) / window.innerHeight; }
+	function easeInOut(v) { return v < 0.5 ? 4 * v * v * v : 1 - Math.pow(-2 * v + 2, 3) / 2; }
+	function playSafe(v) { if (!v) return; var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+	function screenRect() {
+		if (phone3d && phone3d.screenRect) return phone3d.screenRect();
+		var el = phone.querySelector('.tp-phone__screen') || phone;
+		var r = el.getBoundingClientRect();
+		return { left: r.left, top: r.top, width: r.width, height: r.height, radius: parseFloat(getComputedStyle(el).borderRadius) || 0 };
+	}
+	var zoomOn = false, bandLive = false;
+	// z in 0..1: 0 = overlay sovrapposto allo schermo (crossfade breve), 1 = tutto il viewport
+	function zoom(z) {
+		if (!zoomEl) return;
+		if (z <= 0) {
+			if (zoomOn) { zoomEl.classList.remove('is-on'); zoomEl.pause(); zoomOn = false; }
+			return;
+		}
+		if (!zoomOn) { zoomEl.classList.add('is-on'); zoomOn = true; playSafe(zoomEl); }
+		var r = screenRect(), e = easeInOut(z), vw = window.innerWidth, vh = window.innerHeight;
+		zoomEl.style.left = lerp(r.left, 0, e) + 'px';
+		zoomEl.style.top = lerp(r.top, 0, e) + 'px';
+		zoomEl.style.width = lerp(r.width, vw, e) + 'px';
+		zoomEl.style.height = lerp(r.height, vh, e) + 'px';
+		zoomEl.style.borderRadius = lerp(r.radius, 0, e) + 'px';
+		zoomEl.style.opacity = Math.min(1, z / 0.08).toFixed(3);
+	}
+	// Passaggio di consegne overlay <-> banda in flusso: stesso file, stesso istante del video
+	function bandTakeover(on) {
+		if (!bandVideo || bandLive === on) return;
+		bandLive = on;
+		band.classList.toggle('is-live', on);
+		if (on) {
+			if (zoomEl && zoomEl.readyState >= 1) { try { bandVideo.currentTime = zoomEl.currentTime; } catch (e) {} }
+			playSafe(bandVideo);
+			zoom(0);
+		} else {
+			zoom(1);
+			if (zoomEl && bandVideo.readyState >= 1) { try { zoomEl.currentTime = bandVideo.currentTime; } catch (e) {} }
+			bandVideo.pause();
+		}
+	}
 
 	function init() {
 		gsap.registerPlugin(ScrollTrigger);
@@ -117,8 +167,10 @@
 			snap: /[?&]nosnap/.test(location.search) ? undefined : {
 				snapTo: function (p) {
 					if (p < p0) return p;
-					var k = Math.round((p - p0) / (1 - p0) * 3);
-					return p0 + (1 - p0) * k / 3;
+					var n = vhUnits(), u = (p - p0) / (1 - p0) * n;
+					if (u > VIDEO_VH + 0.02) return p; // zoom-through e tenuta: scroll libero
+					var k = Math.round(u);
+					return p0 + (1 - p0) * k / n;
 				},
 				duration: { min: 0.1, max: 0.3 }
 			},
@@ -130,13 +182,35 @@
 					setStep(0);
 					return;
 				}
-				var q = (p - p0) / (1 - p0);
+				var u = (p - p0) / (1 - p0) * vhUnits();
+				var q = Math.max(0, Math.min(1, u / VIDEO_VH));
 				var seg = Math.min(2, Math.floor(q * 3));
 				apply(mix(SEQ[seg], SEQ[seg + 1], q * 3 - seg));
 				seek(q);
 				setStep(q);
+				zoom(Math.max(0, Math.min(1, (u - VIDEO_VH) / ZOOM_VH)));
 			}
 		});
+		// Trigger B: tenuta a tutto schermo e passaggio di consegne alla banda quando arriva in cima al viewport
+		ScrollTrigger.create({
+			trigger: section,
+			start: function () { return sectionTop() + section.offsetHeight - window.innerHeight; },
+			end: function () { return sectionTop() + section.offsetHeight; },
+			invalidateOnRefresh: true,
+			onEnter: function () { zoom(1); },
+			onLeave: function () { bandTakeover(true); },
+			onEnterBack: function () { bandTakeover(false); }
+		});
+		// Banda in flusso: il video gira solo quando e' visibile (dopo lo zoom o arrivandoci in altro modo)
+		if (bandVideo && 'IntersectionObserver' in window) {
+			bandVideo.preload = 'auto';
+			new IntersectionObserver(function (entries) {
+				entries.forEach(function (en) {
+					if (en.isIntersecting && !zoomOn) { band.classList.add('is-live'); bandLive = true; playSafe(bandVideo); }
+					else if (!en.isIntersecting && bandLive) { bandVideo.pause(); }
+				});
+			}, { threshold: 0.05 }).observe(band);
+		}
 	}
 
 	function loadScript(src, cb) {

@@ -49,6 +49,10 @@ add_action( 'carbon_fields_register_fields', function () {
 				->set_help_text( __( 'Deve coincidere con l&#39;ultimo frame del video Come funziona (zoom-through).' ) ),
 			Field::make( 'text', 'visual_band_label', __( 'Etichetta overlay' ) )
 				->set_default_value( 'Pulizia casa' ),
+			Field::make( 'file', 'visual_band_video', __( 'Video (mp4 muto, loop)' ) )
+				->set_type( 'video' )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Primo frame = Immagine qui sopra. Desktop: esce dallo schermo del telefono a fine Come funziona (zoom-through) e diventa la banda a tutto schermo, in loop. Mobile e &quot;riduci movimento&quot;: resta l&#39;immagine.' ) ),
 		) )
 		->add_tab( __( 'Servizi Popolari' ), array(
 			Field::make( 'complex', 'popular_services', __( 'Servizi' ) )

@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.6.1
+Version: 0.7.0
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -524,7 +524,7 @@ a {
 	z-index: 5;
 }
 .motion-ok .how-it-works {
-	height: 400vh;
+	height: 500vh; /* 3 viewport di video + 1 di zoom-through + 1 di tenuta (home-motion.js) */
 }
 .motion-ok .how-it-works__sticky {
 	position: sticky;
@@ -615,6 +615,37 @@ a {
 	font-size: 15px;
 	font-weight: 600;
 	color: var(--tp-white);
+	z-index: 1;
+}
+/* Video della banda: sopra l'immagine (che resta come poster/fallback), visibile solo dove gira lo zoom-through */
+.visual-band__video {
+	display: none;
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.motion-ok .visual-band__media {
+	height: 100vh;
+	border-radius: 0;
+}
+.motion-ok .visual-band__video {
+	display: block;
+}
+/* Overlay dello zoom-through: fisso, sotto la navbar (z 10), geometria impostata da JS */
+.hiw-zoom {
+	display: none;
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: 9;
+	object-fit: cover;
+	opacity: 0;
+	pointer-events: none;
+}
+.hiw-zoom.is-on {
+	display: block;
 }
 
 @media (max-width: 782px) {
