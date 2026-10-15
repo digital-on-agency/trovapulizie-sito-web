@@ -52,6 +52,14 @@ $cta_title        = carbon_get_the_post_meta( 'cta_title' );
 $cta_subtitle     = carbon_get_the_post_meta( 'cta_subtitle' );
 $cta_button_text  = carbon_get_the_post_meta( 'cta_button_text' );
 $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
+$cta_args         = array(
+	'title'       => $cta_title,
+	'subtitle'    => $cta_subtitle,
+	'button_text' => $cta_button_text,
+	'button_link' => $cta_button_link,
+	'note'        => carbon_get_the_post_meta( 'cta_note' ),
+	'image'       => carbon_get_the_post_meta( 'cta_image' ),
+);
 ?>
 <main class="home">
 
@@ -162,13 +170,7 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 		<?php get_template_part( 'template-parts/faq-accordion', null, array( 'title' => $faq_title, 'items' => $faq_items ) ); ?>
 	<?php endif; ?>
 
-	<section class="cta-final">
-		<?php if ( $cta_title ) : ?><h2><?php echo esc_html( $cta_title ); ?></h2><?php endif; ?>
-		<?php if ( $cta_subtitle ) : ?><p><?php echo esc_html( $cta_subtitle ); ?></p><?php endif; ?>
-		<?php if ( $cta_button_text && $cta_button_link ) : ?>
-			<a class="button" href="<?php echo esc_url( $cta_button_link ); ?>"><?php echo esc_html( $cta_button_text ); ?></a>
-		<?php endif; ?>
-	</section>
+		<?php get_template_part( 'template-parts/cta-final', null, $cta_args ); ?>
 
 </main>
 <?php

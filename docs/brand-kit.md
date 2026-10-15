@@ -98,6 +98,14 @@ Vedi `style.css` sezione "Componenti base":
   (`zones-overlay-centro.png`, box 471x352 a 441,189, opacita' 0.8) e Prati (`zones-overlay-prati.jpg`, box
   540x659 a 84,-103, darken 0.7, immagine al 124% spostata di -10.2%). I file sono quadrati 1024px: cover.
 
+## Sezione CTA finale (`3564:162`, 15/10)
+
+- Card 1164x372, raggio 24, gradiente `#00C896 -> #37DBB3` (90deg), ombra `0 10px 30px rgba(15,33,26,0.08)`,
+  padding destro 248 (il testo e' centrato nello spazio restante), mascotte col mocio 273x294 in basso a sinistra
+  (`assets/img/mascotte-mocio.png`).
+- Titolo 36px Bold bianco; sottotitolo 17px/26px bianco; bottone bianco 17px SemiBold `--tp-text-heading`,
+  padding 18/40, raggio 12, freccia 18px; nota 14px `--tp-border` (#EBEDF0).
+
 ## Come aggiornare questo file
 
 Ogni volta che si fetcha un nuovo nodo Figma con valori di colore/font/radius non ancora

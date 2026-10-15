@@ -124,10 +124,18 @@ add_action( 'carbon_fields_register_fields', function () {
 				) ),
 		) )
 		->add_tab( __( 'CTA Finale' ), array(
-			Field::make( 'text', 'cta_title', __( 'Titolo' ) ),
-			Field::make( 'textarea', 'cta_subtitle', __( 'Sottotitolo' ) ),
-			Field::make( 'text', 'cta_button_text', __( 'Testo bottone' ) ),
+			Field::make( 'text', 'cta_title', __( 'Titolo' ) )
+				->set_default_value( 'Pronto a provare?' ),
+			Field::make( 'textarea', 'cta_subtitle', __( 'Sottotitolo' ) )
+				->set_default_value( 'Registrati gratis e prenota il tuo primo servizio di pulizia in meno di un minuto.' ),
+			Field::make( 'text', 'cta_button_text', __( 'Testo bottone' ) )
+				->set_default_value( 'Registrati gratis' ),
 			Field::make( 'text', 'cta_button_link', __( 'Link bottone' ) ),
+			Field::make( 'text', 'cta_note', __( 'Nota sotto il bottone' ) )
+				->set_default_value( 'Gratis · Nessuna carta richiesta · Disdici quando vuoi' ),
+			Field::make( 'image', 'cta_image', __( 'Illustrazione' ) )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Vuota = mascotte con il mocio del Figma.' ) ),
 		) );
 
 } );
