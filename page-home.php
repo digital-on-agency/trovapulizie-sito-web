@@ -32,6 +32,7 @@ $reviews          = carbon_get_the_post_meta( 'reviews' );
 $reviews_args     = array(
 	'badge'      => carbon_get_the_post_meta( 'reviews_badge' ),
 	'badge_link' => carbon_get_the_post_meta( 'reviews_badge_link' ),
+	'badge_logo' => carbon_get_the_post_meta( 'reviews_badge_source' ),
 	'title'      => carbon_get_the_post_meta( 'reviews_title' ),
 	'reviews'    => $reviews,
 );

@@ -1,13 +1,14 @@
 <?php
 /**
  * Sezione "Social proof" — Figma 3564:96 (mobile 4023:1023).
- * Args: badge, badge_link, title, reviews (array del campo complex `reviews`: author_name, author_city, avatar, review_text), theme_uri.
+ * Args: badge, badge_link, badge_logo (google|none), title, reviews (array del campo complex `reviews`: author_name, author_city, avatar, review_text), theme_uri.
  * Desktop: marquee continuo (CSS, 40 s, pausa su hover, set duplicato per il loop); mobile: prime 3 card impilate
  * statiche con reveal in stagger; reduced-motion: griglia statica. Riutilizzabile nelle landing.
  */
 $args = wp_parse_args( $args ?? array(), array(
 	'badge'      => '',
 	'badge_link' => '',
+	'badge_logo' => 'google',
 	'title'      => '',
 	'reviews'    => array(),
 	'theme_uri'  => get_stylesheet_directory_uri(),
@@ -43,6 +44,7 @@ $render_card = function ( $r, $i ) use ( $theme_uri, $total ) {
 		<?php if ( $args['badge'] ) : ?>
 			<?php $tag = $args['badge_link'] ? 'a' : 'div'; ?>
 			<<?php echo $tag; ?> class="reviews__badge"<?php if ( $args['badge_link'] ) : ?> href="<?php echo esc_url( $args['badge_link'] ); ?>" target="_blank" rel="noopener"<?php endif; ?>>
+				<?php if ( 'google' === $args['badge_logo'] ) : ?><img class="reviews__badge-logo" src="<?php echo esc_url( $theme_uri . '/assets/icons/google-g.svg' ); ?>" alt="Google" width="18" height="18"><?php endif; ?>
 				<span class="reviews__stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
 				<span><?php echo esc_html( $args['badge'] ); ?></span>
 			</<?php echo $tag; ?>>

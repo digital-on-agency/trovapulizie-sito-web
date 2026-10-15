@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.10.1
+Version: 0.10.2
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -1042,6 +1042,11 @@ a {
 	color: var(--tp-text-body);
 	text-decoration: none;
 	white-space: nowrap;
+}
+.reviews__badge-logo {
+	width: 18px;
+	height: 18px;
+	flex: 0 0 auto;
 }
 .reviews__stars {
 	color: var(--tp-primary);

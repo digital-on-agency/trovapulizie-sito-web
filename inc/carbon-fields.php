@@ -83,9 +83,11 @@ add_action( 'carbon_fields_register_fields', function () {
 				) ),
 		) )
 		->add_tab( __( 'Social Proof' ), array(
-			Field::make( 'text', 'reviews_badge', __( 'Badge (es. "4.893 recensioni su Trustpilot")' ) )
-				->set_help_text( __( 'Solo dati veri: il numero deve corrispondere al profilo Trustpilot. Vuoto = niente badge.' ) ),
-			Field::make( 'text', 'reviews_badge_link', __( 'Link del badge (profilo Trustpilot)' ) ),
+			Field::make( 'text', 'reviews_badge', __( 'Badge (es. "5.0 stelle sulle recensioni Google")' ) )
+				->set_help_text( __( 'Solo dati veri: la valutazione deve corrispondere al profilo. Vuoto = niente badge.' ) ),
+			Field::make( 'select', 'reviews_badge_source', __( 'Logo nel badge' ) )
+				->set_options( array( 'google' => 'Google', 'none' => 'Nessuno' ) ),
+			Field::make( 'text', 'reviews_badge_link', __( 'Link del badge (es. pagina recensioni Google)' ) ),
 			Field::make( 'text', 'reviews_title', __( 'Titolo' ) )
 				->set_default_value( 'Scelto da chi vuole il meglio' ),
 			Field::make( 'complex', 'reviews', __( 'Recensioni (desktop: scorrono in continuo; mobile: le prime 3)' ) )
