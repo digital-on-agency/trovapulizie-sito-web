@@ -80,6 +80,13 @@
 			if (video.readyState >= 2) video.currentTime = Math.max(video.currentTime, 0.001);
 		}).catch(function (e) { console.warn('phone-3d non disponibile, resta il phone CSS', e); });
 	}
+	var lastFade = null;
+	function setTextFade(v) {
+		var f = Math.round(v * 1000) / 1000;
+		if (f === lastFade) return;
+		lastFade = f;
+		section.style.setProperty('--hiw-text-fade', String(f));
+	}
 	function setStep(q) {
 		var active = q < 1 / 3 ? 0 : q < 2 / 3 ? 1 : 2;
 		for (var i = 0; i < steps.length; i++) steps[i].classList.toggle('is-active', i === active);
@@ -210,6 +217,7 @@
 					apply(mix(POSES.hero, POSES.s1, p0 ? p / p0 : 1));
 					seek(0);
 					setStep(0);
+					setTextFade(1);
 					return;
 				}
 				var u = (p - p0) / (1 - p0) * pinUnits();
@@ -218,6 +226,8 @@
 				apply(mix(SEQ[seg], SEQ[seg + 1], q * 3 - seg));
 				seek(q);
 				setStep(q);
+				// Ultimo 12% del terzo segmento: il phone si raddrizza e sale verso il centro; titolo e step sfumano via
+				setTextFade(1 - Math.max(0, Math.min(1, (q - 0.82) / 0.12)));
 				// A e' scrubbed (0.7 s di ritardo): dopo un salto oltre la sezione il suo onUpdate arriva quando la card ha
 				// gia' preso il video; in quel caso l'overlay non si tocca
 				if (!cardLive) zoom(Math.max(0, Math.min(1, (u - VIDEO_VH) / ZOOM_VH)));
