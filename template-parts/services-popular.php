@@ -14,6 +14,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'proof_sub'    => '',
 	'proof_rating' => '',
 	'services'     => array(),
+	'video_first'  => '', // URL mp4: nella prima card, sotto la foto, il video dello zoom-through (desktop con motion)
 	'theme_uri'    => get_stylesheet_directory_uri(),
 ) );
 $services = array_values( array_filter( (array) $args['services'], function ( $s ) {
@@ -75,6 +76,7 @@ $icon_keys = array( 'casa', 'uffici', 'cantieri', 'condomini', 'sanificazione', 
 				</div>
 				<div class="services__visual">
 					<img src="<?php echo esc_url( $image ); ?>" alt="" loading="lazy">
+					<?php if ( 0 === $i && $args['video_first'] ) : ?><video class="services__video" muted loop playsinline preload="none" src="<?php echo esc_url( $args['video_first'] ); ?>" aria-hidden="true" tabindex="-1"></video><?php endif; ?>
 					<?php if ( ! empty( $s['visual_label'] ) ) : ?><span class="services__visual-label"><?php echo esc_html( $s['visual_label'] ); ?></span><?php endif; ?>
 				</div>
 				<div class="tp-card__panel services__desc">

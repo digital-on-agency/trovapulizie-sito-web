@@ -27,6 +27,10 @@ add_action( 'carbon_fields_register_fields', function () {
 				->set_help_text( __( 'Desktop: scorre con lo scroll (3 step a terzi, ultimo frame = immagine Banda Visual). Vincoli completi in ADR-002.' ) ),
 			Field::make( 'image', 'how_it_works_poster', __( 'Poster video (primo frame)' ) )
 				->set_value_type( 'url' ),
+			Field::make( 'file', 'how_it_works_zoom_video', __( 'Video zoom-through (mp4 muto, loop)' ) )
+				->set_type( 'video' )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Desktop: a fine scroll esce dallo schermo del telefono a tutto schermo e poi rientra nella foto della prima card di Servizi popolari, dove resta in loop. Primo frame = ultimo frame del video schermo = foto della prima card. Mobile e &quot;riduci movimento&quot;: non usato.' ) ),
 			Field::make( 'complex', 'how_it_works_steps', __( 'Step' ) )
 				->set_layout( 'tabbed-vertical' )
 				->set_max( 3 )
@@ -42,17 +46,6 @@ add_action( 'carbon_fields_register_fields', function () {
 				->set_help_text( __( 'Telefono generico senza marchio, formato .glb, consigliato < 2 MB. Vuoto = corpo procedurale.' ) ),
 			Field::make( 'text', 'phone_model_credit', __( 'Credito autore (footer)' ) )
 				->set_help_text( __( 'Obbligatorio per modelli CC-BY, es. "Modello 3D: Nome Autore (Sketchfab), CC BY 4.0".' ) ),
-		) )
-		->add_tab( __( 'Banda Visual' ), array(
-			Field::make( 'image', 'visual_band_image', __( 'Immagine' ) )
-				->set_value_type( 'url' )
-				->set_help_text( __( 'Deve coincidere con l&#39;ultimo frame del video Come funziona (zoom-through).' ) ),
-			Field::make( 'text', 'visual_band_label', __( 'Etichetta overlay' ) )
-				->set_default_value( 'Pulizia casa' ),
-			Field::make( 'file', 'visual_band_video', __( 'Video (mp4 muto, loop)' ) )
-				->set_type( 'video' )
-				->set_value_type( 'url' )
-				->set_help_text( __( 'Primo frame = Immagine qui sopra. Desktop: esce dallo schermo del telefono a fine Come funziona (zoom-through) e diventa la banda a tutto schermo, in loop. Mobile e &quot;riduci movimento&quot;: resta l&#39;immagine.' ) ),
 		) )
 		->add_tab( __( 'Servizi Popolari' ), array(
 			Field::make( 'text', 'services_title', __( 'Titolo sezione' ) )

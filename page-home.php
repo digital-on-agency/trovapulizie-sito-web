@@ -13,10 +13,8 @@ $hiw_subtitle     = carbon_get_the_post_meta( 'how_it_works_subtitle' );
 $hiw_video        = carbon_get_the_post_meta( 'how_it_works_video' );
 $hiw_poster       = carbon_get_the_post_meta( 'how_it_works_poster' );
 $steps            = carbon_get_the_post_meta( 'how_it_works_steps' );
-$visual_image     = carbon_get_the_post_meta( 'visual_band_image' );
-$visual_label     = carbon_get_the_post_meta( 'visual_band_label' );
-$visual_video     = carbon_get_the_post_meta( 'visual_band_video' );
-$visual_video_url = $visual_video ? add_query_arg( 'ver', wp_get_theme()->get( 'Version' ), $visual_video ) : '';
+$zoom_video       = carbon_get_the_post_meta( 'how_it_works_zoom_video' );
+$zoom_video_url   = $zoom_video ? add_query_arg( 'ver', wp_get_theme()->get( 'Version' ), $zoom_video ) : '';
 $theme_uri        = get_stylesheet_directory_uri();
 $step_fallbacks   = array( 'screen-step1-servizio.png', 'screen-step2-cleaner.png', 'screen-step3-conferma.png' );
 $services         = carbon_get_the_post_meta( 'popular_services' );
@@ -28,6 +26,7 @@ $services_args    = array(
 	'proof_sub'    => carbon_get_the_post_meta( 'services_proof_sub' ),
 	'proof_rating' => carbon_get_the_post_meta( 'services_proof_rating' ),
 	'services'     => $services,
+	'video_first'  => $zoom_video_url, // la prima card ospita il video dello zoom-through dopo l'atterraggio
 );
 $reviews          = carbon_get_the_post_meta( 'reviews' );
 $zones_title      = carbon_get_the_post_meta( 'zones_title' );
@@ -126,19 +125,12 @@ $cta_button_link  = carbon_get_the_post_meta( 'cta_button_link' );
 	</section>
 	<?php endif; ?>
 
-	<?php if ( $visual_image && $visual_video_url ) : ?>
-		<!-- Zoom-through: overlay fisso che cresce dallo schermo del telefono a tutto il viewport (home-motion.js), stesso video della banda -->
-		<video id="hiw-zoom" class="hiw-zoom" muted loop playsinline preload="auto" src="<?php echo esc_url( $visual_video_url ); ?>" aria-hidden="true" tabindex="-1"></video>
-	<?php endif; ?>
-
-	<?php if ( $visual_image ) : ?>
-	<section class="visual-band" id="visual-band">
-		<div class="visual-band__media">
-			<img src="<?php echo esc_url( $visual_image ); ?>" alt="">
-			<?php if ( $visual_video_url ) : ?><video class="visual-band__video" muted loop playsinline preload="none" poster="<?php echo esc_url( $visual_image ); ?>" src="<?php echo esc_url( $visual_video_url ); ?>" aria-hidden="true" tabindex="-1"></video><?php endif; ?>
-			<?php if ( $visual_label ) : ?><span class="visual-band__label"><?php echo esc_html( $visual_label ); ?></span><?php endif; ?>
+	<?php if ( $zoom_video_url ) : ?>
+		<!-- Zoom-through (ADR-002 rev. 3): overlay fisso che cresce dallo schermo del telefono a tutto il viewport e poi rientra nella foto della prima card di Servizi popolari (home-motion.js) -->
+		<div id="hiw-zoom" class="hiw-zoom" aria-hidden="true">
+			<video class="hiw-zoom__video" muted loop playsinline preload="auto" src="<?php echo esc_url( $zoom_video_url ); ?>" tabindex="-1"></video>
+			<span class="hiw-zoom__veil"></span>
 		</div>
-	</section>
 	<?php endif; ?>
 
 	<?php if ( $services ) : ?>

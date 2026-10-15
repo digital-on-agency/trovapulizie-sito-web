@@ -33,6 +33,8 @@
 			t.tabIndex = on ? 0 : -1;
 		});
 		cards.forEach(function (c, k) {
+			var v = c.querySelector('.services__video');
+			if (v) { if (k === i && c.querySelector('.services__visual.is-live')) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); } else v.pause(); }
 			if (k === i) {
 				c.classList.add('is-enter');
 				void c.offsetWidth;

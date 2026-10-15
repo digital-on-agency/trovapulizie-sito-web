@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.8.0
+Version: 0.9.0
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -524,7 +524,7 @@ a {
 	z-index: 5;
 }
 .motion-ok .how-it-works {
-	height: 500vh; /* 3 viewport di video + 1 di zoom-through + 1 di tenuta (home-motion.js) */
+	height: 550vh; /* 3 viewport di video + 1 di zoom-through + 0.5 di tenuta + 1 di rientro nella card (home-motion.js) */
 }
 .motion-ok .how-it-works__sticky {
 	position: sticky;
@@ -592,69 +592,37 @@ a {
 	text-align: center;
 }
 
-/* Banda Visual — Figma 3828:1187 (punto di atterraggio zoom-through, ADR-002 F3) */
-.visual-band {
-	max-width: none;
-	padding: 0;
-}
-.visual-band__media {
-	position: relative;
-	height: 759px;
-	border-radius: var(--tp-radius-xl);
-	overflow: hidden;
-}
-.visual-band__media img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-}
-.visual-band__label {
-	position: absolute;
-	left: 20px;
-	bottom: 20px;
-	font-size: 15px;
-	font-weight: 600;
-	color: var(--tp-white);
-	z-index: 1;
-}
-/* Video della banda: sopra l'immagine (che resta come poster/fallback), visibile solo dove gira lo zoom-through */
-.visual-band__video {
-	display: none;
-	position: absolute;
-	inset: 0;
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-}
-.motion-ok .visual-band__media {
-	height: 100vh;
-	border-radius: 0;
-}
-.motion-ok .visual-band__video {
-	display: block;
-}
-/* Overlay dello zoom-through: fisso, sotto la navbar (z 10), geometria impostata da JS */
+/* Overlay dello zoom-through (ADR-002 rev. 3): fisso, sotto la navbar (z 10), geometria impostata da JS;
+   il velo verde (lo stesso della card servizio) sfuma durante il rientro nella card */
 .hiw-zoom {
 	display: none;
 	position: fixed;
 	left: 0;
 	top: 0;
 	z-index: 9;
-	object-fit: cover;
+	overflow: hidden;
 	opacity: 0;
 	pointer-events: none;
 }
 .hiw-zoom.is-on {
 	display: block;
 }
+.hiw-zoom__video {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.hiw-zoom__veil {
+	position: absolute;
+	inset: 0;
+	background: rgba(0, 200, 150, 0.5);
+	opacity: 0;
+}
 
 @media (max-width: 782px) {
 	.how-it-works__steps {
 		grid-template-columns: 1fr;
-	}
-	.visual-band__media {
-		height: 240px;
-		border-radius: 0;
 	}
 }
 
@@ -892,6 +860,17 @@ a {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+}
+.services__video {
+	display: none;
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.services__visual.is-live .services__video {
+	display: block;
 }
 .services__visual::after {
 	content: '';
