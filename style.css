@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.15.1
+Version: 0.15.2
 */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
@@ -907,15 +907,24 @@ a {
 	transform: translateY(-2px);
 	box-shadow: 0 12px 22px -10px rgba(0, 200, 150, 0.7);
 }
-/* Mascotte decorativa (4522:4705): 218px ruotata di 17.42deg, sborda a destra e viene tagliata dalla sezione come nel Figma */
+/* Mascotte decorativa (4522:4705): 218px ruotata di 17.42deg, sborda a destra e viene tagliata dalla sezione come nel
+   Figma. All'ingresso della sezione il braccio entra da destra (Guido 15/10): parte fuori dal bordo e piu' ruotato,
+   scivola in posa con una curva morbida dopo il reveal della card */
 .services__mascot {
 	position: absolute;
 	left: 1180px;
 	top: 439px;
 	width: 218px;
 	height: 218px;
-	transform: rotate(17.42deg);
+	transform: translate(160px, 40px) rotate(34deg);
+	opacity: 0;
+	transform-origin: 80% 60%;
+	transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1) 0.45s, opacity 0.5s ease 0.45s;
 	pointer-events: none;
+}
+.services.is-in .services__mascot {
+	transform: rotate(17.42deg);
+	opacity: 1;
 }
 
 /* Reveal all'ingresso (stagger): titoli, social proof +80ms, tab +160ms (+40ms ciascuna), card +240ms con scale 0.98 -> 1 */
@@ -998,6 +1007,10 @@ a {
 	.services__cards {
 		opacity: 1;
 		transform: none;
+	}
+	.services__mascot {
+		opacity: 1;
+		transform: rotate(17.42deg);
 	}
 }
 
