@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.21.1
+Version: 0.22.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -693,6 +693,21 @@ a {
 	margin-top: 24px;
 }
 
+/* Sequenza mobile delle tre schermate (ADR-002 rev. 5): nascosta finche' hiw-sequence.js non attiva
+   hiw-seq-ok sotto la soglia desktop. Le tre immagini stanno sovrapposte dentro un solo telefono: si
+   incrociano le schermate, non le cornici (due bezel a meta' opacita' lascerebbero passare lo sfondo). */
+.hiw-seq {
+	display: none;
+}
+.hiw-seq__screen {
+	position: absolute;
+	inset: 0;
+	opacity: 0;
+}
+.hiw-seq__screen[data-seq="0"] {
+	opacity: 1;
+}
+
 /* Motion desktop (classe messa dal JS solo da --tp-bp-desktop in su e senza reduced-motion) */
 .motion-ok .hero__phone {
 	z-index: 5;
@@ -824,6 +839,53 @@ a {
 		margin-top: 14px;
 		/* niente height qui: .tp-phone prende l'altezza dal token --tp-phone-h (una regola height
 		   su questo stesso elemento lo azzererebbe, i figli sono in position: absolute) */
+	}
+}
+
+/* Sequenza: il contenuto resta fermo per due viewport mentre schermate e paragrafi si alternano.
+   Altezze in dvh perche' su Safari iOS la barra che entra e esce cambia vh e sfaserebbe il pin. */
+@media (max-width: 1023px) {
+	.hiw-seq-ok .how-it-works {
+		height: 300dvh;
+	}
+	.hiw-seq-ok .how-it-works__sticky {
+		position: sticky;
+		top: var(--tp-navbar-h);
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		height: calc(100dvh - var(--tp-navbar-h));
+		padding-bottom: 24px;
+	}
+	/* I tre testi occupano lo stesso riquadro e si alternano: altezza fissa, altrimenti il telefono
+	   salta quando il paragrafo lungo sostituisce quello corto. */
+	.hiw-seq-ok .how-it-works__steps {
+		position: relative;
+		display: block;
+		width: 100%;
+		max-width: 350px;
+		height: 180px;
+		margin-top: 28px;
+	}
+	.hiw-seq-ok .how-it-works__step {
+		position: absolute;
+		inset: 0;
+		margin: 0;
+		max-width: none;
+		/* nessuna transition: l'opacita' la guida lo scroll, una transizione CSS le andrebbe contro */
+	}
+	.hiw-seq-ok .how-it-works__phone-static {
+		display: none;
+	}
+	.hiw-seq-ok .hiw-seq {
+		display: block;
+		margin-top: auto;
+	}
+	.hiw-seq__phone {
+		--tp-phone-w: 158px;
+		--tp-phone-h: 320px;
+		--tp-phone-radius: 28px;
+		--tp-phone-screen-radius: 22px;
 	}
 }
 

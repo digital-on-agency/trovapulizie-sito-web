@@ -156,19 +156,38 @@ $cta_args         = array(
 						<p><?php echo esc_html( $step['description'] ?? '' ); ?></p>
 					</div>
 					<?php
-					// Sotto 1024px ogni passo ha il proprio clip, caricato da hiw-stacked.js quando il blocco
-					// entra nel viewport (ADR-002 rev. 4). Su desktop il telefono e' quello pinnato della hero
-					// e questi restano nascosti, quindi il data-src non costa nulla.
+					// Telefono del singolo passo: si vede solo nel fallback impilato (niente JS o
+					// reduced-motion). Nella sequenza mobile e su desktop resta nascosto. ADR-002 rev. 5.
 					get_template_part( 'template-parts/phone-mockup', null, array(
 						'screen' => $screen,
-						'poster' => $screen,
-						'video'  => tp_theme_asset( 'assets/video/come-funziona-step' . $n . '.mp4' ),
-						'lazy'   => true,
 						'class'  => 'how-it-works__phone-static',
 					) ); ?>
 				</li>
 				<?php endforeach; ?>
 			</ol>
+			<?php
+			// Sequenza mobile (ADR-002 rev. 5): un solo telefono sticky, le tre schermate in crossfade
+			// guidate dallo scroll (assets/js/hiw-sequence.js). Senza JS o con reduced-motion resta
+			// nascosto e si vedono i tre blocchi impilati qui sopra.
+			$seq_screens = array();
+			foreach ( array_slice( $steps, 0, 3 ) as $i => $step ) {
+				$seq_screens[] = ! empty( $step['image'] ) ? wp_get_attachment_url( $step['image'] ) : tp_theme_asset( 'assets/img/' . $step_fallbacks[ $i ] );
+			}
+			?>
+			<div class="hiw-seq" aria-hidden="true">
+				<div class="tp-phone hiw-seq__phone">
+					<?php for ( $i = 10; $i >= 1; $i-- ) : ?>
+						<span class="tp-phone__layer" style="--z:-<?php echo $i; ?>px"></span>
+					<?php endfor; ?>
+					<div class="tp-phone__face">
+						<div class="tp-phone__screen">
+							<?php foreach ( $seq_screens as $i => $src ) : ?>
+								<img class="tp-phone__img hiw-seq__screen" data-seq="<?php echo $i; ?>" src="<?php echo esc_url( $src ); ?>" alt="">
+							<?php endforeach; ?>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</section>
 	<?php endif; ?>

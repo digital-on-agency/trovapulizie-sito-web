@@ -30,6 +30,7 @@ Stato al 15/10/2026: desktop completo (ver. tema 0.17.0). Mobile e tablet non an
 | `template-parts/faq-accordion.php` | Sezione FAQ (colonna contatto + accordion + JSON-LD) |
 | `template-parts/cta-final.php` | Sezione CTA finale |
 | `assets/js/nav-mobile.js` | Menu mobile della navbar (l'unico modulo caricato su tutte le pagine, non solo la Home) |
+| `assets/js/hiw-sequence.js` | Sequenza mobile di Come funziona: tre schermate in crossfade guidate dallo scroll |
 | `assets/js/*.js` | Un modulo per comportamento, nessun bundler, nessuna dipendenza fra moduli tranne `phone-3d.js` -> `screen-timeline.js` (vedi §4) |
 | `assets/img/`, `assets/icons/`, `assets/video/` | Asset del tema usati come fallback quando il campo WP e' vuoto (vedi §7) |
 | `tools/` | Script di QA headless, pipeline del video dello schermo, encoding video. Non vanno sul server (vedi `tools/README.md`) |
@@ -255,17 +256,22 @@ tutta sezione; qui il testo e' su bianco, la foto e' un box alto 270 in flusso s
 (150x300) sporge dal bordo inferiore del box con un `margin-top` negativo di 168 (= 270 - 102 del Figma).
 La search bar va su tre righe con il divisore orizzontale e Cerca a tutta larghezza.
 
-**Come funziona sotto 1024px** (Figma `4020:965`): tre blocchi impilati, nessun pin. Lo stesso markup del
-desktop cambia solo per CSS; ogni passo ha il proprio clip, che `assets/js/hiw-stacked.js` assegna
-(`data-src` -> `src`) e avvia quando il blocco entra nel viewport, una volta sola e un blocco per volta.
-Con reduced-motion, senza IntersectionObserver o con autoplay negato restano i poster, che sono uno stato
-corretto: la sezione si legge comunque come il Figma.
+**Come funziona sotto 1024px** (ADR-002 rev. 5): il contenuto della sezione resta sticky per circa due
+viewport (`height: 300dvh`, non `vh`: la barra di Safari che entra e esce cambia `vh` e sfaserebbe il pin)
+e dentro un unico telefono le tre schermate si alternano in crossfade, con i tre paragrafi in sincrono.
+Niente video: solo opacita', quindi funziona anche in Low Power Mode e su Safari iOS, dove autoplay e seek
+non sono affidabili. Le tre schermate stanno sovrapposte in `.hiw-seq` e si incrociano fra loro: la
+cornice del telefono e' una sola, perche' due bezel scuri a meta' opacita' lascerebbero passare lo sfondo.
 
-I tre clip vengono da `tools/step-clips-encode.sh`, che taglia `come-funziona.mp4` sui confini semantici
-di `T` in `assets/js/screen-timeline.js` (0-4,0 / 4,0-8,0 / 8,0-11,4) e non ai terzi aritmetici: a 4,2 e
-8,4 i tagli cadevano dentro una transizione gia' iniziata. L'ultimo clip si ferma prima di `bandStart`
-perche' la dissolvenza sulla foto appartiene allo zoom-through, che su mobile non esiste. Cambiando i
-tempi del video desktop vanno rigenerati i clip.
+`assets/js/hiw-sequence.js` calcola il progresso da `scrollY` (nessuna libreria), tiene ferma ogni
+schermata e dissolve solo nella parte centrale di ogni intervallo (`FADE`), e mette `hiw-seq-ok` su
+`<html>`. Senza JavaScript o con `prefers-reduced-motion` la classe non arriva e restano i **tre blocchi
+impilati** del Figma `4020:965` (badge 44, testo 300, telefono 158x320 per blocco): e' il fallback, ed e'
+fedele al design.
+
+Le tre schermate vengono da `tools/step-posters-export.sh`, che le estrae dal video desktop sui tempi di
+`T` in `assets/js/screen-timeline.js` (0,5 / 4,5 / 8,5 s, mezzo secondo dentro ogni passo per non cogliere
+la transizione). Cambiando i tempi del video desktop vanno rigenerate.
 
 ## 11. QA
 
@@ -282,7 +288,7 @@ refactor senza cambi di comportamento deve dare gli stessi valori.
 
 ## 12. Limiti noti (15/10/2026, ver 0.18.0)
 
-- Mobile e tablet: fatti base (TICKET-10), navbar (11), hero (12) e Come funziona impilata animata (13).
+- Mobile e tablet: fatti base (TICKET-10), navbar (11), hero (12) e Come funziona come sequenza di schermate (13 rev. 2).
   Restano al layout desktop: servizi, recensioni, mappa, FAQ, CTA, footer.
   Ticket TICKET-14..21 in `spec/tickets/` nel vault.
 - `reviews__badge` sporge dal viewport a 360px (clippato, non genera scroll): lo chiude TICKET-15.

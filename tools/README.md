@@ -15,7 +15,7 @@ Ogni script usa una porta di debug diversa, quindi possono girare in parallelo.
 | `qa-section.js <chrome> <url> <selettore> [width=1440] [out] [selettore-click]` | una sezione a una larghezza, con click opzionale | screenshot + `STATE` (rect, `is-in`, animazione, overlay) |
 | `qa-services.js <chrome> <url> [width] [slow]` | tab e card di Servizi popolari | `/tmp/cdp-services-{0,1}.png` + geometria |
 | `qa-hero-video.js <chrome> <url>` | autoplay e fine del timelapse hero | `/tmp/cdp-hero-{0,1,2}.png` + stato video |
-| `qa-mobile.js <chrome> <url> [larghezze]` | sweep mobile e tablet: scroll orizzontale, gate motion, risorse CDN, peso, doppioni | esito per larghezza, codice di uscita 1 se fallisce |
+| `qa-mobile.js <chrome> <url> [larghezze]` | sweep mobile e tablet: scroll orizzontale, gate motion, navbar, hero, sequenza di Come funziona, risorse CDN, peso | esito per larghezza, codice di uscita 1 se fallisce. Il peso e' attendibile solo con profilo pulito (`rm -rf /tmp/cdp-profile*`) |
 
 Prima di un run dopo un deploy: cancellare `/tmp/cdp-profile*` (l'HTML e' cachato 7 giorni) e attendere qualche
 secondo dopo `wp litespeed-purge all`. In headless le transizioni CSS avanzano solo allo scatto: letture a meta'
@@ -37,8 +37,8 @@ rigenerare il video.
 ## Encoding
 
 - `hero-video-encode.sh <sorgente.mp4> [durata=3] [larghezza=1600]` -> `assets/video/hero-timelapse.mp4`
-- `step-clips-encode.sh` -> i tre clip mobile `assets/video/come-funziona-step{1,2,3}.mp4` piu' i poster
-  `assets/img/come-funziona-step{1,2,3}-poster.jpg`, tagliati sui tempi di `screen-timeline.js`
+- `step-posters-export.sh` -> le tre schermate della sequenza mobile
+  `assets/img/come-funziona-step{1,2,3}-poster.jpg`, estratte dal video desktop sui tempi di `screen-timeline.js`
 - `zoom-video-encode.sh <sorgente.mp4> [larghezza=2560] [crf=19]` -> `assets/video/come-funziona-zoom.mp4` +
   primo frame in `assets/img/come-funziona-zoom-frame.jpg`
 

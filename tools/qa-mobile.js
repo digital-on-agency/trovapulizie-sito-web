@@ -41,15 +41,22 @@ const PROBE = `(() => {
 	const steps = [].map.call(document.querySelectorAll('.how-it-works__step'), el => {
 		const ph = el.querySelector('.tp-phone');
 		const txt = el.querySelector('.how-it-works__text p');
-		const v = el.querySelector('video');
 		return {
 			w: Math.round(el.getBoundingClientRect().width),
 			phone: ph ? Math.round(ph.getBoundingClientRect().width) + 'x' + Math.round(ph.getBoundingClientRect().height) : null,
-			testo: txt ? Math.round(txt.getBoundingClientRect().width) : null,
-			lazy: !!(v && v.getAttribute('data-src'))
+			testo: txt ? Math.round(txt.getBoundingClientRect().width) : null
 		};
 	});
-	const clip = res.filter(r => /come-funziona-step\d\.mp4/.test(r.name)).length;
+	const seqPhone = document.querySelector('.hiw-seq__phone');
+	const seq = {
+		on: document.documentElement.classList.contains('hiw-seq-ok'),
+		schermate: document.querySelectorAll('.hiw-seq__screen').length,
+		phone: seqPhone ? Math.round(seqPhone.getBoundingClientRect().width) + 'x' + Math.round(seqPhone.getBoundingClientRect().height) : null,
+		sticky: (() => { const k = document.querySelector('.how-it-works__sticky'); return k ? getComputedStyle(k).position : null; })(),
+		viewport: Math.round(window.innerHeight)
+	};
+	// Nessun video deve restare nella sezione: su mobile la sequenza e' di immagini (ADR-002 rev. 5)
+	const videoSezione = document.querySelectorAll('.how-it-works video').length;
 	const box = el => { if (!el) return null; const r = el.getBoundingClientRect(); return [Math.round(r.left), Math.round(r.top), Math.round(r.width), Math.round(r.height)]; };
 	const burger = document.getElementById('nav-burger');
 	const nav = {
@@ -70,9 +77,10 @@ const PROBE = `(() => {
 		kb: Math.round(res.reduce((s, r) => s + r.transferSize, 0) / 1024),
 		dup: dup,
 		steps: steps,
+		seq: seq,
+		videoSezione: videoSezione,
 		nav: nav,
 		hero: hero,
-		clip: clip,
 		offenders: off.slice(0, 10)
 	});
 })()`;
@@ -89,17 +97,27 @@ const PROBE = `(() => {
 			if (r.scrollWidth > r.vw) errors.push('scroll orizzontale: scrollWidth ' + r.scrollWidth + ' > ' + r.vw);
 			if (r.motionOk !== desktop) errors.push('motion-ok ' + r.motionOk + ', atteso ' + desktop);
 			if (!desktop && r.cdn.length) errors.push('risorse CDN richieste sotto soglia: ' + r.cdn.join(', '));
-			// 550vh di sezione pinnata sono oltre 5 viewport; la versione impilata del Figma ne misura circa 2.
-			if (!desktop && r.hiwHeight > 2.5 * 844) errors.push('Come funziona alta ' + r.hiwHeight + 'px: sembra ancora la sezione pinnata');
-			// Come funziona impilata (TICKET-13): tre blocchi col telefono mobile e i clip non ancora richiesti
-			// finche' il blocco non entra nel viewport. In cima alla pagina nessun clip deve essere stato chiesto.
+			// Sotto soglia la sezione vale 300dvh con la sequenza attiva, circa 2 viewport nel fallback
+			// impilato; i 550vh del pin desktop (oltre 5 viewport) non devono comparire in nessuno dei due.
 			if (!desktop) {
-				if (r.steps.length !== 3) errors.push('blocchi Come funziona: ' + r.steps.length + ', attesi 3');
-				r.steps.forEach((st, i) => {
-					if (st.phone !== '158x320') errors.push('blocco ' + (i + 1) + ': telefono ' + st.phone + ', atteso 158x320');
-					if (!st.lazy) errors.push('blocco ' + (i + 1) + ': il clip non e\' in data-src');
-				});
-				if (r.clip) errors.push(r.clip + ' clip gia\' richiesti in cima alla pagina');
+				const atteso = r.seq.on ? 3 * r.seq.viewport : null;
+				if (atteso && Math.abs(r.hiwHeight - atteso) > atteso * 0.1) errors.push('Come funziona alta ' + r.hiwHeight + 'px, attesi circa ' + atteso + ' (300dvh)');
+				if (!r.seq.on && r.hiwHeight > 2.5 * r.seq.viewport) errors.push('fallback impilato alto ' + r.hiwHeight + 'px: sembra la sezione pinnata');
+			}
+			// Come funziona sotto soglia (TICKET-13 rev. 2): sequenza di schermate o fallback impilato.
+			if (!desktop) {
+				if (r.steps.length !== 3) errors.push('passi di Come funziona: ' + r.steps.length + ', attesi 3');
+				if (r.videoSezione) errors.push(r.videoSezione + ' video ancora nella sezione: su mobile la sequenza e\' di immagini');
+				if (r.seq.on) {
+					// Sequenza (ADR-002 rev. 5): un telefono solo, tre schermate, contenuto sticky.
+					if (r.seq.schermate !== 3) errors.push('schermate della sequenza: ' + r.seq.schermate + ', attese 3');
+					if (r.seq.phone !== '158x320') errors.push('telefono della sequenza ' + r.seq.phone + ', atteso 158x320');
+					if (r.seq.sticky !== 'sticky') errors.push('il contenuto della sezione non e\' sticky');
+				} else {
+					r.steps.forEach((st, i) => {
+						if (st.phone !== '158x320') errors.push('blocco ' + (i + 1) + ': telefono ' + st.phone + ', atteso 158x320');
+					});
+				}
 				// Navbar mobile (TICKET-11): barra 65, hamburger 24x24 chiuso, Accedi solo nel pannello.
 				if (r.nav.h !== 65) errors.push('navbar alta ' + r.nav.h + ', attesa 65');
 				if (!r.nav.burger || r.nav.burger[2] !== 24) errors.push('hamburger assente o non 24px');
