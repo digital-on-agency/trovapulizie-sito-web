@@ -135,9 +135,25 @@ dopo un salto: per questo in `onUpdate` lo zoom non viene toccato se la card ha 
 
 ### Impaginazione della sezione (desktop)
 Revisione UX del 15/10 notte: **colonna editoriale a sinistra** (titolo allineato a sinistra, stepper
-verticale, segnale di scorrimento) e telefono centrato nello spazio a destra (`x: 200` nelle pose). Il
-telefono e' pinnato fuori dalla sezione, quindi la colonna non lo contiene: la sua larghezza
-(`min(38%, 560px)`) e la `x` delle pose vanno tenute coerenti a mano.
+verticale, segnale di scorrimento) e telefono alla sua destra. Il telefono e' pinnato fuori dalla sezione,
+quindi la colonna non lo contiene: larghezza della colonna (`min(39%, 560px)`), suo `padding-left` (13%) e
+`x` delle pose vanno tenute coerenti **a mano**, sono tre numeri che descrivono una sola composizione.
+
+**Bilanciamento (16/10).** Prima la colonna partiva da 6,7% e il telefono stava al centro della propria
+meta' (`x: 200`): a 1440 restavano 96px di margine a sinistra contro 373 a destra, cioe' il vuoto piu' grande
+finiva sul bordo invece che fra i due elementi. Ora testo e telefono sono un blocco unico centrato
+(`padding-left: 13%`, `x: 383`): a 1440x980 i due margini esterni valgono ~187 e ~190, a 1280 166/121, a 1680
+218/278. Il titolo non e' piu' allineato agli H2 delle altre sezioni (76-80px), ma fra Come funziona e Servizi
+c'e' in mezzo lo zoom-through a tutto schermo, quindi quell'allineamento non e' mai visibile.
+
+Le pose hanno anche `y: 0` su tutti gli stati (prima `0.075`): la colonna e' centrata verticalmente nel
+viewport e il telefono e' centrato nel suo canvas, quindi con y diversa da 0 i due centri non coincidevano
+(63px a 1440x837). Per lo stesso motivo il segnale di scorrimento porta `margin-bottom: -52px`: e' invisibile
+fuori dal primo passo ma resta nel flusso, e senza quel margine spostava in alto il centraggio della colonna.
+
+[ATTENZIONE] La `x` delle pose non puo' crescere liberamente: il telefono si muove **dentro** al canvas 3D
+(vedi "Telefono 3D"), e oltre il bordo del canvas viene tagliato. Con `x: 383` il canvas e' stato portato da
+720 a 1200 di larghezza.
 
 Lo **stepper** mostra tutti e tre i passi con il pallino numerato: quello attivo apre il proprio paragrafo
 (`grid-template-rows: 0fr -> 1fr`, l'unico modo di animare un'altezza automatica), i gia' fatti restano come
@@ -184,7 +200,7 @@ Le stesse pose valgono per il ramo CSS (`transform` sul bezel) e per il ramo 3D 
 
 ### Telefono 3D (`phone-3d.js`)
 Corpo procedurale (profilo arrotondato estruso, cornice frontale nera opaca, fianchi metallici) oppure GLB dal
-campo WP, schermo = `VideoTexture`, vetro semitrasparente, isola in alto. Canvas 720x960 centrato sul box del
+campo WP, schermo = `VideoTexture`, vetro semitrasparente, isola in alto. Canvas 1200x960 centrato sul box del
 phone (`.hero__phone-3d`), render solo su richiesta (`requestRender`). Espone `setPose`, `setProgress`,
 `screenRect` (proiezione dei 4 angoli dello schermo: da qui parte l'overlay dello zoom). Con `.is-3d` sul
 contenitore il bezel CSS resta nel DOM ma invisibile.

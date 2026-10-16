@@ -51,12 +51,17 @@
 		// circa dimezzate, x e y quasi costanti: cambia la posa, non la posizione.
 		// x positiva: col testo raccolto in un solo blocco a sinistra, il telefono si sposta a destra per
 		// bilanciare la composizione (prima restavano ~570px vuoti a destra).
-		s1: { x: 200, y: 0.075, ry: -10, rx: 3, rz: -5, s: 1.2, k: 1 },
-		s2: { x: 200, y: 0.075, ry: 10, rx: 3, rz: 5, s: 1.2, k: 1 },
-		s3: { x: 190, y: 0.085, ry: -5, rx: 2, rz: -3, s: 1.22, k: 1 },
+		// 16/10: x da 200 a 383 e y a 0. Con x 200 il telefono restava al centro della propria meta' e la
+		// sezione aveva 96px di margine a sinistra contro 373 a destra; ora testo e telefono sono un blocco
+		// unico centrato (va insieme al padding 13% di .how-it-works__sticky). Con y 0.075 il telefono stava
+		// 63px piu' in basso del testo, che e' centrato sul viewport: a 0 sono centrati entrambi, a qualunque
+		// altezza di finestra.
+		s1: { x: 383, y: 0, ry: -10, rx: 3, rz: -5, s: 1.2, k: 1 },
+		s2: { x: 383, y: 0, ry: 10, rx: 3, rz: 5, s: 1.2, k: 1 },
+		s3: { x: 373, y: 0, ry: -5, rx: 2, rz: -3, s: 1.22, k: 1 },
 		// La posa finale (raddrizzata, da cui parte lo zoom-through) tiene la stessa scala degli stati:
 		// con s: 1 il telefono rimpiccioliva di colpo nell'ultimo segmento, subito prima dello zoom.
-		out: { x: 200, y: 0, ry: 0, rx: 0, rz: 0, s: 1.2, k: 1 }
+		out: { x: 383, y: 0, ry: 0, rx: 0, rz: 0, s: 1.2, k: 1 }
 	};
 	var SEQ = [POSES.s1, POSES.s2, POSES.s3, POSES.out];
 	var KEYS = ['x', 'y', 'ry', 'rx', 'rz', 's', 'k'];
@@ -87,7 +92,7 @@
 		var host = pinEl.querySelector('.hero__phone-3d');
 		if (!host || !video || !hasWebGL2() || !pinEl.dataset.theme) return;
 		import(pinEl.dataset.theme + '/assets/js/phone-3d.js?ver=' + (pinEl.dataset.ver || '0')).then(function (mod) {
-			return mod.createPhone3D({ container: host, video: video, modelUrl: pinEl.dataset.model || '', phonePx: 608, width: 720, height: 960 });
+			return mod.createPhone3D({ container: host, video: video, modelUrl: pinEl.dataset.model || '', phonePx: 608, width: 1200, height: 960 });
 		}).then(function (api) {
 			phone3d = api;
 			pinEl.classList.add('is-3d');

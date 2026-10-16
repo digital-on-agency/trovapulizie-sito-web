@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.25.3
+Version: 0.26.2
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -515,13 +515,16 @@ a {
 	z-index: 1;
 	perspective: 1400px;
 }
-/* Canvas Three.js centrato sul box del phone (720x960, trasparente); attivo solo con .is-3d */
+/* Canvas Three.js centrato sul box del phone (1200x960, trasparente); attivo solo con .is-3d.
+   16/10: era 720 di larghezza. Il telefono si muove dentro al canvas (POSES.x, non una trasformazione
+   CSS): con x 383 il suo bordo destro cadeva fuori da un canvas di 720 e veniva tagliato. La larghezza
+   qui deve restare uguale al parametro width passato a createPhone3D in home-motion.js. */
 .hero__phone-3d {
 	display: none;
 	position: absolute;
 	left: 50%;
 	top: 50%;
-	width: 720px;
+	width: 1200px;
 	height: 960px;
 	transform: translate(-50%, -50%);
 	pointer-events: none;
@@ -764,9 +767,14 @@ a {
 	justify-content: center;
 	/* la regola base centra il contenitore (margin: 0 auto): qui la colonna deve stare a sinistra */
 	margin: 0;
-	width: min(38%, 560px);
+	width: min(39%, 560px);
 	max-width: none;
-	padding: 0 0 0 6.7%;
+	/* 16/10: la coppia testo+telefono e' centrata come blocco unico. Prima la colonna partiva da 6,7%
+	   e il telefono restava al centro della propria meta': 96px di margine a sinistra contro 373 a
+	   destra, con il vuoto piu' grande sul bordo invece che fra i due elementi. Con 13% qui e x: 383
+	   nelle POSES i due margini esterni valgono ~187 e ~190 a 1440x980. Cambiare questo padding senza
+	   cambiare la x delle POSES rompe il bilanciamento: vanno insieme. */
+	padding: 0 0 0 13%;
 	opacity: var(--hiw-text-fade, 1);
 }
 .motion-ok .how-it-works__title {
@@ -864,7 +872,10 @@ a {
 	display: block;
 	width: 16px;
 	height: 16px;
-	margin: 36px 0 0 12px;
+	/* il margine negativo in basso annulla i 52px che la freccia occupa (16 + 36): la colonna e' centrata
+	   verticalmente con justify-content, e senza questo il testo stava 27px piu' in alto del telefono anche
+	   nei passi in cui la freccia e' invisibile */
+	margin: 36px 0 -52px 12px;
 	border-right: 2px solid var(--tp-text-muted);
 	border-bottom: 2px solid var(--tp-text-muted);
 	transform: rotate(45deg);
