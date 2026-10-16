@@ -47,10 +47,14 @@
 		if (span <= 0) return;
 		var u = Math.max(0, Math.min(1, -rect.top / span));
 		var w = weights(u);
+		// Il passo corrente e' quello con il peso maggiore: sotto 1024px i tre passi restano tutti
+		// visibili come stepper (fatto / in corso / da fare, come su desktop) e cambia solo lo stato,
+		// quindi qui non si tocca piu' l'opacita' dei testi. Le schermate invece si incrociano.
+		var cur = w[0] >= w[1] && w[0] >= w[2] ? 0 : (w[1] >= w[2] ? 1 : 2);
 		for (var i = 0; i < 3; i++) {
 			screens[i].style.opacity = w[i];
-			steps[i].style.opacity = w[i];
-			steps[i].classList.toggle('is-active', w[i] > 0.5);
+			steps[i].classList.toggle('is-active', i === cur);
+			steps[i].classList.toggle('is-done', i < cur);
 		}
 	}
 

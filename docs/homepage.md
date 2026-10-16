@@ -134,17 +134,20 @@ scroll (listener passivo + rAF) e a ogni `refresh`. Il trigger A, essendo scrubb
 dopo un salto: per questo in `onUpdate` lo zoom non viene toccato se la card ha gia' preso il video (`cardLive`).
 
 ### Impaginazione della sezione (desktop)
-Revisione UX del 15/10 notte: **colonna editoriale a sinistra** (titolo allineato a sinistra, stepper
-verticale, segnale di scorrimento) e telefono alla sua destra. Il telefono e' pinnato fuori dalla sezione,
-quindi la colonna non lo contiene: larghezza della colonna (`min(39%, 560px)`), suo `padding-left` (13%) e
-`x` delle pose vanno tenute coerenti **a mano**, sono tre numeri che descrivono una sola composizione.
+Revisione UX del 15/10 notte: **colonna editoriale** (titolo allineato a sinistra, stepper verticale,
+segnale di scorrimento) e telefono di fianco. Dal 16/10 il **telefono sta a sinistra e la colonna a destra**
+(richiesta di Guido). Il telefono e' pinnato fuori dalla sezione, quindi la colonna non lo contiene:
+larghezza della colonna (`min(39%, 560px)`), suo `padding-right` (13%) e `x` delle pose vanno tenute
+coerenti **a mano**, sono tre numeri che descrivono una sola composizione. Le `x` negative sono le
+precedenti specchiate rispetto al centro del viewport, cosi' i margini esterni sono quelli di prima
+scambiati di lato.
 
 **Bilanciamento (16/10).** Prima la colonna partiva da 6,7% e il telefono stava al centro della propria
 meta' (`x: 200`): a 1440 restavano 96px di margine a sinistra contro 373 a destra, cioe' il vuoto piu' grande
 finiva sul bordo invece che fra i due elementi. Ora testo e telefono sono un blocco unico centrato
-(`padding-left: 13%`, `x: 343`): a 1440 il margine sinistro vale 187 e il destro 226 — i 40px di scarto sono
-voluti, Guido ha poi chiesto il telefono un po' piu' a sinistra e piu' in basso rispetto al centraggio esatto
-(`x: 383`, `y: 0`). Il titolo non e' piu' allineato agli H2 delle altre sezioni (76-80px), ma fra Come funziona e Servizi
+(`padding` 13% dal proprio lato, `x: -337`): a 1440 i margini esterni valgono 187 e 226 — i 40px di scarto
+sono voluti, Guido ha chiesto il telefono un po' piu' verso il centro e piu' in basso rispetto al
+centraggio esatto. Il titolo non e' piu' allineato agli H2 delle altre sezioni (76-80px), ma fra Come funziona e Servizi
 c'e' in mezzo lo zoom-through a tutto schermo, quindi quell'allineamento non e' mai visibile.
 
 Le pose hanno `y: 0.035` su tutti gli stati (prima `0.075`, poi `0`): la colonna e' centrata verticalmente nel
@@ -365,6 +368,15 @@ della rispettiva sezione; i numeri vengono dai frame mobile del Figma.
   larghezza del contenuto con `flex: 0 1 auto`, mentre marchio e blocco Cleaner CTA occupano l'intera
   riga), divisore, copyright e link legali. Sotto i 390px il corpo scende a 13px e il passo fra le colonne
   a 12: e' quanto basta a tenere le tre colonne su una riga a 360 senza troncare "Come guadagnare".
+
+**Come funziona sotto 1024px: lo stepper** (16/10). Prima i tre testi si alternavano nello stesso riquadro,
+uno per volta e centrati: non si capiva a che punto si fosse ne' quanti passi ci fossero. Ora sotto 1024px
+c'e' lo stesso stepper del desktop — i tre passi tutti visibili, numero di fianco al titolo, allineati a
+sinistra, linea di collegamento che si colora fino al passo corrente, e solo il passo in corso che apre il
+proprio paragrafo. `hiw-sequence.js` non tocca piu' l'opacita' dei testi: calcola il passo corrente dal peso
+maggiore e mette `is-active` / `is-done`; le schermate dentro al telefono continuano a incrociarsi.
+Il riquadro dei passi tiene un'altezza fissa (236px) perche' il telefono sotto non salti quando cambia la
+lunghezza del paragrafo, e titolo e sottotitolo sono allineati a sinistra come lo stepper.
 
 ## 11. QA
 

@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.29.1
+Version: 0.31.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -765,16 +765,17 @@ a {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
-	/* la regola base centra il contenitore (margin: 0 auto): qui la colonna deve stare a sinistra */
-	margin: 0;
+	/* la regola base centra il contenitore (margin: 0 auto): qui la colonna deve stare a destra, con il
+	   telefono a sinistra (16/10, richiesta di Guido: prima era l'opposto) */
+	margin: 0 0 0 auto;
 	width: min(39%, 560px);
 	max-width: none;
 	/* 16/10: la coppia testo+telefono e' centrata come blocco unico. Prima la colonna partiva da 6,7%
 	   e il telefono restava al centro della propria meta': 96px di margine a sinistra contro 373 a
-	   destra, con il vuoto piu' grande sul bordo invece che fra i due elementi. Con 13% qui e x: 383
-	   nelle POSES i due margini esterni valgono ~187 e ~190 a 1440x980. Cambiare questo padding senza
-	   cambiare la x delle POSES rompe il bilanciamento: vanno insieme. */
-	padding: 0 0 0 13%;
+	   destra, con il vuoto piu' grande sul bordo invece che fra i due elementi. Il 13% qui e la x delle
+	   POSES descrivono una sola composizione: cambiarne uno senza l'altro la rompe. Da quando il
+	   telefono e' passato a sinistra il padding e' a destra e la x e' negativa. */
+	padding: 0 13% 0 0;
 	opacity: var(--hiw-text-fade, 1);
 }
 .motion-ok .how-it-works__title {
@@ -987,22 +988,112 @@ a {
 		height: calc(100dvh - var(--tp-navbar-h));
 		padding-bottom: 24px;
 	}
-	/* I tre testi occupano lo stesso riquadro e si alternano: altezza fissa, altrimenti il telefono
-	   salta quando il paragrafo lungo sostituisce quello corto. */
+	/* Stepper, come su desktop: i tre passi restano tutti visibili con il numero di fianco al titolo,
+	   allineati a sinistra, uniti da una linea che si colora fino al passo corrente; solo il passo in
+	   corso apre il proprio paragrafo. Prima i tre testi si alternavano nello stesso riquadro, uno per
+	   volta e centrati: non si capiva a che punto si fosse ne' quanti passi ci fossero (16/10, Guido).
+	   L'altezza resta fissa, altrimenti il telefono sotto salta quando cambia la lunghezza del paragrafo. */
+	/* con lo stepper allineato a sinistra, un titolo centrato sopra resterebbe scollegato */
+	.hiw-seq-ok .how-it-works__sticky {
+		align-items: flex-start;
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+	.hiw-seq-ok .how-it-works__title,
+	.hiw-seq-ok .how-it-works__subtitle {
+		text-align: left;
+	}
+	.hiw-seq-ok .hiw-seq {
+		align-self: center;
+	}
 	.hiw-seq-ok .how-it-works__steps {
 		position: relative;
-		display: block;
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
 		width: 100%;
 		max-width: 350px;
-		height: 180px;
-		margin-top: 28px;
+		height: 236px;
+		margin-top: 24px;
+		text-align: left;
 	}
 	.hiw-seq-ok .how-it-works__step {
-		position: absolute;
-		inset: 0;
+		position: relative;
+		display: grid;
+		grid-template-columns: 32px 1fr;
+		column-gap: 14px;
+		align-items: start;
 		margin: 0;
+		padding-bottom: 16px;
 		max-width: none;
-		/* nessuna transition: l'opacita' la guida lo scroll, una transizione CSS le andrebbe contro */
+		text-align: left;
+		opacity: 1;
+	}
+	.hiw-seq-ok .how-it-works__step:last-child {
+		padding-bottom: 0;
+	}
+	/* linea di collegamento fra i pallini: e' l'indicatore di avanzamento */
+	.hiw-seq-ok .how-it-works__step:not(:last-child)::before {
+		content: '';
+		position: absolute;
+		left: 15px;
+		top: 32px;
+		bottom: 0;
+		width: 2px;
+		background: var(--tp-border);
+	}
+	.hiw-seq-ok .how-it-works__step.is-done::before {
+		background: var(--tp-primary);
+	}
+	.hiw-seq-ok .how-it-works__badge {
+		width: 32px;
+		height: 32px;
+		border-radius: 16px;
+		font-size: 14px;
+		background: var(--tp-border);
+		color: var(--tp-text-muted);
+		transition: background-color 260ms cubic-bezier(0.4, 0, 0.2, 1), color 260ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.hiw-seq-ok .how-it-works__step.is-done .how-it-works__badge,
+	.hiw-seq-ok .how-it-works__step.is-active .how-it-works__badge {
+		background: var(--tp-primary);
+		color: var(--tp-white);
+	}
+	.hiw-seq-ok .how-it-works__text {
+		margin-top: 0;
+	}
+	.hiw-seq-ok .how-it-works__text h3 {
+		margin: 4px 0 0;
+		font-size: 17px;
+		line-height: 24px;
+		color: var(--tp-text-muted);
+		transition: color 260ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.hiw-seq-ok .how-it-works__step.is-done .how-it-works__text h3 {
+		color: var(--tp-text-body);
+	}
+	.hiw-seq-ok .how-it-works__step.is-active .how-it-works__text h3 {
+		color: var(--tp-text-heading);
+	}
+	/* il paragrafo del passo in corso si apre: 0fr -> 1fr e' l'unico modo di animare un'altezza automatica */
+	.hiw-seq-ok .how-it-works__text p {
+		display: grid;
+		grid-template-rows: 0fr;
+		max-width: none;
+		margin: 0;
+		font-size: 15px;
+		line-height: 23px;
+		opacity: 0;
+		overflow: hidden;
+		transition: grid-template-rows 320ms cubic-bezier(0.4, 0, 0.2, 1), opacity 240ms linear, margin-top 320ms cubic-bezier(0.4, 0, 0.2, 1);
+	}
+	.hiw-seq-ok .how-it-works__step.is-active .how-it-works__text p {
+		grid-template-rows: 1fr;
+		margin-top: 6px;
+		opacity: 1;
+	}
+	.hiw-seq-ok .how-it-works__text p > * {
+		min-height: 0;
 	}
 	.hiw-seq-ok .how-it-works__phone-static {
 		display: none;
