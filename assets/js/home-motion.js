@@ -56,12 +56,13 @@
 		// unico centrato (va insieme al padding 13% di .how-it-works__sticky). Con y 0.075 il telefono stava
 		// 63px piu' in basso del testo, che e' centrato sul viewport: a 0 sono centrati entrambi, a qualunque
 		// altezza di finestra.
-		s1: { x: 383, y: 0, ry: -10, rx: 3, rz: -5, s: 1.2, k: 1 },
-		s2: { x: 383, y: 0, ry: 10, rx: 3, rz: 5, s: 1.2, k: 1 },
-		s3: { x: 373, y: 0, ry: -5, rx: 2, rz: -3, s: 1.22, k: 1 },
+		// 16/10, secondo giro su richiesta di Guido: 40px piu' a sinistra e 0,035 di viewport piu' in basso.
+		s1: { x: 343, y: 0.035, ry: -10, rx: 3, rz: -5, s: 1.2, k: 1 },
+		s2: { x: 343, y: 0.035, ry: 10, rx: 3, rz: 5, s: 1.2, k: 1 },
+		s3: { x: 333, y: 0.035, ry: -5, rx: 2, rz: -3, s: 1.22, k: 1 },
 		// La posa finale (raddrizzata, da cui parte lo zoom-through) tiene la stessa scala degli stati:
 		// con s: 1 il telefono rimpiccioliva di colpo nell'ultimo segmento, subito prima dello zoom.
-		out: { x: 383, y: 0, ry: 0, rx: 0, rz: 0, s: 1.2, k: 1 }
+		out: { x: 343, y: 0.035, ry: 0, rx: 0, rz: 0, s: 1.2, k: 1 }
 	};
 	var SEQ = [POSES.s1, POSES.s2, POSES.s3, POSES.out];
 	var KEYS = ['x', 'y', 'ry', 'rx', 'rz', 's', 'k'];

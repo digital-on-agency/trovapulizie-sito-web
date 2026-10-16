@@ -142,18 +142,19 @@ quindi la colonna non lo contiene: larghezza della colonna (`min(39%, 560px)`), 
 **Bilanciamento (16/10).** Prima la colonna partiva da 6,7% e il telefono stava al centro della propria
 meta' (`x: 200`): a 1440 restavano 96px di margine a sinistra contro 373 a destra, cioe' il vuoto piu' grande
 finiva sul bordo invece che fra i due elementi. Ora testo e telefono sono un blocco unico centrato
-(`padding-left: 13%`, `x: 383`): a 1440x980 i due margini esterni valgono ~187 e ~190, a 1280 166/121, a 1680
-218/278. Il titolo non e' piu' allineato agli H2 delle altre sezioni (76-80px), ma fra Come funziona e Servizi
+(`padding-left: 13%`, `x: 343`): a 1440 il margine sinistro vale 187 e il destro 226 — i 40px di scarto sono
+voluti, Guido ha poi chiesto il telefono un po' piu' a sinistra e piu' in basso rispetto al centraggio esatto
+(`x: 383`, `y: 0`). Il titolo non e' piu' allineato agli H2 delle altre sezioni (76-80px), ma fra Come funziona e Servizi
 c'e' in mezzo lo zoom-through a tutto schermo, quindi quell'allineamento non e' mai visibile.
 
-Le pose hanno anche `y: 0` su tutti gli stati (prima `0.075`): la colonna e' centrata verticalmente nel
-viewport e il telefono e' centrato nel suo canvas, quindi con y diversa da 0 i due centri non coincidevano
-(63px a 1440x837). Per lo stesso motivo il segnale di scorrimento porta `margin-bottom: -52px`: e' invisibile
+Le pose hanno `y: 0.035` su tutti gli stati (prima `0.075`, poi `0`): la colonna e' centrata verticalmente nel
+viewport e il telefono e' centrato nel suo canvas, quindi la y e' esattamente lo scarto fra i due centri —
+0 li allinea, 0,035 lascia il telefono ~29px piu' in basso del testo, come chiesto. Per lo stesso motivo il segnale di scorrimento porta `margin-bottom: -52px`: e' invisibile
 fuori dal primo passo ma resta nel flusso, e senza quel margine spostava in alto il centraggio della colonna.
 
 [ATTENZIONE] La `x` delle pose non puo' crescere liberamente: il telefono si muove **dentro** al canvas 3D
-(vedi "Telefono 3D"), e oltre il bordo del canvas viene tagliato. Con `x: 383` il canvas e' stato portato da
-720 a 1200 di larghezza.
+(vedi "Telefono 3D"), e oltre il bordo del canvas viene tagliato. Per questa composizione il canvas e' stato
+portato da 720 a 1200 di larghezza.
 
 Lo **stepper** mostra tutti e tre i passi con il pallino numerato: quello attivo apre il proprio paragrafo
 (`grid-template-rows: 0fr -> 1fr`, l'unico modo di animare un'altezza automatica), i gia' fatti restano come
