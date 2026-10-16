@@ -50,22 +50,6 @@ $schema = array(
 			<?php if ( $args['eyebrow'] ) : ?><span class="faq__eyebrow"><?php echo esc_html( $args['eyebrow'] ); ?></span><?php endif; ?>
 			<?php if ( $args['title'] ) : ?><h2 class="faq__title"><?php echo esc_html( $args['title'] ); ?></h2><?php endif; ?>
 			<?php if ( $args['subtitle'] ) : ?><p class="faq__subtitle"><?php echo esc_html( $args['subtitle'] ); ?></p><?php endif; ?>
-			<?php if ( $has_contact ) : ?>
-			<aside class="faq__contact">
-				<?php if ( $contact['people'] || $contact['role'] ) : ?>
-				<div class="faq__founders">
-					<div class="faq__avatars" aria-hidden="true">
-						<img class="faq__avatar" src="<?php echo esc_url( $contact['avatar_1'] ?: tp_theme_asset( 'assets/img/founder-guido.png' ) ); ?>" alt="" width="46" height="46" loading="lazy">
-						<img class="faq__avatar" src="<?php echo esc_url( $contact['avatar_2'] ?: tp_theme_asset( 'assets/img/founder-christian.png' ) ); ?>" alt="" width="46" height="46" loading="lazy">
-					</div>
-					<p class="faq__founders-text"><?php if ( $contact['people'] ) : ?><strong><?php echo esc_html( $contact['people'] ); ?></strong><?php endif; ?><?php if ( $contact['role'] ) : ?><span><?php echo esc_html( $contact['role'] ); ?></span><?php endif; ?></p>
-				</div>
-				<?php endif; ?>
-				<?php if ( $contact['title'] ) : ?><p class="faq__contact-title"><?php echo esc_html( $contact['title'] ); ?></p><?php endif; ?>
-				<?php if ( $contact['text'] ) : ?><p class="faq__contact-text"><?php echo esc_html( $contact['text'] ); ?></p><?php endif; ?>
-				<?php if ( $contact['cta_label'] && $contact['cta_link'] ) : ?><a class="faq__contact-cta" href="<?php echo esc_url( $contact['cta_link'] ); ?>"><span><?php echo esc_html( $contact['cta_label'] ); ?></span><span aria-hidden="true">&rarr;</span></a><?php endif; ?>
-			</aside>
-			<?php endif; ?>
 		</div>
 		<div class="faq__list">
 			<?php foreach ( $items as $i => $f ) : $open = 0 === $i; ?>
@@ -84,6 +68,22 @@ $schema = array(
 			</div>
 			<?php endforeach; ?>
 		</div>
+		<?php if ( $has_contact ) : ?>
+		<aside class="faq__contact">
+			<?php if ( $contact['people'] || $contact['role'] ) : ?>
+			<div class="faq__founders">
+				<div class="faq__avatars" aria-hidden="true">
+					<img class="faq__avatar" src="<?php echo esc_url( $contact['avatar_1'] ?: tp_theme_asset( 'assets/img/founder-guido.png' ) ); ?>" alt="" width="46" height="46" loading="lazy">
+					<img class="faq__avatar" src="<?php echo esc_url( $contact['avatar_2'] ?: tp_theme_asset( 'assets/img/founder-christian.png' ) ); ?>" alt="" width="46" height="46" loading="lazy">
+				</div>
+				<p class="faq__founders-text"><?php if ( $contact['people'] ) : ?><strong><?php echo esc_html( $contact['people'] ); ?></strong><?php endif; ?><?php if ( $contact['role'] ) : ?><span><?php echo esc_html( $contact['role'] ); ?></span><?php endif; ?></p>
+			</div>
+			<?php endif; ?>
+			<?php if ( $contact['title'] ) : ?><p class="faq__contact-title"><?php echo esc_html( $contact['title'] ); ?></p><?php endif; ?>
+			<?php if ( $contact['text'] ) : ?><p class="faq__contact-text"><?php echo esc_html( $contact['text'] ); ?></p><?php endif; ?>
+			<?php if ( $contact['cta_label'] && $contact['cta_link'] ) : ?><a class="faq__contact-cta" href="<?php echo esc_url( $contact['cta_link'] ); ?>"><span><?php echo esc_html( $contact['cta_label'] ); ?></span><span aria-hidden="true">&rarr;</span></a><?php endif; ?>
+		</aside>
+		<?php endif; ?>
 	</div>
 	<script type="application/ld+json"><?php echo wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); ?></script>
 </section>

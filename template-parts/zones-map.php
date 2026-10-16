@@ -21,13 +21,20 @@ $cities    = array_values( array_filter( array_map( 'trim', (array) $args['citie
 <section class="zones" id="dove-siamo" data-reveal>
 	<div class="zones__inner">
 		<?php if ( $args['title'] ) : ?><h2 class="zones__title"><?php echo esc_html( $args['title'] ); ?></h2><?php endif; ?>
+		<?php
+		// Lo "stage" ha sempre il rapporto della mappa (1280x714) e porta img + overlay, che sono in
+		// percentuale su di lui. Serve perche' su mobile il riquadro visibile e' 350x220 (rapporto diverso):
+		// se gli overlay fossero figli del riquadro, al cambio di rapporto si staccherebbero dalla mappa.
+		?>
 		<div class="zones__map">
-			<img class="zones__map-img" src="<?php echo esc_url( $map ); ?>" alt="<?php esc_attr_e( 'Mappa delle zone coperte' ); ?>" loading="lazy" width="1280" height="714">
-			<?php if ( $overlays ) : ?>
-			<div class="zones__overlay zones__overlay--centro" aria-hidden="true"><img src="<?php echo esc_url( tp_theme_asset( 'assets/img/zones-overlay-centro.png' ) ); ?>" alt="" loading="lazy"></div>
-			<div class="zones__overlay zones__overlay--prati" aria-hidden="true"><img src="<?php echo esc_url( tp_theme_asset( 'assets/img/zones-overlay-prati.jpg' ) ); ?>" alt="" loading="lazy"></div>
-			<span class="zones__radar" aria-hidden="true"></span>
-			<?php endif; ?>
+			<div class="zones__map-stage">
+				<img class="zones__map-img" src="<?php echo esc_url( $map ); ?>" alt="<?php esc_attr_e( 'Mappa delle zone coperte' ); ?>" loading="lazy" width="1280" height="714">
+				<?php if ( $overlays ) : ?>
+				<div class="zones__overlay zones__overlay--centro" aria-hidden="true"><img src="<?php echo esc_url( tp_theme_asset( 'assets/img/zones-overlay-centro.png' ) ); ?>" alt="" loading="lazy"></div>
+				<div class="zones__overlay zones__overlay--prati" aria-hidden="true"><img src="<?php echo esc_url( tp_theme_asset( 'assets/img/zones-overlay-prati.jpg' ) ); ?>" alt="" loading="lazy"></div>
+				<span class="zones__radar" aria-hidden="true"></span>
+				<?php endif; ?>
+			</div>
 		</div>
 		<?php if ( $args['description'] ) : ?><p class="zones__desc"><?php echo esc_html( $args['description'] ); ?></p><?php endif; ?>
 		<?php if ( $cities ) : ?>

@@ -328,6 +328,44 @@ Le tre schermate vengono da `tools/step-posters-export.sh`, che le estrae dal vi
 `T` in `assets/js/screen-timeline.js` (0,5 / 4,5 / 8,5 s, mezzo secondo dentro ogni passo per non cogliere
 la transizione). Cambiando i tempi del video desktop vanno rigenerate.
 
+**Le altre sezioni sotto 1024px** (16/10, TICKET-14..19). Tutte in `style.css`, blocco `max-width: 1023px`
+della rispettiva sezione; i numeri vengono dai frame mobile del Figma.
+
+- **Servizi popolari** (`4021:965`): i sei tab vanno a capo su tre righe; nella card l'ordine diventa
+  titolo, testo, visual, "Cosa include" con i chip, pill e CTA a tutta larghezza. I due pannelli
+  (`.services__includes`, `.services__desc`) diventano `display: contents`, cosi' i loro figli sono figli
+  diretti della card e si riordinano con `order` senza duplicare markup; cosi' spariscono anche i riquadri
+  grigi, che nel Figma mobile non ci sono. Distanze tutte a 14px. Due trappole chiuse: il rapporto del
+  visual sta sull'immagine e non sul contenitore (con `height: 100%` dentro un contenitore di altezza
+  automatica la percentuale non si risolve e l'immagine impone la propria altezza), e il visual prende
+  `flex: 0 0 auto` perche' le card stanno tutte nella stessa cella di griglia e la riga e' alta quanto la
+  piu' alta: col `flex: 1 1 auto` del desktop il visual si prendeva tutto lo spazio in eccesso.
+  [ATTENZIONE] L'ordine del DOM resta quello desktop: a schermo l'ordine e' quello del Figma, ma uno
+  screen reader legge ancora prima i chip e poi il titolo. Per sistemarlo servirebbe spezzare il pannello
+  descrizione in due, e su desktop i due pezzi diventerebbero due riquadri grigi separati.
+- **Social proof** (`4023:1023`): niente marquee (animazione `none`, secondo set nascosto), tre card in
+  colonna larghe 350. Dentro la card la citazione sta sopra e avatar + autore sotto sulla stessa riga: il
+  corpo diventa `display: contents` e la card una griglia a due aree. Il contatore "01 / 06" appartiene al
+  marquee desktop e qui e' nascosto.
+- **Dove siamo attivi** (`4023:1007`): il riquadro della mappa e' 350x220, rapporto diverso da quello del
+  raster (1280x714). Gli overlay sono in percentuale, quindi al cambio di rapporto si sarebbero staccati
+  dalla mappa: per questo mappa e overlay stanno dentro `.zones__map-stage`, che tiene sempre il rapporto
+  dell'immagine ed e' largo 112,7% (= 220 x 1280/714 / 350), cioe' un `object-fit: cover` applicato a
+  tutto il gruppo. Su desktop i due rapporti coincidono e lo stage e' grande quanto il riquadro.
+- **FAQ** (`4024:1007`): titolo centrato e lista accordion; la card di contatto resta sotto la lista
+  (decisione del 15/10, nel Figma mobile non c'e'). Per ottenerlo senza invertire l'ordine di lettura la
+  card e' stata spostata **dopo** la lista nel markup e `.faq__inner` e' passato da flex a **griglia**:
+  su desktop la card torna in colonna 1, riga 2, sotto il sottotitolo, e la lista occupa la colonna 2 su
+  entrambe le righe.
+- **CTA finale** (`4025:1007`): card 350x322 con la mascotte (`4025:1015`) in posizione assoluta che
+  sporge a sinistra oltre il bordo della card e del viewport. La sporgenza e' tagliata da `overflow-x:
+  clip` sulla sezione: a differenza di `overflow: hidden` non taglia l'ombra della card in verticale, e
+  non genera scroll orizzontale.
+- **Footer** (`4026:1007`): marchio a tutta larghezza, le tre colonne su una riga sola (prendono la
+  larghezza del contenuto con `flex: 0 1 auto`, mentre marchio e blocco Cleaner CTA occupano l'intera
+  riga), divisore, copyright e link legali. Sotto i 390px il corpo scende a 13px e il passo fra le colonne
+  a 12: e' quanto basta a tenere le tre colonne su una riga a 360 senza troncare "Come guadagnare".
+
 ## 11. QA
 
 Script in `tools/` (Node 22, Chromium di Playwright in cache, CDP; dettagli in `tools/README.md`):

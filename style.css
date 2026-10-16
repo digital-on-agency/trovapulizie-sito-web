@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.26.3
+Version: 0.29.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -1382,21 +1382,120 @@ a {
 		height: 240px;
 	}
 }
+/* Mobile e tablet — Figma 4021:965 (390px). La card cambia ordine: titolo, testo, visual, "Cosa include"
+   con i chip, pill e CTA a tutta larghezza. I due pannelli diventano `display: contents` cosi' i loro figli
+   sono figli diretti della card e si riordinano con `order`, senza duplicare markup e senza i riquadri
+   grigi, che nel Figma mobile non ci sono.
+   [ATTENZIONE] L'ordine del DOM resta quello desktop (pannello "Cosa include", visual, descrizione): a
+   schermo l'ordine e' quello del Figma, ma uno screen reader legge ancora prima i chip e poi il titolo.
+   Sistemarlo richiede di spezzare il pannello descrizione in due, e su desktop i due pezzi diventerebbero
+   due riquadri grigi separati invece di uno. Scelta consapevole, non una svista.
+   Tutte le distanze verticali della card valgono 14px nel Figma (padding 18, gap 14). */
 @media (max-width: 1023px) {
 	.services {
 		padding: 48px 0 56px;
 	}
+	.services__inner {
+		padding: 0 20px;
+	}
 	.services__title {
 		font-size: 28px;
+		line-height: 1.18;
+	}
+	.services__subtitle {
+		margin-top: 8px;
+		font-size: 16px;
+	}
+	/* la riga di social proof del desktop non esiste nel Figma mobile */
+	.services__proof {
+		display: none;
 	}
 	.services__tabs {
-		margin-top: 28px;
+		margin-top: 20px;
+		gap: 8px;
+	}
+	.services__tab {
+		padding: 9px 15px;
+		gap: 7px;
 	}
 	.services__cards {
-		margin-top: 24px;
+		margin-top: 20px;
 	}
 	.services__card {
-		padding: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 0;
+		height: auto;
+		padding: 18px;
+	}
+	.services__includes,
+	.services__desc {
+		display: contents;
+	}
+	.services__card-title {
+		order: 1;
+		font-size: 24px;
+		line-height: 33px;
+	}
+	.services__card-text {
+		order: 2;
+		margin-top: 14px;
+		font-size: 16px;
+		line-height: 21px;
+		color: var(--tp-text-body);
+	}
+	.services__visual {
+		order: 3;
+		margin-top: 14px;
+		height: auto;
+		/* le card stanno tutte nella stessa cella di griglia e la riga e' alta quanto la piu' alta: senza
+		   questo il `flex: 1 1 auto` del desktop faceva assorbire al visual tutto lo spazio in piu' (213px
+		   invece di 167) */
+		flex: 0 0 auto;
+		border-radius: var(--tp-radius-lg);
+	}
+	/* Il rapporto viene dal Figma (314x168) e sta sull'immagine, non sul contenitore: con `height: 100%`
+	   dentro un contenitore di altezza automatica la percentuale non si risolve, l'immagine prende la
+	   propria altezza naturale e il contenitore cresce con lei, ignorando l'aspect-ratio (213px invece
+	   di 164 a 390). */
+	.services__visual img {
+		aspect-ratio: 314 / 168;
+		height: auto;
+	}
+	/* nel Figma mobile la foto e' pulita: il velo verde serve all'atterraggio dello zoom-through, che e' solo desktop */
+	.services__visual::after,
+	.services__visual-label {
+		display: none;
+	}
+	.services__panel-title {
+		order: 4;
+		margin-top: 14px;
+	}
+	.services__chips {
+		order: 5;
+		margin-top: 14px;
+	}
+	.services__chips .tp-chip {
+		padding: 8px 12px;
+		font-size: 14px;
+		line-height: 20px;
+	}
+	/* su mobile l'evidenza diventa una pill piena (4022:1025), non una riga di testo colorato */
+	.services__highlight {
+		order: 6;
+		margin-top: 14px;
+		padding: 10px 12px;
+		border-radius: var(--tp-radius-lg);
+		background: #E7FAF4;
+		font-size: 14px;
+		line-height: 20px;
+		color: var(--tp-text-body);
+	}
+	.services__cta {
+		order: 7;
+		margin-top: 14px;
+		padding: 14px 20px;
+		font-size: 16px;
 	}
 }
 
@@ -1550,10 +1649,13 @@ a {
 		padding: 56px 0 64px;
 	}
 	.reviews__title {
-		font-size: 30px;
+		font-size: 28px;
+		line-height: 33px;
 	}
+	/* il margine e' 0 perche' il contenitore porta gia' 20px di padding in alto (spazio per l'ombra):
+	   con il margine si sommavano e la prima card scendeva di 32px invece dei 20 del Figma */
 	.reviews__marquee {
-		margin-top: 12px;
+		margin-top: 0;
 	}
 	.reviews__track {
 		display: block;
@@ -1563,18 +1665,27 @@ a {
 	}
 	.reviews__set {
 		flex-direction: column;
-		gap: 16px;
+		gap: 20px;
 		padding-right: 0;
 	}
 	.reviews__set[aria-hidden="true"],
 	.review-card:nth-child(n + 4) {
 		display: none;
 	}
+	/* Card del Figma 4023:1028: prima la citazione, sotto avatar e autore sulla stessa riga. Nel DOM
+	   l'autore sta dentro al corpo e l'avatar fuori, quindi il corpo diventa `display: contents` e la card
+	   una griglia a due aree: la citazione occupa tutta la riga, avatar e autore la seconda. */
 	.review-card {
+		display: grid;
+		grid-template-columns: 40px 1fr;
+		grid-template-areas:
+			'citazione citazione'
+			'avatar autore';
+		column-gap: 12px;
+		row-gap: 16px;
 		width: auto;
 		height: auto;
-		padding: 22px 20px;
-		gap: 16px;
+		padding: 20px;
 		opacity: 0;
 		transform: translateY(12px);
 		transition: opacity 0.5s ease, transform 0.5s ease;
@@ -1584,9 +1695,29 @@ a {
 		opacity: 1;
 		transform: none;
 	}
+	.review-card__side {
+		grid-area: avatar;
+	}
+	.review-card__body {
+		display: contents;
+	}
+	.review-card__avatar {
+		width: 40px;
+		height: 40px;
+	}
+	/* il contatore "01 / 06" appartiene al marquee desktop: qui le card sono tre e ferme */
+	.review-card__index {
+		display: none;
+	}
 	.review-card__text {
-		font-size: 17px;
-		line-height: 25px;
+		grid-area: citazione;
+		font-size: 16px;
+		line-height: 24px;
+	}
+	.review-card__author {
+		grid-area: autore;
+		align-self: center;
+		font-size: 14px;
 	}
 }
 
@@ -1621,6 +1752,17 @@ a {
 	width: 100%;
 	aspect-ratio: 1280 / 714;
 	overflow: hidden;
+}
+/* Il riquadro visibile puo' avere un rapporto diverso da quello della mappa (su mobile e' 350x220): lo
+   stage tiene sempre il rapporto dell'immagine, cosi' gli overlay in percentuale restano agganciati.
+   Su desktop i due rapporti coincidono e lo stage e' semplicemente grande quanto il riquadro. */
+.zones__map-stage {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 100%;
+	aspect-ratio: 1280 / 714;
 }
 .zones__map-img {
 	display: block;
@@ -1777,14 +1919,39 @@ a {
 	transition-delay: 0s;
 }
 @media (max-width: 1023px) {
+	/* Figma 4023:1007: le distanze verticali valgono 18px, la mappa e' 350x220 */
 	.zones {
-		padding: 56px 20px;
+		padding: 48px 20px;
 	}
 	.zones__inner {
-		gap: 24px;
+		gap: 18px;
 	}
 	.zones__title {
-		font-size: 26px;
+		font-size: 28px;
+		line-height: 42px;
+	}
+	.zones__map {
+		aspect-ratio: 350 / 220;
+		border-radius: var(--tp-radius-lg);
+	}
+	/* 112.7% = 220 x (1280/714) / 350: lo stage copre il riquadro in altezza e viene tagliato ai lati,
+	   come un object-fit cover applicato a mappa e overlay insieme */
+	.zones__map-stage {
+		width: 112.7%;
+	}
+	.zones__desc {
+		font-size: 16px;
+		line-height: 23px;
+	}
+	.zones__coming {
+		gap: 18px;
+	}
+	.zones__coming-label {
+		font-size: 14px;
+	}
+	.zones__city {
+		padding: 8px 16px;
+		font-size: 14px;
 	}
 	.zones__radar {
 		display: none;
@@ -1801,20 +1968,35 @@ a {
 	padding: 80px 20px;
 	background: #F6FBF9;
 }
+/* Due colonne come griglia, non come flex: la card di contatto sta nel DOM dopo la lista (cosi' si legge
+   nell'ordine giusto, prima le domande e poi "non hai trovato risposta") ma su desktop deve tornare nella
+   colonna di sinistra, sotto il sottotitolo. Con la griglia e' una questione di coordinate. */
 .faq__inner {
-	display: flex;
-	align-items: flex-start;
-	gap: 48px;
+	display: grid;
+	grid-template-columns: 360px 1fr;
+	align-items: start;
+	column-gap: 48px;
+	row-gap: 14px; /* stessa distanza che la colonna di sinistra tiene fra i suoi blocchi */
 	max-width: 1200px;
 	margin: 0 auto;
+}
+.faq__aside {
+	grid-column: 1;
+	grid-row: 1;
+}
+.faq__list {
+	grid-column: 2;
+	grid-row: 1 / span 2;
+}
+.faq__contact {
+	grid-column: 1;
+	grid-row: 2;
 }
 .faq__aside {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	gap: 14px;
-	flex: 0 0 360px;
-	width: 360px;
 }
 .faq__eyebrow {
 	display: inline-block;
@@ -1914,7 +2096,6 @@ a {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
-	flex: 1 1 auto;
 	min-width: 0;
 }
 .faq__item {
@@ -2007,23 +2188,45 @@ a {
 		flex-direction: column;
 		gap: 28px;
 	}
-	.faq__aside {
-		flex: none;
-		width: auto;
+	/* una colonna sola: aside, lista, contatto nell'ordine del DOM */
+	.faq__inner {
+		grid-template-columns: 1fr;
 	}
-	.faq__list {
-		width: 100%;
+	.faq__aside,
+	.faq__list,
+	.faq__contact {
+		grid-column: 1;
+		grid-row: auto;
 	}
 }
+/* Mobile — Figma 4024:1007: titolo centrato e lista accordion; la card di contatto resta sotto la lista
+   (decisione del 15/10, nel Figma mobile non c'e'). */
 @media (max-width: 1023px) {
 	.faq {
-		padding: 56px 20px;
+		padding: 48px 20px;
+	}
+	.faq__inner {
+		row-gap: 20px;
+	}
+	.faq__aside {
+		align-items: center;
+		text-align: center;
+		gap: 10px;
 	}
 	.faq__title {
-		font-size: 30px;
+		font-size: 28px;
+		line-height: 42px;
 	}
 	.faq__item {
 		padding: 18px 20px;
+	}
+	.faq__q {
+		font-size: 16px;
+		line-height: 24px;
+	}
+	.faq__a-inner p {
+		font-size: 15px;
+		line-height: 24px;
 	}
 }
 /* =========================
@@ -2141,34 +2344,48 @@ a {
 	}
 }
 @media (max-width: 1023px) {
+	/* Figma 4025:1007: card 350x322 con il testo dentro e la mascotte (4025:1015) che sporge a sinistra
+	   oltre il bordo della card e oltre quello del viewport. `overflow-x: clip` sulla sezione taglia la
+	   sporgenza senza generare scroll orizzontale e, a differenza di `overflow: hidden`, non taglia
+	   l'ombra della card in verticale. */
 	.cta-final {
-		padding: 16px 20px 48px;
+		padding: 40px 20px 48px;
+		overflow-x: clip;
 	}
 	.cta-final__card {
-		flex-direction: column;
-		align-items: center;
-		height: auto;
-		padding: 40px 24px 0;
-		gap: 24px;
+		display: block;
+		height: 322px;
+		padding: 36px 28px;
+		overflow: visible;
 	}
 	.cta-final__text {
-		height: auto;
+		gap: 14px;
+		height: 100%;
+		justify-content: flex-start;
 	}
 	.cta-final__title {
 		font-size: 28px;
+		line-height: 42px;
 	}
 	.cta-final__subtitle {
 		font-size: 16px;
 		line-height: 24px;
 	}
 	.cta-final__button {
-		padding: 16px 28px;
+		padding: 15px 28px;
 		font-size: 16px;
 	}
+	.cta-final__note {
+		max-width: 210px;
+		font-size: 13px;
+		line-height: 20px;
+	}
 	.cta-final__art {
-		order: 2;
-		width: 160px;
-		height: 172px;
+		position: absolute;
+		left: -31px;
+		bottom: -20px;
+		width: 137px;
+		height: 184px;
 		flex-basis: auto;
 	}
 }
@@ -2348,25 +2565,70 @@ a {
 	}
 }
 @media (max-width: 1023px) {
+	/* Figma 4026:1007: marchio a tutta larghezza, le tre colonne su una riga sola, blocco Cleaner CTA,
+	   divisore, copyright e link legali. Le tre colonne stanno su una riga perche' prendono la larghezza
+	   del contenuto (`flex: 0 1 auto`) mentre marchio e CTA occupano l'intera riga. */
 	.site-footer {
-		padding: 40px 20px 28px;
+		padding: 44px 20px 32px;
 	}
 	.site-footer__top {
-		gap: 28px 20px;
+		flex-wrap: wrap;
+		gap: 28px 18px;
+	}
+	.site-footer__brand {
+		flex: 1 1 100%;
+		max-width: none;
+		gap: 12px;
 	}
 	.site-footer__col:not(.site-footer__brand):not(.site-footer__cta) {
-		flex: 1 1 40%;
+		flex: 0 1 auto;
+		min-width: 0;
+		gap: 12px;
+	}
+	.site-footer__links {
+		padding-top: 0;
+		gap: 10px;
+	}
+	.site-footer__cta {
+		flex: 1 1 100%;
+		gap: 8px;
+		padding: 18px 20px;
+		white-space: normal;
+	}
+	.site-footer__cta-text {
+		font-size: 15px;
+		line-height: 23px;
 	}
 	.site-footer__divider {
-		margin: 28px 0 20px;
+		margin: 28px 0;
 	}
 	.site-footer__bottom {
 		flex-direction: column;
 		align-items: flex-start;
+		gap: 28px;
+		font-size: 13px;
 	}
 	.site-footer__legal {
 		flex-wrap: wrap;
-		gap: 12px 20px;
+		gap: 12px 16px;
+	}
+}
+/* Sotto i 390px le tre colonne del footer non ci stanno piu' a 14px: il corpo scende a 13 e il passo fra
+   le colonne a 12, che e' quanto basta per tenerle su una riga a 360 senza troncare "Come guadagnare". */
+@media (max-width: 389px) {
+	/* il badge e' lungo 363px a 14px con `white-space: nowrap`: a 360 usciva dalla sezione e veniva
+	   tagliato. Qui puo' andare a capo e il corpo scende di un punto. */
+	.reviews__badge {
+		white-space: normal;
+		padding: 8px 14px;
+		font-size: 13px;
+	}
+	.site-footer__top {
+		gap: 28px 12px;
+	}
+	.site-footer__col,
+	.site-footer__heading {
+		font-size: 13px;
 	}
 }
 
