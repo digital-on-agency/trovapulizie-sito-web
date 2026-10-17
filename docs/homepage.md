@@ -234,13 +234,29 @@ blocco unico in coda a `style.css` che azzera transizioni e animazioni di tutte 
 
 | File | Campo | Uso | Produzione |
 |---|---|---|---|
-| `assets/video/hero-timelapse.mp4` (1 MB, 3 s) | `hero_video` | sfondo hero | `tools/hero-video-encode.sh <sorgente>` (accelera a 3 s, 1600px, crf 26) |
+| `assets/video/hero-timelapse.mp4` (1 MB, 3 s, 1600px) | `hero_video` | sfondo hero da --tp-bp-desktop in su | `tools/hero-video-encode.sh <sorgente>` (accelera a 3 s, 1600px, crf 26) |
+| `assets/video/hero-timelapse-720.mp4` (155 KB, 720px) | - (per convenzione) | sfondo hero sotto la soglia desktop | `ffmpeg -i hero-timelapse.mp4 -an -vf scale=720:-2:flags=lanczos -c:v libx264 -preset slow -crf 28 -movflags +faststart` |
 | `assets/video/come-funziona.mp4` (5 MB, 12,6 s, all-intra) | `how_it_works_video` | schermo del telefono, scrubbed | `tools/screen-storyboard/render.js` (frame PNG via Chromium) + ffmpeg con `keyint=1` (comando nell'header di render.js) |
 | `assets/video/come-funziona-zoom.mp4` (6 MB, 2560px) | `how_it_works_zoom_video` | zoom-through e card Servizi | `tools/zoom-video-encode.sh <sorgente>` (salva anche il primo frame in `come-funziona-zoom-frame.jpg`) |
 | `assets/video/placeholder-dev.mp4` | - | non referenziato (residuo del 14/10) | - |
 
 Sullo staging i tre campi puntano ai file del tema (URL `wp-content/themes/trovapulizie/assets/video/...`),
 non alla libreria media: cosi' il `?ver=` del tema li invalida.
+
+### Rendition per mobile (TICKET-20)
+
+Sotto `--tp-bp-desktop` il box della hero e' alto 270px e il telefono e' largo 150: i file a misura desktop
+sono fuori scala. Due meccanismi, diversi perche' diversa e' la sorgente:
+
+- **foto del box**: `assets/img/hero-box-720.jpg` scelta dal CSS nel blocco sotto soglia (media query, nessun JS);
+- **video del box**: `hero-video.js` legge `--tp-bp-desktop` e, sotto soglia, sostituisce nell'URL del campo WP
+  `.mp4` con `-720.mp4`. **La convenzione e' il contratto**: non c'e' un campo WP per la rendition mobile, il
+  nome del file la deve rispettare. Se la rendition manca, il listener sull'evento `error` toglie `src` e resta
+  la foto: da mobile il file desktop non viene chiesto **in nessun caso**, nemmeno come ripiego.
+
+[ATTENZIONE] Il poster di un `<video>` e l'`<img>` che mostra lo stesso file devono avere **lo stesso URL**,
+query di versione inclusa: `?ver=` su uno solo dei due significa due richieste dello stesso file. Per questo
+ogni URL che arriva da un campo WP passa da `tp_versioned_url()`, non solo gli asset del tema.
 
 Texture dell'overlay 3D: `assets/img/tiles/` (tile dei servizi, `card-laura.png`). La card viene ritagliata dallo
 screen Figma con `tools/screen-storyboard/cut-card.py`, che stampa anche il box da riportare in
@@ -252,7 +268,7 @@ Quando il campo WP e' vuoto il template usa l'asset del tema (sempre via `tp_the
 
 | Campo vuoto | Asset |
 |---|---|
-| `how_it_works_poster` | `assets/img/hero-phone-screen.png` (schermo nella hero) |
+| `how_it_works_poster` | `assets/img/come-funziona-step1-poster.jpg` (360x780, 24 KB: lo schermo del telefono e' largo 146px su mobile e 294 su desktop) |
 | step `image` | `assets/img/screen-step1-servizio.png`, `screen-step2-cleaner.png`, `screen-step3-conferma.png` |
 | `card_image` | `assets/img/services-visual-pulizia-casa.jpg` |
 | `services_proof_avatar` | `assets/img/services-proof-avatar.jpg` |
@@ -391,14 +407,14 @@ Letture: in headless le transizioni CSS avanzano solo quando si scatta uno scree
 rilanciare con attese piu' lunghe (`slow`). I numeri loggati vanno confrontati con il run precedente: un
 refactor senza cambi di comportamento deve dare gli stessi valori.
 
-## 12. Limiti noti (15/10/2026, ver 0.18.0)
+## 12. Limiti noti (17/10/2026, ver 0.32.1)
 
-- Mobile e tablet: fatti base (TICKET-10), navbar (11), hero (12) e Come funziona come sequenza di schermate (13 rev. 2).
-  Restano al layout desktop: servizi, recensioni, mappa, FAQ, CTA, footer.
-  Ticket TICKET-14..21 in `spec/tickets/` nel vault.
-- `reviews__badge` sporge dal viewport a 360px (clippato, non genera scroll): lo chiude TICKET-15.
-- Gli screen PNG a piena risoluzione non sono piu' caricati dalla pagina (restano per lo storyboard):
-  i poster dei passi ora sono i fotogrammi dei clip. Il peso a 390px e' sceso da 1508 a 1323 KB.
+- Mobile e tablet: la Home e' completa (TICKET-10..20). Resta TICKET-21: prova su iPhone reale (Low Power Mode
+  e barra dinamica di Safari non sono riproducibili in headless). Ticket in `spec/tickets/` nel vault.
+- Gli screen PNG a piena risoluzione non sono piu' caricati dalla pagina (restano per lo storyboard).
+  Peso trasferito a 390px: 1508 KB (15/10) -> 1331 (16/10) -> **306 KB** (17/10, TICKET-20).
+- Il peso **desktop** non e' stato ottimizzato (682 KB, di cui il video hero a piena misura): fuori dal
+  perimetro di TICKET-20.
 - Contenuti segnaposto: recensioni, badge Google, FAQ 2-5, servizi Uffici/Condomini, URL social, link
   Prezzi/Accedi/Registrati, pagine linkate dal footer non esistenti.
 - Search bar della hero statica: il widget di ricerca reale e' il widget JS di ADR-001.

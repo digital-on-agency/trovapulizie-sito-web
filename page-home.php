@@ -130,9 +130,14 @@ $cta_args         = array(
 		</div>
 		<div class="hero__phone" id="hiw-phone-pin" data-theme="<?php echo esc_attr( get_stylesheet_directory_uri() ); ?>" data-ver="<?php echo esc_attr( tp_theme_version() ); ?>" data-model="<?php echo esc_attr( carbon_get_the_post_meta( 'phone_model_url' ) ); ?>">
 			<?php get_template_part( 'template-parts/phone-mockup', null, array(
-				'screen' => $hiw_poster ?: tp_theme_asset( 'assets/img/hero-phone-screen.png' ),
-				'video'  => $hiw_video ? tp_versioned_url( $hiw_video ) : '', // il video e' cachato 7 giorni dall'hosting: la versione del tema lo invalida
-				'poster' => $hiw_poster,
+				// Poster/schermo del telefono: va caricato gia' ridimensionato (~360px di larghezza).
+				// Lo schermo e' largo 146px su mobile e 294 su desktop: i PNG a piena risoluzione del
+				// Figma (1170px, 86-97 KB serviti) sono fuori misura su ogni viewport (TICKET-20).
+				'screen' => tp_versioned_url( $hiw_poster ) ?: tp_theme_asset( 'assets/img/' . $step_fallbacks[0] ),
+				'video'  => tp_versioned_url( $hiw_video ), // il video e' cachato 7 giorni dall'hosting: la versione del tema lo invalida
+				// Stesso URL dell'<img> della sequenza (tp_versioned_url su entrambi): senza il ?ver
+				// il poster e l'immagine sono due richieste per lo stesso file (TICKET-20).
+				'poster' => tp_versioned_url( $hiw_poster ),
 				'id'     => 'hiw-phone',
 			) ); ?>
 			<div class="hero__phone-3d" aria-hidden="true"></div>
@@ -154,7 +159,7 @@ $cta_args         = array(
 			<ol class="how-it-works__steps">
 				<?php foreach ( array_slice( $steps, 0, 3 ) as $i => $step ) :
 					$n      = $i + 1;
-					$screen = ! empty( $step['image'] ) ? wp_get_attachment_url( $step['image'] ) : tp_theme_asset( 'assets/img/' . $step_fallbacks[ $i ] );
+					$screen = ! empty( $step['image'] ) ? tp_versioned_url( wp_get_attachment_url( $step['image'] ) ) : tp_theme_asset( 'assets/img/' . $step_fallbacks[ $i ] );
 				?>
 				<li class="how-it-works__step how-it-works__step--<?php echo $n; ?><?php echo 1 === $n ? ' is-active' : ''; ?>" data-step="<?php echo $n; ?>">
 					<span class="how-it-works__badge"><?php echo $n; ?></span>
@@ -179,7 +184,7 @@ $cta_args         = array(
 			// nascosto e si vedono i tre blocchi impilati qui sopra.
 			$seq_screens = array();
 			foreach ( array_slice( $steps, 0, 3 ) as $i => $step ) {
-				$seq_screens[] = ! empty( $step['image'] ) ? wp_get_attachment_url( $step['image'] ) : tp_theme_asset( 'assets/img/' . $step_fallbacks[ $i ] );
+				$seq_screens[] = ! empty( $step['image'] ) ? tp_versioned_url( wp_get_attachment_url( $step['image'] ) ) : tp_theme_asset( 'assets/img/' . $step_fallbacks[ $i ] );
 			}
 			?>
 			<div class="hiw-seq" aria-hidden="true">

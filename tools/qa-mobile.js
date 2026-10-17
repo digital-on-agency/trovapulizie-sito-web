@@ -7,13 +7,17 @@
    - la classe motion-ok compare solo da --tp-bp-desktop in su;
    - sotto la soglia non vengono richiesti GSAP (cdnjs) ne' Three.js (jsdelivr);
    - altezza della sezione Come funziona e geometrie utili ai ticket di sezione;
-   - peso trasferito e risorse scaricate piu' di una volta (avviso finche' non si esegue TICKET-20).
+   - peso trasferito (per URL, le richieste Range di uno stesso video sommate), budget mobile di 2560 KB,
+     rendition ridotte dei media (nessuno screen a piena risoluzione, mp4 solo nella variante -720)
+     e nessun file chiesto con due URL diversi (TICKET-20).
    Esce con codice 1 se almeno un controllo fallisce. */
 const { withChrome } = require('./lib/cdp.js');
 
 const bin = process.argv[2];
 const url = process.argv[3];
 const widths = (process.argv[4] || '360,390,430,768,1023,1024').split(',').map(Number);
+// Budget di peso trasferito sotto la soglia desktop (SPEC-home-mobile, TICKET-20).
+const BUDGET_KB = 2560;
 if (!bin || !url) {
 	console.error('Uso: node tools/qa-mobile.js <chrome> <url> [larghezze]');
 	process.exit(2);
@@ -31,12 +35,27 @@ const PROBE = `(() => {
 			off.push((el.tagName.toLowerCase() + (cls ? '.' + cls : '')) + ' [' + Math.round(r.left) + '..' + Math.round(r.right) + ']');
 		}
 	});
+	// Peso per URL: un video scaricato con richieste Range compare in piu' entry sullo stesso URL,
+	// sommarle e' l'unico modo di avere il peso vero del file (TICKET-20).
 	const res = performance.getEntriesByType('resource');
-	const seen = {}, dup = [];
+	const perUrl = {}, urlsDiFile = {};
 	res.forEach(r => {
+		perUrl[r.name] = (perUrl[r.name] || 0) + r.transferSize;
 		const f = r.name.split('/').pop().split('?')[0];
-		if (seen[f] && seen[f] !== r.name) { if (dup.indexOf(f) < 0) dup.push(f); } else seen[f] = r.name;
+		urlsDiFile[f] = urlsDiFile[f] || [];
+		if (urlsDiFile[f].indexOf(r.name) < 0) urlsDiFile[f].push(r.name);
 	});
+	// Doppione = stesso file chiesto con due URL diversi (tipico: una volta con ?ver e una senza).
+	const dup = Object.keys(urlsDiFile).filter(f => urlsDiFile[f].length > 1);
+	const pesanti = Object.keys(perUrl)
+		.map(u => ({ file: u.split('/').pop(), kb: Math.round(perUrl[u] / 1024) }))
+		.sort((a, b) => b.kb - a.kb).slice(0, 6);
+	// Risorse fuori budget per mobile: gli screen a piena risoluzione del Figma e i video senza rendition
+	// ridotta (convenzione: <nome>-720.mp4). Il confronto e' sul nome, non sul peso: il peso trasferito
+	// dipende da quanto e' arrivato al momento della lettura.
+	const base = u => u.split('/').pop().split('?')[0];
+	const screenPieni = Object.keys(perUrl).map(base).filter(f => /^screen-step\\d.*\\.png$/.test(f));
+	const videoPieni = Object.keys(perUrl).map(base).filter(f => /\\.mp4$/.test(f) && !/-720\\.mp4$/.test(f));
 	const hiw = document.querySelector('.how-it-works');
 	const steps = [].map.call(document.querySelectorAll('.how-it-works__step'), el => {
 		const ph = el.querySelector('.tp-phone');
@@ -74,8 +93,11 @@ const PROBE = `(() => {
 		bp: getComputedStyle(document.documentElement).getPropertyValue('--tp-bp-desktop').trim(),
 		hiwHeight: hiw ? Math.round(hiw.getBoundingClientRect().height) : null,
 		cdn: res.filter(r => /cdnjs|jsdelivr/.test(r.name)).map(r => r.name.split('/').pop()),
-		kb: Math.round(res.reduce((s, r) => s + r.transferSize, 0) / 1024),
+		kb: Math.round(Object.keys(perUrl).reduce((s, u) => s + perUrl[u], 0) / 1024),
 		dup: dup,
+		pesanti: pesanti,
+		screenPieni: screenPieni,
+		videoPieni: videoPieni,
 		steps: steps,
 		seq: seq,
 		videoSezione: videoSezione,
@@ -128,13 +150,20 @@ const PROBE = `(() => {
 				if (!r.hero.phone || r.hero.phone[2] !== 150 || r.hero.phone[3] !== 300) errors.push('telefono hero ' + JSON.stringify(r.hero.phone) + ', atteso 150x300');
 				if (r.hero.phone && r.hero.box && r.hero.phone[1] + r.hero.phone[3] <= r.hero.box[1] + r.hero.box[3]) errors.push('il telefono non sporge sotto il box della hero');
 			}
-			// I doppioni restano un avviso finche' non viene eseguito TICKET-20 (peso dei media).
-			const avvisi = r.dup.length ? ['scaricate piu\' volte: ' + r.dup.join(', ')] : [];
+			// Peso dei media (TICKET-20): budget, rendition per mobile, nessun doppione fra URL diversi.
+			if (r.dup.length) errors.push('stesso file con URL diversi: ' + r.dup.join(', '));
+			if (!desktop) {
+				if (r.kb > BUDGET_KB) errors.push('peso ' + r.kb + ' KB oltre il budget di ' + BUDGET_KB);
+				if (r.screenPieni.length) errors.push('screen a piena risoluzione su mobile: ' + r.screenPieni.join(', '));
+				if (r.videoPieni.length) errors.push('video senza rendition ridotta: ' + r.videoPieni.join(', '));
+			}
+			const avvisi = [];
 			const esito = errors.length ? 'KO' : 'ok';
 			console.log('[' + esito + '] ' + w + 'px  scrollWidth ' + r.scrollWidth + '  motion-ok ' + r.motionOk + '  Come funziona ' + r.hiwHeight + 'px  ' + r.kb + ' KB');
 			errors.forEach(e => console.log('      - ' + e));
 			avvisi.forEach(a => console.log('      ~ avviso: ' + a));
 			if (r.offenders.length) console.log('      fuori viewport: ' + r.offenders.join(' | '));
+			console.log('      piu\' pesanti: ' + r.pesanti.map(p => p.kb + ' KB ' + p.file).join(' | '));
 			if (errors.length) failed++;
 		});
 	}

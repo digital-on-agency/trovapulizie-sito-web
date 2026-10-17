@@ -15,7 +15,7 @@ Ogni script usa una porta di debug diversa, quindi possono girare in parallelo.
 | `qa-section.js <chrome> <url> <selettore> [width=1440] [out] [selettore-click]` | una sezione a una larghezza, con click opzionale | screenshot + `STATE` (rect, `is-in`, animazione, overlay) |
 | `qa-services.js <chrome> <url> [width] [slow]` | tab e card di Servizi popolari | `/tmp/cdp-services-{0,1}.png` + geometria |
 | `qa-hero-video.js <chrome> <url>` | autoplay e fine del timelapse hero | `/tmp/cdp-hero-{0,1,2}.png` + stato video |
-| `qa-mobile.js <chrome> <url> [larghezze]` | sweep mobile e tablet: scroll orizzontale, gate motion, navbar, hero, sequenza di Come funziona, risorse CDN, peso | esito per larghezza, codice di uscita 1 se fallisce. Il peso e' attendibile solo con profilo pulito (`rm -rf /tmp/cdp-profile*`) |
+| `qa-mobile.js <chrome> <url> [larghezze]` | sweep mobile e tablet: scroll orizzontale, gate motion, navbar, hero, sequenza di Come funziona, risorse CDN, peso (budget 2560 KB sotto soglia, rendition `-720` dei video, nessuno screen a piena risoluzione, nessun file chiesto con due URL) | esito per larghezza con le sei risorse piu' pesanti, codice di uscita 1 se fallisce. Il peso e' attendibile solo con profilo pulito (`rm -rf /tmp/cdp-profile*`); il peso di un video arriva da piu' richieste Range sullo stesso URL, lo script le somma |
 
 Prima di un run dopo un deploy: cancellare `/tmp/cdp-profile*` (l'HTML e' cachato 7 giorni) e attendere qualche
 secondo dopo `wp litespeed-purge all`. In headless le transizioni CSS avanzano solo allo scatto: letture a meta'

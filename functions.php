@@ -73,5 +73,8 @@ add_action( 'wp_head', function () {
 
 add_action( 'init', function () {
 	remove_action( 'wp_head', 'wp_generator' );
+	// Script delle emoji di WordPress: 22 KB per sostituire emoji che il tema non usa (TICKET-20).
+	remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+	remove_action( 'wp_print_styles', 'print_emoji_styles' );
 } );
 require_once __DIR__ . "/inc/carbon-fields.php";
