@@ -179,6 +179,8 @@ def main():
     ap.add_argument('--geojson', default=GEOJSON_DEFAULT)
     ap.add_argument('--tol', type=float, default=0.0004, help='tolleranza DP in gradi (0.0004 = circa 40 m)')
     ap.add_argument('--width', type=float, default=1000.0)
+    ap.add_argument('--margine', type=float, default=0.04, help='margine attorno ai CAP inquadrati, in frazione del lato')
+    ap.add_argument('--tutto', action='store_true', help='inquadra tutto il comune invece dei soli CAP censiti')
     args = ap.parse_args()
 
     with open(args.geojson, encoding='utf-8') as fh:
@@ -203,16 +205,6 @@ def main():
             per_cap[cap] = anelli
     contorno = [a for a in (semplifica_anello(c, args.tol) for c in contorno) if a]
 
-    tutti = [p for anelli in per_cap.values() for anello in anelli for p in anello]
-    lon_min = min(p[0] for p in tutti)
-    lon_max = max(p[0] for p in tutti)
-    lat_min = min(p[1] for p in tutti)
-    lat_max = max(p[1] for p in tutti)
-    kx = math.cos(math.radians(LAT_RIFERIMENTO))
-    scala = args.width / ((lon_max - lon_min) * kx)
-    altezza = (lat_max - lat_min) * scala
-    proietta = Proiezione(lon_min, lat_max, scala)
-
     nomi_db = {}
     percorso_export = os.path.join(QUI, 'zone-quartieri-export.json')
     if os.path.exists(percorso_export):
@@ -223,6 +215,31 @@ def main():
                     'status': riga.get('stato'),
                     'macro': riga.get('macro_zona'),
                 }
+
+    # Inquadratura. Disegnati restano tutti e 72 i CAP, ma la finestra si stringe sui CAP censiti in
+    # zone_quartieri: tutto il comune e' alto quanto largo (rapporto 1.05) e l'agro a nord, dove non
+    # operiamo, si prende meta' della figura. Sui soli CAP con nome il rapporto scende a 0.66, cioe'
+    # una fascia orizzontale che sta bene accanto al pannello. I CAP fuori finestra non spariscono:
+    # continuano oltre il bordo, che e' come si legge una mappa di citta'.
+    cap_focus = {c for c in per_cap if (nomi_db.get(c) or {}).get('name')} if not args.tutto else set(per_cap)
+    if not cap_focus:
+        cap_focus = set(per_cap)
+    punti_focus = [p for c in cap_focus for anello in per_cap[c] for p in anello]
+    lon_min = min(p[0] for p in punti_focus)
+    lon_max = max(p[0] for p in punti_focus)
+    lat_min = min(p[1] for p in punti_focus)
+    lat_max = max(p[1] for p in punti_focus)
+    margine_lon = (lon_max - lon_min) * args.margine
+    margine_lat = (lat_max - lat_min) * args.margine
+    lon_min -= margine_lon
+    lon_max += margine_lon
+    lat_min -= margine_lat
+    lat_max += margine_lat
+
+    kx = math.cos(math.radians(LAT_RIFERIMENTO))
+    scala = args.width / ((lon_max - lon_min) * kx)
+    altezza = (lat_max - lat_min) * scala
+    proietta = Proiezione(lon_min, lat_max, scala)
 
     # SVG: ordine per CAP crescente, cosi' due build dello stesso input danno file identici.
     righe = ['<svg viewBox="0 0 %d %d" xmlns="http://www.w3.org/2000/svg" class="zones-map__svg" role="img" aria-label="Mappa dei CAP di Roma">' % (round(args.width), round(altezza))]
@@ -237,7 +254,9 @@ def main():
             for chiave, valore in (('name', meta.get('name')), ('macro', meta.get('macro')))
             if valore
         )
-        righe.append('<path data-cap="%s"%s data-level="0" d="%s"/>' % (cap, attributi, path_d(per_cap[cap], proietta)))
+        # Lo stato (attiva / in arrivo / non coperta) lo scrive il JS quando arrivano i dati: qui
+        # nasce "none", cosi' senza JS la mappa resta leggibile come sagoma della citta'.
+        righe.append('<path data-cap="%s"%s data-state="none" d="%s"/>' % (cap, attributi, path_d(per_cap[cap], proietta)))
     righe.append('</g>')
     righe.append('<path class="zones-map__outline" d="%s"/>' % path_d(contorno, proietta))
     righe.append('</svg>')
@@ -257,7 +276,7 @@ def main():
     scrivi(os.path.join(TEMA, 'assets', 'data', 'cap-centroids.json'), json.dumps(centroidi, ensure_ascii=False, indent=1) + '\n')
     scrivi(os.path.join(TEMA, 'assets', 'data', 'cap-names.json'), json.dumps(nomi, ensure_ascii=False, indent=1) + '\n')
 
-    print('CAP: %d   anelli scartati: %d   anelli di contorno: %d' % (len(per_cap), len(saltati), len(contorno)))
+    print('CAP: %d (inquadrati %d)   anelli scartati: %d   anelli di contorno: %d' % (len(per_cap), len(cap_focus), len(saltati), len(contorno)))
     print('viewBox 0 0 %d %d   scala %.1f px/grado' % (round(args.width), round(altezza), scala))
     print('SVG: %.1f KB   nomi dal DB: %d su %d' % (len(svg.encode('utf-8')) / 1024, sum(1 for v in nomi.values() if v['name']), len(nomi)))
 

@@ -85,7 +85,7 @@ const PROBE = `(() => {
 		accediVisibile: !!document.querySelector('.navbar__cta .tp-btn--secondary') && getComputedStyle(document.querySelector('.navbar__cta .tp-btn--secondary')).display !== 'none',
 		h: Math.round(document.querySelector('.navbar').getBoundingClientRect().height)
 	};
-	const hero = { box: box(document.querySelector('.hero__box')), phone: box(document.querySelector('.hero .tp-phone')), bar: box(document.querySelector('.hero__search-bar')) };
+	const hero = { box: box(document.querySelector('.hero__box')), phone: box(document.querySelector('.hero .tp-phone')), bar: box(document.querySelector('.tp-search')) };
 	return JSON.stringify({
 		vw: vw,
 		scrollWidth: d.scrollWidth,

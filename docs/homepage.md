@@ -235,13 +235,34 @@ blocco unico in coda a `style.css` che azzera transizioni e animazioni di tutte 
 `template-parts/zones-interactive.php` + `assets/js/zones-map.js`. L'SVG dei 72 CAP e' incluso **inline**
 (`file_get_contents`), non come `<img>`: il CSS deve poter colorare i singoli path. Nome e macro zona di
 ogni CAP stanno nei `data-name` / `data-macro` dei path, scritti dal build: sono dati del tema, non
-dell'endpoint, e servono anche quando i numeri non arrivano. Il pannello ha tre stati (`data-state`:
-idle / hover / selected) in una sola cella di griglia, con un'altezza riservata di 400px perche' il
-blocco della zona e' vuoto finche' non si sceglie. Con `data-coverage-url` vuoto o irraggiungibile la
+dell'endpoint, e servono anche quando i numeri non arrivano. Il pannello ha quattro stati (`data-state`:
+idle / hover / selected / unknown) in una sola cella di griglia, con un'altezza riservata di 400px perche'
+il blocco della zona e' vuoto finche' non si sceglie. Con `data-coverage-url` vuoto o irraggiungibile la
 sezione resta navigabile senza numeri (`data-network="fallback"`), un solo tentativo, 4 secondi.
 
-[ATTENZIONE] I figli della griglia hanno `min-width: 0`: senza, la select larga quanto l'opzione piu'
-lunga allargava la sezione a 431px dentro un viewport da 360.
+Come ci si muove nella sezione (revisione del 17/10, ADR-003 rev. 2):
+- **barra di ricerca** `template-parts/search-bar.php`, la stessa della hero: indirizzo o CAP. Riconosce
+  un CAP di cinque cifre anche dentro un indirizzo incollato, una voce della datalist "Nome - CAP" e un
+  nome di quartiere anche parziale. Senza corrispondenza il pannello passa a `unknown` e lo dice.
+- **chip dei quartieri**, nel blocco di riposo del pannello: sono i 26 nomi veri da `zone_quartieri`,
+  nel markup anche senza JS (quindi indicizzabili) e sono i bottoni che insieme alla barra sostituiscono
+  il select; dalla zona scelta si torna all'elenco con "Tutte le zone".
+- **tre stati sulla mappa** (`data-state` sui path): attiva, in arrivo, non coperta. Non quattro livelli
+  di intensita': la copertura reale va da 1 a 4 profili e una gradazione mostrerebbe sempre lo stesso
+  colore. I numeri veri stanno nel pannello.
+
+[ATTENZIONE] La barra e' la stessa in due sezioni: in QA o in console va sempre ristretta alla sezione
+(`.zones-map .tp-search__submit`), altrimenti si aziona quella della hero, che e' statica, e la ricerca
+sembra non rispondere.
+
+L'SVG non inquadra tutto il comune: la finestra si stringe sui 26 CAP censiti (`build-svg.py`, opzione
+`--tutto` per tornare indietro). Tutto il comune ha un rapporto 1,05, quasi quadrato, e meta' della figura
+sarebbe agro a nord dove non operiamo; sui CAP censiti il rapporto scende a 0,66. I CAP fuori finestra
+restano disegnati e proseguono oltre il bordo.
+
+[ATTENZIONE] I figli della griglia hanno `min-width: 0`: senza, un figlio largo quanto il suo contenuto
+piu' lungo (era la select, con l'opzione "Casal Palocco / Axa / Dragona - 00126") allarga la sezione a
+431px dentro un viewport da 360.
 
 La vecchia sezione raster (`template-parts/zones-map.php`, ADR-002 rev. 3) e' ancora nel tema ma non e'
 piu' renderizzata: la toglie TICKET-08 insieme ai suoi campi.

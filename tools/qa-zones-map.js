@@ -1,9 +1,10 @@
 /* QA della mappa interattiva per CAP (ADR-003, TICKET-03).
    Uso: node tools/qa-zones-map.js <chrome> <url> [larghezza=1440]
 
-   Verifica i criteri del ticket: passaggio del mouse e click sul CAP 00183, scelta dal select di un CAP
-   senza copertura, CTA con il CAP in coda, e lo stato di ripiego quando i dati non arrivano (la richiesta
-   della copertura viene bloccata via CDP). Esce con 1 se almeno un controllo fallisce. */
+   Verifica: passaggio del mouse e click sul CAP 00183, ricerca per nome di quartiere e per CAP dentro
+   un indirizzo, testo senza corrispondenza, chip dei quartieri, stati della mappa (attiva / in arrivo /
+   non coperta), CTA con il CAP in coda e stato di ripiego con la copertura bloccata via CDP.
+   Esce con 1 se almeno un controllo fallisce. */
 const { withChrome } = require('./lib/cdp.js');
 
 const bin = process.argv[2];
@@ -36,14 +37,28 @@ const LEGGI = `(() => {
 		ctaVisibile: getComputedStyle(p.querySelector('.zones-map__cta')).display !== 'none',
 		scopertaVisibile: getComputedStyle(p.querySelector('.zones-map__uncovered')).display !== 'none',
 		ripiegoVisibile: getComputedStyle(p.querySelector('.zones-map__fallback')).display !== 'none',
-		livello183: path ? path.getAttribute('data-level') : null,
+		stato183: path ? path.getAttribute('data-state') : null,
+		attive: document.querySelectorAll('.zones-map__caps path[data-state="active"]').length,
+		chipAttivi: document.querySelectorAll('.zones-map__chip[data-state="active"]').length,
+		chip: document.querySelectorAll('.zones-map__chip').length,
+		inputValore: (document.querySelector('.zones-map .tp-search__input') || {}).value,
 		selezionato: !!(path && path.classList.contains('is-selected')),
 		totali: [].map.call(p.querySelectorAll('[data-total]'), d => d.textContent),
 		servizi: [].map.call(p.querySelectorAll('.zones-map__services li'), li => li.textContent),
-		opzioni: document.querySelectorAll('.zones-map__select option').length,
+		opzioni: document.querySelectorAll('#zones-map-input-list option').length,
 		path: document.querySelectorAll('.zones-map__caps path[data-cap]').length,
 		panelBox: Math.round(p.getBoundingClientRect().height)
 	});
+})()`;
+
+// Scrive nel campo di ricerca e preme il bottone, come farebbe una persona.
+// [ATTENZIONE] La barra e' la stessa della hero: senza restringere a .zones-map si clicca il "Cerca"
+// della hero, che e' statico, e la ricerca sembra non reagire.
+const cerca = testo => `(() => {
+	const s = document.querySelector('.zones-map');
+	s.querySelector('.tp-search__input').value = ${JSON.stringify(testo)};
+	s.querySelector('.tp-search__submit').click();
+	return 'ok';
 })()`;
 
 const EVENTO = (sel, tipo) => `(() => {
@@ -59,10 +74,14 @@ const EVENTO = (sel, tipo) => `(() => {
 		await ev(`document.querySelector('.zones-map').scrollIntoView()`);
 		let r = JSON.parse(await ev(LEGGI));
 		controlla('72 path nella mappa', r.path === 72, r.path);
-		controlla('73 opzioni nel select (72 CAP piu\' "Tutte le zone")', r.opzioni === 73, r.opzioni);
+		controlla('72 voci nella datalist', r.opzioni === 72, r.opzioni);
+		controlla('26 chip di quartiere', r.chip === 26, r.chip);
+		controlla('barra di ricerca presente', r.inputValore === '', r.inputValore);
 		controlla('dati caricati', r.rete === null || r.rete === 'ready', r.rete);
 		controlla('totali in evidenza', r.totali.join('/') === '2/2/26', r.totali);
-		controlla('00183 al livello 1 (2 persone + 2 imprese = 4 -> livello 2)', r.livello183 === '2', r.livello183);
+		controlla('00183 attiva', r.stato183 === 'active', r.stato183);
+		controlla('26 CAP attivi sulla mappa', r.attive === 26, r.attive);
+		controlla('26 chip marcati attivi', r.chipAttivi === 26, r.chipAttivi);
 
 		await ev(EVENTO('path[data-cap="00183"]', 'pointerover'));
 		await sleep(200);
@@ -85,8 +104,32 @@ const EVENTO = (sel, tipo) => `(() => {
 		controlla('servizi elencati', r.servizi.length > 0, r.servizi);
 		controlla('la colonna non cambia altezza fra hover e selezione', Math.abs(r.panelBox - altezzaHover) <= 1, [altezzaHover, r.panelBox]);
 
-		// CAP senza copertura scelto dal select (00118 non e' in nessun profilo).
-		await ev(`(() => { const s = document.querySelector('.zones-map__select'); s.value = '00118'; s.dispatchEvent(new Event('change', { bubbles: true })); return 'ok'; })()`);
+		// Ricerca per nome di quartiere.
+		await ev(cerca('Trastevere'));
+		await sleep(200);
+		r = JSON.parse(await ev(LEGGI));
+		controlla('ricerca per nome di quartiere', r.stato === 'selected' && /Trastevere/.test(r.zoneName), r.zoneName);
+
+		// Ricerca con un indirizzo che contiene il CAP.
+		await ev(cerca('Via Tuscolana 118, 00183 Roma'));
+		await sleep(200);
+		r = JSON.parse(await ev(LEGGI));
+		controlla('CAP riconosciuto dentro un indirizzo', r.zoneName === 'San Giovanni - 00183', r.zoneName);
+
+		// Testo senza corrispondenza: il pannello lo dice.
+		await ev(cerca('qwerty'));
+		await sleep(200);
+		r = JSON.parse(await ev(LEGGI));
+		controlla('testo senza corrispondenza: stato "zona non trovata"', r.stato === 'unknown', r.stato);
+
+		// Chip di un quartiere.
+		await ev(`(() => { document.querySelector('.zones-map__chip').click(); return 'ok'; })()`);
+		await sleep(200);
+		r = JSON.parse(await ev(LEGGI));
+		controlla('chip seleziona la zona', r.stato === 'selected' && r.zoneName.length > 0, r.zoneName);
+
+		// CAP senza copertura (00118 non e' in nessun profilo).
+		await ev(`(() => { document.querySelector('path[data-cap="00118"]').dispatchEvent(new MouseEvent('click', { bubbles: true })); return 'ok'; })()`);
 		await sleep(200);
 		r = JSON.parse(await ev(LEGGI));
 		controlla('zona scoperta: 0 persone', r.persone === '0', r.persone);
@@ -107,7 +150,8 @@ const EVENTO = (sel, tipo) => `(() => {
 		controlla('senza dati: stato di ripiego', r.rete === 'fallback', r.rete);
 		controlla('senza dati: la mappa resta navigabile (zona scelta)', r.stato === 'selected' && r.zoneName === 'San Giovanni - 00183', [r.stato, r.zoneName]);
 		controlla('senza dati: avviso al posto dei numeri', r.ripiegoVisibile && !r.ctaVisibile, [r.ripiegoVisibile, r.ctaVisibile]);
-		controlla('senza dati: tutti i CAP al livello 0', r.livello183 === '0', r.livello183);
+		controlla('senza dati: nessun CAP marcato attivo', r.attive === 0, r.attive);
+		controlla('senza dati: le zone censite restano "in arrivo"', r.stato183 === 'soon', r.stato183);
 	});
 
 	console.log(falliti ? '\nFALLITI ' + falliti + ' controlli' : '\nTutti i controlli ok');

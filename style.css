@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.33.5
+Version: 0.34.3
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -448,7 +448,7 @@ a {
 	margin: 0;
 }
 
-.hero__search-bar {
+.tp-search {
 	display: flex;
 	align-items: center;
 	/* width/max-width invertiti rispetto alla prima stesura: con width: 640px il min-content della
@@ -462,7 +462,7 @@ a {
 	box-shadow: var(--tp-shadow-card);
 	padding: 6px;
 }
-.hero__search-field {
+.tp-search__field {
 	display: flex;
 	align-items: center;
 	gap: 10px;
@@ -473,40 +473,66 @@ a {
 	cursor: pointer;
 	font-family: var(--tp-font);
 }
-.hero__search-field--service span {
+.tp-search__field--service span {
 	font-weight: 700;
 	font-size: 15px;
 	color: var(--tp-text-heading);
 	white-space: nowrap;
 }
-.hero__search-field--address {
+.tp-search__field--address {
 	flex: 1;
 	min-width: 0;
 }
-.hero__search-placeholder {
+/* Campo reale della barra (variante mode=input): stesso aspetto del segnaposto della hero. */
+.screen-reader-text {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	white-space: nowrap;
+	border: 0;
+}
+.tp-search__input {
+	flex: 1;
+	min-width: 0;
+	border: none;
+	background: none;
+	font: inherit;
+	font-size: 15px;
+	color: var(--tp-text);
+	padding: 0;
+}
+.tp-search__input::placeholder { color: var(--tp-text-placeholder); }
+.tp-search__input:focus { outline: none; }
+.tp-search__field--address:focus-within { box-shadow: inset 0 0 0 2px var(--tp-primary); }
+
+.tp-search__placeholder {
 	font-size: 15px;
 	color: var(--tp-text-placeholder);
 }
-.hero__search-divider {
+.tp-search__divider {
 	width: 1px;
 	height: 26px;
 	background: var(--tp-border);
 	flex-shrink: 0;
 }
-.hero__search-icon {
+.tp-search__icon {
 	width: 20px;
 	height: 20px;
 	flex-shrink: 0;
 }
-.hero__search-chevron {
+.tp-search__chevron {
 	width: 18px;
 	height: 18px;
 	flex-shrink: 0;
 }
-.hero__search-submit {
+.tp-search__submit {
 	margin-left: auto;
 }
-.hero__search-icon--white {
+.tp-search__icon--white {
 	filter: brightness(0) invert(1);
 }
 
@@ -571,24 +597,24 @@ a {
 		max-width: none;
 	}
 	/* Search bar su tre righe: servizio, indirizzo, Cerca a tutta larghezza (4018:979) */
-	.hero__search-bar {
+	.tp-search {
 		flex-direction: column;
 		align-items: stretch;
 		max-width: none;
 		border-radius: var(--tp-radius-xl);
 	}
-	.hero__search-field {
+	.tp-search__field {
 		width: 100%;
 		min-height: 49px;
 	}
-	.hero__search-divider {
+	.tp-search__divider {
 		display: block;
 		width: 100%;
 		height: 1px;
 		margin: 0;
 		background: var(--tp-border);
 	}
-	.hero__search-submit {
+	.tp-search__submit {
 		width: 100%;
 		min-height: 54px;
 		margin-left: 0;
@@ -2754,7 +2780,7 @@ a {
    pannello; preserveAspectRatio fa il resto, non serve ritagliare. */
 .zones-map__svg { width: 100%; max-height: 620px; height: auto; display: block; margin: 0 auto; }
 
-/* Quattro livelli di copertura: nessuno, 1-2, 3-5, 6 e oltre. */
+/* Tre stati, non una gradazione: attiva, in arrivo, non coperta (vedi zones-map.js). */
 .zones-map__caps path {
 	fill: #EBEDF0;
 	stroke: var(--tp-white);
@@ -2762,42 +2788,43 @@ a {
 	cursor: pointer;
 	transition: fill 0.15s ease, stroke 0.15s ease;
 }
-.zones-map__caps path[data-level='1'] { fill: #B3FFE0; }
-.zones-map__caps path[data-level='2'] { fill: #66E6C0; }
-.zones-map__caps path[data-level='3'] { fill: var(--tp-primary); }
+.zones-map__caps path[data-state='soon'] { fill: #D6F7EC; }
+.zones-map__caps path[data-state='active'] { fill: var(--tp-primary); }
 .zones-map__caps path:hover { stroke: var(--tp-primary); stroke-width: 2; }
-.zones-map__caps path.is-selected { fill: var(--tp-primary); stroke: var(--tp-white); stroke-width: 2; }
+.zones-map__caps path.is-selected { fill: #0F9D63; stroke: var(--tp-white); stroke-width: 2; }
 .zones-map__outline { fill: none; stroke: #D1D5DB; stroke-width: 1.5; pointer-events: none; }
 
-.zones-map__picker { display: flex; align-items: center; gap: 12px; margin: 20px 0 8px; }
-.zones-map__picker label { color: var(--tp-text-body); font-size: 14px; }
-/* La freccia della select nativa ignora il padding destro: serve appearance-none piu' chevron proprio. */
-.zones-map__select {
-	appearance: none;
-	-webkit-appearance: none;
-	flex: 1;
-	min-width: 0;
-	padding: 10px 40px 10px 14px;
+.zones-map__credit { margin: 8px 0 0; font-size: 12px; color: var(--tp-text-muted); }
+
+/* Colonna di destra: prima l'azione (la barra), poi i quartieri, poi l'esito. */
+.zones-map__side { grid-area: pannello; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.zones-map__search { max-width: none; }
+
+.zones-map__chips-label { margin: 20px 0 10px; font-size: 13px; color: var(--tp-text-body); }
+.zones-map__chips ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.zones-map__chip {
 	font: inherit;
-	font-size: 15px;
-	color: var(--tp-text);
-	background: var(--tp-white) url('assets/icons/chevron.svg') no-repeat right 14px center;
-	border: 1px solid var(--tp-border-card);
-	border-radius: var(--tp-radius-md, 10px);
-	max-width: 100%;
-	text-overflow: ellipsis;
+	font-size: 13px;
+	cursor: pointer;
+	border: 1px solid var(--tp-border);
+	background: var(--tp-white);
+	color: var(--tp-text-chip);
+	padding: 7px 14px;
+	border-radius: 999px;
+	transition: border-color 0.15s ease, background 0.15s ease;
 }
-.zones-map__credit { margin: 0; font-size: 12px; color: var(--tp-text-muted); }
+/* Un quartiere senza offerta non deve sembrare prenotabile: il pieno e' solo per le zone attive. */
+.zones-map__chip[data-state='active'] { border-color: var(--tp-primary); background: #EAFAF4; color: #0F9D63; }
+.zones-map__chip:hover { border-color: var(--tp-primary); }
 
 .zones-map__panel {
-	grid-area: pannello;
-	/* Altezza minima fissa: i tre stati hanno contenuti diversi e senza questo la colonna salta. */
 	display: grid;
 	align-items: start;
 	/* Lo stacking tiene insieme i tre stati, ma il blocco della zona e' vuoto finche' non si sceglie
 	   una zona: senza un'altezza riservata la colonna crescerebbe al primo click (208 -> 394 di
-	   altezza totale). Il box e' border-box, quindi 400 comprende i 28+28 di padding e copre la
-	   zona piu' alta misurata (394, sei servizi su due righe). */
+	   altezza totale). Il box e' border-box, quindi 340 comprende i 28+28 di padding e copre la zona
+	   piu' alta misurata (394). I chip stanno nel blocco di riposo proprio per questo: l'altezza va
+	   riservata comunque, tanto vale riempirla con qualcosa di utile invece che con del bianco. */
 	min-height: 400px;
 	padding: 28px;
 	background: var(--tp-bg-soft);
@@ -2823,16 +2850,31 @@ a {
 .zones-map__totals, .zones-map__counts { display: flex; gap: 32px; margin: 0 0 24px; }
 .zones-map__totals dt, .zones-map__counts dt { font-size: 13px; color: var(--tp-text-body); margin: 0; }
 .zones-map__totals dd, .zones-map__counts dd { margin: 4px 0 0; font-size: 28px; font-weight: 700; color: var(--tp-text-heading); }
-.zones-map__legend { list-style: none; margin: 0 0 20px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--tp-text-body); }
+.zones-map__legend { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--tp-text-body); }
 .zones-map__legend li { display: flex; align-items: center; gap: 8px; }
-.zones-map__legend li::before { content: ''; width: 14px; height: 14px; border-radius: 4px; background: #EBEDF0; }
-.zones-map__legend li[data-level='1']::before { background: #B3FFE0; }
-.zones-map__legend li[data-level='2']::before { background: #66E6C0; }
-.zones-map__legend li[data-level='3']::before { background: var(--tp-primary); }
+.zones-map__legend li::before { content: ''; width: 14px; height: 14px; border-radius: 4px; background: #EBEDF0; border: 1px solid var(--tp-border); }
+.zones-map__legend li[data-state='soon']::before { background: #D6F7EC; }
+.zones-map__legend li[data-state='active']::before { background: var(--tp-primary); border-color: var(--tp-primary); }
 .zones-map__hint, .zones-map__hover-hint { margin: 0; color: var(--tp-text-muted); font-size: 14px; }
 .zones-map__zone-meta { margin: 0 0 20px; color: var(--tp-text-body); font-size: 14px; }
 .zones-map__services { list-style: none; margin: 0 0 24px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .zones-map__services li { padding: 6px 12px; background: var(--tp-white); border: 1px solid var(--tp-border); border-radius: 999px; font-size: 13px; color: var(--tp-text-chip); }
+
+.zones-map__panel[data-state='unknown'] .zones-map__unknown { visibility: visible; pointer-events: auto; }
+.zones-map__unknown h3 { margin: 0 0 8px; }
+.zones-map__unknown p { margin: 0; color: var(--tp-text-body); font-size: 14px; }
+.zones-map__back {
+	display: block;
+	margin: 16px 0 0;
+	padding: 0;
+	border: none;
+	background: none;
+	font: inherit;
+	font-size: 14px;
+	color: var(--tp-text-body);
+	text-decoration: underline;
+	cursor: pointer;
+}
 
 /* Copertura e stato della rete decidono quale azione mostrare: CTA verso l'app dove c'e' offerta,
    bottone "zona scoperta" dove non ce n'e', avviso quando i numeri non sono arrivati. */

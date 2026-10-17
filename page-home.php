@@ -110,23 +110,8 @@ $cta_args         = array(
 				<p class="hero__subtitle"><?php echo nl2br( esc_html( $hero_subtitle ) ); ?></p>
 			<?php endif; ?>
 
-			<!-- Search bar: markup statico, widget JS reale da collegare — vedi ADR-001 -->
-			<div class="hero__search-bar">
-				<div class="hero__search-field hero__search-field--service">
-					<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/icons/ic-servizio.svg' ); ?>" alt="" class="hero__search-icon">
-					<span>Pulizia casa</span>
-					<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/icons/chevron.svg' ); ?>" alt="" class="hero__search-chevron">
-				</div>
-				<div class="hero__search-divider"></div>
-				<div class="hero__search-field hero__search-field--address">
-					<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/icons/ic-pin.svg' ); ?>" alt="" class="hero__search-icon">
-					<span class="hero__search-placeholder">Inserisci il tuo indirizzo</span>
-				</div>
-				<button type="button" class="tp-btn tp-btn--primary tp-btn--lg hero__search-submit">
-					<img src="<?php echo esc_url( get_stylesheet_directory_uri() . '/assets/icons/ic-search.svg' ); ?>" alt="" class="hero__search-icon hero__search-icon--white">
-					Cerca
-				</button>
-			</div>
+			<?php // Stessa barra della sezione "Dove siamo attivi": template-parts/search-bar.php
+			get_template_part( 'template-parts/search-bar', null, array( 'mode' => 'static' ) ); ?>
 		</div>
 		<div class="hero__phone" id="hiw-phone-pin" data-theme="<?php echo esc_attr( get_stylesheet_directory_uri() ); ?>" data-ver="<?php echo esc_attr( tp_theme_version() ); ?>" data-model="<?php echo esc_attr( carbon_get_the_post_meta( 'phone_model_url' ) ); ?>">
 			<?php get_template_part( 'template-parts/phone-mockup', null, array(

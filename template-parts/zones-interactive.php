@@ -45,6 +45,17 @@ foreach ( $names as $cap => $meta ) {
 	$options[] = array( 'cap' => $cap, 'label' => $nome ? $nome . ' - ' . $cap : $cap, 'ord' => $nome ? '0' . $nome : '1' . $cap );
 }
 usort( $options, function ( $a, $b ) { return strcmp( $a['ord'], $b['ord'] ); } );
+
+// Chip dei quartieri: solo quelli con un nome vero. Sono il pezzo che rende leggibile la sezione —
+// un nome di quartiere lo si riconosce, un poligono o un CAP no — e restano nel markup anche senza
+// JS, quindi sono anche contenuto indicizzabile.
+$chips = array();
+foreach ( $options as $o ) {
+	$meta = $names[ $o['cap'] ] ?? array();
+	if ( ! empty( $meta['name'] ) ) {
+		$chips[] = array( 'cap' => $o['cap'], 'name' => $meta['name'] );
+	}
+}
 ?>
 <section class="zones-map" id="dove-siamo" data-reveal
 	data-app-url="<?php echo esc_url( $args['app_url'] ); ?>"
@@ -61,51 +72,75 @@ usort( $options, function ( $a, $b ) { return strcmp( $a['ord'], $b['ord'] ); } 
 
 		<div class="zones-map__map">
 			<?php echo $svg; // phpcs:ignore WordPress.Security.EscapeOutput -- file del tema generato da build-svg.py ?>
-			<p class="zones-map__picker">
-				<label for="zones-map-select">Scegli una zona</label>
-				<select id="zones-map-select" class="zones-map__select">
-					<option value="">Tutte le zone</option>
-					<?php foreach ( $options as $o ) : ?>
-						<option value="<?php echo esc_attr( $o['cap'] ); ?>"><?php echo esc_html( $o['label'] ); ?></option>
-					<?php endforeach; ?>
-				</select>
-			</p>
+			<ul class="zones-map__legend">
+				<li data-state="active">Zone attive</li>
+				<li data-state="soon">In arrivo</li>
+				<li data-state="none">Non ancora coperte</li>
+			</ul>
 			<p class="zones-map__credit"><?php echo esc_html( $args['credit'] ); ?></p>
 		</div>
 
-		<aside class="zones-map__panel" data-state="idle" aria-live="polite">
-			<div class="zones-map__idle">
-				<dl class="zones-map__totals">
-					<div><dt>Persone</dt><dd data-total="individuals">-</dd></div>
-					<div><dt>Imprese</dt><dd data-total="companies">-</dd></div>
-					<div><dt>Zone coperte</dt><dd data-total="zones_covered">-</dd></div>
-				</dl>
-				<ul class="zones-map__legend">
-					<li data-level="0">nessuno</li>
-					<li data-level="1">1-2</li>
-					<li data-level="2">3-5</li>
-					<li data-level="3">6 e oltre</li>
-				</ul>
-				<p class="zones-map__hint">Passa sulla mappa o scegli una zona dall'elenco.</p>
-			</div>
+		<div class="zones-map__side">
+			<?php
+			// La stessa barra della hero. Qui fa una cosa sola: indirizzo o CAP -> zona selezionata.
+			// La datalist porta i nomi veri dei quartieri ed e' anche il percorso da tastiera.
+			get_template_part( 'template-parts/search-bar', null, array(
+				'mode'         => 'input',
+				'service'      => false,
+				'placeholder'  => 'Inserisci indirizzo o CAP',
+				'submit_label' => 'Verifica',
+				'input_id'     => 'zones-map-input',
+				'input_name'   => 'zona',
+				'suggestions'  => wp_list_pluck( $options, 'label' ),
+				'class'        => 'zones-map__search',
+			) ); ?>
 
-			<div class="zones-map__hover">
-				<h3 class="zones-map__hover-name"></h3>
-				<p class="zones-map__hover-hint">Clicca per vedere la copertura.</p>
-			</div>
 
-			<div class="zones-map__zone">
-				<h3 class="zones-map__zone-name"></h3>
-				<p class="zones-map__zone-meta"></p>
-				<dl class="zones-map__counts">
-					<div><dt>Persone</dt><dd data-count="individuals">0</dd></div>
-					<div><dt>Imprese</dt><dd data-count="companies">0</dd></div>
-				</dl>
-				<ul class="zones-map__services"></ul>
-				<a class="tp-btn tp-btn--primary zones-map__cta" href="<?php echo esc_url( $args['app_url'] ); ?>"><?php echo esc_html( $args['cta_label'] ); ?></a>
-				<button type="button" class="tp-btn tp-btn--secondary zones-map__uncovered"><?php echo esc_html( $args['uncovered_label'] ); ?></button>
-				<p class="zones-map__fallback"><?php echo esc_html( $args['fallback_text'] ); ?></p>
-			</div>
-		</aside>
+			<aside class="zones-map__panel" data-state="idle" aria-live="polite">
+				<div class="zones-map__idle">
+					<dl class="zones-map__totals">
+						<div><dt>Persone</dt><dd data-total="individuals">-</dd></div>
+						<div><dt>Imprese</dt><dd data-total="companies">-</dd></div>
+						<div><dt>Zone coperte</dt><dd data-total="zones_covered">-</dd></div>
+					</dl>
+					<p class="zones-map__hint">Cerca il tuo indirizzo, scegli un quartiere o tocca la mappa.</p>
+					<?php if ( $chips ) : ?>
+					<div class="zones-map__chips">
+						<p class="zones-map__chips-label">Quartieri in cui lavoriamo</p>
+						<ul>
+							<?php foreach ( $chips as $chip ) : ?>
+								<li><button type="button" class="tp-chip zones-map__chip" data-cap="<?php echo esc_attr( $chip['cap'] ); ?>"><?php echo esc_html( $chip['name'] ); ?></button></li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
+					<?php endif; ?>
+				</div>
+
+				<div class="zones-map__hover">
+					<h3 class="zones-map__hover-name"></h3>
+					<p class="zones-map__hover-hint">Clicca per vedere la copertura.</p>
+				</div>
+
+				<div class="zones-map__zone">
+					<h3 class="zones-map__zone-name"></h3>
+					<p class="zones-map__zone-meta"></p>
+					<dl class="zones-map__counts">
+						<div><dt>Persone</dt><dd data-count="individuals">0</dd></div>
+						<div><dt>Imprese</dt><dd data-count="companies">0</dd></div>
+					</dl>
+					<ul class="zones-map__services"></ul>
+					<a class="tp-btn tp-btn--primary zones-map__cta" href="<?php echo esc_url( $args['app_url'] ); ?>"><?php echo esc_html( $args['cta_label'] ); ?></a>
+					<button type="button" class="tp-btn tp-btn--secondary zones-map__uncovered"><?php echo esc_html( $args['uncovered_label'] ); ?></button>
+					<p class="zones-map__fallback"><?php echo esc_html( $args['fallback_text'] ); ?></p>
+					<button type="button" class="zones-map__back">Tutte le zone</button>
+				</div>
+
+				<div class="zones-map__unknown">
+					<h3>Zona non trovata</h3>
+					<p>Prova con il CAP, oppure scegli un quartiere dall'elenco delle zone.</p>
+				</div>
+			</aside>
+
+		</div>
 	</div>
 </section>

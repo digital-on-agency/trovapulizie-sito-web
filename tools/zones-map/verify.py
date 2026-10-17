@@ -48,13 +48,20 @@ def main():
     controlla('viewBox presente', viewbox is not None)
     if viewbox:
         larghezza, altezza = float(viewbox.group(1)), float(viewbox.group(2))
+        # La finestra inquadra i CAP censiti, non tutto il comune: gli altri escono dal bordo apposta.
+        # Quello che deve valere e' che ogni CAP con nome ci stia dentro per intero.
         fuori = []
-        for d in re.findall(r' d="([^"]+)"', svg):
+        for m in re.finditer(r'<path data-cap="(\d{5})"([^>]*)d="([^"]+)"', svg):
+            cap, attributi, d = m.group(1), m.group(2), m.group(3)
+            if 'data-name=' not in attributi:
+                continue
             valori = numeri(d)
             xs, ys = valori[0::2], valori[1::2]
             if xs and (min(xs) < -1 or max(xs) > larghezza + 1 or min(ys) < -1 or max(ys) > altezza + 1):
-                fuori.append((min(xs), max(xs), min(ys), max(ys)))
-        controlla('il viewBox copre tutti i path', not fuori, '%d path fuori: %s' % (len(fuori), fuori[:2]))
+                fuori.append(cap)
+        controlla('il viewBox copre per intero i CAP con nome', not fuori, '%d fuori: %s' % (len(fuori), fuori[:5]))
+        rapporto = altezza / larghezza
+        controlla('inquadratura orizzontale (rapporto sotto 0.8)', rapporto < 0.8, round(rapporto, 2))
 
     controlla('72 centroidi', len(centroidi) == 72, '%d voci' % len(centroidi))
     lat_fuori = [c for c in centroidi if not 41.6 <= c['lat'] <= 42.2]
