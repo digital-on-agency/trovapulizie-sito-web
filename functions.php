@@ -47,8 +47,29 @@ function tp_icon_span( $rel, $class ) {
 }
 
 add_action( 'after_setup_theme', function () {
+	// Senza questo WordPress non stampa il <title>: la Home usciva con la scheda del browser senza nome
+	// e nessun titolo nei risultati di ricerca.
+	add_theme_support( 'title-tag' );
 	\Carbon_Fields\Carbon_Fields::boot();
 } );
+
+/* URL dell'app transazionale. Vive qui e non sparso nei template: al cutover cambia in un posto solo.
+   Diventera' un campo di Theme Options con TICKET-08. */
+function tp_app_url( $percorso = '' ) {
+	return 'https://app.trovapulizie.com/' . ltrim( $percorso, '/' );
+}
+
+/* Meta description: dal campo SEO della pagina, altrimenti dal motto del sito. Senza, la pagina si
+   presenta ai motori con un estratto scelto da loro. */
+add_action( 'wp_head', function () {
+	$descrizione = function_exists( 'carbon_get_the_post_meta' ) && is_singular() ? carbon_get_the_post_meta( 'seo_description' ) : '';
+	if ( ! $descrizione ) {
+		$descrizione = get_bloginfo( 'description' );
+	}
+	if ( $descrizione ) {
+		echo '<meta name="description" content="' . esc_attr( wp_strip_all_tags( $descrizione ) ) . '">' . "\n";
+	}
+}, 2 );
 
 add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_style( 'trovapulizie-fonts', 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap', array(), null );
@@ -56,7 +77,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	// nav-mobile serve su ogni pagina (la navbar e' in header.php), gli altri moduli solo sulla Home.
 	wp_enqueue_script( 'trovapulizie-nav-mobile', get_stylesheet_directory_uri() . '/assets/js/nav-mobile.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 	if ( is_page_template( 'page-home.php' ) ) {
-		foreach ( array( 'home-motion', 'hiw-sequence', 'reveal', 'faq-accordion', 'services-tabs', 'hero-video', 'zones-map' ) as $handle ) {
+		foreach ( array( 'home-motion', 'hiw-sequence', 'reveal', 'faq-accordion', 'services-tabs', 'hero-video', 'zones-map', 'reviews-marquee' ) as $handle ) {
 			wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 		}
 	}

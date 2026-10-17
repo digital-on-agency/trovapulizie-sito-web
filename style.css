@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.36.1
+Version: 0.37.6
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -25,11 +25,19 @@ Version: 0.36.1
 :root {
 	/* Colori */
 	--tp-primary: #00C896;
+	/* Il verde del marchio con sopra del testo bianco da' 2,16:1, sotto il minimo AA di 4,5. Due token
+	   derivati, da usare ogni volta che il verde porta testo o e' testo:
+	   --tp-primary-ink  fondo con testo bianco sopra (bottoni, badge, CTA finale): 4,52:1
+	   --tp-green-ink    il verde usato come testo su fondo chiaro: 5,38:1 su bianco
+	   --tp-primary resta per riempimenti e grafica senza testo sopra (la mappa, per esempio). */
+	--tp-primary-ink: #08875F;
+	--tp-green-ink: #0A7A4D;
 	--tp-text: #191919;
 	--tp-text-heading: #1F2937;
 	--tp-text-body: #6B7280;
-	--tp-text-muted: #8C94A1;
-	--tp-text-placeholder: #9CA3AF;
+	/* I due grigi chiari stavano a 2,9 e 2,5:1 su tutti i fondi del sito: nessun testo li raggiungeva. */
+	--tp-text-muted: #5B6472;
+	--tp-text-placeholder: #6B7280;
 	--tp-text-chip: #474F5C;
 	--tp-border: #EBEDF0;
 	--tp-border-card: #E5E8EB;
@@ -86,7 +94,7 @@ img {
 }
 
 a {
-	color: var(--tp-primary);
+	color: var(--tp-green-ink);
 	text-decoration: none;
 }
 
@@ -117,13 +125,15 @@ a {
 	white-space: nowrap;
 }
 .tp-btn--primary {
-	background: var(--tp-primary);
+	background: var(--tp-primary-ink);
 	color: var(--tp-white);
 }
 .tp-btn--secondary {
 	background: transparent;
-	color: var(--tp-primary);
-	border: 1.5px solid var(--tp-primary);
+	color: var(--tp-green-ink);
+	/* Il bordo e' l'unico confine del bottone: come elemento d'interfaccia vuole 3:1, e il verde
+	   pieno su bianco si ferma a 2,16. */
+	border: 1.5px solid var(--tp-primary-ink);
 }
 .tp-btn--lg {
 	font-size: 16px;
@@ -259,6 +269,7 @@ a {
 	gap: 32px;
 }
 .navbar__links a {
+	padding-block: 6px;
 	font-family: var(--tp-font);
 	font-size: 15px;
 	font-weight: 400;
@@ -286,6 +297,14 @@ a {
 	border: 0;
 	background: none;
 	cursor: pointer;
+	/* L'elemento resta 24x24 per non spostare la barra, l'area toccabile arriva a 44 con ::before:
+	   e' l'unico accesso al menu su mobile e 24px sono sotto la misura minima per il dito. */
+	position: relative;
+}
+.navbar__burger::before {
+	content: '';
+	position: absolute;
+	inset: -10px;
 }
 .navbar__burger span {
 	display: block;
@@ -484,6 +503,23 @@ a {
 	min-width: 0;
 }
 /* Campo reale della barra (variante mode=input): stesso aspetto del segnaposto della hero. */
+/* Link di salto: fuori schermo finche' non prende il focus da tastiera. Primo elemento del body. */
+.skip-link {
+	position: absolute;
+	left: -9999px;
+	top: 0;
+	z-index: 100;
+	padding: 12px 20px;
+	background: var(--tp-white);
+	color: var(--tp-text);
+	border-radius: 0 0 var(--tp-radius-md) 0;
+	box-shadow: var(--tp-shadow-card);
+	text-decoration: none;
+}
+.skip-link:focus {
+	left: 0;
+}
+
 .screen-reader-text {
 	position: absolute;
 	width: 1px;
@@ -699,7 +735,7 @@ a {
 	width: 44px;
 	height: 44px;
 	border-radius: 22px;
-	background: var(--tp-primary);
+	background: var(--tp-primary-ink);
 	color: var(--tp-white);
 	font-size: 18px;
 	font-weight: 700;
@@ -845,7 +881,7 @@ a {
 }
 /* solo il tratto dei passi gia' superati e' colorato: quello sotto il passo attivo e' ancora da fare */
 .motion-ok .how-it-works__step.is-done::before {
-	background: var(--tp-primary);
+	background: var(--tp-primary-ink);
 }
 .motion-ok .how-it-works__badge {
 	display: inline-flex;
@@ -854,12 +890,12 @@ a {
 	border-radius: 20px;
 	font-size: 16px;
 	background: var(--tp-border);
-	color: var(--tp-text-muted);
+	color: #4B5563; /* 6,2:1 su --tp-border: il numero del passo si legge anche da spento */
 	transition: background-color 260ms cubic-bezier(0.4, 0, 0.2, 1), color 260ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 .motion-ok .how-it-works__step.is-done .how-it-works__badge,
 .motion-ok .how-it-works__step.is-active .how-it-works__badge {
-	background: var(--tp-primary);
+	background: var(--tp-primary-ink);
 	color: var(--tp-white);
 }
 .motion-ok .how-it-works__text h3 {
@@ -1085,7 +1121,7 @@ a {
 	}
 	.hiw-seq-ok .how-it-works__step.is-done .how-it-works__badge,
 	.hiw-seq-ok .how-it-works__step.is-active .how-it-works__badge {
-		background: var(--tp-primary);
+		background: var(--tp-primary-ink);
 		color: var(--tp-white);
 	}
 	.hiw-seq-ok .how-it-works__text {
@@ -1265,7 +1301,7 @@ a {
 	background: transparent;
 }
 .services__tabs:not(.has-indicator) .services__tab.is-active {
-	background: var(--tp-primary);
+	background: var(--tp-primary-ink);
 }
 .services__tab-icon {
 	width: 18px;
@@ -1279,7 +1315,7 @@ a {
 	width: 0;
 	height: 0;
 	border-radius: 22px;
-	background: var(--tp-primary);
+	background: var(--tp-primary-ink); /* sotto il testo bianco della tab attiva: il verde chiaro dava 2,16:1 */
 	opacity: 0;
 }
 .services__tabs.has-indicator .services__tab-indicator {
@@ -1388,6 +1424,8 @@ a {
 	inset: 0;
 	background: rgba(0, 200, 150, 0.5);
 }
+/* Etichetta bianca sopra la foto: l'unico testo del sito il cui contrasto non si puo' calcolare,
+   perche' dipende dal pixel sotto. Una velatura scura dal basso lo rende indipendente dalla foto. */
 .services__visual-label {
 	position: absolute;
 	left: 20px;
@@ -1396,6 +1434,17 @@ a {
 	font-size: 15px;
 	font-weight: 600;
 	color: var(--tp-white);
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+.services__visual::after {
+	content: '';
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 96px;
+	background: linear-gradient(to top, rgba(0, 0, 0, 0.52), rgba(0, 0, 0, 0));
+	pointer-events: none;
 }
 .services__card-title {
 	margin: 0;
@@ -1415,7 +1464,7 @@ a {
 	font-size: 13px;
 	font-weight: 500;
 	line-height: 1.5;
-	color: var(--tp-primary);
+	color: var(--tp-green-ink);
 }
 .services__cta {
 	margin-top: auto;
@@ -1679,9 +1728,27 @@ a {
 	padding-left: max(20px, calc((100% - 1248px) / 2));
 	animation: reviews-marquee 40s linear infinite;
 }
-.reviews__marquee:hover .reviews__track {
+.reviews__marquee:hover .reviews__track,
+.reviews__marquee:focus-within .reviews__track,
+.reviews__marquee.is-paused .reviews__track {
 	animation-play-state: paused;
 }
+/* Comando di pausa: il nastro si muove per piu' di 5 secondi e la sola pausa in hover lascia fuori
+   chi naviga da tastiera (WCAG 2.2.2). Sotto la soglia desktop il nastro e' fermo e il bottone sparisce. */
+.reviews__pause {
+	display: block;
+	margin: 0 auto 12px;
+	padding: 8px 16px;
+	min-height: 44px;
+	font: inherit;
+	font-size: 13px;
+	color: var(--tp-text-body);
+	background: var(--tp-white);
+	border: 1px solid var(--tp-border-card);
+	border-radius: 999px;
+	cursor: pointer;
+}
+.reviews__pause:hover { border-color: var(--tp-primary-ink); }
 .reviews__set {
 	display: flex;
 	gap: 28px;
@@ -2127,7 +2194,7 @@ a {
 	font-weight: 600;
 	letter-spacing: 1px;
 	text-transform: uppercase;
-	color: #008866;
+	color: #00674E;
 }
 .faq__title {
 	margin: 0;
@@ -2201,7 +2268,7 @@ a {
 	box-sizing: border-box;
 	padding: 14px 20px;
 	border-radius: var(--tp-radius-lg);
-	background: var(--tp-primary);
+	background: var(--tp-primary-ink);
 	font-size: 15px;
 	font-weight: 600;
 	color: var(--tp-white);
@@ -2260,7 +2327,7 @@ a {
 	content: '+';
 }
 .faq__item.is-open .faq__toggle {
-	color: var(--tp-primary);
+	color: var(--tp-green-ink);
 }
 .faq__item.is-open .faq__toggle::before {
 	content: '\2212';
@@ -2370,7 +2437,9 @@ a {
 	padding-right: 248px;
 	box-sizing: border-box;
 	border-radius: var(--tp-radius-2xl);
-	background: linear-gradient(90deg, #00C896 0%, #37DBB3 100%);
+	/* Entrambi gli estremi devono reggere il testo bianco: #0FA676 lo lasciava a 3,12 e la nota a 2,66.
+	   Cosi' il punto peggiore del gradiente e' 4,52:1. */
+	background: linear-gradient(90deg, #06734F 0%, #08875F 100%);
 	box-shadow: 0 10px 30px 0 rgba(15, 33, 26, 0.08);
 	overflow: hidden;
 	color: var(--tp-white);
@@ -2434,7 +2503,8 @@ a {
 .cta-final__note {
 	margin: 0;
 	font-size: 14px;
-	color: var(--tp-border);
+	color: var(--tp-white); /* era --tp-border: 1,85:1 sul verde */
+	opacity: 0.92;
 }
 /* Ingresso: card fade + scale .96, mascotte da sinistra con 120 ms di ritardo */
 .cta-final__card {
@@ -2634,7 +2704,7 @@ a {
 	justify-content: space-between;
 	gap: 16px;
 	font-size: 13px;
-	color: var(--tp-text-body);
+	color: #9AA3B0; /* --tp-text-body su #111827 dava 3,67:1, qui 6,96 */
 }
 .site-footer__copyright {
 	margin: 0;
@@ -2651,7 +2721,7 @@ a {
 	gap: 24px;
 }
 .site-footer__legal a {
-	color: var(--tp-text-body);
+	color: #9AA3B0; /* --tp-text-body su #111827 dava 3,67:1 */
 }
 /* Reveal: colonne in stagger da 60 ms, poi la riga legale */
 .site-footer__col,
@@ -2934,6 +3004,19 @@ a {
 	   attiva piu' vicina; qui si toglie solo il cursore, che su touch non significa nulla. */
 	.zones-map__caps path { cursor: default; }
 	.zones-map__chip { padding: 11px 16px; }
+	/* 44px di altezza utile anche per gli altri comandi: le tab dei servizi stavano a 38, le voci di
+	   menu e del footer fra 20 e 23. L'area cresce senza cambiare la forma, come per i chip. */
+	.services__tab { min-height: 44px; }
+	.navbar__panel a { display: block; padding-block: 12px; }
+	.site-footer__col a,
+	.site-footer__legal a { position: relative; display: inline-block; padding-block: 12px; }
+	/* [ATTENZIONE] Niente min-width/min-height sull'hamburger: le tre barre sono figlie flex e si
+	   allungherebbero con il bottone. L'area toccabile da 44px la da' .navbar__burger::before, e il
+	   box resta 24x24 come chiede il Figma (verificato da tools/qa-mobile.js). */
+	.tp-btn { min-height: 44px; }
+	.faq__q { min-height: 44px; }
+	.navbar__logo { display: inline-flex; align-items: center; min-height: 44px; }
+	.zones-map__chip { min-height: 45px; }
 	.zones-map__chip::before { content: none; }
 	.zones-map__totals, .zones-map__counts { gap: 24px; }
 }
@@ -2958,6 +3041,7 @@ a {
 		opacity: 1;
 		transform: rotate(17.42deg);
 	}
+	.reviews__pause { display: none; }
 	.reviews__track {
 		animation: none;
 		flex-wrap: wrap;

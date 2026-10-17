@@ -19,6 +19,15 @@ use Carbon_Fields\Field;
 
 add_action( 'carbon_fields_register_fields', function () {
 
+	// Scheda SEO su tutte le pagine: il titolo lo fa WordPress (title-tag), la descrizione no.
+	Container::make( 'post_meta', __( 'SEO' ) )
+		->where( 'post_type', '=', 'page' )
+		->set_context( 'side' )
+		->add_fields( array(
+			Field::make( 'textarea', 'seo_description', __( 'Meta description' ) )
+				->set_help_text( __( 'Da 120 a 160 caratteri. Se vuota vale il motto del sito.' ) ),
+		) );
+
 	Container::make( 'post_meta', __( 'Home — Sezioni' ) )
 		->where( 'post_template', '=', 'page-home.php' )
 		->add_tab( __( 'Hero' ), array(

@@ -2,7 +2,7 @@
 /**
  * Sezione "Social proof" — Figma 3564:96 (mobile 4023:1023).
  * Args: badge, badge_link, badge_logo (google|none), title, reviews (array del campo complex `reviews`: author_name, author_city, avatar, review_text), theme_uri.
- * Desktop: marquee continuo (CSS, 40 s, pausa su hover, set duplicato per il loop); mobile: prime 3 card impilate
+ * Desktop: marquee continuo (CSS, 40 s, pausa su hover, sul focus e col bottone; set duplicato per il loop); mobile: prime 3 card impilate
  * statiche con reveal in stagger; reduced-motion: griglia statica. Riutilizzabile nelle landing.
  */
 $args = wp_parse_args( $args ?? array(), array(
@@ -50,6 +50,12 @@ $render_card = function ( $r, $i ) use ( $total ) {
 		<?php if ( $args['title'] ) : ?><h2 class="reviews__title"><?php echo esc_html( $args['title'] ); ?></h2><?php endif; ?>
 	</div>
 	<div class="reviews__marquee" aria-label="<?php esc_attr_e( 'Recensioni dei clienti' ); ?>">
+		<?php // Il nastro scorre da solo per piu' di 5 secondi: serve un comando per fermarlo (WCAG 2.2.2).
+		// La pausa al passaggio del mouse non basta, da tastiera non esiste. Il bottone compare solo dove
+		// il nastro si muove davvero, cioe' da --tp-bp-desktop in su. ?>
+		<button type="button" class="reviews__pause" aria-pressed="false">
+			<span class="reviews__pause-label"><?php esc_html_e( 'Metti in pausa' ); ?></span>
+		</button>
 		<div class="reviews__track">
 			<div class="reviews__set">
 				<?php foreach ( $reviews as $i => $r ) { $render_card( $r, $i ); } ?>

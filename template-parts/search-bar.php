@@ -28,15 +28,15 @@ $datalist_id = $args['suggestions'] && $args['input_id'] ? $args['input_id'] . '
 <div class="tp-search <?php echo esc_attr( $args['class'] ); ?>">
 	<?php if ( $args['service'] ) : ?>
 		<div class="tp-search__field tp-search__field--service">
-			<img src="<?php echo esc_url( $icona . 'ic-servizio.svg' ); ?>" alt="" class="tp-search__icon">
+			<img src="<?php echo esc_url( $icona . 'ic-servizio.svg' ); ?>" alt="" class="tp-search__icon" width="20" height="20">
 			<span><?php echo esc_html( $args['service_label'] ); ?></span>
-			<img src="<?php echo esc_url( $icona . 'chevron.svg' ); ?>" alt="" class="tp-search__chevron">
+			<img src="<?php echo esc_url( $icona . 'chevron.svg' ); ?>" alt="" class="tp-search__chevron" width="18" height="18">
 		</div>
 		<div class="tp-search__divider"></div>
 	<?php endif; ?>
 
 	<div class="tp-search__field tp-search__field--address">
-		<img src="<?php echo esc_url( $icona . 'ic-pin.svg' ); ?>" alt="" class="tp-search__icon">
+		<img src="<?php echo esc_url( $icona . 'ic-pin.svg' ); ?>" alt="" class="tp-search__icon" width="20" height="20">
 		<?php if ( 'input' === $args['mode'] ) : ?>
 			<label class="screen-reader-text" for="<?php echo esc_attr( $args['input_id'] ); ?>"><?php echo esc_html( $args['placeholder'] ); ?></label>
 			<input type="text" class="tp-search__input" id="<?php echo esc_attr( $args['input_id'] ); ?>"
@@ -58,7 +58,7 @@ $datalist_id = $args['suggestions'] && $args['input_id'] ? $args['input_id'] . '
 	</div>
 
 	<button type="button" class="tp-btn tp-btn--primary tp-btn--lg tp-search__submit">
-		<img src="<?php echo esc_url( $icona . 'ic-search.svg' ); ?>" alt="" class="tp-search__icon tp-search__icon--white">
+		<img src="<?php echo esc_url( $icona . 'ic-search.svg' ); ?>" alt="" class="tp-search__icon tp-search__icon--white" width="20" height="20">
 		<?php echo esc_html( $args['submit_label'] ); ?>
 	</button>
 </div>

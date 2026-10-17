@@ -79,7 +79,7 @@ $cta_args         = array(
 	'image'       => carbon_get_the_post_meta( 'cta_image' ),
 );
 ?>
-<main class="home">
+<main class="home" id="contenuto">
 
 	<?php if ( current_user_can( 'edit_posts' ) && ! $hero_title && ! $steps && ! $services ) : ?>
 		<div style="background:#fff3cd;border:1px solid #ffe69c;padding:12px 20px;margin:20px;border-radius:8px;">
@@ -97,7 +97,7 @@ $cta_args         = array(
 		<div class="hero__content">
 			<?php if ( $hero_trust_badge ) : ?>
 				<div class="trust-badge">
-					<span class="trust-badge__stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
+					<span class="trust-badge__stars" aria-hidden="true">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
 					<span class="trust-badge__text"><?php echo esc_html( $hero_trust_badge ); ?></span>
 				</div>
 			<?php endif; ?>
