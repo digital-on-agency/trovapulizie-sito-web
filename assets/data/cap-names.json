@@ -1,0 +1,362 @@
+{
+ "00118": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00119": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00121": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00122": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00123": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00124": {
+  "name": "Infernetto / Casal Palocco",
+  "status": "future",
+  "macro": null
+ },
+ "00125": {
+  "name": "Acilia",
+  "status": "future",
+  "macro": null
+ },
+ "00126": {
+  "name": "Casal Palocco / Axa / Dragona",
+  "status": "future",
+  "macro": null
+ },
+ "00127": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00128": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00131": {
+  "name": "Settecamini",
+  "status": "future",
+  "macro": null
+ },
+ "00132": {
+  "name": "Ponte di Nona",
+  "status": "future",
+  "macro": null
+ },
+ "00133": {
+  "name": "Tor Vergata",
+  "status": "future",
+  "macro": null
+ },
+ "00134": {
+  "name": "Castel di Leva",
+  "status": "future",
+  "macro": null
+ },
+ "00135": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00136": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00137": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00138": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00139": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00141": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00142": {
+  "name": "EUR residenziale",
+  "status": "future",
+  "macro": "Roma Sud"
+ },
+ "00143": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00144": {
+  "name": "EUR direzionale",
+  "status": "future",
+  "macro": "Roma Sud"
+ },
+ "00145": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00146": {
+  "name": "Marconi",
+  "status": "future",
+  "macro": "Roma Sud"
+ },
+ "00147": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00148": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00149": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00151": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00152": {
+  "name": "Monteverde",
+  "status": "future",
+  "macro": "Roma Centro"
+ },
+ "00153": {
+  "name": "Trastevere",
+  "status": "future",
+  "macro": "Roma Centro"
+ },
+ "00154": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00155": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00156": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00157": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00158": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00159": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00161": {
+  "name": "Nomentano",
+  "status": "future",
+  "macro": "Roma Sud-Est"
+ },
+ "00162": {
+  "name": "Bologna / Tiburtina",
+  "status": "future",
+  "macro": "Roma Sud-Est"
+ },
+ "00163": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00164": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00165": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00166": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00167": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00168": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00169": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00171": {
+  "name": "Centocelle",
+  "status": "future",
+  "macro": "Roma Est"
+ },
+ "00172": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00173": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00174": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00175": {
+  "name": "Quadraro",
+  "status": "future",
+  "macro": "Roma Est"
+ },
+ "00176": {
+  "name": "Torpignattara",
+  "status": "future",
+  "macro": "Roma Est"
+ },
+ "00177": {
+  "name": "Pigneto",
+  "status": "future",
+  "macro": "Roma Est"
+ },
+ "00178": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00179": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00181": {
+  "name": "Tuscolano",
+  "status": "future",
+  "macro": "Roma Sud-Est"
+ },
+ "00182": {
+  "name": "Appio Claudio",
+  "status": "future",
+  "macro": "Roma Sud-Est"
+ },
+ "00183": {
+  "name": "San Giovanni",
+  "status": "active",
+  "macro": "Roma Sud-Est"
+ },
+ "00184": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00185": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00186": {
+  "name": "Centro Storico (Navona, Pantheon)",
+  "status": "active",
+  "macro": "Roma Centro"
+ },
+ "00187": {
+  "name": "Quirinale / Trevi / Spagna",
+  "status": "future",
+  "macro": "Roma Centro"
+ },
+ "00188": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00189": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00191": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00192": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00193": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00195": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00196": {
+  "name": null,
+  "status": null,
+  "macro": null
+ },
+ "00197": {
+  "name": "Parioli",
+  "status": "future",
+  "macro": "Roma Nord"
+ },
+ "00198": {
+  "name": "Salario",
+  "status": "future",
+  "macro": "Roma Nord"
+ },
+ "00199": {
+  "name": "Trieste",
+  "status": "future",
+  "macro": "Roma Nord"
+ }
+}

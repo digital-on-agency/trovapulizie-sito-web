@@ -1,0 +1,754 @@
+{
+ "v": 1,
+ "generated_at": "2026-10-17T15:00:00Z",
+ "ttl_seconds": 3600,
+ "totals": {
+  "individuals": 2,
+  "companies": 2,
+  "zones_covered": 26
+ },
+ "zones": [
+  {
+   "cap": "00118",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00119",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00121",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00122",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00123",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00124",
+   "name": "Infernetto / Casal Palocco",
+   "status": "future",
+   "individuals": 0,
+   "companies": 1,
+   "services": [
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00125",
+   "name": "Acilia",
+   "status": "future",
+   "individuals": 0,
+   "companies": 1,
+   "services": [
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00126",
+   "name": "Casal Palocco / Axa / Dragona",
+   "status": "future",
+   "individuals": 0,
+   "companies": 1,
+   "services": [
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00127",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00128",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00131",
+   "name": "Settecamini",
+   "status": "future",
+   "individuals": 0,
+   "companies": 1,
+   "services": [
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00132",
+   "name": "Ponte di Nona",
+   "status": "future",
+   "individuals": 0,
+   "companies": 1,
+   "services": [
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00133",
+   "name": "Tor Vergata",
+   "status": "future",
+   "individuals": 1,
+   "companies": 1,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00134",
+   "name": "Castel di Leva",
+   "status": "future",
+   "individuals": 0,
+   "companies": 1,
+   "services": [
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00135",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00136",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00137",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00138",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00139",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00141",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00142",
+   "name": "EUR residenziale",
+   "status": "future",
+   "individuals": 2,
+   "companies": 1,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00143",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00144",
+   "name": "EUR direzionale",
+   "status": "future",
+   "individuals": 1,
+   "companies": 1,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00145",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00146",
+   "name": "Marconi",
+   "status": "future",
+   "individuals": 1,
+   "companies": 1,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00147",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00148",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00149",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00151",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00152",
+   "name": "Monteverde",
+   "status": "future",
+   "individuals": 2,
+   "companies": 2,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00153",
+   "name": "Trastevere",
+   "status": "future",
+   "individuals": 2,
+   "companies": 2,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00154",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00155",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00156",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00157",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00158",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00159",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00161",
+   "name": "Nomentano",
+   "status": "future",
+   "individuals": 1,
+   "companies": 2,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00162",
+   "name": "Bologna / Tiburtina",
+   "status": "future",
+   "individuals": 1,
+   "companies": 2,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00163",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00164",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00165",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00166",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00167",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00168",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00169",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00171",
+   "name": "Centocelle",
+   "status": "future",
+   "individuals": 1,
+   "companies": 1,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00172",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00173",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00174",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00175",
+   "name": "Quadraro",
+   "status": "future",
+   "individuals": 1,
+   "companies": 1,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00176",
+   "name": "Torpignattara",
+   "status": "future",
+   "individuals": 1,
+   "companies": 1,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00177",
+   "name": "Pigneto",
+   "status": "future",
+   "individuals": 1,
+   "companies": 1,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00178",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00179",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00181",
+   "name": "Tuscolano",
+   "status": "future",
+   "individuals": 2,
+   "companies": 2,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00182",
+   "name": "Appio Claudio",
+   "status": "future",
+   "individuals": 2,
+   "companies": 2,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00183",
+   "name": "San Giovanni",
+   "status": "active",
+   "individuals": 2,
+   "companies": 2,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00184",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00185",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00186",
+   "name": "Centro Storico (Navona, Pantheon)",
+   "status": "active",
+   "individuals": 2,
+   "companies": 2,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00187",
+   "name": "Quirinale / Trevi / Spagna",
+   "status": "future",
+   "individuals": 2,
+   "companies": 2,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_esterni",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00188",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00189",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00191",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00192",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00193",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00195",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00196",
+   "name": null,
+   "status": null,
+   "individuals": 0,
+   "companies": 0,
+   "services": []
+  },
+  {
+   "cap": "00197",
+   "name": "Parioli",
+   "status": "future",
+   "individuals": 2,
+   "companies": 1,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00198",
+   "name": "Salario",
+   "status": "future",
+   "individuals": 1,
+   "companies": 1,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  },
+  {
+   "cap": "00199",
+   "name": "Trieste",
+   "status": "future",
+   "individuals": 1,
+   "companies": 1,
+   "services": [
+    "pulizia_domestica",
+    "pulizia_scale",
+    "pulizia_uffici",
+    "pulizie_industriali",
+    "sanificazioni"
+   ]
+  }
+ ]
+}
