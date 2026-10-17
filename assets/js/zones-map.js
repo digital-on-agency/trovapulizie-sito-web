@@ -69,6 +69,10 @@
 		if (el) el.textContent = testo;
 	}
 
+	/* I contatori di persone e imprese esistono nel dato ma a schermo ci vanno solo se il template
+	   li ha stampati (show_counts). In questa fase non lo fa: scrivere "2 persone, 2 imprese"
+	   racconterebbe la debolezza dell'offerta invece della copertura. Il numero di zone attive resta,
+	   perche' e' la risposta alla domanda che la sezione pone. */
 	function mostraTotali() {
 		var totali = (stato.dati && stato.dati.totals) || null;
 		['individuals', 'companies', 'zones_covered'].forEach(function (chiave) {
@@ -107,7 +111,11 @@
 		scrivi('.zones-map__zone-meta', 'CAP ' + cap + macro);
 		scrivi('[data-count="individuals"]', stato.rete === 'ready' ? String(persone) : '-');
 		scrivi('[data-count="companies"]', stato.rete === 'ready' ? String(imprese) : '-');
+		// Senza i numeri la risposta deve essere esplicita: qui ci siamo, oppure non ancora.
+		scrivi('.zones-map__verdict', stato.rete !== 'ready' ? '' : (coperta ? 'Siamo attivi in questa zona.' : 'Non siamo ancora attivi qui.'));
 
+		var etichettaServizi = pannello.querySelector('.zones-map__services-label');
+		if (etichettaServizi) etichettaServizi.hidden = !(coperta && zona && zona.services && zona.services.length);
 		var lista = pannello.querySelector('.zones-map__services');
 		if (lista) {
 			lista.innerHTML = '';

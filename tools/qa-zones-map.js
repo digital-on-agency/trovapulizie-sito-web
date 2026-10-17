@@ -31,8 +31,12 @@ const LEGGI = `(() => {
 		hoverName: p.querySelector('.zones-map__hover-name').textContent,
 		zoneName: p.querySelector('.zones-map__zone-name').textContent,
 		zoneMeta: p.querySelector('.zones-map__zone-meta').textContent,
-		persone: p.querySelector('[data-count="individuals"]').textContent,
-		imprese: p.querySelector('[data-count="companies"]').textContent,
+		persone: (p.querySelector('[data-count="individuals"]') || {}).textContent || null,
+		imprese: (p.querySelector('[data-count="companies"]') || {}).textContent || null,
+		verdetto: (p.querySelector('.zones-map__verdict') || {}).textContent || '',
+		// Niente numeri dell'offerta a schermo in questa fase: si controlla sul testo visibile,
+		// non sulla presenza degli elementi, cosi' il controllo regge anche a un markup diverso.
+		testoPannello: p.innerText.replace(/\s+/g, ' ').trim(),
 		cta: p.querySelector('.zones-map__cta').getAttribute('href'),
 		ctaVisibile: getComputedStyle(p.querySelector('.zones-map__cta')).display !== 'none',
 		scopertaVisibile: getComputedStyle(p.querySelector('.zones-map__uncovered')).display !== 'none',
@@ -78,7 +82,7 @@ const EVENTO = (sel, tipo) => `(() => {
 		controlla('26 chip di quartiere', r.chip === 26, r.chip);
 		controlla('barra di ricerca presente', r.inputValore === '', r.inputValore);
 		controlla('dati caricati', r.rete === null || r.rete === 'ready', r.rete);
-		controlla('totali in evidenza', r.totali.join('/') === '2/2/26', r.totali);
+		controlla('in evidenza solo il numero di zone attive', r.totali.join('/') === '26', r.totali);
 		controlla('00183 attiva', r.stato183 === 'active', r.stato183);
 		controlla('26 CAP attivi sulla mappa', r.attive === 26, r.attive);
 		controlla('26 chip marcati attivi', r.chipAttivi === 26, r.chipAttivi);
@@ -97,8 +101,9 @@ const EVENTO = (sel, tipo) => `(() => {
 		controlla('path evidenziato', r.selezionato === true);
 		controlla('nome della zona scelta', r.zoneName === 'San Giovanni - 00183', r.zoneName);
 		controlla('CAP e macro zona', r.zoneMeta === 'CAP 00183 - Roma Sud-Est', r.zoneMeta);
-		controlla('2 persone', r.persone === '2', r.persone);
-		controlla('2 imprese', r.imprese === '2', r.imprese);
+		controlla('nessun contatore di persone o imprese nel DOM', r.persone === null && r.imprese === null, [r.persone, r.imprese]);
+		controlla('nessun numero di professionisti nel testo del pannello', !/\b(persone|imprese)\b/i.test(r.testoPannello), r.testoPannello.slice(0, 120));
+		controlla('verdetto esplicito sulla zona coperta', r.verdetto === 'Siamo attivi in questa zona.', r.verdetto);
 		controlla('CTA verso l\'app con il CAP', /\\?cap=00183$/.test(r.cta || ''), r.cta);
 		controlla('CTA visibile, non il bottone zona scoperta', r.ctaVisibile && !r.scopertaVisibile, [r.ctaVisibile, r.scopertaVisibile]);
 		controlla('servizi elencati', r.servizi.length > 0, r.servizi);
@@ -132,8 +137,7 @@ const EVENTO = (sel, tipo) => `(() => {
 		await ev(`(() => { document.querySelector('path[data-cap="00118"]').dispatchEvent(new MouseEvent('click', { bubbles: true })); return 'ok'; })()`);
 		await sleep(200);
 		r = JSON.parse(await ev(LEGGI));
-		controlla('zona scoperta: 0 persone', r.persone === '0', r.persone);
-		controlla('zona scoperta: 0 imprese', r.imprese === '0', r.imprese);
+		controlla('zona scoperta: verdetto esplicito', r.verdetto === 'Non siamo ancora attivi qui.', r.verdetto);
 		controlla('zona scoperta: bottone "Dicci che sei qui" al posto della CTA', r.scopertaVisibile && !r.ctaVisibile, [r.scopertaVisibile, r.ctaVisibile]);
 	});
 

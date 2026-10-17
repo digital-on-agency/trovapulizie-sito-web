@@ -247,6 +247,11 @@ Come ci si muove nella sezione (revisione del 17/10, ADR-003 rev. 2):
 - **chip dei quartieri**, nel blocco di riposo del pannello: sono i 26 nomi veri da `zone_quartieri`,
   nel markup anche senza JS (quindi indicizzabili) e sono i bottoni che insieme alla barra sostituiscono
   il select; dalla zona scelta si torna all'elenco con "Tutte le zone".
+- **nessun numero di professionisti a schermo** (decisione del 17/10): con l'offerta di oggi, "2 persone
+  e 2 imprese" racconta la debolezza invece della copertura. Il pannello risponde a parole ("Siamo
+  attivi in questa zona" / "Non siamo ancora attivi qui") e in evidenza resta il solo numero di zone
+  attive. Il dato continua ad arrivare dall'endpoint e decide lo stato della zona: per rimetterlo a
+  schermo basta `'show_counts' => true` sul template-part.
 - **tre stati sulla mappa** (`data-state` sui path): attiva, in arrivo, non coperta. Non quattro livelli
   di intensita': la copertura reale va da 1 a 4 profili e una gradazione mostrerebbe sempre lo stesso
   colore. I numeri veri stanno nel pannello.

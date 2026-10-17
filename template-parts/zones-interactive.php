@@ -25,6 +25,11 @@ $args = wp_parse_args( $args ?? array(), array(
 	'credit'           => 'Confini CAP: Zornade, dati OpenStreetMap (ODbL)',
 	'services'         => array(),
 	'coverage_url'     => '',
+	// [ATTENZIONE] Numeri di persone e imprese: NON si mostrano in questa fase (decisione di Guido
+	// del 17/10). Con 2 persone e 2 imprese scritte a schermo la sezione racconta la debolezza
+	// dell'offerta invece della copertura. Il dato continua ad arrivare e serve a decidere se una
+	// zona e' attiva: quando l'offerta regge, questo diventa true (o un campo WP con TICKET-08).
+	'show_counts'      => false,
 ) );
 
 $svg_path = get_stylesheet_directory() . '/assets/img/zones-map-cap.svg';
@@ -99,9 +104,11 @@ foreach ( $options as $o ) {
 			<aside class="zones-map__panel" data-state="idle" aria-live="polite">
 				<div class="zones-map__idle">
 					<dl class="zones-map__totals">
-						<div><dt>Persone</dt><dd data-total="individuals">-</dd></div>
-						<div><dt>Imprese</dt><dd data-total="companies">-</dd></div>
-						<div><dt>Zone coperte</dt><dd data-total="zones_covered">-</dd></div>
+						<div><dt>Zone attive a Roma</dt><dd data-total="zones_covered">-</dd></div>
+						<?php if ( $args['show_counts'] ) : ?>
+							<div><dt>Persone</dt><dd data-total="individuals">-</dd></div>
+							<div><dt>Imprese</dt><dd data-total="companies">-</dd></div>
+						<?php endif; ?>
 					</dl>
 					<p class="zones-map__hint">Cerca il tuo indirizzo, scegli un quartiere o tocca la mappa.</p>
 					<?php if ( $chips ) : ?>
@@ -124,10 +131,14 @@ foreach ( $options as $o ) {
 				<div class="zones-map__zone">
 					<h3 class="zones-map__zone-name"></h3>
 					<p class="zones-map__zone-meta"></p>
+					<p class="zones-map__verdict"></p>
+					<?php if ( $args['show_counts'] ) : ?>
 					<dl class="zones-map__counts">
 						<div><dt>Persone</dt><dd data-count="individuals">0</dd></div>
 						<div><dt>Imprese</dt><dd data-count="companies">0</dd></div>
 					</dl>
+					<?php endif; ?>
+					<p class="zones-map__services-label">Servizi disponibili</p>
 					<ul class="zones-map__services"></ul>
 					<a class="tp-btn tp-btn--primary zones-map__cta" href="<?php echo esc_url( $args['app_url'] ); ?>"><?php echo esc_html( $args['cta_label'] ); ?></a>
 					<button type="button" class="tp-btn tp-btn--secondary zones-map__uncovered"><?php echo esc_html( $args['uncovered_label'] ); ?></button>

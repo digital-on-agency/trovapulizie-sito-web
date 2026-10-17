@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.34.3
+Version: 0.35.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -2850,6 +2850,9 @@ a {
 .zones-map__totals, .zones-map__counts { display: flex; gap: 32px; margin: 0 0 24px; }
 .zones-map__totals dt, .zones-map__counts dt { font-size: 13px; color: var(--tp-text-body); margin: 0; }
 .zones-map__totals dd, .zones-map__counts dd { margin: 4px 0 0; font-size: 28px; font-weight: 700; color: var(--tp-text-heading); }
+.zones-map__verdict { margin: 0 0 20px; font-size: 16px; font-weight: 600; color: var(--tp-text-heading); }
+.zones-map__services-label { margin: 0 0 10px; font-size: 13px; color: var(--tp-text-body); }
+.zones-map__services-label[hidden] { display: none; }
 .zones-map__legend { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--tp-text-body); }
 .zones-map__legend li { display: flex; align-items: center; gap: 8px; }
 .zones-map__legend li::before { content: ''; width: 14px; height: 14px; border-radius: 4px; background: #EBEDF0; border: 1px solid var(--tp-border); }
