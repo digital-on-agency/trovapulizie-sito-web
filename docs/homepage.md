@@ -230,6 +230,22 @@ blocco unico in coda a `style.css` che azzera transizioni e animazioni di tutte 
 | CTA finale | `3564:162` | `cta-final.php` | - | Card a gradiente, illustrazione `mascotte-mocio.png`, `id="registrati"` (ancora del bottone navbar) |
 | Footer | `3564:167` | `footer.php` | - | Tutto da Theme Options. Social come icone a maschera; senza URL l'icona e' resa ma non e' un link |
 
+### Dove siamo attivi: mappa per CAP (ADR-003)
+
+`template-parts/zones-interactive.php` + `assets/js/zones-map.js`. L'SVG dei 72 CAP e' incluso **inline**
+(`file_get_contents`), non come `<img>`: il CSS deve poter colorare i singoli path. Nome e macro zona di
+ogni CAP stanno nei `data-name` / `data-macro` dei path, scritti dal build: sono dati del tema, non
+dell'endpoint, e servono anche quando i numeri non arrivano. Il pannello ha tre stati (`data-state`:
+idle / hover / selected) in una sola cella di griglia, con un'altezza riservata di 400px perche' il
+blocco della zona e' vuoto finche' non si sceglie. Con `data-coverage-url` vuoto o irraggiungibile la
+sezione resta navigabile senza numeri (`data-network="fallback"`), un solo tentativo, 4 secondi.
+
+[ATTENZIONE] I figli della griglia hanno `min-width: 0`: senza, la select larga quanto l'opzione piu'
+lunga allargava la sezione a 431px dentro un viewport da 360.
+
+La vecchia sezione raster (`template-parts/zones-map.php`, ADR-002 rev. 3) e' ancora nel tema ma non e'
+piu' renderizzata: la toglie TICKET-08 insieme ai suoi campi.
+
 ## 6. Asset video
 
 | File | Campo | Uso | Produzione |

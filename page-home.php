@@ -221,7 +221,23 @@ $cta_args         = array(
 		<?php get_template_part( 'template-parts/reviews-marquee', null, $reviews_args ); ?>
 	<?php endif; ?>
 
-		<?php get_template_part( 'template-parts/zones-map', null, $zones_args ); ?>
+		<?php
+		// Mappa interattiva per CAP (ADR-003). Finche' non c'e' il proxy (TICKET-05) legge la fixture
+		// con i numeri veri; i testi diventano campi WP con TICKET-08, qui restano i default del tema
+		// con titolo e descrizione presi dai campi della vecchia sezione raster.
+		get_template_part( 'template-parts/zones-interactive', null, array(
+			'title'        => $zones_args['title'],
+			'description'  => $zones_args['description'],
+			'coverage_url' => tp_theme_asset( 'assets/data/coverage.fixture.json' ),
+			'services'     => array(
+				'pulizia_domestica'   => 'Pulizia casa',
+				'pulizia_uffici'      => 'Uffici',
+				'pulizia_scale'       => 'Scale e condomini',
+				'pulizie_industriali' => 'Industriali',
+				'sanificazioni'       => 'Sanificazioni',
+				'pulizia_esterni'     => 'Esterni',
+			),
+		) ); ?>
 
 	<?php if ( $faq_items ) : ?>
 		<?php get_template_part( 'template-parts/faq-accordion', null, $faq_args ); ?>

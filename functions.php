@@ -56,7 +56,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	// nav-mobile serve su ogni pagina (la navbar e' in header.php), gli altri moduli solo sulla Home.
 	wp_enqueue_script( 'trovapulizie-nav-mobile', get_stylesheet_directory_uri() . '/assets/js/nav-mobile.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 	if ( is_page_template( 'page-home.php' ) ) {
-		foreach ( array( 'home-motion', 'hiw-sequence', 'reveal', 'faq-accordion', 'services-tabs', 'hero-video' ) as $handle ) {
+		foreach ( array( 'home-motion', 'hiw-sequence', 'reveal', 'faq-accordion', 'services-tabs', 'hero-video', 'zones-map' ) as $handle ) {
 			wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 		}
 	}

@@ -228,9 +228,16 @@ def main():
     righe = ['<svg viewBox="0 0 %d %d" xmlns="http://www.w3.org/2000/svg" class="zones-map__svg" role="img" aria-label="Mappa dei CAP di Roma">' % (round(args.width), round(altezza))]
     righe.append('<g class="zones-map__caps">')
     for cap in sorted(per_cap):
-        nome = (nomi_db.get(cap) or {}).get('name') or ''
-        attributo_nome = ' data-name="%s"' % nome.replace('&', '&amp;').replace('"', '&quot;') if nome else ''
-        righe.append('<path data-cap="%s"%s data-level="0" d="%s"/>' % (cap, attributo_nome, path_d(per_cap[cap], proietta)))
+        meta = nomi_db.get(cap) or {}
+        # name e macro vengono dal tema, non dall'endpoint: il contratto della copertura non li porta
+        # (name e' facoltativo li', macro non c'e' proprio) e la mappa deve saper scrivere il nome
+        # della zona anche quando i dati non arrivano.
+        attributi = ''.join(
+            ' data-%s="%s"' % (chiave, str(valore).replace('&', '&amp;').replace('"', '&quot;'))
+            for chiave, valore in (('name', meta.get('name')), ('macro', meta.get('macro')))
+            if valore
+        )
+        righe.append('<path data-cap="%s"%s data-level="0" d="%s"/>' % (cap, attributi, path_d(per_cap[cap], proietta)))
     righe.append('</g>')
     righe.append('<path class="zones-map__outline" d="%s"/>' % path_d(contorno, proietta))
     righe.append('</svg>')

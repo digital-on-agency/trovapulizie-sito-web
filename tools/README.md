@@ -15,6 +15,7 @@ Ogni script usa una porta di debug diversa, quindi possono girare in parallelo.
 | `qa-section.js <chrome> <url> <selettore> [width=1440] [out] [selettore-click]` | una sezione a una larghezza, con click opzionale | screenshot + `STATE` (rect, `is-in`, animazione, overlay) |
 | `qa-services.js <chrome> <url> [width] [slow]` | tab e card di Servizi popolari | `/tmp/cdp-services-{0,1}.png` + geometria |
 | `qa-hero-video.js <chrome> <url>` | autoplay e fine del timelapse hero | `/tmp/cdp-hero-{0,1,2}.png` + stato video |
+| `qa-zones-map.js <chrome> <url> [larghezza]` | mappa interattiva per CAP: livelli, passaggio del mouse, click, select, CTA con il CAP, stato di ripiego con la copertura bloccata via CDP | esito per controllo, codice di uscita 1 se fallisce |
 | `qa-mobile.js <chrome> <url> [larghezze]` | sweep mobile e tablet: scroll orizzontale, gate motion, navbar, hero, sequenza di Come funziona, risorse CDN, peso (budget 2560 KB sotto soglia, rendition `-720` dei video, nessuno screen a piena risoluzione, nessun file chiesto con due URL) | esito per larghezza con le sei risorse piu' pesanti, codice di uscita 1 se fallisce. Il peso e' attendibile solo con profilo pulito (`rm -rf /tmp/cdp-profile*`); il peso di un video arriva da piu' richieste Range sullo stesso URL, lo script le somma |
 
 Prima di un run dopo un deploy: cancellare `/tmp/cdp-profile*` (l'HTML e' cachato 7 giorni) e attendere qualche
@@ -43,3 +44,13 @@ rigenerare il video.
   primo frame in `assets/img/come-funziona-zoom-frame.jpg`
 
 Dopo ogni nuovo video: bump di `Version:` in `style.css`, deploy, purge (vedi README principale).
+
+## Mappa per CAP
+
+`zones-map/`:
+- `build-svg.py`: dai 72 MultiPolygon di `roma_cap.geojson` (vault, dataset Zornade su dati OSM, ODbL)
+  genera `assets/img/zones-map-cap.svg`, `assets/data/cap-centroids.json` e `assets/data/cap-names.json`.
+  Va rieseguito solo quando cambia la geometria o l'export dei nomi. I nomi vengono da
+  `zone-quartieri-export.json` accanto allo script (export una tantum di `zone_quartieri`, 26 CAP su 72).
+- `verify.py`: i criteri di TICKET-01 in 16 controlli, compresa la trappola del Douglas-Peucker sugli
+  anelli chiusi.

@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.32.1
+Version: 0.33.5
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -2727,7 +2727,136 @@ a {
 }
 
 /* Riduci movimento: tutte le sezioni della Home in un blocco solo (stesse regole di prima, raccolte) */
+/* ---- Dove siamo attivi: mappa interattiva per CAP (ADR-003, TICKET-03) ---------------------- */
+
+.zones-map {
+	max-width: var(--tp-container, 1360px);
+	margin: 0 auto;
+	padding: 80px 20px;
+}
+.zones-map__inner {
+	display: grid;
+	grid-template-columns: 60fr 40fr;
+	grid-template-areas: 'testa testa' 'mappa pannello';
+	gap: 48px;
+	align-items: start;
+}
+/* [ATTENZIONE] Senza min-width: 0 i figli della griglia non scendono sotto il proprio min-content e
+   la select, larga quanto l'opzione piu' lunga ("Casal Palocco / Axa / Dragona - 00126"), allargava
+   la colonna fino a 431px dentro un viewport da 360 (stessa trappola della hero, TICKET-10). */
+.zones-map__inner > * { min-width: 0; }
+.zones-map__head { grid-area: testa; }
+.zones-map__title { margin: 0 0 12px; }
+.zones-map__desc { margin: 0; color: var(--tp-text-body); max-width: 60ch; }
+.zones-map__map { grid-area: mappa; }
+/* Il viewBox e' 1000x1049: a tutta colonna la mappa sarebbe alta oltre 800px e il pannello
+   resterebbe appeso in cima a una colonna mezza vuota. Il tetto la tiene in proporzione al
+   pannello; preserveAspectRatio fa il resto, non serve ritagliare. */
+.zones-map__svg { width: 100%; max-height: 620px; height: auto; display: block; margin: 0 auto; }
+
+/* Quattro livelli di copertura: nessuno, 1-2, 3-5, 6 e oltre. */
+.zones-map__caps path {
+	fill: #EBEDF0;
+	stroke: var(--tp-white);
+	stroke-width: 1;
+	cursor: pointer;
+	transition: fill 0.15s ease, stroke 0.15s ease;
+}
+.zones-map__caps path[data-level='1'] { fill: #B3FFE0; }
+.zones-map__caps path[data-level='2'] { fill: #66E6C0; }
+.zones-map__caps path[data-level='3'] { fill: var(--tp-primary); }
+.zones-map__caps path:hover { stroke: var(--tp-primary); stroke-width: 2; }
+.zones-map__caps path.is-selected { fill: var(--tp-primary); stroke: var(--tp-white); stroke-width: 2; }
+.zones-map__outline { fill: none; stroke: #D1D5DB; stroke-width: 1.5; pointer-events: none; }
+
+.zones-map__picker { display: flex; align-items: center; gap: 12px; margin: 20px 0 8px; }
+.zones-map__picker label { color: var(--tp-text-body); font-size: 14px; }
+/* La freccia della select nativa ignora il padding destro: serve appearance-none piu' chevron proprio. */
+.zones-map__select {
+	appearance: none;
+	-webkit-appearance: none;
+	flex: 1;
+	min-width: 0;
+	padding: 10px 40px 10px 14px;
+	font: inherit;
+	font-size: 15px;
+	color: var(--tp-text);
+	background: var(--tp-white) url('assets/icons/chevron.svg') no-repeat right 14px center;
+	border: 1px solid var(--tp-border-card);
+	border-radius: var(--tp-radius-md, 10px);
+	max-width: 100%;
+	text-overflow: ellipsis;
+}
+.zones-map__credit { margin: 0; font-size: 12px; color: var(--tp-text-muted); }
+
+.zones-map__panel {
+	grid-area: pannello;
+	/* Altezza minima fissa: i tre stati hanno contenuti diversi e senza questo la colonna salta. */
+	display: grid;
+	align-items: start;
+	/* Lo stacking tiene insieme i tre stati, ma il blocco della zona e' vuoto finche' non si sceglie
+	   una zona: senza un'altezza riservata la colonna crescerebbe al primo click (208 -> 394 di
+	   altezza totale). Il box e' border-box, quindi 400 comprende i 28+28 di padding e copre la
+	   zona piu' alta misurata (394, sei servizi su due righe). */
+	min-height: 400px;
+	padding: 28px;
+	background: var(--tp-bg-soft);
+	border: 1px solid var(--tp-border-card);
+	border-radius: var(--tp-radius-2xl, 24px);
+}
+/* I tre stati stanno nella stessa cella di griglia: la colonna e' sempre alta quanto il piu' alto
+   dei tre e il cambio di stato non muove nulla. Con display: none l'altezza seguiva lo stato attivo
+   (riposo 360, zona scelta 394) e la pagina saltava di 34px al primo click. Gli stati inattivi sono
+   visibility: hidden, quindi fuori anche dalla lettura assistiva. */
+.zones-map__panel > div {
+	grid-area: 1 / 1;
+	visibility: hidden;
+	pointer-events: none;
+}
+.zones-map__panel[data-state='idle'] .zones-map__idle,
+.zones-map__panel[data-state='hover'] .zones-map__hover,
+.zones-map__panel[data-state='selected'] .zones-map__zone {
+	visibility: visible;
+	pointer-events: auto;
+}
+
+.zones-map__totals, .zones-map__counts { display: flex; gap: 32px; margin: 0 0 24px; }
+.zones-map__totals dt, .zones-map__counts dt { font-size: 13px; color: var(--tp-text-body); margin: 0; }
+.zones-map__totals dd, .zones-map__counts dd { margin: 4px 0 0; font-size: 28px; font-weight: 700; color: var(--tp-text-heading); }
+.zones-map__legend { list-style: none; margin: 0 0 20px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--tp-text-body); }
+.zones-map__legend li { display: flex; align-items: center; gap: 8px; }
+.zones-map__legend li::before { content: ''; width: 14px; height: 14px; border-radius: 4px; background: #EBEDF0; }
+.zones-map__legend li[data-level='1']::before { background: #B3FFE0; }
+.zones-map__legend li[data-level='2']::before { background: #66E6C0; }
+.zones-map__legend li[data-level='3']::before { background: var(--tp-primary); }
+.zones-map__hint, .zones-map__hover-hint { margin: 0; color: var(--tp-text-muted); font-size: 14px; }
+.zones-map__zone-meta { margin: 0 0 20px; color: var(--tp-text-body); font-size: 14px; }
+.zones-map__services { list-style: none; margin: 0 0 24px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.zones-map__services li { padding: 6px 12px; background: var(--tp-white); border: 1px solid var(--tp-border); border-radius: 999px; font-size: 13px; color: var(--tp-text-chip); }
+
+/* Copertura e stato della rete decidono quale azione mostrare: CTA verso l'app dove c'e' offerta,
+   bottone "zona scoperta" dove non ce n'e', avviso quando i numeri non sono arrivati. */
+.zones-map__cta, .zones-map__uncovered, .zones-map__fallback { display: none; }
+.zones-map__panel[data-state='selected'][data-network='ready'][data-coverage='yes'] .zones-map__cta { display: inline-flex; }
+.zones-map__panel[data-state='selected'][data-network='ready'][data-coverage='no'] .zones-map__uncovered { display: inline-flex; }
+.zones-map__panel[data-state='selected'][data-network='fallback'] .zones-map__fallback { display: block; }
+.zones-map__fallback { margin: 0; color: var(--tp-text-muted); font-size: 14px; }
+
+@media (max-width: 1023px) {
+	.zones-map { padding: 48px 20px; }
+	.zones-map__inner {
+		grid-template-columns: 1fr;
+		grid-template-areas: 'testa' 'mappa' 'pannello';
+		gap: 24px;
+	}
+	/* Sotto la soglia il pannello sta sotto la mappa: riservare 360px lascerebbe un vuoto in mezzo
+	   alla pagina, e lo scorrimento al tap porta comunque il pannello in vista. */
+	.zones-map__panel { min-height: 0; padding: 20px; }
+	.zones-map__totals, .zones-map__counts { gap: 24px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
+	.zones-map__caps path { transition: none; }
 	.hiw-scrollcue {
 		animation: none;
 	}
