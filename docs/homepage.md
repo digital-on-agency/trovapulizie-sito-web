@@ -256,6 +256,20 @@ Come ci si muove nella sezione (revisione del 17/10, ADR-003 rev. 2):
   di intensita': la copertura reale va da 1 a 4 profili e una gradazione mostrerebbe sempre lo stesso
   colore. I numeri veri stanno nel pannello.
 
+Revisione UI/UX del 17/10, con i numeri del rilievo (contrasti calcolati, non scelti a occhio):
+- **contrasti**: testo dei chip da 3,2:1 a **4,99:1** (`#0A7A4D` su `#EAFAF4`), suggerimenti e didascalie
+  da 2,9 a **5,75:1** (`#5B6472`), attribuzione da 3,1 a **5,16:1** (`#656E7B`). Il minimo AA e' 4,5;
+  `--tp-text-muted` non lo raggiunge su questi fondi e qui non va usato.
+- **bersagli da dito**: chip da 36 a 44px e campo di ricerca da 23 a 46px di altezza utile. L'area dei
+  chip e del link "Tutte le zone" cresce con `::before`, non con il padding, cosi' la forma non cambia.
+- **tocco sulla mappa**: sotto la soglia desktop **18 zone attive su 26 sono piu' piccole di 24px**
+  (San Giovanni e' 25x19 anche a 1440). Su puntatore grossolano il click non cerca piu' il poligono
+  esatto: prende la zona attiva **piu' vicina** al punto toccato, e porta il pannello in vista.
+- **elenco dei quartieri**: sotto la soglia si fermava a 1633px di sezione, ora ne mostra 12 con un
+  bottone per gli altri (il taglio lo fa il JS: senza JS restano tutti nel markup). Sezione a 1380px.
+- **focus da tastiera**: contorno visibile di 3px su chip, bottoni e link; il campo lo segnala con
+  l'anello interno su `:focus-within`.
+
 [ATTENZIONE] La barra e' la stessa in due sezioni: in QA o in console va sempre ristretta alla sezione
 (`.zones-map .tp-search__submit`), altrimenti si aziona quella della hero, che e' statica, e la ricerca
 sembra non rispondere.

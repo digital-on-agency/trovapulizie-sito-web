@@ -45,6 +45,8 @@ const LEGGI = `(() => {
 		attive: document.querySelectorAll('.zones-map__caps path[data-state="active"]').length,
 		chipAttivi: document.querySelectorAll('.zones-map__chip[data-state="active"]').length,
 		chip: document.querySelectorAll('.zones-map__chip').length,
+		chipVisibili: [].filter.call(document.querySelectorAll('.zones-map__chips li'), li => !li.hidden).length,
+		bottoneAltre: !!document.querySelector('.zones-map__more'),
 		inputValore: (document.querySelector('.zones-map .tp-search__input') || {}).value,
 		selezionato: !!(path && path.classList.contains('is-selected')),
 		totali: [].map.call(p.querySelectorAll('[data-total]'), d => d.textContent),
@@ -156,6 +158,31 @@ const EVENTO = (sel, tipo) => `(() => {
 		controlla('senza dati: avviso al posto dei numeri', r.ripiegoVisibile && !r.ctaVisibile, [r.ripiegoVisibile, r.ctaVisibile]);
 		controlla('senza dati: nessun CAP marcato attivo', r.attive === 0, r.attive);
 		controlla('senza dati: le zone censite restano "in arrivo"', r.stato183 === 'soon', r.stato183);
+	});
+
+	// 3) Mobile: il tocco sulla mappa va alla zona attiva piu' vicina, e l'esito finisce in vista.
+	await withChrome(bin, url, { port: 9823, width: 390, height: 844, mobile: true, profile: '/tmp/cdp-zones-mob' }, async ({ ev, sleep }) => {
+		await sleep(4500);
+		await ev(`document.querySelector('.zones-map').scrollIntoView()`);
+		await sleep(400);
+		const prima = JSON.parse(await ev(LEGGI));
+		controlla('mobile: elenco dei quartieri accorciato', prima.chipVisibili === 12, prima.chipVisibili);
+		controlla('mobile: bottone per mostrare tutte le zone', prima.bottoneAltre === true);
+
+		// Tocco in un punto qualunque della mappa, non su un poligono preciso.
+		const esito = await ev(`(() => {
+			const r = document.querySelector('.zones-map__svg').getBoundingClientRect();
+			const x = r.left + r.width * 0.42, y = r.top + r.height * 0.52;
+			const sotto = document.elementFromPoint(x, y);
+			document.querySelector('.zones-map__caps').dispatchEvent(new MouseEvent('click', { bubbles: true, clientX: x, clientY: y }));
+			return sotto ? sotto.tagName + ':' + (sotto.dataset ? sotto.dataset.state : '') : 'niente';
+		})()`);
+		await sleep(400);
+		const dopo = JSON.parse(await ev(LEGGI));
+		controlla('mobile: il tocco sulla mappa seleziona una zona attiva', dopo.stato === 'selected' && dopo.stato183 !== null && dopo.zoneName.length > 0, [esito, dopo.stato, dopo.zoneName]);
+		controlla('mobile: la zona scelta e\' attiva', /Siamo attivi/.test(dopo.verdetto), dopo.verdetto);
+		const inVista = await ev(`(() => { const r = document.querySelector('.zones-map__panel').getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; })()`);
+		controlla('mobile: il pannello con la risposta e\' in vista', inVista === true, inVista);
 	});
 
 	console.log(falliti ? '\nFALLITI ' + falliti + ' controlli' : '\nTutti i controlli ok');

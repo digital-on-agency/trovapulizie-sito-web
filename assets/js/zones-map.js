@@ -86,15 +86,7 @@
 			paths[cap].setAttribute('data-state', statoDi(cap));
 		});
 		// Le stesse tre classi sui chip: un quartiere senza offerta non deve sembrare prenotabile.
-		var indietro = pannello.querySelector('.zones-map__back');
-	if (indietro) {
-		indietro.addEventListener('click', function () {
-			if (input) input.value = '';
-			seleziona(null);
-		});
-	}
-
-	[].forEach.call(sezione.querySelectorAll('.zones-map__chip'), function (chip) {
+		[].forEach.call(sezione.querySelectorAll('.zones-map__chip'), function (chip) {
 			chip.dataset.state = statoDi(chip.dataset.cap);
 		});
 	}
@@ -169,10 +161,44 @@
 		stato.hovered = null;
 		if (!stato.selected) aggiornaPannello();
 	});
+	/* Tocco contro click. Sotto la soglia desktop 18 delle 26 zone attive sono piu' piccole di 24px:
+	   col dito non si colpiscono, e un tocco che non fa niente e' peggio di una mappa ferma. Su
+	   puntatore grossolano il tocco viene raccolto dall'intero SVG e portato alla zona attiva piu'
+	   vicina al punto toccato; col mouse resta la selezione esatta del poligono. */
+	var bp = getComputedStyle(document.documentElement).getPropertyValue('--tp-bp-desktop').trim() || '1024px';
+	function puntatoreGrossolano() {
+		return window.matchMedia('(pointer: coarse)').matches || !window.matchMedia('(min-width: ' + bp + ')').matches;
+	}
+
+	function zonaPiuVicina(x, y) {
+		var migliore = null, minimo = Infinity;
+		Object.keys(paths).forEach(function (cap) {
+			if (paths[cap].getAttribute('data-state') !== 'active') return;
+			var r = paths[cap].getBoundingClientRect();
+			var dx = x - (r.left + r.width / 2);
+			var dy = y - (r.top + r.height / 2);
+			var d = dx * dx + dy * dy;
+			if (d < minimo) { minimo = d; migliore = cap; }
+		});
+		return migliore;
+	}
+
+	function portaInVista() {
+		if (!puntatoreGrossolano()) return;
+		var dolce = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		pannello.scrollIntoView({ behavior: dolce ? 'smooth' : 'auto', block: 'nearest' });
+	}
+
 	gruppo.addEventListener('click', function (e) {
 		var p = e.target.closest ? e.target.closest('path[data-cap]') : null;
-		if (p) seleziona(p.dataset.cap);
+		if (p && !puntatoreGrossolano()) { seleziona(p.dataset.cap); return; }
+		var vicina = zonaPiuVicina(e.clientX, e.clientY);
+		if (vicina) { seleziona(vicina); portaInVista(); }
+		else if (p) seleziona(p.dataset.cap);
 	});
+	var suggerimentoHover = pannello.querySelector('.zones-map__hover-hint');
+	if (suggerimentoHover && puntatoreGrossolano()) suggerimentoHover.textContent = 'Tocca per vedere la copertura.';
+
 	var indietro = pannello.querySelector('.zones-map__back');
 	if (indietro) {
 		indietro.addEventListener('click', function () {
@@ -182,8 +208,30 @@
 	}
 
 	[].forEach.call(sezione.querySelectorAll('.zones-map__chip'), function (chip) {
-		chip.addEventListener('click', function () { seleziona(chip.dataset.cap); });
+		chip.addEventListener('click', function () { seleziona(chip.dataset.cap); portaInVista(); });
 	});
+
+	/* Sotto la soglia i 26 chip, alti 44px l'uno perche' siano toccabili, allungano la sezione a
+	   1633px: l'elenco diventa un muro. Se ne mostrano 12 e il resto sta dietro un bottone. Il
+	   taglio lo fa il JS, non il PHP: senza JS restano tutti nel markup, quindi indicizzabili. */
+	var elenco = sezione.querySelector('.zones-map__chips ul');
+	if (elenco && puntatoreGrossolano()) {
+		var voci = [].slice.call(elenco.children);
+		var VISIBILI = 12;
+		if (voci.length > VISIBILI + 2) {
+			var nascoste = voci.slice(VISIBILI);
+			nascoste.forEach(function (li) { li.hidden = true; });
+			var altre = document.createElement('button');
+			altre.type = 'button';
+			altre.className = 'zones-map__more';
+			altre.textContent = 'Mostra tutte le zone (' + voci.length + ')';
+			altre.addEventListener('click', function () {
+				nascoste.forEach(function (li) { li.hidden = false; });
+				altre.remove();
+			});
+			elenco.parentNode.appendChild(altre);
+		}
+	}
 
 	/* Ricerca testuale. Riconosce, in quest'ordine: un CAP di cinque cifre ovunque nel testo (vale
 	   anche per un indirizzo incollato con il CAP dentro), una voce della datalist nella forma
@@ -204,7 +252,7 @@
 
 	function cerca() {
 		var trovato = cercaCap(input ? input.value : '');
-		if (trovato) { seleziona(trovato); return; }
+		if (trovato) { seleziona(trovato); portaInVista(); return; }
 		if (input && input.value.trim()) {
 			seleziona(null);
 			pannello.dataset.state = 'unknown';

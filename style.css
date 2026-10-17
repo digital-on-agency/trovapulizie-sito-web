@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.35.0
+Version: 0.36.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -506,7 +506,7 @@ a {
 	padding: 0;
 }
 .tp-search__input::placeholder { color: var(--tp-text-placeholder); }
-.tp-search__input:focus { outline: none; }
+.tp-search__input:focus { outline: none; } /* il segnale di focus lo da' il campo, vedi :focus-within sotto */
 .tp-search__field--address:focus-within { box-shadow: inset 0 0 0 2px var(--tp-primary); }
 
 .tp-search__placeholder {
@@ -2794,13 +2794,17 @@ a {
 .zones-map__caps path.is-selected { fill: #0F9D63; stroke: var(--tp-white); stroke-width: 2; }
 .zones-map__outline { fill: none; stroke: #D1D5DB; stroke-width: 1.5; pointer-events: none; }
 
-.zones-map__credit { margin: 8px 0 0; font-size: 12px; color: var(--tp-text-muted); }
+.zones-map__credit { margin: 8px 0 0; font-size: 12px; color: #656E7B; } /* 5,16:1 su bianco */
 
 /* Colonna di destra: prima l'azione (la barra), poi i quartieri, poi l'esito. */
 .zones-map__side { grid-area: pannello; display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .zones-map__search { max-width: none; }
+/* Il campo reale deve essere alto quanto la riga che si tocca: l'input stava a 23px dentro un
+   contenitore da 47 e un tocco appena sopra o sotto il testo non apriva la tastiera. */
+.zones-map__search .tp-search__field--address { padding-top: 0; padding-bottom: 0; }
+.zones-map__search .tp-search__input { min-height: 46px; }
 
-.zones-map__chips-label { margin: 20px 0 10px; font-size: 13px; color: var(--tp-text-body); }
+.zones-map__chips-label { margin: 20px 0 10px; font-size: 13px; color: #5B6472; }
 .zones-map__chips ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .zones-map__chip {
 	font: inherit;
@@ -2812,10 +2816,23 @@ a {
 	padding: 7px 14px;
 	border-radius: 999px;
 	transition: border-color 0.15s ease, background 0.15s ease;
+	/* 44px e' il minimo per un bersaglio da dito: i chip stavano a 36 e il link di ritorno a 21.
+	   L'area cresce con ::before, non con il padding, cosi' il chip non si gonfia a vista
+	   (reference_css_hitarea_padding_translate_bug nel vault). */
+	position: relative;
+}
+.zones-map__chip::before {
+	content: '';
+	position: absolute;
+	inset: -5px 0;
+	min-height: 44px;
 }
 /* Un quartiere senza offerta non deve sembrare prenotabile: il pieno e' solo per le zone attive. */
-.zones-map__chip[data-state='active'] { border-color: var(--tp-primary); background: #EAFAF4; color: #0F9D63; }
+.zones-map__chip[data-state='active'] { border-color: var(--tp-primary); background: #EAFAF4; color: #0A7A4D; } /* 4,99:1 su #EAFAF4; il verde pieno #0F9D63 si fermava a 3,2 */
 .zones-map__chip:hover { border-color: var(--tp-primary); }
+.zones-map__chip:focus-visible,
+.zones-map__back:focus-visible,
+.zones-map__caps path:focus-visible { outline: 3px solid #0A7A4D; outline-offset: 2px; }
 
 .zones-map__panel {
 	display: grid;
@@ -2851,21 +2868,34 @@ a {
 .zones-map__totals dt, .zones-map__counts dt { font-size: 13px; color: var(--tp-text-body); margin: 0; }
 .zones-map__totals dd, .zones-map__counts dd { margin: 4px 0 0; font-size: 28px; font-weight: 700; color: var(--tp-text-heading); }
 .zones-map__verdict { margin: 0 0 20px; font-size: 16px; font-weight: 600; color: var(--tp-text-heading); }
-.zones-map__services-label { margin: 0 0 10px; font-size: 13px; color: var(--tp-text-body); }
+.zones-map__services-label { margin: 0 0 10px; font-size: 13px; color: #5B6472; }
 .zones-map__services-label[hidden] { display: none; }
-.zones-map__legend { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: var(--tp-text-body); }
+.zones-map__legend { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 13px; color: #5B6472; }
 .zones-map__legend li { display: flex; align-items: center; gap: 8px; }
 .zones-map__legend li::before { content: ''; width: 14px; height: 14px; border-radius: 4px; background: #EBEDF0; border: 1px solid var(--tp-border); }
 .zones-map__legend li[data-state='soon']::before { background: #D6F7EC; }
 .zones-map__legend li[data-state='active']::before { background: var(--tp-primary); border-color: var(--tp-primary); }
-.zones-map__hint, .zones-map__hover-hint { margin: 0; color: var(--tp-text-muted); font-size: 14px; }
-.zones-map__zone-meta { margin: 0 0 20px; color: var(--tp-text-body); font-size: 14px; }
+.zones-map__hint, .zones-map__hover-hint { margin: 0; color: #5B6472; font-size: 14px; } /* 5,75:1 sul fondo del pannello; --tp-text-muted stava a 2,9 */
+.zones-map__zone-meta { margin: 0 0 16px; color: #5B6472; font-size: 14px; }
 .zones-map__services { list-style: none; margin: 0 0 24px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
 .zones-map__services li { padding: 6px 12px; background: var(--tp-white); border: 1px solid var(--tp-border); border-radius: 999px; font-size: 13px; color: var(--tp-text-chip); }
 
 .zones-map__panel[data-state='unknown'] .zones-map__unknown { visibility: visible; pointer-events: auto; }
 .zones-map__unknown h3 { margin: 0 0 8px; }
-.zones-map__unknown p { margin: 0; color: var(--tp-text-body); font-size: 14px; }
+.zones-map__unknown p { margin: 0; color: #5B6472; font-size: 14px; }
+.zones-map__more {
+	margin: 12px 0 0;
+	padding: 10px 0;
+	border: none;
+	background: none;
+	font: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	color: #0A7A4D;
+	text-decoration: underline;
+	cursor: pointer;
+	min-height: 44px;
+}
 .zones-map__back {
 	display: block;
 	margin: 16px 0 0;
@@ -2874,10 +2904,12 @@ a {
 	background: none;
 	font: inherit;
 	font-size: 14px;
-	color: var(--tp-text-body);
+	color: #5B6472;
 	text-decoration: underline;
 	cursor: pointer;
+	position: relative;
 }
+.zones-map__back::before { content: ''; position: absolute; inset: -12px -8px; }
 
 /* Copertura e stato della rete decidono quale azione mostrare: CTA verso l'app dove c'e' offerta,
    bottone "zona scoperta" dove non ce n'e', avviso quando i numeri non sono arrivati. */
@@ -2897,6 +2929,12 @@ a {
 	/* Sotto la soglia il pannello sta sotto la mappa: riservare 360px lascerebbe un vuoto in mezzo
 	   alla pagina, e lo scorrimento al tap porta comunque il pannello in vista. */
 	.zones-map__panel { min-height: 0; padding: 20px; }
+	/* Sotto la soglia 18 zone attive su 26 sono piu' piccole di 24px: puntarle col dito non si puo'.
+	   Il tocco sulla mappa non deve cadere nel vuoto, lo raccoglie zones-map.js e lo porta alla zona
+	   attiva piu' vicina; qui si toglie solo il cursore, che su touch non significa nulla. */
+	.zones-map__caps path { cursor: default; }
+	.zones-map__chip { padding: 11px 16px; }
+	.zones-map__chip::before { content: none; }
 	.zones-map__totals, .zones-map__counts { gap: 24px; }
 }
 
