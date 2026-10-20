@@ -9,6 +9,10 @@
  * - service: true/false, mostra il campo del servizio con il chevron (nella mappa e' rumore)
  * - service_label, placeholder, submit_label
  * - input_id, input_name, suggestions (array di stringhe per la datalist)
+ * - action: URL di destinazione. Se valorizzato la barra diventa un <form method="get"> e il
+ *           bottone un submit: la ricerca funziona anche a JavaScript spento (TICKET-24).
+ *           Vuoto = contenitore inerte, il comportamento lo da' il JS della sezione
+ *           (es. zones-map.js nella sezione mappa).
  * - class: classi extra sul contenitore
  */
 $args = wp_parse_args( $args ?? array(), array(
@@ -19,13 +23,19 @@ $args = wp_parse_args( $args ?? array(), array(
 	'submit_label'  => 'Cerca',
 	'input_id'      => '',
 	'input_name'    => 'indirizzo',
+	'action'        => '',
 	'suggestions'   => array(),
 	'class'         => '',
 ) );
 $icona       = get_stylesheet_directory_uri() . '/assets/icons/';
 $datalist_id = $args['suggestions'] && $args['input_id'] ? $args['input_id'] . '-list' : '';
+$e_form      = (bool) $args['action'];
 ?>
+<?php if ( $e_form ) : ?>
+<form class="tp-search <?php echo esc_attr( $args['class'] ); ?>" method="get" action="<?php echo esc_url( $args['action'] ); ?>" role="search">
+<?php else : ?>
 <div class="tp-search <?php echo esc_attr( $args['class'] ); ?>">
+<?php endif; ?>
 	<?php if ( $args['service'] ) : ?>
 		<div class="tp-search__field tp-search__field--service">
 			<img src="<?php echo esc_url( $icona . 'ic-servizio.svg' ); ?>" alt="" class="tp-search__icon" width="20" height="20">
@@ -57,8 +67,12 @@ $datalist_id = $args['suggestions'] && $args['input_id'] ? $args['input_id'] . '
 		<?php endif; ?>
 	</div>
 
-	<button type="button" class="tp-btn tp-btn--primary tp-btn--lg tp-search__submit">
+	<button type="<?php echo $e_form ? 'submit' : 'button'; ?>" class="tp-btn tp-btn--primary tp-btn--lg tp-search__submit">
 		<img src="<?php echo esc_url( $icona . 'ic-search.svg' ); ?>" alt="" class="tp-search__icon tp-search__icon--white" width="20" height="20">
 		<?php echo esc_html( $args['submit_label'] ); ?>
 	</button>
+<?php if ( $e_form ) : ?>
+</form>
+<?php else : ?>
 </div>
+<?php endif; ?>

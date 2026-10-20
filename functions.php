@@ -71,15 +71,60 @@ add_action( 'wp_head', function () {
 	}
 }, 2 );
 
+/* Dati strutturati LocalBusiness sulla pagina hub di citta' (TICKET-32). Un solo blocco per pagina,
+   generato da qui e non da un plugin SEO: il tema non ne ha.
+
+   [ATTENZIONE] Niente aggregateRating finche' non ci sono recensioni vere: un placeholder di quel
+   tipo e' gia' finito pubblicato su 21 pagine del portale. Niente telefono segnaposto. */
+add_action( 'wp_head', function () {
+	if ( ! is_page_template( 'page-hub-roma.php' ) ) {
+		return;
+	}
+	$dati = array(
+		'@context'    => 'https://schema.org',
+		'@type'       => 'LocalBusiness',
+		'name'        => get_bloginfo( 'name' ),
+		'url'         => get_permalink(),
+		'description' => wp_strip_all_tags( (string) carbon_get_the_post_meta( 'seo_description' ) ) ?: get_bloginfo( 'description' ),
+		'areaServed'  => array(
+			'@type' => 'City',
+			'name'  => 'Roma',
+		),
+	);
+	echo '<script type="application/ld+json">' . wp_json_encode( $dati, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
+}, 5 );
+
 add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_style( 'trovapulizie-fonts', 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap', array(), null );
 	wp_enqueue_style( 'trovapulizie-style', get_stylesheet_uri(), array( 'trovapulizie-fonts' ), tp_theme_version() );
-	// nav-mobile serve su ogni pagina (la navbar e' in header.php), gli altri moduli solo sulla Home.
+	// nav-mobile serve su ogni pagina (la navbar e' in header.php).
 	wp_enqueue_script( 'trovapulizie-nav-mobile', get_stylesheet_directory_uri() . '/assets/js/nav-mobile.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
-	if ( is_page_template( 'page-home.php' ) ) {
-		foreach ( array( 'home-motion', 'hiw-sequence', 'reveal', 'faq-accordion', 'services-tabs', 'hero-video', 'zones-map', 'reviews-marquee' ) as $handle ) {
-			wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
+
+	// Moduli dei template-part condivisi: ogni pagina che riusa quelle sezioni ne ha bisogno,
+	// altrimenti le sezioni escono mute (accordion che non apre, tab inerti, mappa ferma).
+	// Aggiungendo una landing che riusa i template-part, aggiungerla a $pagine_con_sezioni.
+	$moduli_condivisi = array( 'reveal', 'faq-accordion', 'services-tabs', 'zones-map', 'reviews-marquee' );
+	// Solo sull'hub: la barra fissa non esiste sulla Home.
+	$moduli_hub       = array( 'sticky-cta', 'price-estimator' );
+	// Coreografia della sola Home (ADR-002): telefono pinnato, sequenza schermate, video hero.
+	$moduli_home      = array( 'home-motion', 'hiw-sequence', 'hero-video' );
+	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php' );
+
+	$handles = array();
+	foreach ( $pagine_con_sezioni as $template ) {
+		if ( is_page_template( $template ) ) {
+			$handles = $moduli_condivisi;
+			break;
 		}
+	}
+	if ( is_page_template( 'page-home.php' ) ) {
+		$handles = array_merge( $handles, $moduli_home );
+	}
+	if ( is_page_template( 'page-hub-roma.php' ) ) {
+		$handles = array_merge( $handles, $moduli_hub );
+	}
+	foreach ( $handles as $handle ) {
+		wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 	}
 } );
 

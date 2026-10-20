@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.37.6
+Version: 0.40.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -18,16 +18,21 @@ Version: 0.37.6
    9. FAQ (due colonne, accordion, reveal)
    10. CTA finale
    11. Footer
+   11-bis. Hub citta' /roma/: hero, verificati, come funziona statica, calcolatore, intro, barra fissa mobile
    12. prefers-reduced-motion: blocco unico per tutte le sezioni
    Ogni sezione ha la propria media query sotto i 1024px; la soglia e' il token --tp-bp-desktop. */
 
 /* Token da Figma reale — vedi docs/brand-kit.md per provenienza (node-id) */
 :root {
 	/* Colori */
+	/* [ATTENZIONE] Le CTA usano --tp-primary, il verde del marchio (decisione di Guido, 20/10):
+	   l'identita' del marchio vince sul contrasto. Col testo bianco sopra sta a 2,16:1, sotto il
+	   minimo AA di 4,5:1 — scelta consapevole, non una svista: non va "corretta" in una passata
+	   di QA. Se servira' l'AA senza perdere il verde: stesso fondo, testo #191919 (8,12:1). */
 	--tp-primary: #00C896;
 	/* Il verde del marchio con sopra del testo bianco da' 2,16:1, sotto il minimo AA di 4,5. Due token
 	   derivati, da usare ogni volta che il verde porta testo o e' testo:
-	   --tp-primary-ink  fondo con testo bianco sopra (bottoni, badge, CTA finale): 4,52:1
+	   --tp-primary-ink  fondo con testo bianco sopra (badge, indicatore tab, stati): 4,52:1
 	   --tp-green-ink    il verde usato come testo su fondo chiaro: 5,38:1 su bianco
 	   --tp-primary resta per riempimenti e grafica senza testo sopra (la mappa, per esempio). */
 	--tp-primary-ink: #08875F;
@@ -99,7 +104,7 @@ a {
 }
 
 /* :where() azzera la specificita': ogni sezione puo' sovrascrivere senza combattere */
-:where(main.home) > section {
+:where(main.home, main.hub-roma) > section {
 	max-width: var(--tp-max-width);
 	margin: 0 auto;
 	padding: 48px 20px;
@@ -125,7 +130,7 @@ a {
 	white-space: nowrap;
 }
 .tp-btn--primary {
-	background: var(--tp-primary-ink);
+	background: var(--tp-primary);
 	color: var(--tp-white);
 }
 .tp-btn--secondary {
@@ -685,7 +690,7 @@ a {
 
 /* Le sezioni sono bersaglio dei link ad ancora della navbar: senza questo il titolo finisce sotto la
    navbar sticky (alta --tp-navbar-h) quando si salta alla sezione. */
-:where(main.home > section) {
+:where(main.home > section, main.hub-roma > section) {
 	scroll-margin-top: var(--tp-navbar-h);
 }
 
@@ -2268,7 +2273,7 @@ a {
 	box-sizing: border-box;
 	padding: 14px 20px;
 	border-radius: var(--tp-radius-lg);
-	background: var(--tp-primary-ink);
+	background: var(--tp-primary);
 	font-size: 15px;
 	font-weight: 600;
 	color: var(--tp-white);
@@ -3021,6 +3026,650 @@ a {
 	.zones-map__totals, .zones-map__counts { gap: 24px; }
 }
 
+/* =========================
+   Hub citta' /roma/ — Figma 4422:921 (desktop) / 3927:1280 (mobile)
+   Sezioni proprie dell'hub. Le altre (zone, servizi, recensioni, FAQ, CTA) riusano i blocchi
+   della Home senza stili aggiuntivi: le regole base di :where(main.hub-roma) > section in
+   cima al file danno larghezza e padding come sulla Home.
+   ========================= */
+
+.hub-hero {
+	display: flex;
+	justify-content: center;
+	padding: 72px 20px 56px;
+}
+
+.hub-hero__content {
+	width: 100%;
+	max-width: 760px;
+	text-align: center;
+}
+
+.hub-hero__eyebrow {
+	margin: 0 0 12px;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--tp-green-ink);
+}
+
+.hub-hero h1 {
+	margin: 0 0 16px;
+	font-size: clamp(32px, 4vw, 52px);
+	line-height: 1.15;
+	color: var(--tp-text-heading);
+}
+
+.hub-hero__subtitle {
+	margin: 0 auto 32px;
+	max-width: 620px;
+	font-size: 17px;
+	line-height: 1.6;
+	color: var(--tp-text-muted);
+}
+
+.hub-hero .tp-search {
+	margin: 0 auto;
+	max-width: 680px;
+}
+
+/* Verificati sul serio — Figma 4441:965 / 4451:965 */
+.verified__inner {
+	display: grid;
+	grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+	gap: 48px;
+	align-items: start;
+}
+
+.verified__eyebrow {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0 0 16px;
+	padding: 7px 16px;
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-bg-soft);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--tp-green-ink);
+}
+
+.verified__dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--tp-primary-ink);
+}
+
+.verified__title {
+	margin: 0 0 16px;
+	font-size: clamp(28px, 3vw, 40px);
+	line-height: 1.2;
+	color: var(--tp-text-heading);
+}
+
+.verified__text {
+	margin: 0 0 28px;
+	font-size: 16px;
+	line-height: 1.6;
+	color: var(--tp-text-muted);
+}
+
+.verified__steps {
+	margin: 0 0 28px;
+	padding: 0;
+	list-style: none;
+	display: grid;
+	gap: 18px;
+}
+
+.verified__step {
+	display: flex;
+	gap: 14px;
+	align-items: flex-start;
+	opacity: 0;
+	transform: translateY(12px);
+	transition: opacity 0.6s ease, transform 0.6s ease;
+	transition-delay: calc(var(--i) * 80ms);
+}
+
+.verified.is-in .verified__step {
+	opacity: 1;
+	transform: none;
+}
+
+.verified__check {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background: var(--tp-bg-soft);
+	color: var(--tp-primary-ink);
+	font-size: 15px;
+}
+
+.verified__step-text {
+	display: grid;
+	gap: 3px;
+}
+
+.verified__step-text strong {
+	font-size: 16px;
+	color: var(--tp-text-heading);
+}
+
+.verified__step-text span {
+	font-size: 14px;
+	color: var(--tp-text-muted);
+}
+
+.verified__cta {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	padding: 15px 28px;
+	border-radius: var(--tp-radius-lg);
+	background: var(--tp-primary);
+	color: var(--tp-white);
+	font-weight: 600;
+	text-decoration: none;
+	transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.verified__cta:hover {
+	transform: translateY(-1px);
+	box-shadow: var(--tp-shadow-card);
+}
+
+.verified__cta:hover .verified__arrow {
+	transform: translateX(3px);
+}
+
+.verified__arrow {
+	transition: transform 0.2s ease;
+}
+
+.verified__card {
+	padding: 26px;
+	border: 1px solid var(--tp-border-card);
+	border-radius: var(--tp-radius-2xl);
+	background: var(--tp-white);
+	box-shadow: var(--tp-shadow-card);
+}
+
+.verified__card-head {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding-bottom: 18px;
+	border-bottom: 1px solid var(--tp-border);
+}
+
+.verified__avatar {
+	display: grid;
+	place-items: center;
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	background: var(--tp-bg-soft);
+	color: var(--tp-primary-ink);
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.verified__identity {
+	display: grid;
+	gap: 2px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.verified__identity strong {
+	font-size: 17px;
+	color: var(--tp-text-heading);
+}
+
+.verified__identity span {
+	font-size: 13px;
+	color: var(--tp-text-muted);
+}
+
+.verified__badge {
+	flex: 0 0 auto;
+	padding: 6px 12px;
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-bg-soft);
+	font-size: 12px;
+	font-weight: 600;
+	color: var(--tp-green-ink);
+}
+
+.verified__card-checks {
+	margin: 18px 0 0;
+	padding: 0;
+	list-style: none;
+	display: grid;
+	gap: 12px;
+}
+
+.verified__card-checks li {
+	display: flex;
+	gap: 10px;
+	font-size: 14px;
+	color: var(--tp-text-body);
+}
+
+.verified__card-checks span {
+	color: var(--tp-primary-ink);
+}
+
+.verified__card-note {
+	margin: 18px 0 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--tp-text-muted);
+}
+
+/* Come funziona statica — Figma 4467:921 / 4471:921. Nessun pin, nessun video: ADR-002 vale
+   solo per la Home. */
+.hiw-static__inner {
+	display: grid;
+	grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+	gap: 48px;
+	align-items: center;
+}
+
+.hiw-static__eyebrow {
+	margin: 0 0 12px;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--tp-green-ink);
+}
+
+.hiw-static__title {
+	margin: 0 0 12px;
+	font-size: clamp(28px, 3vw, 40px);
+	line-height: 1.2;
+	color: var(--tp-text-heading);
+}
+
+.hiw-static__subtitle {
+	margin: 0 0 32px;
+	font-size: 16px;
+	color: var(--tp-text-muted);
+}
+
+.hiw-static__steps {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: grid;
+	gap: 26px;
+	counter-reset: none;
+}
+
+.hiw-static__step {
+	display: flex;
+	gap: 18px;
+	align-items: flex-start;
+	opacity: 0;
+	transform: translateY(12px);
+	transition: opacity 0.6s ease, transform 0.6s ease;
+	transition-delay: calc(var(--i) * 90ms);
+}
+
+.hiw-static.is-in .hiw-static__step {
+	opacity: 1;
+	transform: none;
+}
+
+.hiw-static__num {
+	flex: 0 0 auto;
+	display: grid;
+	place-items: center;
+	width: 46px;
+	height: 46px;
+	border-radius: var(--tp-radius-lg);
+	background: var(--tp-bg-soft);
+	color: var(--tp-primary-ink);
+	font-size: 20px;
+	font-weight: 700;
+}
+
+.hiw-static__step-text {
+	display: grid;
+	gap: 5px;
+}
+
+.hiw-static__step-text strong {
+	font-size: 18px;
+	color: var(--tp-text-heading);
+}
+
+.hiw-static__step-text span {
+	font-size: 15px;
+	line-height: 1.55;
+	color: var(--tp-text-muted);
+}
+
+.hiw-static__phone {
+	display: flex;
+	justify-content: center;
+}
+
+/* Intro SEO in fondo — Figma 4424:942 */
+.hub-intro__inner {
+	max-width: 900px;
+	margin: 0 auto;
+	text-align: center;
+}
+
+.hub-intro__eyebrow {
+	margin: 0 0 14px;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--tp-green-ink);
+}
+
+.hub-intro__text {
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.75;
+	color: var(--tp-text-muted);
+}
+
+/* Barra CTA fissa, solo sotto --tp-bp-desktop — Figma 3946:1280 */
+.sticky-cta {
+	position: fixed;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 40;
+	display: none;
+	padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+	background: var(--tp-white);
+	box-shadow: 0 -6px 24px -10px rgba(15, 23, 41, 0.22);
+}
+
+.sticky-cta[hidden] {
+	display: none;
+}
+
+.sticky-cta__btn {
+	display: flex;
+	width: 100%;
+	justify-content: center;
+}
+
+@media (max-width: 1023px) {
+	.verified__inner,
+	.hiw-static__inner {
+		grid-template-columns: 1fr;
+		gap: 32px;
+	}
+
+	.hub-hero {
+		padding: 48px 20px 40px;
+	}
+
+	.hub-hero__content {
+		text-align: left;
+	}
+
+	.hub-hero .tp-search {
+		margin: 0;
+	}
+
+	.hub-intro__inner {
+		text-align: left;
+	}
+
+	/* La barra fissa esiste solo qui: il JS toglie [hidden] quando la hero esce dallo schermo. */
+	.sticky-cta:not([hidden]) {
+		display: block;
+	}
+
+	/* Spazio in fondo perche' la barra non copra il footer. */
+	main.hub-roma {
+		padding-bottom: 84px;
+	}
+}
+
+/* Quanto costa: calcolatore della stima — Figma 4447:965 / 4452:965 (TICKET-34).
+   I controlli compaiono solo con .is-ready, messa dal JS: senza JavaScript resta il <noscript>. */
+.price__head {
+	max-width: 620px;
+	margin: 0 auto 36px;
+	text-align: center;
+}
+
+.price__eyebrow {
+	margin: 0 0 12px;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--tp-green-ink);
+}
+
+.price__title {
+	margin: 0 0 12px;
+	font-size: clamp(28px, 3vw, 40px);
+	line-height: 1.2;
+	color: var(--tp-text-heading);
+}
+
+.price__subtitle {
+	margin: 0;
+	font-size: 16px;
+	color: var(--tp-text-muted);
+}
+
+.price__card {
+	display: grid;
+	grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+	border: 1px solid var(--tp-border-card);
+	border-radius: var(--tp-radius-2xl);
+	background: var(--tp-white);
+	box-shadow: var(--tp-shadow-card);
+	overflow: hidden;
+}
+
+.price__controls {
+	display: grid;
+	gap: 28px;
+	padding: 36px;
+}
+
+.price__field {
+	display: grid;
+	gap: 12px;
+}
+
+.price__label-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+}
+
+.price__label,
+.price__label-row label {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--tp-text-heading);
+}
+
+.price__value {
+	padding: 5px 12px;
+	border-radius: var(--tp-radius-sm);
+	background: var(--tp-bg-soft);
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--tp-green-ink);
+}
+
+.price__slider {
+	--riempimento: 29%;
+	width: 100%;
+	height: 8px;
+	appearance: none;
+	border-radius: var(--tp-radius-pill);
+	background: linear-gradient(to right, var(--tp-primary) 0 var(--riempimento), var(--tp-border) var(--riempimento) 100%);
+	cursor: pointer;
+}
+
+.price__slider::-webkit-slider-thumb {
+	appearance: none;
+	width: 22px;
+	height: 22px;
+	border: 3px solid var(--tp-white);
+	border-radius: 50%;
+	background: var(--tp-primary-ink);
+	box-shadow: var(--tp-shadow-card);
+}
+
+.price__slider::-moz-range-thumb {
+	width: 22px;
+	height: 22px;
+	border: 3px solid var(--tp-white);
+	border-radius: 50%;
+	background: var(--tp-primary-ink);
+}
+
+.price__slider:focus-visible {
+	outline: 2px solid var(--tp-primary-ink);
+	outline-offset: 4px;
+}
+
+.price__scale {
+	display: flex;
+	justify-content: space-between;
+	font-size: 13px;
+	color: var(--tp-text-muted);
+}
+
+.price__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.price__chip {
+	min-height: 44px;
+	padding: 10px 18px;
+	border: 1px solid var(--tp-border-card);
+	border-radius: var(--tp-radius-md);
+	background: var(--tp-white);
+	font-family: inherit;
+	font-size: 14px;
+	color: var(--tp-text-chip);
+	cursor: pointer;
+	transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.price__chip:hover {
+	border-color: var(--tp-primary);
+}
+
+.price__chip.is-active {
+	border-color: var(--tp-primary-ink);
+	background: var(--tp-bg-soft);
+	color: var(--tp-green-ink);
+	font-weight: 600;
+}
+
+.price__result {
+	padding: 36px;
+	background: var(--tp-bg-soft);
+	border-left: 1px solid var(--tp-border);
+}
+
+.price__result-label {
+	margin: 0 0 10px;
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	color: var(--tp-text-muted);
+}
+
+.price__amount {
+	margin: 0 0 10px;
+	font-size: clamp(34px, 4vw, 46px);
+	font-weight: 700;
+	line-height: 1.1;
+	color: var(--tp-text-heading);
+}
+
+.price__summary {
+	margin: 0 0 24px;
+	font-size: 14px;
+	color: var(--tp-text-muted);
+}
+
+.price__cta {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+	min-height: 52px;
+	padding: 14px 24px;
+	border-radius: var(--tp-radius-lg);
+	background: var(--tp-primary);
+	color: var(--tp-white);
+	font-weight: 600;
+	text-decoration: none;
+}
+
+.price__cta:hover {
+	box-shadow: var(--tp-shadow-card);
+}
+
+.price__note,
+.price__fallback {
+	margin: 16px 0 0;
+	font-size: 12px;
+	line-height: 1.55;
+	color: var(--tp-text-muted);
+}
+
+/* Senza JS i comandi non servono: una stima che non calcola e' peggio che assente. */
+.price:not(.is-ready) .price__card {
+	display: none;
+}
+
+@media (max-width: 1023px) {
+	.price__card {
+		grid-template-columns: 1fr;
+	}
+
+	.price__controls,
+	.price__result {
+		padding: 24px;
+	}
+
+	.price__result {
+		border-left: 0;
+		border-top: 1px solid var(--tp-border);
+	}
+
+	.price__head {
+		text-align: left;
+		margin-bottom: 24px;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.zones-map__caps path { transition: none; }
 	.hiw-scrollcue {
@@ -3099,6 +3748,14 @@ a {
 	.site-footer__bottom {
 		opacity: 1;
 		transform: none;
+		transition: none !important;
+	}
+	.verified__step,
+	.hiw-static__step,
+	.verified__cta,
+	.verified__arrow {
+		opacity: 1;
+		transform: none !important;
 		transition: none !important;
 	}
 }

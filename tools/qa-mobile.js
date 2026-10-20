@@ -89,6 +89,15 @@ const PROBE = `(() => {
 	return JSON.stringify({
 		vw: vw,
 		scrollWidth: d.scrollWidth,
+		// L'hub di citta' riusa le sezioni della Home ma non la sua coreografia: le verifiche
+		// su pin, telefono e hero della Home non valgono li' (SPEC-pagina-hub-roma).
+		hub: !!document.querySelector('main.hub-roma'),
+		stickyCta: (() => {
+			const b = document.querySelector('[data-sticky-cta]');
+			return b ? { c: true, hidden: b.hidden } : { c: false };
+		})(),
+		sezioni: ['.zones-map', '.services', '.verified', '.hiw-static', '.faq', '.cta-final']
+			.filter(sel => !document.querySelector(sel)),
 		motionOk: document.documentElement.classList.contains('motion-ok'),
 		bp: getComputedStyle(document.documentElement).getPropertyValue('--tp-bp-desktop').trim(),
 		hiwHeight: hiw ? Math.round(hiw.getBoundingClientRect().height) : null,
@@ -117,17 +126,18 @@ const PROBE = `(() => {
 			const r = JSON.parse(await ev(PROBE));
 			const errors = [];
 			if (r.scrollWidth > r.vw) errors.push('scroll orizzontale: scrollWidth ' + r.scrollWidth + ' > ' + r.vw);
-			if (r.motionOk !== desktop) errors.push('motion-ok ' + r.motionOk + ', atteso ' + desktop);
+			const attesoMotion = r.hub ? false : desktop;
+			if (r.motionOk !== attesoMotion) errors.push('motion-ok ' + r.motionOk + ', atteso ' + attesoMotion);
 			if (!desktop && r.cdn.length) errors.push('risorse CDN richieste sotto soglia: ' + r.cdn.join(', '));
 			// Sotto soglia la sezione vale 300dvh con la sequenza attiva, circa 2 viewport nel fallback
 			// impilato; i 550vh del pin desktop (oltre 5 viewport) non devono comparire in nessuno dei due.
-			if (!desktop) {
+			if (!desktop && !r.hub) {
 				const atteso = r.seq.on ? 3 * r.seq.viewport : null;
 				if (atteso && Math.abs(r.hiwHeight - atteso) > atteso * 0.1) errors.push('Come funziona alta ' + r.hiwHeight + 'px, attesi circa ' + atteso + ' (300dvh)');
 				if (!r.seq.on && r.hiwHeight > 2.5 * r.seq.viewport) errors.push('fallback impilato alto ' + r.hiwHeight + 'px: sembra la sezione pinnata');
 			}
 			// Come funziona sotto soglia (TICKET-13 rev. 2): sequenza di schermate o fallback impilato.
-			if (!desktop) {
+			if (!desktop && !r.hub) {
 				if (r.steps.length !== 3) errors.push('passi di Come funziona: ' + r.steps.length + ', attesi 3');
 				if (r.videoSezione) errors.push(r.videoSezione + ' video ancora nella sezione: su mobile la sequenza e\' di immagini');
 				if (r.seq.on) {
@@ -140,15 +150,23 @@ const PROBE = `(() => {
 						if (st.phone !== '158x320') errors.push('blocco ' + (i + 1) + ': telefono ' + st.phone + ', atteso 158x320');
 					});
 				}
-				// Navbar mobile (TICKET-11): barra 65, hamburger 24x24 chiuso, Accedi solo nel pannello.
-				if (r.nav.h !== 65) errors.push('navbar alta ' + r.nav.h + ', attesa 65');
-				if (!r.nav.burger || r.nav.burger[2] !== 24) errors.push('hamburger assente o non 24px');
-				if (r.nav.aria !== 'false' || r.nav.panelHidden !== true) errors.push('pannello non chiuso al caricamento');
-				if (r.nav.accediVisibile) errors.push('Accedi visibile nella barra: va nel pannello');
 				// Hero mobile (TICKET-12): box 270 di altezza e telefono 150x300 che ne sporge sotto.
 				if (!r.hero.box || r.hero.box[3] !== 270) errors.push('box hero alto ' + (r.hero.box && r.hero.box[3]) + ', atteso 270');
 				if (!r.hero.phone || r.hero.phone[2] !== 150 || r.hero.phone[3] !== 300) errors.push('telefono hero ' + JSON.stringify(r.hero.phone) + ', atteso 150x300');
 				if (r.hero.phone && r.hero.box && r.hero.phone[1] + r.hero.phone[3] <= r.hero.box[1] + r.hero.box[3]) errors.push('il telefono non sporge sotto il box della hero');
+			}
+			// Navbar mobile (TICKET-11): vale su ogni pagina, la barra sta in header.php.
+			if (!desktop) {
+				if (r.nav.h !== 65) errors.push('navbar alta ' + r.nav.h + ', attesa 65');
+				if (!r.nav.burger || r.nav.burger[2] !== 24) errors.push('hamburger assente o non 24px');
+				if (r.nav.aria !== 'false' || r.nav.panelHidden !== true) errors.push('pannello non chiuso al caricamento');
+				if (r.nav.accediVisibile) errors.push('Accedi visibile nella barra: va nel pannello');
+			}
+			// Hub di citta' (SPEC-pagina-hub-roma): sezioni attese e barra fissa solo sotto soglia.
+			if (r.hub) {
+				if (r.sezioni.length) errors.push('sezioni mancanti: ' + r.sezioni.join(', '));
+				if (!r.stickyCta.c) errors.push('barra CTA fissa assente dal DOM');
+				else if (desktop && !r.stickyCta.hidden) errors.push('barra CTA fissa visibile su desktop');
 			}
 			// Peso dei media (TICKET-20): budget, rendition per mobile, nessun doppione fra URL diversi.
 			if (r.dup.length) errors.push('stesso file con URL diversi: ' + r.dup.join(', '));

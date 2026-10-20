@@ -179,6 +179,117 @@ add_action( 'carbon_fields_register_fields', function () {
 		) );
 
 
+	// Hub Roma — Figma 4422:921 (desktop) / 3927:1280 (mobile). PRD: SPEC-pagina-hub-roma.
+	// Prefisso roma_ su tutti i campi: la scheda convive con quella della Home e i nomi non
+	// devono potersi confondere leggendo un template.
+	Container::make( 'post_meta', __( 'Hub Roma — Sezioni' ) )
+		->where( 'post_template', '=', 'page-hub-roma.php' )
+		->add_tab( __( 'Hero' ), array(
+			Field::make( 'text', 'roma_hero_eyebrow', __( 'Pillola sopra il titolo' ) ),
+			Field::make( 'textarea', 'roma_hero_title', __( 'Titolo (H1)' ) )
+				->set_help_text( __( 'Un invio a capo = una riga nel titolo.' ) ),
+			Field::make( 'textarea', 'roma_hero_subtitle', __( 'Sottotitolo' ) ),
+		) )
+		->add_tab( __( 'Zone' ), array(
+			Field::make( 'text', 'roma_zones_title', __( 'Titolo' ) )
+				->set_default_value( 'Pulizie per zona a Roma' ),
+			Field::make( 'textarea', 'roma_zones_description', __( 'Testo sotto il titolo' ) ),
+			Field::make( 'text', 'roma_zones_cta_label', __( 'Testo della CTA del pannello' ) ),
+		) )
+		->add_tab( __( 'Servizi' ), array(
+			Field::make( 'text', 'roma_services_title', __( 'Titolo sezione' ) ),
+			Field::make( 'text', 'roma_services_subtitle', __( 'Sottotitolo' ) ),
+			Field::make( 'complex', 'roma_services', __( 'Servizi (una tab ciascuno)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'tab_label', __( 'Etichetta tab' ) ),
+					// Stesso set di icone della Home: 'cantieri' e' gia' l'icona di "a fondo"
+					// (lo dice la sua etichetta), non serve disegnarne una nuova.
+					Field::make( 'select', 'tab_icon', __( 'Icona tab' ) )
+						->set_options( array( 'casa' => 'Casa', 'uffici' => 'Uffici', 'cantieri' => 'Cantieri / a fondo', 'condomini' => 'Condomini', 'sanificazione' => 'Sanificazione', 'affitti' => 'Affitti brevi' ) ),
+					Field::make( 'textarea', 'includes', __( 'Cosa include (una voce per riga)' ) ),
+					Field::make( 'text', 'card_title', __( 'Titolo card' ) ),
+					Field::make( 'textarea', 'card_description', __( 'Descrizione card' ) ),
+					Field::make( 'text', 'highlight', __( 'Riga in evidenza' ) ),
+					Field::make( 'image', 'card_image', __( 'Foto' ) )
+						->set_value_type( 'url' ),
+					Field::make( 'text', 'link_text', __( 'Testo CTA' ) ),
+					Field::make( 'text', 'link', __( 'Link CTA' ) ),
+				) ),
+		) )
+		->add_tab( __( 'Verificati' ), array(
+			Field::make( 'text', 'roma_verified_eyebrow', __( 'Pillola sopra il titolo' ) ),
+			Field::make( 'text', 'roma_verified_title', __( 'Titolo' ) ),
+			Field::make( 'textarea', 'roma_verified_text', __( 'Testo' ) ),
+			Field::make( 'complex', 'roma_verified_steps', __( 'Step di verifica' ) )
+				->add_fields( array(
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'text', 'description', __( 'Descrizione' ) ),
+				) ),
+			Field::make( 'text', 'roma_verified_cta_label', __( 'Testo del bottone' ) ),
+			Field::make( 'text', 'roma_verified_cta_link', __( 'Link del bottone' ) ),
+		) )
+		->add_tab( __( 'Come funziona' ), array(
+			Field::make( 'text', 'roma_hiw_eyebrow', __( 'Pillola sopra il titolo' ) ),
+			Field::make( 'text', 'roma_hiw_title', __( 'Titolo' ) ),
+			Field::make( 'text', 'roma_hiw_subtitle', __( 'Sottotitolo' ) ),
+			Field::make( 'complex', 'roma_hiw_steps', __( 'Passi (tre nel Figma)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'textarea', 'description', __( 'Descrizione' ) ),
+				) ),
+			Field::make( 'image', 'roma_hiw_screen', __( 'Schermata nel telefono' ) )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Immagine gia ridimensionata: lo schermo e largo 294px su desktop.' ) ),
+		) )
+		->add_tab( __( 'Quanto costa' ), array(
+			Field::make( 'text', 'roma_price_eyebrow', __( 'Pillola sopra il titolo' ) ),
+			Field::make( 'text', 'roma_price_title', __( 'Titolo' ) ),
+			Field::make( 'text', 'roma_price_subtitle', __( 'Sottotitolo' ) ),
+			// [ATTENZIONE] Questi due numeri devono restare uguali a quelli dichiarati nella FAQ
+			// sul prezzo: sono la stessa promessa detta due volte nella stessa pagina.
+			Field::make( 'text', 'roma_price_min', __( 'Tariffa oraria minima (euro)' ) )
+				->set_default_value( '15' ),
+			Field::make( 'text', 'roma_price_max', __( 'Tariffa oraria massima (euro)' ) )
+				->set_default_value( '20' ),
+			Field::make( 'text', 'roma_price_cta_label', __( 'Bottone: testo' ) ),
+			Field::make( 'text', 'roma_price_cta_link', __( 'Bottone: URL' ) ),
+			Field::make( 'textarea', 'roma_price_note', __( 'Nota sotto il bottone' ) ),
+		) )
+		->add_tab( __( 'FAQ' ), array(
+			Field::make( 'text', 'roma_faq_eyebrow', __( 'Pillola sopra il titolo' ) ),
+			Field::make( 'text', 'roma_faq_title', __( 'Titolo' ) ),
+			Field::make( 'textarea', 'roma_faq_subtitle', __( 'Testo sotto il titolo' ) ),
+			Field::make( 'separator', 'roma_faq_contact_sep', __( 'Card di contatto (colonna sinistra)' ) ),
+			Field::make( 'text', 'roma_faq_contact_people', __( 'Nomi' ) ),
+			Field::make( 'text', 'roma_faq_contact_role', __( 'Ruolo' ) ),
+			Field::make( 'image', 'roma_faq_contact_avatar_1', __( 'Foto 1' ) )
+				->set_value_type( 'url' ),
+			Field::make( 'image', 'roma_faq_contact_avatar_2', __( 'Foto 2' ) )
+				->set_value_type( 'url' ),
+			Field::make( 'text', 'roma_faq_contact_title', __( 'Titolo card' ) ),
+			Field::make( 'textarea', 'roma_faq_contact_text', __( 'Testo card' ) ),
+			Field::make( 'text', 'roma_faq_contact_cta_label', __( 'Bottone: testo' ) ),
+			Field::make( 'text', 'roma_faq_contact_cta_link', __( 'Bottone: URL' ) ),
+			Field::make( 'separator', 'roma_faq_items_sep', __( 'Domande' ) ),
+			Field::make( 'complex', 'roma_faq_items', __( 'FAQ (la prima parte aperta)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'question', __( 'Domanda' ) ),
+					Field::make( 'textarea', 'answer', __( 'Risposta' ) ),
+				) ),
+		) )
+		->add_tab( __( 'CTA e Intro' ), array(
+			Field::make( 'text', 'roma_cta_title', __( 'CTA: titolo' ) ),
+			Field::make( 'textarea', 'roma_cta_subtitle', __( 'CTA: sottotitolo' ) ),
+			Field::make( 'text', 'roma_cta_button_text', __( 'CTA: testo bottone' ) ),
+			Field::make( 'text', 'roma_cta_button_link', __( 'CTA: link bottone' ) ),
+			Field::make( 'image', 'roma_cta_image', __( 'CTA: illustrazione' ) )
+				->set_value_type( 'url' ),
+			Field::make( 'separator', 'roma_intro_sep', __( 'Testo introduttivo in fondo' ) ),
+			Field::make( 'text', 'roma_intro_eyebrow', __( 'Pillola' ) ),
+			Field::make( 'textarea', 'roma_intro_text', __( 'Testo' ) ),
+		) );
+
+
 	// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)
 	Container::make( 'theme_options', __( 'Footer' ) )
 		->set_page_file( 'tp-footer' )
