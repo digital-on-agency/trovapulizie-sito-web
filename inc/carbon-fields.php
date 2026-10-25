@@ -600,6 +600,12 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'text', 'tp_api_base', __( 'Base URL dell\'API del portale' ) )
 				->set_default_value( 'https://api.trovapulizie.com' )
 				->set_help_text( __( 'Produzione https://api.trovapulizie.com, staging https://staging.api.trovapulizie.com. Il form lead chiama /api/leads da qui. [ATTENZIONE] L\'allowlist CORS del backend accetta solo www.trovapulizie.it e staging.trovapulizie.it: da altri hostname le chiamate falliscono.' ) ),
+			Field::make( 'select', 'tp_search_target', __( 'Barra di ricerca della Home: destinazione per i privati' ) )
+				->set_options( array(
+					'home'    => 'Home dell\'app (/home?address=...) - funziona in produzione al 25/10/2026',
+					'results' => 'Risultati (/results?address=...&service=...) - solo dopo il backport di 947de5d8',
+				) )
+				->set_help_text( __( '[ATTENZIONE] Al 25/10/2026 la pagina risultati dell\'app di produzione non legge address dall\'URL (il ripiego e\' solo su staging, commit 947de5d8): con "Risultati" resta bloccata su "Ricerca in corso". Passare a Risultati solo quando Niccolo\' conferma il rilascio. I servizi solo aziende vanno sempre al preventivo B2B.' ) ),
 			Field::make( 'text', 'tp_here_key', __( 'Chiave HERE (autocomplete indirizzo)' ) )
 				->set_help_text( __( 'Chiave dedicata al sito, limitata ai referrer staging.trovapulizie.it e www.trovapulizie.it, solo servizio Autosuggest. Vuota = campo indirizzo a testo libero.' ) ),
 		) );

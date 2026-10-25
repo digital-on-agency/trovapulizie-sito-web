@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.52.1
+Version: 0.53.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -510,6 +510,35 @@ a {
 .tp-search__field--address {
 	flex: 1;
 	min-width: 0;
+}
+/* Menu del servizio vero (Home): select nativa senza aspetto del sistema, stesso testo dell'etichetta statica.
+   La freccia e' l'icona del tema (la freccia nativa ignora il padding), sopra la select ma senza catturare i click. */
+.tp-search__field--service {
+	position: relative;
+}
+.tp-search__select {
+	-webkit-appearance: none;
+	appearance: none;
+	min-width: 0;
+	margin: 0 -28px 0 0;
+	padding: 0 28px 0 0;
+	border: 0;
+	background: transparent;
+	font-family: var(--tp-font);
+	font-size: 15px;
+	font-weight: 700;
+	color: var(--tp-text-heading);
+	cursor: pointer;
+}
+.tp-search__select:focus {
+	outline: none;
+}
+.tp-search__field--service:focus-within {
+	box-shadow: inset 0 0 0 2px var(--tp-primary);
+}
+.tp-search__select + .tp-search__chevron {
+	position: relative;
+	pointer-events: none;
 }
 /* Campo reale della barra (variante mode=input): stesso aspetto del segnaposto della hero. */
 /* Link di salto: fuori schermo finche' non prende il focus da tastiera. Primo elemento del body. */

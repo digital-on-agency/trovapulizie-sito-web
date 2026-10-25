@@ -94,6 +94,48 @@ function tp_app_url( $percorso = '' ) {
 	return 'https://app.trovapulizie.com/' . ltrim( $percorso, '/' );
 }
 
+/* Tipi di servizio dell'app (GET /api/services/types), letti dal server WordPress e tenuti in cache 6 ore: la
+   barra di ricerca della Home li mostra nel menu del servizio. Lato server niente CORS (lo slot di staging e'
+   bloccato dall'allowlist del backend) e il menu esce gia' nell'HTML, anche senza JavaScript. Se l'API non
+   risponde vale l'elenco di ripiego, uguale a quello di produzione al 25/10/2026; la risposta vuota o in errore
+   non va in cache per piu' di 10 minuti.
+   Ritorna [ { id, label, b2b } ] in ordine di sort_order. */
+function tp_service_types() {
+	$cached = get_transient( 'tp_service_types' );
+	if ( is_array( $cached ) && $cached ) {
+		return $cached;
+	}
+	$out = array();
+	$res = wp_remote_get( tp_api_base() . '/api/services/types', array( 'timeout' => 4 ) );
+	if ( ! is_wp_error( $res ) && 200 === (int) wp_remote_retrieve_response_code( $res ) ) {
+		$data = json_decode( wp_remote_retrieve_body( $res ), true );
+		if ( is_array( $data ) ) {
+			usort( $data, function ( $a, $b ) {
+				return (int) ( $a['sort_order'] ?? 0 ) <=> (int) ( $b['sort_order'] ?? 0 );
+			} );
+			foreach ( $data as $t ) {
+				if ( ! empty( $t['id'] ) && ! empty( $t['name_it'] ) ) {
+					$out[] = array( 'id' => (string) $t['id'], 'label' => (string) $t['name_it'], 'b2b' => ! empty( $t['b2b_only'] ) );
+				}
+			}
+		}
+	}
+	if ( $out ) {
+		set_transient( 'tp_service_types', $out, 6 * HOUR_IN_SECONDS );
+		return $out;
+	}
+	$ripiego = array(
+		array( 'id' => 'pulizia_domestica', 'label' => 'Pulizia ordinaria', 'b2b' => false ),
+		array( 'id' => 'pulizia_uffici', 'label' => 'Uffici', 'b2b' => true ),
+		array( 'id' => 'pulizia_scale', 'label' => 'Condomini', 'b2b' => true ),
+		array( 'id' => 'pulizie_industriali', 'label' => 'Sgrosso', 'b2b' => false ),
+		array( 'id' => 'sanificazioni', 'label' => 'Sanificazione', 'b2b' => false ),
+		array( 'id' => 'pulizia_esterni', 'label' => 'Affitti brevi', 'b2b' => true ),
+	);
+	set_transient( 'tp_service_types', $ripiego, 10 * MINUTE_IN_SECONDS );
+	return $ripiego;
+}
+
 /* Thank-you (TICKET-42): noindex e fuori dalla sitemap. E' una pagina di servizio raggiunta solo dopo un lead. */
 add_filter( 'wp_robots', function ( $robots ) {
 	if ( is_page_template( 'page-thank-you.php' ) ) {
@@ -154,7 +196,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	// Landing Sgrosso (ADR-004): barra fissa doppia; lead-form.js arriva con TICKET-40.
 	$moduli_sgrosso   = array( 'sticky-cta', 'scenario-tabs', 'sgrosso-estimator', 'lead-form' );
 	// Coreografia della sola Home (ADR-002): telefono pinnato, sequenza schermate, video hero.
-	$moduli_home      = array( 'home-motion', 'hiw-sequence', 'hero-video' );
+	$moduli_home      = array( 'home-motion', 'hiw-sequence', 'hero-video', 'search-form' );
 	// Pagina Diventa cleaner (TICKET-51/54): barra fissa e calcolatore dei guadagni.
 	$moduli_cleaner   = array( 'sticky-cta', 'earnings-calculator', 'cleaner-motion' );
 	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php', 'page-cleaner-landing.php' );

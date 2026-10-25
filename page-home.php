@@ -110,8 +110,30 @@ $cta_args         = array(
 				<p class="hero__subtitle"><?php echo nl2br( esc_html( $hero_subtitle ) ); ?></p>
 			<?php endif; ?>
 
-			<?php // Stessa barra della sezione "Dove siamo attivi": template-parts/search-bar.php
-			get_template_part( 'template-parts/search-bar', null, array( 'mode' => 'static' ) ); ?>
+			<?php
+			// Ricerca vera (era un segnaposto): GET verso l'app con address e service, come la Home React
+			// (MarketingHome.handleSearch); i servizi solo aziende vanno al preventivo B2B (assets/js/search-form.js).
+			// [ATTENZIONE] Destinazione dei privati da Theme Options > Integrazioni (tp_search_target). Default /home:
+			// al 25/10/2026 in produzione /results non legge address dall'URL (ripiego solo su staging, 947de5d8) e resta
+			// bloccata, mentre /home precompila l'indirizzo (il servizio si riconferma nell'app).
+			$servizi = tp_service_types();
+			$default = 0;
+			foreach ( $servizi as $i => $svc ) {
+				if ( empty( $svc['b2b'] ) ) { $default = $i; break; }
+			}
+			if ( $default ) {
+				array_unshift( $servizi, array_splice( $servizi, $default, 1 )[0] );
+			}
+			get_template_part( 'template-parts/search-bar', null, array(
+				'mode'         => 'input',
+				'action'       => tp_app_url( 'results' === carbon_get_theme_option( 'tp_search_target' ) ? 'results' : 'home' ),
+				'b2b_action'   => tp_app_url( 'richiedi-preventivo' ),
+				'services'     => $servizi,
+				'input_id'     => 'hero-indirizzo',
+				'input_name'   => 'address',
+				'placeholder'  => 'Inserisci il tuo indirizzo',
+				'required'     => true,
+			) ); ?>
 		</div>
 		<div class="hero__phone" id="hiw-phone-pin" data-theme="<?php echo esc_attr( get_stylesheet_directory_uri() ); ?>" data-ver="<?php echo esc_attr( tp_theme_version() ); ?>" data-model="<?php echo esc_attr( carbon_get_the_post_meta( 'phone_model_url' ) ); ?>">
 			<?php get_template_part( 'template-parts/phone-mockup', null, array(
