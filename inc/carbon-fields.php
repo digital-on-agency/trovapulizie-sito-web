@@ -391,6 +391,27 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'text', 'sg_when_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Calcola il preventivo gratis".' ) ),
 			Field::make( 'text', 'sg_when_cta_link', __( 'Bottone: link' ) )->set_help_text( __( 'Vuoto = #form.' ) ),
 		) )
+		->add_tab( __( 'Quanto costa' ), array(
+			Field::make( 'text', 'sg_calc_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = CALCOLA LA STIMA.' ) ),
+			Field::make( 'text', 'sg_calc_title', __( 'Titolo (H2)' ) )->set_help_text( $sg_variant_help ),
+			Field::make( 'text', 'sg_calc_subtitle', __( 'Sottotitolo' ) )->set_help_text( __( 'Vuoto = "Fai una stima in 10 secondi. Senza registrarti."' ) ),
+			Field::make( 'textarea', 'sg_calc_types', __( 'Tipi di intervento (uno per riga)' ) )->set_help_text( __( 'Vuoto = Post-ristrutturazione / Trasloco / Fine affitto / Prima pulizia a fondo. Il tipo preselezionato e\' quello della variante.' ) ),
+			Field::make( 'textarea', 'sg_calc_extras', __( 'Extra (uno per riga)' ) )->set_help_text( __( 'Vuoto = Forno e cappa / Vetri e infissi / Balconi e terrazzi / Sanificazione a vapore.' ) ),
+			Field::make( 'separator', 'sg_calc_coef_sep', __( 'Formula: base = fisso + mq x euro/mq; minimo = base + extra x costo minimo; massimo = base x moltiplicatore + extra x costo massimo; arrotondati alla decina' ) ),
+			Field::make( 'text', 'sg_calc_base', __( 'Fisso (euro)' ) )->set_default_value( '200' ),
+			Field::make( 'text', 'sg_calc_per_mq', __( 'Euro al metro quadro' ) )->set_default_value( '2.2' ),
+			Field::make( 'text', 'sg_calc_extra_min', __( 'Costo minimo di un extra (euro)' ) )->set_default_value( '25' ),
+			Field::make( 'text', 'sg_calc_extra_max', __( 'Costo massimo di un extra (euro)' ) )->set_default_value( '40' ),
+			Field::make( 'text', 'sg_calc_max_mult', __( 'Moltiplicatore del massimo' ) )->set_default_value( '1.35' ),
+			Field::make( 'text', 'sg_calc_mq_default', __( 'Metri quadri iniziali' ) )->set_default_value( '100' ),
+			Field::make( 'separator', 'sg_calc_card_sep', __( 'Card del risultato' ) ),
+			Field::make( 'text', 'sg_calc_result_label', __( 'Etichetta sopra il prezzo' ) )->set_help_text( __( 'Vuoto = STIMA INDICATIVA.' ) ),
+			Field::make( 'text', 'sg_calc_cta_title', __( 'Titolo del form' ) )->set_help_text( __( 'Vuoto = "Ricevi il preventivo esatto".' ) ),
+			Field::make( 'text', 'sg_calc_coupon_amount', __( 'Coupon: importo' ) )->set_help_text( __( 'Vuoto = -30€. Svuotare con uno spazio per nascondere il coupon.' ) ),
+			Field::make( 'text', 'sg_calc_coupon_text', __( 'Coupon: testo' ) )->set_help_text( __( "Vuoto = \"sul primo lavoro, con l'email\"." ) ),
+			Field::make( 'text', 'sg_calc_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Ricevi il preventivo".' ) ),
+			Field::make( 'textarea', 'sg_calc_note', __( 'Nota sotto il bottone' ) )->set_help_text( __( 'Vuoto = "Prezzo indicativo. Quello fisso, senza sorprese, lo confermiamo dopo il sopralluogo gratuito."' ) ),
+		) )
 		->add_tab( __( 'Come funziona' ), array(
 			Field::make( 'text', 'sg_hiw_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = COME FUNZIONA.' ) ),
 			Field::make( 'text', 'sg_hiw_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Vuoto = "Dal sopralluogo alla casa pulita".' ) ),

@@ -212,6 +212,45 @@ get_header( 'landing', array(
 		'steps'    => $hiw_steps,
 	) );
 
+	// Quanto costa (TICKET-46): calcolatore con la formula del live, tipo preselezionato dalla variante.
+	$calc_types = tp_lines( carbon_get_the_post_meta( 'sg_calc_types' ) );
+	if ( ! $calc_types ) {
+		$calc_types = array( 'Post-ristrutturazione', 'Trasloco', 'Fine affitto', 'Prima pulizia a fondo' );
+	}
+	$calc_extras = tp_lines( carbon_get_the_post_meta( 'sg_calc_extras' ) );
+	if ( ! $calc_extras ) {
+		$calc_extras = array( 'Forno e cappa', 'Vetri e infissi', 'Balconi e terrazzi', 'Sanificazione a vapore' );
+	}
+	$scenario_labels = array( 'post-ristrutturazione' => 'Post-ristrutturazione', 'trasloco' => 'Trasloco', 'fine-affitto' => 'Fine affitto', 'prima-pulizia-a-fondo' => 'Prima pulizia a fondo' );
+	$calc_num = function ( $field, $fallback ) {
+		$v = str_replace( ',', '.', (string) carbon_get_the_post_meta( $field ) );
+		return is_numeric( $v ) ? (float) $v : $fallback;
+	};
+	$coupon_amount = carbon_get_the_post_meta( 'sg_calc_coupon_amount' );
+	get_template_part( 'template-parts/sgrosso-estimator', null, array(
+		'eyebrow'       => tp_sg_text( 'sg_calc_eyebrow', $defaults, null, 'CALCOLA LA STIMA' ),
+		'title'         => tp_sg_text( 'sg_calc_title', $defaults, 'calc_h2' ),
+		'subtitle'      => tp_sg_text( 'sg_calc_subtitle', $defaults, null, 'Fai una stima in 10 secondi. Senza registrarti.' ),
+		'types'         => $calc_types,
+		'default_type'  => $scenario_labels[ $defaults['scenario'] ] ?? $calc_types[0],
+		'extras'        => $calc_extras,
+		'mq_default'    => (int) $calc_num( 'sg_calc_mq_default', 100 ),
+		'coef'          => array(
+			'base'      => $calc_num( 'sg_calc_base', 200 ),
+			'per_mq'    => $calc_num( 'sg_calc_per_mq', 2.2 ),
+			'extra_min' => $calc_num( 'sg_calc_extra_min', 25 ),
+			'extra_max' => $calc_num( 'sg_calc_extra_max', 40 ),
+			'max_mult'  => $calc_num( 'sg_calc_max_mult', 1.35 ),
+		),
+		'result_label'  => tp_sg_text( 'sg_calc_result_label', $defaults, null, 'STIMA INDICATIVA' ),
+		'cta_title'     => tp_sg_text( 'sg_calc_cta_title', $defaults, null, 'Ricevi il preventivo esatto' ),
+		'coupon_amount' => '' === trim( (string) $coupon_amount ) && (string) $coupon_amount !== '' ? '' : ( $coupon_amount ?: '-30€' ),
+		'coupon_text'   => tp_sg_text( 'sg_calc_coupon_text', $defaults, null, "sul primo lavoro, con l'email" ),
+		'cta_label'     => tp_sg_text( 'sg_calc_cta_label', $defaults, null, 'Ricevi il preventivo' ),
+		'note'          => tp_sg_text( 'sg_calc_note', $defaults, null, 'Prezzo indicativo. Quello fisso, senza sorprese, lo confermiamo dopo il sopralluogo gratuito.' ),
+		'landing'       => $landing,
+	) );
+
 	// FAQ (TICKET-45): componente della Home, sei domande del live con la prima per variante, card dei fondatori.
 	$faq_items = carbon_get_the_post_meta( 'sg_faq_items' );
 	if ( ! $faq_items ) {
