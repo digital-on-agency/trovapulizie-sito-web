@@ -422,6 +422,24 @@ add_action( 'carbon_fields_register_fields', function () {
 					Field::make( 'textarea', 'description', __( 'Descrizione' ) ),
 				) ),
 		) )
+		->add_tab( __( 'Recensioni e coupon' ), array(
+			Field::make( 'text', 'sg_reviews_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = DICONO DI NOI.' ) ),
+			Field::make( 'text', 'sg_reviews_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Vuoto = "Case rimesse a nuovo, a Roma".' ) ),
+			Field::make( 'complex', 'sg_reviews', __( 'Recensioni (vuoto = le tre del live, dichiarate fittizie nel sorgente)' ) )
+				->set_help_text( __( 'Tre card ferme su desktop. Scrivere uno spazio nel testo della prima per non mostrare la sezione.' ) )
+				->add_fields( array(
+					Field::make( 'text', 'author_name', __( 'Nome' ) ),
+					Field::make( 'text', 'author_city', __( 'Zona' ) ),
+					Field::make( 'image', 'avatar', __( 'Foto' ) )->set_value_type( 'url' ),
+					Field::make( 'textarea', 'review_text', __( 'Testo' ) ),
+				) ),
+			Field::make( 'separator', 'sg_coupon_sep', __( 'Banner coupon' ) ),
+			Field::make( 'text', 'sg_coupon_amount', __( 'Importo' ) )->set_help_text( __( 'Vuoto = -30€.' ) ),
+			Field::make( 'text', 'sg_coupon_title', __( 'Titolo' ) )->set_help_text( __( 'Vuoto = "sul tuo primo sgrosso".' ) ),
+			Field::make( 'textarea', 'sg_coupon_text', __( 'Testo' ) )->set_help_text( __( "Vuoto = \"Lascia l'email: ricevi il coupon e lo riscatti dopo il sopralluogo gratuito. Solo nuovi clienti.\"" ) ),
+			Field::make( 'text', 'sg_coupon_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Richiedi la stima gratis".' ) ),
+			Field::make( 'text', 'sg_coupon_cta_link', __( 'Bottone: link' ) )->set_help_text( __( 'Vuoto = #form-bottom.' ) ),
+		) )
 		->add_tab( __( 'FAQ' ), array(
 			Field::make( 'text', 'sg_faq_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = DOMANDE FREQUENTI.' ) ),
 			Field::make( 'text', 'sg_faq_title', __( 'Titolo' ) )->set_help_text( __( 'Vuoto = "Prima di prenotare il sopralluogo".' ) ),

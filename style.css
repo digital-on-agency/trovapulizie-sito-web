@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.45.1
+Version: 0.46.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -5262,12 +5262,12 @@ a {
 .tp-check--onlight a {
 	color: var(--tp-white);
 }
-.sg-calc__submit {
-	display: flex;
+/* Bottone scuro a gradiente (live btn-dark-gradient): submit del calcolatore e CTA del banner coupon */
+.sg-btn-dark {
+	display: inline-flex;
 	align-items: center;
 	justify-content: center;
 	gap: 8px;
-	width: 100%;
 	padding: 15px 20px;
 	border: 0;
 	border-radius: 12px;
@@ -5280,16 +5280,19 @@ a {
 	cursor: pointer;
 	transition: background-position 0.4s;
 }
-.sg-calc__submit:hover {
+.sg-btn-dark:hover {
 	background-position: right top;
 }
-.sg-calc__submit:focus-visible {
+.sg-btn-dark:focus-visible {
 	outline: none;
 	box-shadow: 0 0 0 3px var(--tp-white), 0 0 0 6px #111827;
 }
-.sg-calc__submit[disabled] {
+.sg-btn-dark[disabled] {
 	opacity: 0.7;
 	cursor: wait;
+}
+.sg-calc__submit {
+	width: 100%;
 }
 .sg-calc__note {
 	margin: 0;
@@ -5300,6 +5303,134 @@ a {
 }
 .sg-calc__result .lead-form__api-error {
 	margin: 0;
+}
+
+/* ---- Recensioni in griglia con card a stelle (Figma 4364:6920 / 4364:7382) ------------------ */
+.reviews--grid {
+	padding: 78px 80px 40px;
+}
+.reviews--grid .reviews__inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	padding: 0;
+	text-align: center;
+}
+.reviews--grid .reviews__title {
+	margin: 0;
+	font-size: 34px;
+	line-height: 1.2;
+	letter-spacing: -0.68px;
+	font-weight: 800;
+	color: var(--tp-ink);
+}
+.reviews__grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 24px;
+	max-width: 1248px;
+	margin: 44px auto 0;
+}
+.review-card--stars {
+	flex-direction: column;
+	gap: 14px;
+	width: auto;
+	height: auto;
+	padding: 26px;
+	border-color: var(--tp-border);
+	border-radius: 18px;
+	box-shadow: none;
+}
+.review-card--stars:hover {
+	transform: translateY(-4px);
+	border-color: #D1D5DB;
+	box-shadow: 0 12px 32px rgba(15, 23, 41, 0.1);
+}
+.review-card__stars {
+	font-size: 15px;
+	letter-spacing: 1px;
+	color: var(--tp-star);
+}
+.review-card--stars .review-card__text {
+	margin: 0;
+	font-size: 16px;
+	line-height: 1.55;
+	color: var(--tp-text-heading);
+}
+.review-card__who {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: auto;
+}
+.review-card--stars .review-card__avatar {
+	width: 40px;
+	height: 40px;
+}
+.review-card__name {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--tp-ink);
+}
+.review-card__city {
+	margin: 0;
+	font-size: 13px;
+	color: var(--tp-text-body);
+}
+
+/* ---- Banner coupon (Figma 4364:6951 / 4364:7308) ------------------------------------------- */
+.sg-coupon {
+	padding: 0 80px 78px;
+	background: var(--tp-white);
+}
+.sg-coupon__band {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+	max-width: 1248px;
+	margin: 0 auto;
+	padding: 32px 40px;
+	border-radius: 24px;
+	background: linear-gradient(90deg, var(--tp-primary) 0%, #36DBB2 100%);
+	box-shadow: 0 16px 40px -12px rgba(0, 128, 94, 0.28);
+	color: var(--tp-white);
+}
+.sg-coupon__left {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	min-width: 0;
+}
+.sg-coupon__amount {
+	flex: none;
+	font-size: 38px;
+	line-height: 1;
+	font-weight: 800;
+}
+.sg-coupon__copy {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+.sg-coupon__title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+}
+.sg-coupon__text {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.4;
+	color: rgba(255, 255, 255, 0.9);
+}
+.sg-coupon__cta {
+	flex: none;
+	padding: 16px 24px;
+	border-radius: 13px;
+	font-size: 15px;
 }
 
 /* ---- Testa di sezione centrata (eyebrow, titolo, sottotitolo) ------------------------------- */
@@ -5725,6 +5856,50 @@ a {
 	}
 	.sg-calc__price {
 		font-size: 34px;
+	}
+
+	/* Recensioni in colonna, coupon impilato */
+	.reviews--grid {
+		padding: 40px 20px 28px;
+	}
+	.reviews--grid .reviews__title {
+		font-size: 26px;
+		line-height: 1.2;
+		letter-spacing: -0.52px;
+	}
+	.reviews__grid {
+		grid-template-columns: 1fr;
+		gap: 16px;
+		margin-top: 24px;
+	}
+	.review-card--stars {
+		display: flex; /* la regola mobile del marquee trasforma .review-card in griglia a due aree: qui non serve */
+		padding: 20px;
+	}
+	.review-card--stars .review-card__text {
+		font-size: 15px;
+	}
+	.sg-coupon {
+		padding: 0 20px 50px;
+	}
+	.sg-coupon__band {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 20px;
+		padding: 28px 24px;
+		border-radius: 18px;
+	}
+	.sg-coupon__left {
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: 12px;
+	}
+	.sg-coupon__amount {
+		font-size: 48px;
+	}
+	.sg-coupon__cta {
+		width: 100%;
 	}
 
 	/* Come funziona e CTA finale in colonna */

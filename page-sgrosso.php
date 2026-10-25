@@ -251,6 +251,34 @@ get_header( 'landing', array(
 		'landing'       => $landing,
 	) );
 
+	// Recensioni (TICKET-47): componente della Home in layout a griglia con la card a stelle; le tre voci del live
+	// sono dichiarate fittizie nel sorgente (REVIEWS, avatar casuali di pravatar): qui gli avatar segnaposto del tema.
+	// Importate per decisione di Guido del 25/10, da sostituire con recensioni vere prima del cutover (SPEC §6).
+	$sg_reviews = carbon_get_the_post_meta( 'sg_reviews' );
+	if ( ! $sg_reviews ) {
+		$sg_reviews = array(
+			array( 'author_name' => 'Giulia R.', 'author_city' => 'Parioli, Roma', 'avatar' => '', 'review_text' => 'Casa presa in affitto in condizioni pietose. Dopo lo sgrosso sembrava nuova. Sopralluogo puntuale e preventivo onesto.' ),
+			array( 'author_name' => 'Luca M.', 'author_city' => 'Prati, Roma', 'avatar' => '', 'review_text' => 'Post-trasloco avevo bisogno di una pulizia seria. Prezzo concordato prima, zero sorprese. Lavoro impeccabile.' ),
+			array( 'author_name' => 'Anna F.', 'author_city' => 'EUR, Roma', 'avatar' => '', 'review_text' => "Dopo la ristrutturazione la casa era coperta di polvere di cantiere. In un giorno l'hanno resa pronta da abitare, vernice e stucco residui compresi." ),
+		);
+	}
+	get_template_part( 'template-parts/reviews-marquee', null, array(
+		'eyebrow' => tp_sg_text( 'sg_reviews_eyebrow', $defaults, null, 'DICONO DI NOI' ),
+		'title'   => tp_sg_text( 'sg_reviews_title', $defaults, null, 'Case rimesse a nuovo, a Roma' ),
+		'reviews' => $sg_reviews,
+		'layout'  => 'grid',
+		'card'    => 'stars',
+	) );
+
+	// Banner coupon (TICKET-47), verso la seconda istanza del form.
+	get_template_part( 'template-parts/coupon-band', null, array(
+		'amount'    => tp_sg_text( 'sg_coupon_amount', $defaults, null, '-30€' ),
+		'title'     => tp_sg_text( 'sg_coupon_title', $defaults, null, 'sul tuo primo sgrosso' ),
+		'text'      => tp_sg_text( 'sg_coupon_text', $defaults, null, "Lascia l'email: ricevi il coupon e lo riscatti dopo il sopralluogo gratuito. Solo nuovi clienti." ),
+		'cta_label' => tp_sg_text( 'sg_coupon_cta_label', $defaults, null, 'Richiedi la stima gratis' ),
+		'cta_link'  => tp_sg_text( 'sg_coupon_cta_link', $defaults, null, '#form-bottom' ),
+	) );
+
 	// FAQ (TICKET-45): componente della Home, sei domande del live con la prima per variante, card dei fondatori.
 	$faq_items = carbon_get_the_post_meta( 'sg_faq_items' );
 	if ( ! $faq_items ) {

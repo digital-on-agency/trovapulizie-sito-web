@@ -117,7 +117,7 @@ $uid     = 'calc-' . wp_unique_id();
 				</label>
 				<p class="tp-field__error tp-field__error--onlight" data-error-for="consentPrivacy" aria-live="polite"></p>
 				<p class="lead-form__api-error" role="alert" hidden></p>
-				<button type="submit" class="sg-calc__submit" data-submit><?php echo esc_html( $args['cta_label'] ); ?> <span class="sg-cta__arrow" aria-hidden="true">&rarr;</span></button>
+				<button type="submit" class="sg-btn-dark sg-calc__submit" data-submit><?php echo esc_html( $args['cta_label'] ); ?> <span class="sg-cta__arrow" aria-hidden="true">&rarr;</span></button>
 				<?php if ( $args['note'] ) : ?><p class="sg-calc__note"><?php echo esc_html( $args['note'] ); ?></p><?php endif; ?>
 			</form>
 		</div>
