@@ -69,6 +69,26 @@ function tp_app_url( $percorso = '' ) {
 	return 'https://app.trovapulizie.com/' . ltrim( $percorso, '/' );
 }
 
+/* Thank-you (TICKET-42): noindex e fuori dalla sitemap. E' una pagina di servizio raggiunta solo dopo un lead. */
+add_filter( 'wp_robots', function ( $robots ) {
+	if ( is_page_template( 'page-thank-you.php' ) ) {
+		$robots['noindex'] = true;
+		$robots['follow']  = true;
+		unset( $robots['max-image-preview'] );
+	}
+	return $robots;
+} );
+add_filter( 'wp_sitemaps_posts_query_args', function ( $args, $post_type ) {
+	if ( 'page' === $post_type ) {
+		$args['meta_query'] = array(
+			'relation' => 'OR',
+			array( 'key' => '_wp_page_template', 'compare' => 'NOT EXISTS' ),
+			array( 'key' => '_wp_page_template', 'value' => 'page-thank-you.php', 'compare' => '!=' ),
+		);
+	}
+	return $args;
+}, 10, 2 );
+
 /* Meta description: dal campo SEO della pagina, altrimenti dal motto del sito. Senza, la pagina si
    presenta ai motori con un estratto scelto da loro. */
 add_action( 'wp_head', function () {
@@ -137,6 +157,9 @@ add_action( 'wp_enqueue_scripts', function () {
 	}
 	if ( is_page_template( 'page-sgrosso.php' ) ) {
 		$handles = array_merge( $handles, $moduli_sgrosso );
+	}
+	if ( is_page_template( 'page-thank-you.php' ) ) {
+		$handles[] = 'thank-you';
 	}
 	foreach ( $handles as $handle ) {
 		wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );

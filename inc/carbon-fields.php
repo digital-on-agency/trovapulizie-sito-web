@@ -468,6 +468,21 @@ add_action( 'carbon_fields_register_fields', function () {
 		) );
 
 	// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)
+	// Thank-you — pagina col template page-thank-you.php (TICKET-42). Riepilogo e passi sono fissi nel template:
+	// i dati della richiesta arrivano dal browser (sessionStorage), non da WordPress.
+	Container::make( 'post_meta', __( 'Thank-you — Testi' ) )
+		->where( 'post_template', '=', 'page-thank-you.php' )
+		->add_fields( array(
+			Field::make( 'text', 'ty_badge', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = RICHIESTA RICEVUTA.' ) ),
+			Field::make( 'textarea', 'ty_title', __( 'Titolo (H1)' ) )->set_help_text( __( 'Un invio a capo = una riga. Vuoto = "Richiesta ricevuta / Ci pensiamo noi".' ) ),
+			Field::make( 'textarea', 'ty_text', __( 'Testo sotto il titolo' ) ),
+			Field::make( 'text', 'ty_coupon', __( 'Coupon mostrato nel riepilogo' ) )->set_help_text( __( 'Vuoto = "-30€ sul primo lavoro". Il form puo\' sovrascriverlo.' ) ),
+			Field::make( 'text', 'ty_promo_desktop', __( 'Promo bar, testo desktop' ) ),
+			Field::make( 'text', 'ty_promo_mobile', __( 'Promo bar, testo mobile' ) ),
+			Field::make( 'text', 'ty_phone', __( 'Telefono in testata' ) )->set_help_text( __( 'Vuoto = 06 9151 6075.' ) ),
+			Field::make( 'text', 'ty_nav_cta', __( 'CTA in testata' ) )->set_help_text( __( 'Vuoto = "Sopralluogo gratuito", verso /roma/sgrosso-casa/#form.' ) ),
+		) );
+
 	// Integrazioni — Theme Options > Integrazioni: API del portale per il form lead (ADR-004) e chiave HERE.
 	// La chiave HERE e' pubblica nel browser (va limitata per referrer sul pannello HERE), non e' un segreto da
 	// repo: per questo sta nel database e non in wp-config.

@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.48.1
+Version: 0.49.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -5624,6 +5624,283 @@ a {
 	scroll-margin-top: calc(var(--tp-navbar-h) + 16px);
 }
 
+/* ---- Thank-you (Figma 4418:922 / 4414:2) ----------------------------------------------------- */
+.ty {
+	background: #F8F9FA;
+}
+.ty__inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	max-width: 900px;
+	margin: 0 auto;
+	padding: 80px 20px;
+}
+.ty__check {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	border-radius: 50%;
+	background: var(--tp-primary);
+	color: var(--tp-white);
+}
+.ty__check-icon {
+	width: 30px;
+	height: 30px;
+}
+.ty__badge {
+	margin: 20px 0 0;
+	padding: 7px 14px;
+	border: 1px solid var(--tp-mint-border);
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-white);
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.55px;
+	color: var(--tp-primary-700);
+}
+.ty h1 {
+	margin: 20px 0 0;
+	max-width: 600px;
+	text-align: center;
+	font-size: 38px;
+	line-height: 1.1;
+	letter-spacing: -0.76px;
+	font-weight: 800;
+	color: var(--tp-ink);
+}
+.ty__lead {
+	margin: 16px 0 0;
+	max-width: 560px;
+	text-align: center;
+	font-size: 16px;
+	line-height: 1.5;
+	color: #4B5563;
+}
+.ty__grid {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); /* 1fr = minmax(auto, 1fr): le righe del riepilogo allargavano la card oltre il viewport a 390 */
+	gap: 20px;
+	width: 100%;
+	margin-top: 40px;
+}
+.ty__card {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	min-width: 0;
+	padding: 24px;
+	background: var(--tp-white);
+	border: 1px solid var(--tp-border);
+	border-radius: 16px;
+}
+.ty__card-title {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 700;
+	color: #111827;
+}
+.ty__card-title--sm {
+	font-size: 15px;
+}
+.ty__card-sub {
+	margin: 4px 0 0;
+	font-size: 13px;
+	color: var(--tp-text-body);
+}
+.ty__rows {
+	margin: 12px 0 0;
+}
+.ty__row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 12px 0;
+	border-bottom: 1px solid #F0F1F3;
+}
+.ty__row:last-child {
+	border-bottom: 0;
+}
+.ty__row[hidden] {
+	display: none;
+}
+.ty__row dt {
+	font-size: 14px;
+	color: var(--tp-text-body);
+}
+.ty__row dd {
+	min-width: 0;
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: #111827;
+	text-align: right;
+	overflow-wrap: anywhere;
+}
+.ty__coupon {
+	color: var(--tp-primary-700);
+}
+.ty__divider {
+	width: 100%;
+	height: 1px;
+	margin: 0;
+	border: 0;
+	background: var(--tp-border);
+}
+.ty__steps {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin: 12px 0 0;
+	padding: 0;
+	list-style: none;
+}
+.ty__steps li {
+	display: flex;
+	gap: 12px;
+}
+.ty__step-n {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: var(--tp-mint);
+	font-size: 12px;
+	font-weight: 700;
+	color: var(--tp-primary-700);
+}
+.ty__steps li > span:last-child {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.ty__steps b {
+	font-size: 14px;
+	font-weight: 600;
+	color: #111827;
+}
+.ty__steps li > span:last-child > span {
+	font-size: 13px;
+	color: var(--tp-text-body);
+}
+.ty__form {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+.ty__label {
+	font-size: 13px;
+	font-weight: 500;
+	color: #374151;
+}
+.ty__input-wrap {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: -10px;
+	padding: 0 14px;
+	border: 1px solid #E5E7EB;
+	border-radius: var(--tp-radius-sm);
+	background: #F9FAFB;
+}
+.ty__input-wrap:focus-within {
+	border-color: var(--tp-primary);
+}
+.ty__input {
+	flex: 1;
+	min-width: 0;
+	padding: 12px 0;
+	border: 0;
+	background: transparent;
+	font: inherit;
+	font-size: 14px;
+	color: #111827;
+	outline: none;
+}
+.ty__verified {
+	flex: none;
+	padding: 2px 8px;
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-mint);
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--tp-primary-700);
+}
+.ty__verified::before {
+	content: '\2713 ';
+}
+.ty__submit {
+	width: 100%;
+	min-height: 48px;
+	border-radius: var(--tp-radius-pill);
+	font-size: 15px;
+	font-weight: 700;
+}
+.ty__or {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	font-size: 12px;
+	color: #9CA3AF;
+}
+.ty__or::before,
+.ty__or::after {
+	content: '';
+	flex: 1;
+	height: 1px;
+	background: var(--tp-border);
+}
+.ty__google {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	min-height: 48px;
+	border: 1px solid #D1D4DB;
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-white);
+	font-size: 15px;
+	font-weight: 600;
+	color: #2E3340;
+}
+.ty__perks {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.ty__perks li {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13px;
+	color: #374151;
+}
+.ty__perk-check {
+	flex: none;
+	width: 13px;
+	height: 13px;
+	color: var(--tp-primary-600);
+}
+.ty__legal {
+	margin: 0;
+	text-align: center;
+	font-size: 12px;
+	color: #9CA3AF;
+}
+.ty__legal a {
+	color: inherit;
+	text-decoration: underline;
+}
+
 /* ---- Barra fissa doppia (Chiama + CTA), Figma 4364:7535 ---------------------------------- */
 .sticky-cta--dual {
 	gap: 10px;
@@ -5923,6 +6200,23 @@ a {
 	}
 	.sg-coupon__cta {
 		width: 100%;
+	}
+
+	/* Thank-you in colonna */
+	.ty__inner {
+		padding: 56px 20px;
+	}
+	.ty h1 {
+		font-size: 32px;
+		letter-spacing: -0.64px;
+	}
+	.ty__lead {
+		font-size: 15px;
+	}
+	.ty__grid {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 16px;
+		margin-top: 32px;
 	}
 
 	/* Come funziona e CTA finale in colonna */
