@@ -471,6 +471,111 @@ add_action( 'carbon_fields_register_fields', function () {
 		) );
 
 	// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)
+	// Diventa cleaner — Figma 6752:895 (TICKET-51..56). Solo sulla pagina col template page-cleaner-landing.php.
+	// Ogni campo vuoto = testo di default del template; un campo compilato vince.
+	$dc_vuoto = __( 'Vuoto = testo di default del template.' );
+	Container::make( 'post_meta', __( 'Diventa cleaner — Sezioni' ) )
+		->where( 'post_template', '=', 'page-cleaner-landing.php' )
+		->add_tab( __( 'Hero' ), array(
+			Field::make( 'text', 'dc_hero_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'textarea', 'dc_hero_title', __( 'Titolo (H1)' ) )->set_rows( 3 )->set_help_text( __( 'Un invio a capo = una riga. Vuoto = "I clienti li portiamo noi. / Tu scegli quando, / dove e a quanto."' ) ),
+			Field::make( 'textarea', 'dc_hero_subtitle', __( 'Sottotitolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_hero_cta', __( 'Bottone principale' ) )->set_help_text( __( 'Vuoto = "Registrati gratis". Porta sempre al signup cleaner dell\'app.' ) ),
+			Field::make( 'text', 'dc_hero_cta2', __( 'Bottone secondario' ) )->set_help_text( __( 'Vuoto = "Come funziona". Porta alla sezione Come funziona.' ) ),
+			Field::make( 'image', 'dc_hero_screen', __( 'Schermo del telefono' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuoto = dashboard dell\'app (assets/img/cleaner/dashboard-hero.webp). Proporzione 270x584.' ) ),
+			Field::make( 'text', 'dc_float1_title', __( 'Card flottante 1: titolo' ) )->set_help_text( __( 'Vuoto = "Nuova richiesta · Prati".' ) ),
+			Field::make( 'text', 'dc_float1_sub', __( 'Card flottante 1: riga sotto' ) ),
+			Field::make( 'text', 'dc_float2_title', __( 'Card flottante 2: titolo' ) )->set_help_text( __( 'Vuoto = "Pagamento ricevuto".' ) ),
+			Field::make( 'text', 'dc_float2_sub', __( 'Card flottante 2: riga sotto' ) ),
+		) )
+		->add_tab( __( 'Trust strip' ), array(
+			Field::make( 'textarea', 'dc_trust_items', __( 'Garanzie (una per riga)' ) )->set_help_text( __( 'Vuoto = Zero costi fissi / Tu fissi la tariffa / Pagamento automatico con carta / Zone che scegli tu.' ) ),
+		) )
+		->add_tab( __( 'Come funziona' ), array(
+			Field::make( 'text', 'dc_hiw_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_hiw_title', __( 'Titolo (H2)' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_hiw_subtitle', __( 'Sottotitolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'complex', 'dc_hiw_steps', __( 'Passi (vuoto = i tre di default con le schermate)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'textarea', 'description', __( 'Descrizione' ) ),
+					Field::make( 'image', 'screen', __( 'Schermata (ritagliata dall\'alto)' ) )->set_value_type( 'url' ),
+				) ),
+		) )
+		->add_tab( __( 'Strumenti (bento)' ), array(
+			Field::make( 'text', 'dc_app_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_app_title', __( 'Titolo (H2)' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_app_subtitle', __( 'Sottotitolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'complex', 'dc_app_tiles', __( 'Tile (vuoto = le cinque di default)' ) )
+				->set_help_text( __( 'La prima tile "larga" occupa due colonne. Le schermate vanno caricate gia\' ritagliate sulla parte da mostrare.' ) )
+				->add_fields( array(
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'textarea', 'text', __( 'Testo' ) ),
+					Field::make( 'image', 'screen', __( 'Schermata' ) )->set_value_type( 'url' ),
+					Field::make( 'checkbox', 'wide', __( 'Larga (due colonne)' ) ),
+				) ),
+		) )
+		->add_tab( __( 'Quanto guadagni' ), array(
+			Field::make( 'text', 'dc_calc_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_calc_title', __( 'Titolo (H2)' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'textarea', 'dc_calc_subtitle', __( 'Sottotitolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_calc_rate_min', __( 'Tariffa minima dello slider (€/h)' ) )->set_help_text( __( 'Vuoto = 15. E\' un esempio, non un dato di piattaforma.' ) ),
+			Field::make( 'text', 'dc_calc_rate_max', __( 'Tariffa massima (€/h)' ) )->set_help_text( __( 'Vuoto = 35.' ) ),
+			Field::make( 'text', 'dc_calc_rate_default', __( 'Tariffa iniziale (€/h)' ) )->set_help_text( __( 'Vuoto = 22.' ) ),
+			Field::make( 'text', 'dc_calc_hours', __( 'Ore a settimana proposte (separate da virgola)' ) )->set_help_text( __( 'Vuoto = 10,20,30,40.' ) ),
+			Field::make( 'text', 'dc_calc_hours_default', __( 'Ore iniziali' ) )->set_help_text( __( 'Vuoto = 20. Deve essere una delle ore proposte.' ) ),
+			Field::make( 'textarea', 'dc_calc_rows', __( 'Righe della card (Etichetta | Valore)' ) )->set_help_text( __( 'Vuoto = Costi fissi / Quota di iscrizione / Commissione / Accredito.' ) ),
+			Field::make( 'text', 'dc_calc_note', __( 'Nota dopo la formula' ) )->set_help_text( __( 'Vuoto = "stima lorda, prima della commissione di piattaforma".' ) ),
+			Field::make( 'text', 'dc_calc_cta', __( 'Bottone' ) )->set_help_text( __( 'Vuoto = "Registrati e imposta la tua tariffa".' ) ),
+		) )
+		->add_tab( __( 'Per chi è' ), array(
+			Field::make( 'text', 'dc_who_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_who_title', __( 'Titolo (H2)' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'textarea', 'dc_who_subtitle', __( 'Sottotitolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'complex', 'dc_who_cards', __( 'Card (vuoto = professionista e impresa di default)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'badge', __( 'Badge (es. P.IVA)' ) ),
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'textarea', 'text', __( 'Testo' ) ),
+					Field::make( 'textarea', 'bullets', __( 'Punti (uno per riga)' ) ),
+					Field::make( 'text', 'cta_label', __( 'Bottone: testo' ) ),
+					Field::make( 'text', 'cta_link', __( 'Bottone: link' ) )->set_help_text( __( 'Signup: https://app.trovapulizie.com/cleaner-signup. WhatsApp: https://wa.me/393200980144?text=...' ) ),
+					Field::make( 'checkbox', 'dark', __( 'Card scura' ) ),
+				) ),
+		) )
+		->add_tab( __( 'Requisiti' ), array(
+			Field::make( 'text', 'dc_req_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_req_title', __( 'Titolo (H2)' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_req_yes_title', __( 'Card 1: titolo' ) )->set_help_text( __( 'Vuoto = "Cosa serve".' ) ),
+			Field::make( 'textarea', 'dc_req_yes', __( 'Card 1: voci (Titolo | testo, una per riga)' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_req_no_title', __( 'Card 2: titolo' ) )->set_help_text( __( 'Vuoto = "Cosa non serve".' ) ),
+			Field::make( 'textarea', 'dc_req_no', __( 'Card 2: voci (Titolo | testo, una per riga)' ) )->set_help_text( $dc_vuoto ),
+		) )
+		->add_tab( __( 'Partner' ), array(
+			Field::make( 'textarea', 'dc_partners', __( 'Nomi dei partner (uno per riga)' ) )->set_help_text( __( '[ATTENZIONE] Vuoto = sezione nascosta. Scrivere un nome solo dopo l\'ok del partner.' ) ),
+			Field::make( 'text', 'dc_partners_title', __( 'Titolo' ) )->set_help_text( __( 'Vuoto = "LAVORANO GIÀ CON NOI A ROMA".' ) ),
+			Field::make( 'text', 'dc_partners_tail', __( 'Riga di coda' ) )->set_help_text( __( 'Vuoto = "+ professionisti indipendenti in tutta la città".' ) ),
+		) )
+		->add_tab( __( 'FAQ' ), array(
+			Field::make( 'text', 'dc_faq_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_faq_title', __( 'Titolo' ) )->set_help_text( __( 'Vuoto = "Domande dei cleaner".' ) ),
+			Field::make( 'textarea', 'dc_faq_subtitle', __( 'Testo sotto il titolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'complex', 'dc_faq_items', __( 'Domande (vuoto = le sei di default)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'question', __( 'Domanda' ) ),
+					Field::make( 'textarea', 'answer', __( 'Risposta' ) ),
+				) ),
+			Field::make( 'text', 'dc_faq_contact_title', __( 'Card contatto: titolo' ) )->set_help_text( __( 'Vuoto = "Rispondiamo di persona".' ) ),
+			Field::make( 'textarea', 'dc_faq_contact_text', __( 'Card contatto: testo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_faq_contact_cta', __( 'Card contatto: bottone' ) )->set_help_text( __( 'Vuoto = "Scrivici su WhatsApp". Porta sempre a WhatsApp.' ) ),
+		) )
+		->add_tab( __( 'CTA finale' ), array(
+			Field::make( 'text', 'dc_cta_title', __( 'Titolo' ) )->set_help_text( __( 'Vuoto = "Pronto a riempire l\'agenda?".' ) ),
+			Field::make( 'textarea', 'dc_cta_subtitle', __( 'Sottotitolo' ) )->set_help_text( $dc_vuoto ),
+			Field::make( 'text', 'dc_cta_button', __( 'Bottone' ) )->set_help_text( __( 'Vuoto = "Registrati gratis". Porta al signup cleaner.' ) ),
+			Field::make( 'text', 'dc_cta_note', __( 'Nota sotto il bottone' ) )->set_help_text( $dc_vuoto ),
+		) );
+
 	// Thank-you — pagina col template page-thank-you.php (TICKET-42). Riepilogo e passi sono fissi nel template:
 	// i dati della richiesta arrivano dal browser (sessionStorage), non da WordPress.
 	Container::make( 'post_meta', __( 'Thank-you — Testi' ) )

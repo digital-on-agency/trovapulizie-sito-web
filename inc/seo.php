@@ -33,6 +33,10 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-thank-you.php' ) ) {
 		return 'Richiesta ricevuta | Trovapulizie';
 	}
+	// Diventa cleaner (TICKET-51): stesso title del live React.
+	if ( is_singular() && is_page_template( 'page-cleaner-landing.php' ) ) {
+		return 'Diventa cleaner Trovapulizie — Lavora con clienti verificati a Roma';
+	}
 	return '';
 }
 
@@ -47,6 +51,9 @@ function tp_seo_description() {
 	}
 	if ( is_singular() && is_page_template( 'page-thank-you.php' ) ) {
 		return 'Richiesta ricevuta: il team Trovapulizie ti ricontatta entro 1 ora per confermare il tuo preventivo gratuito.';
+	}
+	if ( is_singular() && is_page_template( 'page-cleaner-landing.php' ) ) {
+		return 'Lavora come cleaner a Roma con Trovapulizie: clienti verificati, pagamenti puntuali via app, zero commissioni nascoste. Iscriviti gratis in 5 minuti.';
 	}
 	return get_bloginfo( 'description' );
 }

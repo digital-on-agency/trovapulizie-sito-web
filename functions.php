@@ -38,6 +38,17 @@ function tp_link_lines( $text ) {
 	}
 	return $out;
 }
+// Textarea "Titolo | testo" per riga -> array di [title, text] (testo opzionale). Pagina Diventa cleaner (TICKET-56).
+function tp_pipe_lines( $text ) {
+	$out = array();
+	foreach ( tp_lines( $text ) as $line ) {
+		$parts = array_map( 'trim', explode( '|', $line, 2 ) );
+		if ( $parts[0] ) {
+			$out[] = array( 'title' => $parts[0], 'text' => $parts[1] ?? '' );
+		}
+	}
+	return $out;
+}
 // Icona SVG monocromatica resa come maschera in currentColor (classe .tp-icon-mask); '' se il file non esiste
 function tp_icon_span( $rel, $class ) {
 	if ( ! file_exists( get_stylesheet_directory() . '/' . ltrim( $rel, '/' ) ) ) {
@@ -130,7 +141,9 @@ add_action( 'wp_enqueue_scripts', function () {
 	$moduli_sgrosso   = array( 'sticky-cta', 'scenario-tabs', 'sgrosso-estimator', 'lead-form' );
 	// Coreografia della sola Home (ADR-002): telefono pinnato, sequenza schermate, video hero.
 	$moduli_home      = array( 'home-motion', 'hiw-sequence', 'hero-video' );
-	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php' );
+	// Pagina Diventa cleaner (TICKET-51/54): barra fissa e calcolatore dei guadagni.
+	$moduli_cleaner   = array( 'sticky-cta', 'earnings-calculator' );
+	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php', 'page-cleaner-landing.php' );
 
 	$handles = array();
 	foreach ( $pagine_con_sezioni as $template ) {
@@ -147,6 +160,10 @@ add_action( 'wp_enqueue_scripts', function () {
 	}
 	if ( is_page_template( 'page-sgrosso.php' ) ) {
 		$handles = array_merge( $handles, $moduli_sgrosso );
+	}
+	if ( is_page_template( 'page-cleaner-landing.php' ) ) {
+		// Dei moduli condivisi usa solo reveal e FAQ: niente mappa, servizi, recensioni.
+		$handles = array_merge( array( 'reveal', 'faq-accordion' ), $moduli_cleaner );
 	}
 	if ( is_page_template( 'page-thank-you.php' ) ) {
 		$handles[] = 'thank-you';
