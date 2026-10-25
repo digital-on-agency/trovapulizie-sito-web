@@ -61,7 +61,7 @@ get_header( '', array(
 				<h1><?php echo nl2br( esc_html( tp_dc( 'dc_hero_title', "I clienti li portiamo noi.\nTu scegli quando,\ndove e a quanto." ) ) ); ?></h1>
 				<p class="dc-hero__subtitle"><?php echo esc_html( tp_dc( 'dc_hero_subtitle', 'Trovapulizie ti porta richieste di pulizia nella tua zona. Tu fissi la tariffa, accetti solo i lavori che vuoi e ricevi il pagamento in automatico, senza inseguire nessuno.' ) ); ?></p>
 				<div class="dc-hero__ctas">
-					<a class="tp-btn tp-btn--primary tp-btn--lg dc-btn" href="<?php echo esc_url( $signup ); ?>" data-cta-position="hero"><?php echo esc_html( tp_dc( 'dc_hero_cta', 'Registrati gratis' ) ); ?> <span aria-hidden="true">&rarr;</span></a>
+					<a class="tp-btn tp-btn--primary tp-btn--lg dc-btn" href="<?php echo esc_url( $signup ); ?>" data-cta-position="hero"><?php echo esc_html( tp_dc( 'dc_hero_cta', 'Registrati gratis' ) ); ?> <span class="dc-arrow" aria-hidden="true">&rarr;</span></a>
 					<a class="tp-btn tp-btn--lg dc-btn dc-btn--ghost" href="#come-funziona"><?php echo esc_html( tp_dc( 'dc_hero_cta2', 'Come funziona' ) ); ?></a>
 				</div>
 			</div>

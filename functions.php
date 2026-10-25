@@ -142,7 +142,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	// Coreografia della sola Home (ADR-002): telefono pinnato, sequenza schermate, video hero.
 	$moduli_home      = array( 'home-motion', 'hiw-sequence', 'hero-video' );
 	// Pagina Diventa cleaner (TICKET-51/54): barra fissa e calcolatore dei guadagni.
-	$moduli_cleaner   = array( 'sticky-cta', 'earnings-calculator' );
+	$moduli_cleaner   = array( 'sticky-cta', 'earnings-calculator', 'cleaner-motion' );
 	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php', 'page-cleaner-landing.php' );
 
 	$handles = array();

@@ -38,7 +38,14 @@
 		if (rateOut) rateOut.textContent = rate + ' €/h';
 		total.textContent = '≈ ' + fmt(stima(rate, hours, weeks)) + ' €';
 		if (formula) formula.textContent = '= ' + rate + ' €/h × ' + hours + ' h a settimana · ' + note;
+		// Impulso della cifra a ogni cambio (CSS .is-bump, spento con "riduci movimento"); non al primo disegno.
+		if (pronto) {
+			total.classList.remove('is-bump');
+			void total.offsetWidth;
+			total.classList.add('is-bump');
+		}
 	}
+	var pronto = false;
 
 	range.addEventListener('input', paint);
 	chips.forEach(function (c) {
@@ -54,4 +61,5 @@
 	});
 	controls.hidden = false;
 	paint();
+	pronto = true;
 })();

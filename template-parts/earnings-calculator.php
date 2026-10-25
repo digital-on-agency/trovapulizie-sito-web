@@ -79,7 +79,7 @@ $fmt   = function ( $n ) {
 				</dl>
 			<?php endif; ?>
 			<?php if ( $args['cta_label'] && $args['cta_link'] ) : ?>
-				<a class="tp-btn tp-btn--primary dc-estimate__cta" href="<?php echo esc_url( $args['cta_link'] ); ?>" data-cta-position="guadagni"><?php echo esc_html( $args['cta_label'] ); ?> <span aria-hidden="true">&rarr;</span></a>
+				<a class="tp-btn tp-btn--primary dc-estimate__cta" href="<?php echo esc_url( $args['cta_link'] ); ?>" data-cta-position="guadagni"><?php echo esc_html( $args['cta_label'] ); ?> <span class="dc-arrow" aria-hidden="true">&rarr;</span></a>
 			<?php endif; ?>
 		</div>
 	</div>

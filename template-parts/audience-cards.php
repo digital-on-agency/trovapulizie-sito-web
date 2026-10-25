@@ -47,7 +47,7 @@ if ( ! $cards ) {
 						</ul>
 					<?php endif; ?>
 					<?php if ( ! empty( $c['cta_label'] ) && ! empty( $c['cta_link'] ) ) : ?>
-						<a class="tp-btn <?php echo $dark ? 'dc-btn--light' : 'tp-btn--primary'; ?> dc-who__cta" href="<?php echo esc_url( $c['cta_link'] ); ?>" data-cta-position="<?php echo esc_attr( $c['cta_position'] ?? 'per-chi' ); ?>"<?php echo $wa ? ' target="_blank" rel="noopener"' : ''; ?>><?php echo esc_html( $c['cta_label'] ); ?> <span aria-hidden="true">&rarr;</span></a>
+						<a class="tp-btn <?php echo $dark ? 'dc-btn--light' : 'tp-btn--primary'; ?> dc-who__cta" href="<?php echo esc_url( $c['cta_link'] ); ?>" data-cta-position="<?php echo esc_attr( $c['cta_position'] ?? 'per-chi' ); ?>"<?php echo $wa ? ' target="_blank" rel="noopener"' : ''; ?>><?php echo esc_html( $c['cta_label'] ); ?> <span class="dc-arrow" aria-hidden="true">&rarr;</span></a>
 					<?php endif; ?>
 				</article>
 			<?php endforeach; ?>

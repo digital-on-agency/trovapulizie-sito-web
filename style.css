@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.51.1
+Version: 0.52.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -7115,8 +7115,174 @@ a {
 	}
 }
 
+/* ---- Diventa cleaner: movimento (assets/js/cleaner-motion.js) ----
+   Ingressi solo sotto .dc--motion, che lo script aggiunge se il movimento e' consentito: senza JavaScript tutto
+   resta visibile. Hover solo con mouse ((hover: hover)), stessi valori del resto del sito: card -4px, bottoni -2px,
+   freccia +3px, 0.25s. */
+/* main.dc--motion: specificita' sopra le regole di transizione degli hover (.sg-steps--screens .sg-step ecc.),
+   che vengono dopo nel file e altrimenti sostituirebbero la transizione d'ingresso, opacita' compresa. */
+main.dc--motion .dc-rv {
+	opacity: 0;
+	transform: translateY(24px);
+	transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+	transition-delay: calc(var(--d, 0) * 80ms);
+}
+main.dc--motion .dc-rv.is-in {
+	opacity: 1;
+	transform: none;
+}
+/* Hero: testo a cascata, poi telefono, poi le due card che restano a ondeggiare */
+.dc--motion .dc-hero__copy > * {
+	opacity: 0;
+	transform: translateY(18px);
+	transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.dc--motion .dc-hero__copy > :nth-child(2) { transition-delay: 0.08s; }
+.dc--motion .dc-hero__copy > :nth-child(3) { transition-delay: 0.16s; }
+.dc--motion .dc-hero__copy > :nth-child(4) { transition-delay: 0.24s; }
+.dc--motion .dc-hero__stage {
+	opacity: 0;
+	transform: translateY(40px);
+	transition: opacity 0.8s ease 0.2s, transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) 0.2s;
+}
+.dc--motion .dc-hero.is-in .dc-hero__copy > *,
+.dc--motion .dc-hero.is-in .dc-hero__stage {
+	opacity: 1;
+	transform: none;
+}
+.dc--motion .dc-float {
+	opacity: 0;
+}
+.dc--motion .dc-hero.is-in .dc-float {
+	animation: dc-pop 0.5s cubic-bezier(0.3, 1.4, 0.5, 1) both, dc-bob 6s ease-in-out 1.4s infinite;
+}
+.dc--motion .dc-hero.is-in .dc-float--1 { animation-delay: 0.75s, 1.4s; }
+.dc--motion .dc-hero.is-in .dc-float--2 { animation-delay: 0.95s, 2.6s; }
+@keyframes dc-pop {
+	from { opacity: 0; transform: translateY(10px) scale(0.9); }
+	to { opacity: 1; transform: none; }
+}
+@keyframes dc-bob {
+	0%, 100% { opacity: 1; transform: translateY(0); }
+	50% { opacity: 1; transform: translateY(-8px); }
+}
+/* Parallasse della hero: inclinazione del telefono e spostamento delle card (variabili dallo script) */
+.dc-hero__phone {
+	transform: perspective(1400px) rotateY(var(--ry, 0deg)) rotateX(var(--rx, 0deg));
+	transition: transform 0.4s ease-out;
+}
+.dc-float {
+	translate: var(--px, 0) var(--py, 0);
+	transition: translate 0.4s ease-out;
+}
+/* Cifra della stima: impulso a ogni cambio */
+.dc-estimate__value [data-earn-total] {
+	display: inline-block;
+	transform-origin: left bottom;
+}
+.dc-estimate__value [data-earn-total].is-bump {
+	animation: dc-bump 0.3s ease;
+}
+@keyframes dc-bump {
+	40% { transform: scale(1.05); }
+}
+
+/* Transizioni di base per gli hover */
+.dc-btn,
+.dc-who__cta,
+.dc-estimate__cta,
+.sg-steps--screens .sg-step,
+.dc-tile,
+.dc-who__card,
+.dc-req__card,
+.dc-partners__pill,
+.dc-who__badge,
+.dc .sg-trust__tile,
+.dc-calc__chip {
+	transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background-color 0.25s ease, color 0.25s ease;
+}
+.dc-arrow {
+	display: inline-block;
+	transition: transform 0.25s ease;
+}
+.dc-peek img {
+	transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+@media (hover: hover) {
+	.dc-btn:hover,
+	.dc-who__cta:hover,
+	.dc-estimate__cta:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 12px 24px -8px rgba(15, 33, 26, 0.35);
+	}
+	.dc-btn:hover .dc-arrow,
+	.dc-who__cta:hover .dc-arrow,
+	.dc-estimate__cta:hover .dc-arrow {
+		transform: translateX(3px);
+	}
+	.dc-btn--ghost:hover {
+		background: #E6FFF5;
+	}
+	/* Card con lo schermo: si sollevano e lo schermo dell'app scorre un poco, come se si scrollasse l'app */
+	.sg-steps--screens .sg-step:hover,
+	.dc-tile:hover {
+		transform: translateY(-4px);
+		border-color: #B3FFE0;
+		box-shadow: 0 20px 40px -6px rgba(15, 51, 38, 0.14);
+	}
+	.sg-steps--screens .sg-step:hover .dc-peek img,
+	.dc-tile:hover .dc-peek img {
+		transform: translateY(-28px);
+	}
+	.dc-who__card:hover,
+	.dc-req__card:hover {
+		transform: translateY(-4px);
+		box-shadow: 0 20px 40px -6px rgba(15, 51, 38, 0.14);
+	}
+	.dc-who__card--dark:hover {
+		border-color: #08875E;
+		box-shadow: 0 20px 40px -6px rgba(0, 200, 150, 0.25);
+	}
+	.dc-who__card:hover .dc-who__badge {
+		transform: rotate(-6deg) scale(1.06);
+	}
+	.dc .sg-trust__bar li:hover .sg-trust__tile {
+		transform: scale(1.15);
+	}
+	.dc-partners__pill:hover {
+		transform: translateY(-2px);
+		border-color: #B3FFE0;
+	}
+	.dc-calc__chip:not(.is-on):hover {
+		border-color: rgba(255, 255, 255, 0.4);
+		background: rgba(255, 255, 255, 0.1);
+	}
+	.dc-calc__range:hover::-webkit-slider-thumb {
+		transform: scale(1.15);
+	}
+	.dc-calc__range:hover::-moz-range-thumb {
+		transform: scale(1.15);
+	}
+}
+.dc-calc__range::-webkit-slider-thumb {
+	transition: transform 0.2s ease;
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.zones-map__caps path { transition: none; }
+	/* Diventa cleaner: niente ingressi (lo script non aggiunge .dc--motion), niente ondeggiamento, inclinazione,
+	   impulso ne' spostamenti al passaggio del mouse */
+	.dc *,
+	.dc *::-webkit-slider-thumb {
+		transition: none !important;
+		animation: none !important;
+	}
+	.dc .dc-peek img,
+	.dc .dc-hero__phone,
+	.dc .dc-arrow {
+		transform: none !important;
+	}
 	.hiw-scrollcue {
 		animation: none;
 	}
