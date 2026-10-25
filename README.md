@@ -25,6 +25,7 @@ page-home.php             template Home
 page-hub-roma.php         template hub di citta' /roma/
 page-sgrosso.php          template landing Sgrosso (cinque pagine, campo variante)
 page-thank-you.php        thank-you dopo un lead (noindex)
+page-cleaner-landing.php  pagina /diventa-cleaner/ (docs/landing-cleaner.md)
 header-landing.php        testata delle landing (promo bar, navbar senza menu); head condiviso in template-parts/head.php
 inc/sgrosso-variants.php  testi di default per variante della landing Sgrosso
 inc/tracking.php          iubenda, GTM, Clarity da Theme Options
