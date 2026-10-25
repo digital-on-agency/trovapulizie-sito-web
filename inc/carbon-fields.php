@@ -468,6 +468,19 @@ add_action( 'carbon_fields_register_fields', function () {
 		) );
 
 	// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)
+	// Integrazioni — Theme Options > Integrazioni: API del portale per il form lead (ADR-004) e chiave HERE.
+	// La chiave HERE e' pubblica nel browser (va limitata per referrer sul pannello HERE), non e' un segreto da
+	// repo: per questo sta nel database e non in wp-config.
+	Container::make( 'theme_options', __( 'Integrazioni' ) )
+		->set_page_file( 'tp-integrazioni' )
+		->add_fields( array(
+			Field::make( 'text', 'tp_api_base', __( 'Base URL dell\'API del portale' ) )
+				->set_default_value( 'https://api.trovapulizie.com' )
+				->set_help_text( __( 'Produzione https://api.trovapulizie.com, staging https://staging.api.trovapulizie.com. Il form lead chiama /api/leads da qui. [ATTENZIONE] L\'allowlist CORS del backend accetta solo www.trovapulizie.it e staging.trovapulizie.it: da altri hostname le chiamate falliscono.' ) ),
+			Field::make( 'text', 'tp_here_key', __( 'Chiave HERE (autocomplete indirizzo)' ) )
+				->set_help_text( __( 'Chiave dedicata al sito, limitata ai referrer staging.trovapulizie.it e www.trovapulizie.it, solo servizio Autosuggest. Vuota = campo indirizzo a testo libero.' ) ),
+		) );
+
 	// Tracking — Theme Options > Tracking (inc/tracking.php). ID pubblici (stanno nel sorgente di ogni pagina),
 	// non segreti: per questo vivono nel database e non in wp-config. Campo vuoto = snippet non emesso.
 	Container::make( 'theme_options', __( 'Tracking' ) )

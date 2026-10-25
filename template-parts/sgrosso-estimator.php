@@ -89,7 +89,7 @@ $uid     = 'calc-' . wp_unique_id();
 				<?php endif; ?>
 			</div>
 
-			<form class="sg-calc__result" data-lead-atomic data-form="calcolatore" data-landing="<?php echo esc_attr( $args['landing'] ); ?>" novalidate data-reveal>
+			<form class="sg-calc__result" data-lead-atomic data-api="<?php echo esc_attr( tp_api_base() ); ?>" data-form="calcolatore" data-landing="<?php echo esc_attr( $args['landing'] ); ?>" novalidate data-reveal>
 				<p class="sg-calc__result-label"><?php echo esc_html( $args['result_label'] ); ?></p>
 				<p class="sg-calc__price" aria-live="polite"><span data-price-min><?php echo $min_ini; ?></span>€ – <span data-price-max><?php echo $max_ini; ?></span>€</p>
 				<p class="sg-calc__meta">≈ <span data-meta-mq><?php echo (int) $mq; ?></span> m² · <span data-meta-tipo><?php echo esc_html( $default_type ); ?></span> · <span data-meta-extra>0</span> extra</p>

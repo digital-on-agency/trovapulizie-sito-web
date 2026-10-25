@@ -16,15 +16,17 @@ async function withChrome(bin, url, opts, fn) {
 		for (let i = 0; i < 40; i++) { try { await getJson('/json/version'); break; } catch (e) { await sleep(300); } }
 		const target = await getJson('/json/new?' + encodeURIComponent(url), 'PUT');
 		const ws = new WebSocket(target.webSocketDebuggerUrl);
-		let id = 0; const pending = {};
-		ws.onmessage = e => { const m = JSON.parse(e.data); if (m.id && pending[m.id]) { pending[m.id](m); delete pending[m.id]; } else if (m.method === 'Runtime.exceptionThrown') console.log('EXC', JSON.stringify(m.params.exceptionDetails).slice(0, 300)); };
+		let id = 0; const pending = {}; const handlers = {};
+		// on(method, fn): ascolta un evento CDP (es. Fetch.requestPaused per simulare l'API). Piu' handler per evento.
+		const on = (method, fn) => { (handlers[method] = handlers[method] || []).push(fn); };
+		ws.onmessage = e => { const m = JSON.parse(e.data); if (m.id && pending[m.id]) { pending[m.id](m); delete pending[m.id]; } else if (m.method && handlers[m.method]) { handlers[m.method].forEach(fn => { try { fn(m.params); } catch (err) { console.log('HANDLER', m.method, err.message); } }); } else if (m.method === 'Runtime.exceptionThrown') console.log('EXC', JSON.stringify(m.params.exceptionDetails).slice(0, 300)); };
 		const send = (method, params) => new Promise(r => { const mid = ++id; pending[mid] = r; ws.send(JSON.stringify({ id: mid, method, params: params || {} })); });
 		await new Promise(r => ws.onopen = r);
 		await send('Page.enable'); await send('Runtime.enable');
 		if (o.width !== 1440 || o.mobile) await send('Emulation.setDeviceMetricsOverride', { width: o.width, height: o.height, deviceScaleFactor: 1, mobile: o.mobile });
 		const ev = async expr => { const r = await send('Runtime.evaluate', { expression: expr, awaitPromise: true, returnByValue: true }); return r.result && r.result.result ? r.result.result.value : JSON.stringify(r); };
 		const shot = async (path, clip) => { const r = await send('Page.captureScreenshot', Object.assign({ format: 'png' }, clip ? { clip, captureBeyondViewport: true } : {})); fs.writeFileSync(path, Buffer.from(r.result.data, 'base64')); };
-		await fn({ send, ev, shot, sleep });
+		await fn({ send, ev, shot, sleep, on });
 		ws.close();
 	} finally {
 		chrome.kill();

@@ -53,6 +53,16 @@ add_action( 'after_setup_theme', function () {
 	\Carbon_Fields\Carbon_Fields::boot();
 } );
 
+/* Integrazioni (Theme Options > Integrazioni, inc/carbon-fields.php): base URL dell'API del portale per il form
+   lead (ADR-004) e chiave HERE per l'autocomplete dell'indirizzo. Sullo staging l'API e' quella di staging. */
+function tp_api_base() {
+	$v = function_exists( 'carbon_get_theme_option' ) ? trim( (string) carbon_get_theme_option( 'tp_api_base' ) ) : '';
+	return rtrim( $v ?: 'https://api.trovapulizie.com', '/' );
+}
+function tp_here_key() {
+	return function_exists( 'carbon_get_theme_option' ) ? trim( (string) carbon_get_theme_option( 'tp_here_key' ) ) : '';
+}
+
 /* URL dell'app transazionale. Vive qui e non sparso nei template: al cutover cambia in un posto solo.
    Diventera' un campo di Theme Options con TICKET-08. */
 function tp_app_url( $percorso = '' ) {
@@ -107,7 +117,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	// Solo sull'hub: la barra fissa non esiste sulla Home.
 	$moduli_hub       = array( 'sticky-cta', 'price-estimator' );
 	// Landing Sgrosso (ADR-004): barra fissa doppia; lead-form.js arriva con TICKET-40.
-	$moduli_sgrosso   = array( 'sticky-cta', 'scenario-tabs', 'sgrosso-estimator' );
+	$moduli_sgrosso   = array( 'sticky-cta', 'scenario-tabs', 'sgrosso-estimator', 'lead-form' );
 	// Coreografia della sola Home (ADR-002): telefono pinnato, sequenza schermate, video hero.
 	$moduli_home      = array( 'home-motion', 'hiw-sequence', 'hero-video' );
 	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php' );

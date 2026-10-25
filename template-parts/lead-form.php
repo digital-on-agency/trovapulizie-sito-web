@@ -44,7 +44,7 @@ $tipi_pulizia = array(
 );
 $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '1 settimana', 'Entro 48h' => '48h', 'Entro 24h' => '24h' );
 ?>
-<form class="lead-form" id="<?php echo esc_attr( $p ); ?>" data-lead-form data-cta-position="<?php echo esc_attr( $args['cta_position'] ); ?>" data-landing="<?php echo esc_attr( $args['landing'] ); ?>" novalidate>
+<form class="lead-form" id="<?php echo esc_attr( $p ); ?>" data-lead-form data-api="<?php echo esc_attr( tp_api_base() ); ?>" data-cta-position="<?php echo esc_attr( $args['cta_position'] ); ?>" data-landing="<?php echo esc_attr( $args['landing'] ); ?>" novalidate>
 	<input class="lead-form__hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
 
 	<div class="lead-form__progress">
@@ -96,7 +96,7 @@ $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '
 
 		<div class="tp-field" data-field="indirizzo">
 			<div class="tp-field__box">
-				<input id="<?php echo esc_attr( $p ); ?>-indirizzo" name="indirizzo" type="text" placeholder=" " autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="<?php echo esc_attr( $p ); ?>-indirizzo-list" required>
+				<input id="<?php echo esc_attr( $p ); ?>-indirizzo" name="indirizzo" type="text" placeholder=" " autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="<?php echo esc_attr( $p ); ?>-indirizzo-list" data-here-key="<?php echo esc_attr( tp_here_key() ); ?>" required>
 				<label for="<?php echo esc_attr( $p ); ?>-indirizzo">Indirizzo *</label>
 				<ul class="tp-field__suggest" id="<?php echo esc_attr( $p ); ?>-indirizzo-list" role="listbox" hidden></ul>
 			</div>
