@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.43.0
+Version: 0.44.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -5051,6 +5051,174 @@ a {
 	font-weight: 600;
 }
 
+/* ---- Testa di sezione centrata (eyebrow, titolo, sottotitolo) ------------------------------- */
+.sg-section-head {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	text-align: center;
+}
+.sg-section-head h2 {
+	margin: 0;
+	font-size: 34px;
+	line-height: 1.2;
+	letter-spacing: -0.68px;
+	font-weight: 800;
+	color: var(--tp-ink);
+}
+.sg-section-head__sub {
+	margin: 0;
+	font-size: 17px;
+	line-height: 1.5;
+	color: #4B5563;
+}
+
+/* ---- Come funziona: tre card numerate con frecce (Figma 4364:6830 / 4364:7282) ------------- */
+.sg-steps {
+	padding: 78px 80px;
+	background: var(--tp-white);
+}
+.sg-steps__inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 44px;
+	max-width: 1280px;
+	margin: 0 auto;
+}
+.sg-steps__row {
+	display: flex;
+	align-items: stretch; /* tre card alte uguali come nel Figma (219px), non centrate come sul live */
+	justify-content: center;
+	gap: 8px;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.sg-step {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 14px;
+	width: 380px;
+	padding: 26px;
+	border: 1px solid var(--tp-border);
+	border-radius: 18px;
+	background: var(--tp-white);
+}
+.sg-step__badge {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, var(--tp-primary), var(--tp-primary-700));
+	font-size: 19px;
+	font-weight: 700;
+	color: var(--tp-white);
+}
+.sg-step__title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--tp-ink);
+}
+.sg-step__desc {
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.5;
+	color: #4B5563;
+}
+.sg-steps__arrow {
+	flex: none;
+	align-self: center;
+	padding: 0 8px;
+	font-size: 22px;
+	color: #4DFFB8;
+}
+
+/* ---- CTA finale con la seconda istanza del form (Figma 4473:4967 / 4364:7454) --------------- */
+.sg-final {
+	position: relative;
+	overflow: hidden;
+	padding: 80px;
+	background: #F6FBF9;
+}
+.sg-final__inner {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 420px;
+	align-items: start;
+	gap: 72px;
+	max-width: 1280px;
+	margin: 0 auto;
+}
+.sg-final__copy {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 22px;
+	padding-top: 48px;
+}
+.sg-final__copy h2 {
+	margin: 0;
+	font-size: 36px;
+	line-height: 1.15;
+	letter-spacing: -0.72px;
+	font-weight: 800;
+	color: var(--tp-ink);
+}
+.sg-final__subtitle {
+	margin: 0;
+	font-size: 17px;
+	line-height: 1.58;
+	color: #4B5563;
+}
+.sg-final__bullets {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.sg-final__bullets li {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 15.5px;
+	font-weight: 600;
+	color: var(--tp-ink);
+}
+.sg-final__tile {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 26px;
+	height: 26px;
+	border-radius: 50%;
+	background: var(--tp-mint);
+	color: var(--tp-primary-ink);
+}
+.sg-final__check {
+	width: 12px;
+	height: 12px;
+}
+/* Mascotte: in flusso sotto i punti, spostata a destra verso il form (il live la mette in assoluto a 520px) */
+.sg-final__mascot {
+	align-self: flex-end;
+	width: 360px;
+	height: auto;
+	margin: -36px 48px -24px 0;
+	pointer-events: none;
+}
+.sg-final__form {
+	scroll-margin-top: calc(var(--tp-navbar-h) + 16px);
+}
+
 /* ---- Barra fissa doppia (Chiama + CTA), Figma 4364:7535 ---------------------------------- */
 .sticky-cta--dual {
 	gap: 10px;
@@ -5277,6 +5445,64 @@ a {
 		justify-content: center;
 		min-height: 52px;
 		border-radius: var(--tp-radius-lg);
+	}
+
+	/* Come funziona e CTA finale in colonna */
+	.sg-section-head h2 {
+		font-size: 26px;
+		letter-spacing: -0.52px;
+	}
+	.sg-section-head__sub {
+		font-size: 15px;
+	}
+	.sg-steps {
+		padding: 50px 20px;
+	}
+	.sg-steps__inner {
+		gap: 32px;
+	}
+	.sg-steps__row {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 16px;
+	}
+	.sg-step {
+		width: 100%;
+		gap: 12px;
+		padding: 18px;
+	}
+	.sg-step__title {
+		font-size: 17px;
+	}
+	.sg-step__desc {
+		font-size: 14px;
+	}
+	.sg-steps__arrow {
+		display: none;
+	}
+	.sg-final {
+		padding: 50px 20px;
+	}
+	.sg-final__inner {
+		grid-template-columns: 1fr;
+		gap: 40px;
+	}
+	.sg-final__copy {
+		gap: 18px;
+		padding-top: 0;
+	}
+	.sg-final__copy h2 {
+		font-size: 28px;
+		letter-spacing: -0.56px;
+	}
+	.sg-final__subtitle {
+		font-size: 15px;
+	}
+	.sg-final__bullets li {
+		font-size: 15px;
+	}
+	.sg-final__mascot {
+		display: none;
 	}
 }
 

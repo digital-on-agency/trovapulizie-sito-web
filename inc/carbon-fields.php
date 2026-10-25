@@ -390,6 +390,42 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'textarea', 'sg_when_areas_text', __( 'Testo sotto le aree' ) )->set_help_text( __( 'Vuoto = "Lo sgrosso copre tutte le stanze a fondo. Cambia il focus in base alla tua situazione."' ) ),
 			Field::make( 'text', 'sg_when_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Calcola il preventivo gratis".' ) ),
 			Field::make( 'text', 'sg_when_cta_link', __( 'Bottone: link' ) )->set_help_text( __( 'Vuoto = #form.' ) ),
+		) )
+		->add_tab( __( 'Come funziona' ), array(
+			Field::make( 'text', 'sg_hiw_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = COME FUNZIONA.' ) ),
+			Field::make( 'text', 'sg_hiw_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Vuoto = "Dal sopralluogo alla casa pulita".' ) ),
+			Field::make( 'text', 'sg_hiw_subtitle', __( 'Sottotitolo' ) )->set_help_text( __( 'Vuoto = "Tre passaggi, senza sorprese."' ) ),
+			Field::make( 'complex', 'sg_hiw_steps', __( 'Passi (vuoto = i tre del live)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'textarea', 'description', __( 'Descrizione' ) ),
+				) ),
+		) )
+		->add_tab( __( 'FAQ' ), array(
+			Field::make( 'text', 'sg_faq_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = DOMANDE FREQUENTI.' ) ),
+			Field::make( 'text', 'sg_faq_title', __( 'Titolo' ) )->set_help_text( __( 'Vuoto = "Prima di prenotare il sopralluogo".' ) ),
+			Field::make( 'textarea', 'sg_faq_subtitle', __( 'Testo sotto il titolo' ) )->set_help_text( __( 'Vuoto = "Le risposte rapide. Per tutto il resto, il sopralluogo e\' gratuito e senza impegno."' ) ),
+			Field::make( 'complex', 'sg_faq_items', __( 'Domande (vuoto = le sei del live; la prima cambia per variante)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'question', __( 'Domanda' ) ),
+					Field::make( 'textarea', 'answer', __( 'Risposta' ) ),
+				) ),
+			Field::make( 'separator', 'sg_faq_contact_sep', __( 'Card di contatto' ) ),
+			Field::make( 'text', 'sg_faq_contact_people', __( 'Nomi' ) )->set_help_text( __( 'Vuoto = "Christian & Guido".' ) ),
+			Field::make( 'text', 'sg_faq_contact_role', __( 'Ruolo' ) )->set_help_text( __( 'Vuoto = Fondatori.' ) ),
+			Field::make( 'image', 'sg_faq_contact_avatar_1', __( 'Foto 1' ) )->set_value_type( 'url' ),
+			Field::make( 'image', 'sg_faq_contact_avatar_2', __( 'Foto 2' ) )->set_value_type( 'url' ),
+			Field::make( 'text', 'sg_faq_contact_title', __( 'Titolo card' ) )->set_help_text( __( 'Vuoto = "Rispondiamo di persona".' ) ),
+			Field::make( 'textarea', 'sg_faq_contact_text', __( 'Testo card' ) ),
+			Field::make( 'text', 'sg_faq_contact_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Prenota la stima gratis".' ) ),
+			Field::make( 'text', 'sg_faq_contact_cta_link', __( 'Bottone: link' ) )->set_help_text( __( 'Vuoto = #form-bottom.' ) ),
+		) )
+		->add_tab( __( 'CTA finale' ), array(
+			Field::make( 'text', 'sg_cta_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = ULTIMO PASSO.' ) ),
+			Field::make( 'text', 'sg_cta_title', __( 'Titolo (H2)' ) )->set_help_text( $sg_variant_help ),
+			Field::make( 'textarea', 'sg_cta_subtitle', __( 'Sottotitolo' ) )->set_help_text( __( 'Vuoto = "Un sopralluogo gratuito, un prezzo fisso, una ditta verificata. Al resto pensa lei."' ) ),
+			Field::make( 'textarea', 'sg_cta_bullets', __( 'Punti (uno per riga)' ) )->set_help_text( __( 'Vuoto = i quattro del live.' ) ),
+			Field::make( 'image', 'sg_cta_image', __( 'Mascotte' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuota = polpo del tema. Solo su desktop.' ) ),
 		) );
 
 	// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)

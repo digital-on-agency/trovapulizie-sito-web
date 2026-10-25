@@ -195,6 +195,76 @@ get_header( 'landing', array(
 	) );
 	?>
 
+	<?php
+	// Come funziona (TICKET-45): tre card numerate, testi STEPS del live.
+	$hiw_steps = carbon_get_the_post_meta( 'sg_hiw_steps' );
+	if ( ! $hiw_steps ) {
+		$hiw_steps = array(
+			array( 'title' => 'Invii la richiesta', 'description' => 'Compili il form in 2 minuti: tipo di casa e contatti. Ti ricontattiamo entro 1 ora.' ),
+			array( 'title' => 'Ricevi il preventivo', 'description' => 'Una ditta verificata valuta metratura e stato della casa e ti dà un prezzo fisso. Sopralluogo gratuito solo se serve.' ),
+			array( 'title' => 'Fissi la data', 'description' => 'Scegli quando: la ditta verificata fa lo sgrosso. Tu ritrovi la casa pronta da vivere.' ),
+		);
+	}
+	get_template_part( 'template-parts/steps-cards', null, array(
+		'eyebrow'  => tp_sg_text( 'sg_hiw_eyebrow', $defaults, null, 'COME FUNZIONA' ),
+		'title'    => tp_sg_text( 'sg_hiw_title', $defaults, null, 'Dal sopralluogo alla casa pulita' ),
+		'subtitle' => tp_sg_text( 'sg_hiw_subtitle', $defaults, null, 'Tre passaggi, senza sorprese.' ),
+		'steps'    => $hiw_steps,
+	) );
+
+	// FAQ (TICKET-45): componente della Home, sei domande del live con la prima per variante, card dei fondatori.
+	$faq_items = carbon_get_the_post_meta( 'sg_faq_items' );
+	if ( ! $faq_items ) {
+		$faq_items = array(
+			array( 'question' => $defaults['faq_first_q'], 'answer' => $defaults['faq_first_a'] ),
+			array( 'question' => 'Quanto dura?', 'answer' => 'In genere da mezza giornata a una giornata, secondo la casa. Te lo diciamo con precisione al sopralluogo.' ),
+			array( 'question' => 'Il sopralluogo è davvero gratuito?', 'answer' => 'Sì, gratuito e senza impegno. Se il preventivo non ti convince, non paghi nulla.' ),
+			array( 'question' => 'Cosa devo preparare?', 'answer' => 'Nulla: prodotti e attrezzatura professionale sono inclusi nel servizio.' ),
+			array( 'question' => 'Le ditte sono affidabili?', 'answer' => 'Sì. Ogni ditta passa una verifica di identità e documenti prima di poter lavorare.' ),
+			array( 'question' => 'In che zone operate?', 'answer' => 'Roma città e provincia. Indica la tua zona nel form e ti confermiamo la disponibilità.' ),
+		);
+	}
+	get_template_part( 'template-parts/faq-accordion', null, array(
+		'eyebrow'  => tp_sg_text( 'sg_faq_eyebrow', $defaults, null, 'DOMANDE FREQUENTI' ),
+		'title'    => tp_sg_text( 'sg_faq_title', $defaults, null, 'Prima di prenotare il sopralluogo' ),
+		'subtitle' => tp_sg_text( 'sg_faq_subtitle', $defaults, null, 'Le risposte rapide. Per tutto il resto, il sopralluogo è gratuito e senza impegno.' ),
+		'items'    => $faq_items,
+		'contact'  => array(
+			'people'    => tp_sg_text( 'sg_faq_contact_people', $defaults, null, 'Christian & Guido' ),
+			'role'      => tp_sg_text( 'sg_faq_contact_role', $defaults, null, 'Fondatori' ),
+			'avatar_1'  => carbon_get_the_post_meta( 'sg_faq_contact_avatar_1' ) ?: tp_theme_asset( 'assets/img/founder-christian.png' ),
+			'avatar_2'  => carbon_get_the_post_meta( 'sg_faq_contact_avatar_2' ) ?: tp_theme_asset( 'assets/img/founder-guido.png' ),
+			'title'     => tp_sg_text( 'sg_faq_contact_title', $defaults, null, 'Rispondiamo di persona' ),
+			'text'      => tp_sg_text( 'sg_faq_contact_text', $defaults, null, 'Scrivici: ti risponde Guido o Christian, in base alla disponibilità. I fondatori, non un call center.' ),
+			'cta_label' => tp_sg_text( 'sg_faq_contact_cta_label', $defaults, null, 'Prenota la stima gratis' ),
+			'cta_link'  => tp_sg_text( 'sg_faq_contact_cta_link', $defaults, null, '#form-bottom' ),
+		),
+	) );
+
+	// CTA finale con la seconda istanza del form (TICKET-45): cta_position 'bottom', id #form-bottom.
+	$cta_bullets = tp_lines( carbon_get_the_post_meta( 'sg_cta_bullets' ) );
+	if ( ! $cta_bullets ) {
+		$cta_bullets = array( 'Sopralluogo gratuito e senza impegno', 'Prezzo fisso confermato dopo la visita', 'Ti ricontattiamo entro 1 ora', 'Ditte verificate e assicurate' );
+	}
+	get_template_part( 'template-parts/cta-form', null, array(
+		'eyebrow'  => tp_sg_text( 'sg_cta_eyebrow', $defaults, null, 'ULTIMO PASSO' ),
+		'title'    => tp_sg_text( 'sg_cta_title', $defaults, 'cta_final_h2' ),
+		'subtitle' => tp_sg_text( 'sg_cta_subtitle', $defaults, null, 'Un sopralluogo gratuito, un prezzo fisso, una ditta verificata. Al resto pensa lei.' ),
+		'bullets'  => $cta_bullets,
+		'image'    => carbon_get_the_post_meta( 'sg_cta_image' ) ?: tp_theme_asset( 'assets/img/sgrosso/sgrosso-polpo-mascotte.webp' ),
+		'form'     => array(
+			'id'           => 'lead-bottom',
+			'cta_position' => 'bottom',
+			'landing'      => $landing,
+			'default_tipo' => $defaults['scenario'],
+			'title'        => tp_sg_text( 'sg_form_title', $defaults, null, 'I tuoi dati di contatto' ),
+			'subtitle'     => tp_sg_text( 'sg_form_subtitle', $defaults, null, "Ti risponderemo entro un'ora con una prima valutazione." ),
+			'cta_label'    => tp_sg_text( 'sg_form_cta', $defaults, null, 'Prenota sopralluogo gratuito' ),
+			'note'         => tp_sg_text( 'sg_form_note', $defaults, null, 'Gratis · nessun impegno · risposta in 1h' ),
+		),
+	) );
+	?>
+
 	<?php get_template_part( 'template-parts/sticky-cta', null, array(
 		'variant'     => 'dual',
 		'label'       => 'Prenota sopralluogo', // Figma 4364:7540: accanto a Chiama la CTA lunga non entra a 390
