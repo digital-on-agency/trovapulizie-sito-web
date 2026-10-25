@@ -41,6 +41,9 @@ const PROBE = `(() => {
 	const perUrl = {}, urlsDiFile = {};
 	res.forEach(r => {
 		perUrl[r.name] = (perUrl[r.name] || 0) + r.transferSize;
+		// Il controllo sui doppioni vale per gli asset del tema: le chiamate di GA4/Ads (collect, gtm.js) hanno
+		// query diverse per natura e non sono un file chiesto due volte.
+		if (r.name.indexOf('/wp-content/') === -1) return;
 		const f = r.name.split('/').pop().split('?')[0];
 		urlsDiFile[f] = urlsDiFile[f] || [];
 		if (urlsDiFile[f].indexOf(r.name) < 0) urlsDiFile[f].push(r.name);
@@ -83,8 +86,23 @@ const PROBE = `(() => {
 		aria: burger ? burger.getAttribute('aria-expanded') : null,
 		panelHidden: document.getElementById('nav-panel') ? document.getElementById('nav-panel').hidden : null,
 		accediVisibile: !!document.querySelector('.navbar__cta .tp-btn--secondary') && getComputedStyle(document.querySelector('.navbar__cta .tp-btn--secondary')).display !== 'none',
-		h: Math.round(document.querySelector('.navbar').getBoundingClientRect().height)
+		h: Math.round(document.querySelector('.navbar, .landing-nav').getBoundingClientRect().height)
 	};
+	// Landing (page-sgrosso.php, page-thank-you.php): testata senza menu, barra fissa doppia, form card nel viewport.
+	const landingMain = document.querySelector('main.sgrosso, main.ty');
+	const vis = el => !!el && getComputedStyle(el).display !== 'none';
+	const landingNav = document.querySelector('.landing-nav') ? {
+		linksVisibili: vis(document.querySelector('.landing-nav__links')),
+		phoneVisibile: vis(document.querySelector('.landing-nav__phone')),
+		ctaVisibile: vis(document.querySelector('.landing-nav__cta')),
+		ctaBox: box(document.querySelector('.landing-nav__cta'))
+	} : null;
+	const forms = [].map.call(document.querySelectorAll('[data-lead-form], [data-lead-atomic]'), f => box(f));
+	// Bersagli interattivi sotto i 44px di altezza (solo avviso): link e bottoni visibili fuori dalla navbar.
+	const corti = [].filter.call(document.querySelectorAll('a[href], button'), el => {
+		const r = el.getBoundingClientRect();
+		return r.width > 0 && r.height > 0 && r.height < 44 && !el.closest('.site-footer, .faq__q, .tp-pill, .sg-when__tab, .sg-area, .lead-form__photo-remove');
+	}).slice(0, 8).map(el => (el.textContent || el.getAttribute('aria-label') || el.tagName).trim().slice(0, 30) + ' ' + Math.round(el.getBoundingClientRect().height) + 'px');
 	const hero = { box: box(document.querySelector('.hero__box')), phone: box(document.querySelector('.hero .tp-phone')), bar: box(document.querySelector('.tp-search')) };
 	return JSON.stringify({
 		vw: vw,
@@ -92,6 +110,13 @@ const PROBE = `(() => {
 		// L'hub di citta' riusa le sezioni della Home ma non la sua coreografia: le verifiche
 		// su pin, telefono e hero della Home non valgono li' (SPEC-pagina-hub-roma).
 		hub: !!document.querySelector('main.hub-roma'),
+		landing: landingMain ? landingMain.className : '',
+		landingNav: landingNav,
+		forms: forms,
+		corti: corti,
+		sezioniLanding: (landingMain && landingMain.classList.contains('sgrosso')
+			? ['.sg-hero', '.sg-trust', '.sg-compare', '.sg-when', '.sg-steps', '.sg-calc', '.reviews', '.sg-coupon', '.faq', '.sg-final']
+			: (landingMain ? ['.ty__grid'] : [])).filter(sel => !document.querySelector(sel)),
 		stickyCta: (() => {
 			const b = document.querySelector('[data-sticky-cta]');
 			return b ? { c: true, hidden: b.hidden } : { c: false };
@@ -126,18 +151,19 @@ const PROBE = `(() => {
 			const r = JSON.parse(await ev(PROBE));
 			const errors = [];
 			if (r.scrollWidth > r.vw) errors.push('scroll orizzontale: scrollWidth ' + r.scrollWidth + ' > ' + r.vw);
-			const attesoMotion = r.hub ? false : desktop;
+			const landing = !!r.landing;
+			const attesoMotion = (r.hub || landing) ? false : desktop;
 			if (r.motionOk !== attesoMotion) errors.push('motion-ok ' + r.motionOk + ', atteso ' + attesoMotion);
 			if (!desktop && r.cdn.length) errors.push('risorse CDN richieste sotto soglia: ' + r.cdn.join(', '));
 			// Sotto soglia la sezione vale 300dvh con la sequenza attiva, circa 2 viewport nel fallback
 			// impilato; i 550vh del pin desktop (oltre 5 viewport) non devono comparire in nessuno dei due.
-			if (!desktop && !r.hub) {
+			if (!desktop && !r.hub && !landing) {
 				const atteso = r.seq.on ? 3 * r.seq.viewport : null;
 				if (atteso && Math.abs(r.hiwHeight - atteso) > atteso * 0.1) errors.push('Come funziona alta ' + r.hiwHeight + 'px, attesi circa ' + atteso + ' (300dvh)');
 				if (!r.seq.on && r.hiwHeight > 2.5 * r.seq.viewport) errors.push('fallback impilato alto ' + r.hiwHeight + 'px: sembra la sezione pinnata');
 			}
 			// Come funziona sotto soglia (TICKET-13 rev. 2): sequenza di schermate o fallback impilato.
-			if (!desktop && !r.hub) {
+			if (!desktop && !r.hub && !landing) {
 				if (r.steps.length !== 3) errors.push('passi di Come funziona: ' + r.steps.length + ', attesi 3');
 				if (r.videoSezione) errors.push(r.videoSezione + ' video ancora nella sezione: su mobile la sequenza e\' di immagini');
 				if (r.seq.on) {
@@ -156,11 +182,27 @@ const PROBE = `(() => {
 				if (r.hero.phone && r.hero.box && r.hero.phone[1] + r.hero.phone[3] <= r.hero.box[1] + r.hero.box[3]) errors.push('il telefono non sporge sotto il box della hero');
 			}
 			// Navbar mobile (TICKET-11): vale su ogni pagina, la barra sta in header.php.
-			if (!desktop) {
+			if (!desktop && !landing) {
 				if (r.nav.h !== 65) errors.push('navbar alta ' + r.nav.h + ', attesa 65');
 				if (!r.nav.burger || r.nav.burger[2] !== 24) errors.push('hamburger assente o non 24px');
 				if (r.nav.aria !== 'false' || r.nav.panelHidden !== true) errors.push('pannello non chiuso al caricamento');
 				if (r.nav.accediVisibile) errors.push('Accedi visibile nella barra: va nel pannello');
+			}
+			// Testata delle landing (TICKET-39): sotto soglia restano logo e CTA, niente ancore ne' telefono.
+			if (landing) {
+				if (!r.landingNav) errors.push('testata landing assente');
+				else {
+					if (r.nav.h !== (desktop ? 72 : 65)) errors.push('navbar landing alta ' + r.nav.h + ', attesa ' + (desktop ? 72 : 65));
+					if (!r.landingNav.ctaVisibile) errors.push('CTA della testata non visibile');
+					if (!desktop && (r.landingNav.linksVisibili || r.landingNav.phoneVisibile)) errors.push('ancore o telefono visibili sotto soglia');
+					if (r.landingNav.ctaBox && r.landingNav.ctaBox[0] + r.landingNav.ctaBox[2] > r.vw) errors.push('CTA della testata esce dal viewport');
+				}
+				if (r.sezioniLanding.length) errors.push('sezioni mancanti: ' + r.sezioniLanding.join(', '));
+				r.forms.forEach((f, i) => { if (f && f[0] + f[2] > r.vw + 1) errors.push('form ' + (i + 1) + ' esce dal viewport: ' + JSON.stringify(f)); });
+				if (r.landing.indexOf('sgrosso') >= 0) {
+					if (!r.stickyCta.c) errors.push('barra CTA fissa assente dal DOM');
+					else if (!r.stickyCta.hidden) errors.push('barra CTA fissa visibile al caricamento (il form hero e\' in vista)');
+				}
 			}
 			// Hub di citta' (SPEC-pagina-hub-roma): sezioni attese e barra fissa solo sotto soglia.
 			if (r.hub) {
@@ -176,6 +218,7 @@ const PROBE = `(() => {
 				if (r.videoPieni.length) errors.push('video senza rendition ridotta: ' + r.videoPieni.join(', '));
 			}
 			const avvisi = [];
+			if (r.corti && r.corti.length) avvisi.push('bersagli sotto 44px: ' + r.corti.join(' | '));
 			const esito = errors.length ? 'KO' : 'ok';
 			console.log('[' + esito + '] ' + w + 'px  scrollWidth ' + r.scrollWidth + '  motion-ok ' + r.motionOk + '  Come funziona ' + r.hiwHeight + 'px  ' + r.kb + ' KB');
 			errors.forEach(e => console.log('      - ' + e));

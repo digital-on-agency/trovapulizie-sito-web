@@ -9,6 +9,8 @@ Trovapulizie, scorporato dall'app transazionale React (`portale-transazionale`).
 - `docs/homepage.md`: come e' costruita la Home (file, campi editoriali, sezioni, coreografia del telefono,
   asset, cache-busting, QA, limiti noti). Da leggere prima di toccare `page-home.php`, `home-motion.js` o `style.css`.
 - `docs/brand-kit.md`: token di design estratti dal Figma (colori, font, raggi, ombre) con i node-id di provenienza.
+- `docs/landing-sgrosso.md`: landing Sgrosso (cinque pagine su un template, form lead con chiamate dirette all'API,
+  tracking, SEO, QA).
 - `tools/README.md`: script di QA, pipeline del video dello schermo, encoding.
 - Decisioni (ADR), spec e stato del progetto: vault `clients/trovapulizie/projects/sito-web/`.
 
@@ -20,6 +22,13 @@ functions.php             helper, enqueue, importmap Three.js, boot Carbon Field
 inc/carbon-fields.php     campi editoriali (Home per tab + Theme Options Footer)
 header.php / footer.php   navbar e footer
 page-home.php             template Home
+page-hub-roma.php         template hub di citta' /roma/
+page-sgrosso.php          template landing Sgrosso (cinque pagine, campo variante)
+page-thank-you.php        thank-you dopo un lead (noindex)
+header-landing.php        testata delle landing (promo bar, navbar senza menu); head condiviso in template-parts/head.php
+inc/sgrosso-variants.php  testi di default per variante della landing Sgrosso
+inc/tracking.php          iubenda, GTM, Clarity da Theme Options
+inc/seo.php               title, description e JSON-LD per pagina
 index.php                 fallback per le altre pagine
 template-parts/           sezioni riutilizzabili (args via get_template_part) + phone-mockup
 assets/js/                un modulo per comportamento
@@ -73,5 +82,5 @@ Un errore PHP nel tema manda in fatal tutto il sito: per questo il lint precede 
 
 ## Stato
 
-Desktop della Home completo (ver 0.17.0). Mobile e tablet da adattare. Stato e prossimi passi nel vault,
+Home desktop e mobile, hub /roma/ e cinque landing Sgrosso con form lead funzionante (ver 0.50.x). Stato e prossimi passi nel vault,
 `clients/trovapulizie/projects/sito-web/CLAUDE.md`.

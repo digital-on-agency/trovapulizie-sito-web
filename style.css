@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.50.0
+Version: 0.50.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -4483,8 +4483,10 @@ a {
 }
 .sg-trust__bar {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	justify-content: center;
+	row-gap: 12px;
 	max-width: 1200px;
 	margin: 0 auto;
 	padding: 22px 24px;
@@ -4527,6 +4529,12 @@ a {
 .sg-trust__check {
 	width: 13px;
 	height: 13px;
+}
+
+@media (max-width: 1240px) {
+	.sg-trust__bar li {
+		padding: 0 28px; /* a 1024 le quattro voci con 56px per lato uscivano dal viewport */
+	}
 }
 
 /* ---- Confrontiamo tutta Roma (Figma 4364:6697 / 4364:7154) --------------------------------- */
@@ -5940,19 +5948,20 @@ a {
 		display: block;
 	}
 	.landing-nav {
+		gap: 12px;
 		padding: 0 20px;
 	}
 	.landing-nav__logo img {
-		height: 28px;
+		height: 24px; /* con la CTA accanto, a 360-390 il logo da 28px spingeva la barra oltre il viewport */
 	}
 	.landing-nav__links,
 	.landing-nav__phone {
 		display: none;
 	}
 	.landing-nav__cta {
-		min-height: 41px;
-		padding: 0 16px;
-		font-size: 14px;
+		min-height: 44px;
+		padding: 0 14px;
+		font-size: 13px;
 	}
 	.landing-nav__cta-short + .landing-nav__cta-full {
 		display: none;
