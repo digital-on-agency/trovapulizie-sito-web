@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.48.0
+Version: 0.48.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -30,13 +30,15 @@ Version: 0.48.0
 	   minimo AA di 4,5:1 — scelta consapevole, non una svista: non va "corretta" in una passata
 	   di QA. Se servira' l'AA senza perdere il verde: stesso fondo, testo #191919 (8,12:1). */
 	--tp-primary: #00C896;
-	/* Il verde del marchio con sopra del testo bianco da' 2,16:1, sotto il minimo AA di 4,5. Due token
-	   derivati, da usare ogni volta che il verde porta testo o e' testo:
-	   --tp-primary-ink  fondo con testo bianco sopra (badge, indicatore tab, stati): 4,52:1
-	   --tp-green-ink    il verde usato come testo su fondo chiaro: 5,38:1 su bianco
-	   --tp-primary resta per riempimenti e grafica senza testo sopra (la mappa, per esempio). */
-	--tp-primary-ink: #08875F;
-	--tp-green-ink: #0A7A4D;
+	/* 25/10/2026, decisione di Guido: un solo verde, quello del marchio, per CTA, badge, numeri dei passi,
+	   indicatori, bordi e testo verde. I due token "ink" del 17/10 (#08875F sui fondi con testo bianco,
+	   #0A7A4D per il testo verde) restano come nomi, per non toccare 40 regole, ma valgono il verde del
+	   marchio: col bianco sopra fanno 2,16:1, sotto l'AA, scelta consapevole come per le CTA del 20/10.
+	   Se un giorno servira' l'AA: --tp-primary-ink #08875F e --tp-green-ink #0A7A4D, un cambio qui.
+	   --tp-focus e' l'unico verde scuro rimasto: l'anello di focus da tastiera deve staccarsi dal fondo. */
+	--tp-primary-ink: #00C896;
+	--tp-green-ink: #00C896;
+	--tp-focus: #08875F;
 	--tp-text: #191919;
 	--tp-text-heading: #1F2937;
 	--tp-text-body: #6B7280;
@@ -2442,9 +2444,9 @@ a {
 	padding-right: 248px;
 	box-sizing: border-box;
 	border-radius: var(--tp-radius-2xl);
-	/* Entrambi gli estremi devono reggere il testo bianco: #0FA676 lo lasciava a 3,12 e la nota a 2,66.
-	   Cosi' il punto peggiore del gradiente e' 4,52:1. */
-	background: linear-gradient(90deg, #06734F 0%, #08875F 100%);
+	/* Gradiente del Figma 3564:162 (#00C896 -> #37DBB3). Il 17/10 era stato scurito a #06734F -> #08875F per
+	   l'AA del testo bianco; il 25/10 Guido ha chiesto il verde del marchio: scelta consapevole, vedi :root. */
+	background: linear-gradient(90deg, var(--tp-primary) 0%, #37DBB3 100%);
 	box-shadow: 0 10px 30px 0 rgba(15, 33, 26, 0.08);
 	overflow: hidden;
 	color: var(--tp-white);
@@ -2903,11 +2905,11 @@ a {
 	min-height: 44px;
 }
 /* Un quartiere senza offerta non deve sembrare prenotabile: il pieno e' solo per le zone attive. */
-.zones-map__chip[data-state='active'] { border-color: var(--tp-primary); background: #EAFAF4; color: #0A7A4D; } /* 4,99:1 su #EAFAF4; il verde pieno #0F9D63 si fermava a 3,2 */
+.zones-map__chip[data-state='active'] { border-color: var(--tp-primary); background: #EAFAF4; color: var(--tp-green-ink); } /* 4,99:1 su #EAFAF4; il verde pieno #0F9D63 si fermava a 3,2 */
 .zones-map__chip:hover { border-color: var(--tp-primary); }
 .zones-map__chip:focus-visible,
 .zones-map__back:focus-visible,
-.zones-map__caps path:focus-visible { outline: 3px solid #0A7A4D; outline-offset: 2px; }
+.zones-map__caps path:focus-visible { outline: 3px solid var(--tp-focus); outline-offset: 2px; }
 
 .zones-map__panel {
 	display: grid;
@@ -2966,7 +2968,7 @@ a {
 	font: inherit;
 	font-size: 14px;
 	font-weight: 600;
-	color: #0A7A4D;
+	color: var(--tp-green-ink);
 	text-decoration: underline;
 	cursor: pointer;
 	min-height: 44px;
@@ -3548,7 +3550,7 @@ a {
 }
 
 .price__slider:focus-visible {
-	outline: 2px solid var(--tp-primary-ink);
+	outline: 2px solid var(--tp-focus);
 	outline-offset: 4px;
 }
 
@@ -4848,7 +4850,7 @@ a {
 	color: var(--tp-white);
 }
 .sg-when__tab:focus-visible {
-	outline: 2px solid var(--tp-primary-ink);
+	outline: 2px solid var(--tp-focus);
 	outline-offset: 2px;
 }
 .sg-when__panel {
@@ -4865,7 +4867,7 @@ a {
 	display: none;
 }
 .sg-when__panel:focus-visible {
-	outline: 2px solid var(--tp-primary-ink);
+	outline: 2px solid var(--tp-focus);
 	outline-offset: 4px;
 }
 .sg-when__areas {
@@ -5023,7 +5025,7 @@ a {
 	border: 0;
 }
 .sg-compare-media:has(.sg-compare-media__range:focus-visible) {
-	outline: 2px solid var(--tp-primary-ink);
+	outline: 2px solid var(--tp-focus);
 	outline-offset: 3px;
 }
 .sg-when__detail {
@@ -5164,7 +5166,7 @@ a {
 	box-shadow: 0 2px 6px rgba(15, 23, 41, 0.18);
 }
 .sg-calc__range:focus-visible {
-	outline: 2px solid var(--tp-primary-ink);
+	outline: 2px solid var(--tp-focus);
 	outline-offset: 4px;
 }
 .sg-calc__scale {
