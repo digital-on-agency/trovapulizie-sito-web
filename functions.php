@@ -49,6 +49,20 @@ function tp_pipe_lines( $text ) {
 	}
 	return $out;
 }
+// Card di contatto dei fondatori nelle FAQ: foto, nomi e ruolo vengono dalla scheda della Home (campi faq_contact_*),
+// unica fonte per tutte le pagine. Prima le landing ripiegavano sui file del tema, che non sono le foto in uso.
+function tp_founders_contact() {
+	$home = (int) get_option( 'page_on_front' );
+	$get  = function ( $k ) use ( $home ) {
+		return $home ? (string) carbon_get_post_meta( $home, $k ) : '';
+	};
+	return array(
+		'people'   => $get( 'faq_contact_people' ) ?: 'Guido & Christian',
+		'role'     => $get( 'faq_contact_role' ) ?: 'Fondatori',
+		'avatar_1' => $get( 'faq_contact_avatar_1' ),
+		'avatar_2' => $get( 'faq_contact_avatar_2' ),
+	);
+}
 // Icona SVG monocromatica resa come maschera in currentColor (classe .tp-icon-mask); '' se il file non esiste
 function tp_icon_span( $rel, $class ) {
 	if ( ! file_exists( get_stylesheet_directory() . '/' . ltrim( $rel, '/' ) ) ) {

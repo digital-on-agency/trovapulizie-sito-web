@@ -199,14 +199,12 @@ get_header( '', array(
 		'title'    => tp_dc( 'dc_faq_title', 'Domande dei cleaner' ),
 		'subtitle' => tp_dc( 'dc_faq_subtitle', 'Le risposte rapide. Per tutto il resto, scrivici.' ),
 		'items'    => $faq,
-		'contact'  => array(
-			'people'    => 'Christian & Guido',
-			'role'      => 'Fondatori',
+		'contact'  => array_merge( tp_founders_contact(), array(
 			'title'     => tp_dc( 'dc_faq_contact_title', 'Rispondiamo di persona' ),
 			'text'      => tp_dc( 'dc_faq_contact_text', 'Scrivici: ti risponde Guido o Christian, in base alla disponibilità. I fondatori, non un call center.' ),
 			'cta_label' => tp_dc( 'dc_faq_contact_cta', 'Scrivici su WhatsApp' ),
 			'cta_link'  => $whatsapp,
-		),
+		) ),
 	) );
 
 	get_template_part( 'template-parts/cta-final', null, array(

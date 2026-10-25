@@ -291,16 +291,17 @@ get_header( 'landing', array(
 			array( 'question' => 'In che zone operate?', 'answer' => 'Roma città e provincia. Indica la tua zona nel form e ti confermiamo la disponibilità.' ),
 		);
 	}
+	$founders = tp_founders_contact();
 	get_template_part( 'template-parts/faq-accordion', null, array(
 		'eyebrow'  => tp_sg_text( 'sg_faq_eyebrow', $defaults, null, 'DOMANDE FREQUENTI' ),
 		'title'    => tp_sg_text( 'sg_faq_title', $defaults, null, 'Prima di prenotare il sopralluogo' ),
 		'subtitle' => tp_sg_text( 'sg_faq_subtitle', $defaults, null, 'Le risposte rapide. Per tutto il resto, il sopralluogo è gratuito e senza impegno.' ),
 		'items'    => $faq_items,
 		'contact'  => array(
-			'people'    => tp_sg_text( 'sg_faq_contact_people', $defaults, null, 'Christian & Guido' ),
-			'role'      => tp_sg_text( 'sg_faq_contact_role', $defaults, null, 'Fondatori' ),
-			'avatar_1'  => carbon_get_the_post_meta( 'sg_faq_contact_avatar_1' ) ?: tp_theme_asset( 'assets/img/founder-christian.png' ),
-			'avatar_2'  => carbon_get_the_post_meta( 'sg_faq_contact_avatar_2' ) ?: tp_theme_asset( 'assets/img/founder-guido.png' ),
+			'people'    => tp_sg_text( 'sg_faq_contact_people', $defaults, null, $founders['people'] ),
+			'role'      => tp_sg_text( 'sg_faq_contact_role', $defaults, null, $founders['role'] ),
+			'avatar_1'  => carbon_get_the_post_meta( 'sg_faq_contact_avatar_1' ) ?: $founders['avatar_1'],
+			'avatar_2'  => carbon_get_the_post_meta( 'sg_faq_contact_avatar_2' ) ?: $founders['avatar_2'],
 			'title'     => tp_sg_text( 'sg_faq_contact_title', $defaults, null, 'Rispondiamo di persona' ),
 			'text'      => tp_sg_text( 'sg_faq_contact_text', $defaults, null, 'Scrivici: ti risponde Guido o Christian, in base alla disponibilità. I fondatori, non un call center.' ),
 			'cta_label' => tp_sg_text( 'sg_faq_contact_cta_label', $defaults, null, 'Prenota la stima gratis' ),

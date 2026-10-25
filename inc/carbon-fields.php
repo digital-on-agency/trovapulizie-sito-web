@@ -453,7 +453,7 @@ add_action( 'carbon_fields_register_fields', function () {
 					Field::make( 'textarea', 'answer', __( 'Risposta' ) ),
 				) ),
 			Field::make( 'separator', 'sg_faq_contact_sep', __( 'Card di contatto' ) ),
-			Field::make( 'text', 'sg_faq_contact_people', __( 'Nomi' ) )->set_help_text( __( 'Vuoto = "Christian & Guido".' ) ),
+			Field::make( 'text', 'sg_faq_contact_people', __( 'Nomi' ) )->set_help_text( __( 'Vuoto = nomi, ruolo e foto della card di contatto della Home.' ) ),
 			Field::make( 'text', 'sg_faq_contact_role', __( 'Ruolo' ) )->set_help_text( __( 'Vuoto = Fondatori.' ) ),
 			Field::make( 'image', 'sg_faq_contact_avatar_1', __( 'Foto 1' ) )->set_value_type( 'url' ),
 			Field::make( 'image', 'sg_faq_contact_avatar_2', __( 'Foto 2' ) )->set_value_type( 'url' ),
