@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.53.0
+Version: 0.54.2
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -21,6 +21,7 @@ Version: 0.53.0
    11-bis. Hub citta' /roma/: hero, verificati, come funziona statica, calcolatore, intro, barra fissa mobile
    (segue: landing Sgrosso, testata landing, form lead, thank-you)
    13. Diventa cleaner (page-cleaner-landing.php): hero, schermi, bento, calcolatore guadagni, per chi e', requisiti
+   14. Landing B2B (page-landing-b2b.php): form a un passo, settori con foto, lavori, formule, perche' noi
    12. prefers-reduced-motion: blocco unico per tutte le sezioni
    Ogni sezione ha la propria media query sotto i 1024px; la soglia e' il token --tp-bp-desktop. */
 
@@ -7298,6 +7299,395 @@ main.dc--motion .dc-rv.is-in {
 	transition: transform 0.2s ease;
 }
 
+/* =========================
+   14. Landing B2B — page-landing-b2b.php, Figma 6780:895 (TICKET-58..62)
+   Classi b2b-*; riusa .sg-hero, .sg-trust, .sg-when (+ .sg-when__photo), .sg-compare-media, .dc-who, .sg-steps,
+   .reviews, .faq, .sg-final. Verde del marchio solo sulle CTA; testo e icone verdi su fondo chiaro in
+   #08875E / #067A55 (analisi UX 25/10, come la pagina Diventa cleaner).
+   ========================= */
+.b2b .sg-eyebrow {
+	color: #067A55;
+}
+.b2b .sg-section-head__sub {
+	max-width: 620px;
+}
+/* Hero: foto verticale della lavasciuga (1000x1133) sotto la card del form: inquadra il centro */
+.b2b .sg-hero__img {
+	object-position: 50% 42%;
+}
+.b2b .sg-hero h1 {
+	max-width: 660px;
+}
+/* Trust strip: quattro voci lunghe su una riga a 1440 (con 32px la quarta andava a capo) */
+.b2b .sg-trust__bar li {
+	padding: 0 22px;
+}
+
+/* ---- Form a un passo (template-parts/lead-form-b2b.php) ---- */
+.lead-form--b2b .lead-form__chips {
+	gap: 8px;
+}
+.lead-form--b2b .lead-form__chips .tp-pill {
+	padding: 8px 14px;
+	font-size: 13px;
+}
+.lead-form--b2b .lead-form__group.is-invalid .tp-pill {
+	border-color: var(--tp-error);
+}
+.lead-form--b2b .tp-field[hidden] {
+	display: none;
+}
+.lead-form__done {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	padding: 28px 8px 12px;
+	text-align: center;
+	outline: none;
+}
+.lead-form__done[hidden] {
+	display: none;
+}
+.lead-form__done-tile {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: var(--tp-mint);
+	color: #08875E;
+}
+.lead-form__done-check {
+	width: 24px;
+	height: 24px;
+}
+.lead-form__done-title {
+	margin: 6px 0 0;
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--tp-ink);
+}
+.lead-form__done-text {
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.55;
+	color: #4B5563;
+}
+.lead-form__done-text a {
+	font-weight: 600;
+	color: #08875E;
+}
+
+/* ---- Settori: foto singola al posto del prima/dopo (scenario-tabs.php con `image`) ---- */
+.sg-when__photo {
+	position: relative;
+	aspect-ratio: 536 / 392;
+	width: 100%;
+	overflow: hidden;
+	border-radius: var(--tp-radius-xl);
+	background: var(--tp-bg-soft);
+}
+.sg-when__photo img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* ---- Lavori a Roma (works-gallery.php) ---- */
+.b2b-works {
+	padding: 88px 80px;
+	background: var(--tp-white);
+}
+.b2b-works__inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 44px;
+	max-width: 1280px;
+	margin: 0 auto;
+}
+.b2b-works__compare {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 455px;
+	align-items: center;
+	gap: 24px;
+	width: 100%;
+}
+.b2b-works__media {
+	aspect-ratio: 760 / 556;
+}
+.b2b-works__card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 16px;
+	padding: 32px;
+	border: 1px solid var(--tp-border);
+	border-radius: 24px;
+	background: #F6FBF9;
+}
+.b2b-works__pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	margin: 0;
+	padding: 6px 12px;
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-white);
+	font-size: 12px;
+	font-weight: 600;
+	color: #067A55;
+}
+.b2b-works__title {
+	margin: 0;
+	font-size: 24px;
+	line-height: 1.25;
+	font-weight: 700;
+	color: var(--tp-ink);
+}
+.b2b-works__text {
+	margin: 0;
+	font-size: 16px;
+	line-height: 1.55;
+	color: #4B5563;
+}
+.b2b-works__tags {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.b2b-works__tags li {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--tp-ink);
+}
+.b2b-tag {
+	flex: none;
+	padding: 3px 8px;
+	border-radius: var(--tp-radius-pill);
+	font-size: 11px;
+	font-weight: 700;
+	letter-spacing: 0.6px;
+	color: var(--tp-white);
+}
+.b2b-tag--before {
+	background: #B8632A;
+}
+.b2b-tag--after {
+	background: #08875E;
+}
+.b2b-works__gallery {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 24px;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.b2b-works__item {
+	overflow: hidden;
+	border: 1px solid var(--tp-border);
+	border-radius: 20px;
+	background: var(--tp-white);
+	box-shadow: var(--tp-shadow-card);
+}
+.b2b-works__item img {
+	display: block;
+	width: 100%;
+	aspect-ratio: 397 / 250;
+	object-fit: cover;
+}
+.b2b-works__item p {
+	margin: 0;
+	padding: 14px 18px 16px;
+	font-size: 14px;
+	line-height: 1.4;
+	font-weight: 500;
+	color: var(--tp-ink);
+}
+
+/* ---- Formule: "Per chi e'" della pagina Diventa cleaner con badge a pillola e bottoni del ridisegno ---- */
+.b2b .dc-who {
+	padding: 88px 80px;
+	background: #F6FBF9;
+}
+.b2b .dc-who__badge {
+	min-width: 0;
+	height: auto;
+	padding: 6px 12px;
+	border-radius: var(--tp-radius-pill);
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.4px;
+}
+.b2b .dc-who__cta {
+	border-radius: 12px;
+}
+
+/* ---- Perche' noi (value-props.php) ---- */
+.b2b-why {
+	padding: 88px 80px;
+	background: #F7F8FA;
+}
+.b2b-why__inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 44px;
+	max-width: 1280px;
+	margin: 0 auto;
+}
+.b2b-why__grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 20px;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.b2b-why__card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 28px;
+	border: 1px solid var(--tp-border);
+	border-radius: 18px;
+	background: var(--tp-white);
+}
+.b2b-why__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 48px;
+	height: 48px;
+	border-radius: 14px;
+	background: var(--tp-mint);
+	color: #08875E;
+}
+.b2b-why__glyph {
+	width: 22px;
+	height: 22px;
+}
+.b2b-why__title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--tp-ink);
+}
+.b2b-why__text {
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.5;
+	color: #4B5563;
+}
+
+/* ---- Recensioni: iniziali al posto delle foto (reviews-marquee.php, avatar_mode initials) ---- */
+.review-card__initials {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: var(--tp-mint);
+	font-size: 14px;
+	font-weight: 600;
+	color: #067A55;
+}
+
+/* Reveal a cascata di vantaggi e galleria (reveal.js mette .is-in sulla sezione). Ombra e bordo degli hover stanno
+   nella stessa dichiarazione di transizione: una seconda regola con la stessa specificita' la sostituirebbe e
+   l'ingresso scatterebbe di colpo (trappola documentata in docs/landing-cleaner.md). */
+.b2b-why__card,
+.b2b-works__item {
+	opacity: 0;
+	transform: translateY(16px);
+	transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+	transition-delay: calc(var(--i, 0) * 70ms), calc(var(--i, 0) * 70ms), 0s, 0s;
+}
+.b2b-why.is-in .b2b-why__card,
+.b2b-works.is-in .b2b-works__item {
+	opacity: 1;
+	transform: none;
+}
+@media (hover: hover) {
+	.b2b-why__card:hover,
+	.b2b-works__item:hover {
+		border-color: #B3FFE0;
+		box-shadow: 0 12px 28px -8px rgba(15, 23, 42, 0.14);
+	}
+}
+
+@media (max-width: 1023px) {
+	.b2b .sg-trust__bar {
+		grid-template-columns: auto;
+		justify-content: start;
+		padding-left: 4px;
+	}
+	.b2b .sg-trust__bar li {
+		padding: 0;
+		white-space: normal;
+	}
+	.b2b .sg-hero__img {
+		object-position: 50% 40%;
+	}
+	.lead-form--b2b .lead-form__row {
+		flex-direction: column;
+	}
+	.sg-when__photo {
+		order: 1;
+	}
+	.b2b-works,
+	.b2b-why,
+	.b2b .dc-who {
+		padding: 50px 20px;
+	}
+	.b2b-works__inner,
+	.b2b-why__inner {
+		gap: 28px;
+	}
+	.b2b-works__compare {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+	/* Le regole mobile dello Sgrosso danno order: 1 a ogni .sg-compare-media (dentro i tab la foto va prima dei
+	   chip): qui il confronto deve restare prima della card di testo. */
+	.b2b-works__media {
+		order: 0;
+	}
+	.b2b-works__card {
+		padding: 22px;
+		border-radius: 18px;
+	}
+	.b2b-works__title {
+		font-size: 20px;
+	}
+	.b2b-works__gallery {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+	.b2b-why__grid {
+		grid-template-columns: 1fr;
+		gap: 12px;
+	}
+	.b2b-why__card {
+		padding: 20px;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.zones-map__caps path { transition: none; }
 	/* Diventa cleaner: niente ingressi (lo script non aggiunge .dc--motion), niente ondeggiamento, inclinazione,
@@ -7396,6 +7786,12 @@ main.dc--motion .dc-rv.is-in {
 	.verified__arrow {
 		opacity: 1;
 		transform: none !important;
+		transition: none !important;
+	}
+	.b2b-why__card,
+	.b2b-works__item {
+		opacity: 1;
+		transform: none;
 		transition: none !important;
 	}
 }

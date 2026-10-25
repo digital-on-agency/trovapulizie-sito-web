@@ -37,6 +37,10 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-cleaner-landing.php' ) ) {
 		return 'Diventa cleaner Trovapulizie — Lavora con clienti verificati a Roma';
 	}
+	// Landing B2B (TICKET-58): stesso title del live React.
+	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {
+		return 'Pulizie commerciali Roma — Uffici, negozi e locali | Trovapulizie';
+	}
 	return '';
 }
 
@@ -55,6 +59,9 @@ function tp_seo_description() {
 	if ( is_singular() && is_page_template( 'page-cleaner-landing.php' ) ) {
 		return 'Lavora come cleaner a Roma con Trovapulizie: clienti verificati, pagamenti puntuali via app, zero commissioni nascoste. Iscriviti gratis in 5 minuti.';
 	}
+	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {
+		return 'Pulizie commerciali a Roma per uffici, negozi e locali: preventivo su misura, fattura, personale verificato. Sopralluogo gratuito, risposta in 1 ora.';
+	}
 	return get_bloginfo( 'description' );
 }
 
@@ -71,14 +78,16 @@ add_action( 'wp_head', function () {
 }, 2 );
 
 add_action( 'wp_head', function () {
-	$d = tp_seo_sgrosso_defaults();
-	if ( ! $d ) {
+	$d   = tp_seo_sgrosso_defaults();
+	// Landing B2B (TICKET-58): stesso Service, senza offerta: il live non pubblica prezzi per le aziende.
+	$b2b = is_singular() && is_page_template( 'page-landing-b2b.php' );
+	if ( ! $d && ! $b2b ) {
 		return;
 	}
 	$dati = array(
 		'@context'    => 'https://schema.org',
 		'@type'       => 'Service',
-		'serviceType' => 'Pulizia straordinaria (sgrosso)',
+		'serviceType' => $b2b ? 'Pulizie commerciali per uffici, negozi e locali' : 'Pulizia straordinaria (sgrosso)',
 		'description' => wp_strip_all_tags( tp_seo_description() ),
 		'url'         => get_permalink(),
 		'areaServed'  => array(
@@ -107,5 +116,8 @@ add_action( 'wp_head', function () {
 			),
 		),
 	);
+	if ( $b2b ) {
+		unset( $dati['offers'] );
+	}
 	echo '<script type="application/ld+json">' . wp_json_encode( $dati, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
 }, 5 );

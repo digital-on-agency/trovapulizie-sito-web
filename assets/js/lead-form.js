@@ -7,6 +7,9 @@
  *   passo 2  POST  {api}/api/leads/:contattoId/opportunita  token             -> {opportunitaId, token}
  *   passo 3  PATCH {api}/api/leads/:opportunitaId           token, step:3, final:true, foto
  * Form atomico [data-lead-atomic] (calcolatore): POST {api}/api/leads con email, zona e note gia' nei campi.
+ * Form B2B a un passo [data-lead-b2b] (landing Pulizie commerciali, SPEC-landing-sgrosso-commerciale §2): POST
+ * {api}/api/leads con tipo b2b, telefono fisso o cellulare, zona, note = tipo di attivita', superficieMq facoltativa;
+ * al 201 la card mostra la conferma al posto dei campi (nessuna thank-you) ed emette marketing_form_submit.
  * Eventi dataLayer via tpTrack (tp-track.js): preventivo_sgrosso_step {step, step_name, landing, cta_position,
  * tipoPulizia}, preventivo_sgrosso_submitted, marketing_form_submit {landing, form}. Poi sessionStorage
  * tp_thankyou e navigazione a /thank-you/.
@@ -72,6 +75,16 @@
 		var d = digits(local);
 		if (prefix === '+39') {
 			if (!/^3\d{8,9}$/.test(d)) return false; // solo mobile: il canale e' WhatsApp
+			return !(isRepeated(d) || isSequential(d) || KNOWN_FAKE[d]);
+		}
+		return d.length >= 6 && d.length <= 15;
+	}
+	// Landing B2B: il recapito di un'attivita' e' spesso un fisso. Per +39 valgono fisso (0...) e cellulare (3...),
+	// da 6 a 11 cifre, con gli stessi filtri anti-numeri finti; il backend non valida il formato.
+	function phoneOkAny(prefix, local) {
+		var d = digits(local);
+		if (prefix === '+39') {
+			if (!/^[03]\d{5,10}$/.test(d)) return false;
 			return !(isRepeated(d) || isSequential(d) || KNOWN_FAKE[d]);
 		}
 		return d.length >= 6 && d.length <= 15;
@@ -407,6 +420,68 @@
 		});
 	}
 
+	/* ---- Form B2B a un passo (landing Pulizie commerciali) ------------------------------------- */
+	function initB2B(form) {
+		var landing = form.getAttribute('data-landing') || '';
+		var ctaPosition = form.getAttribute('data-cta-position') || 'hero';
+		var formName = form.getAttribute('data-form') || 'b2b';
+		var other = form.querySelector('[data-other-field]');
+		var otherInput = other ? other.querySelector('input') : null;
+
+		function selected() { return form.querySelector('input[name="tipoAttivita"]:checked'); }
+		function isOther() { var s = selected(); return !!(s && s.getAttribute('data-other') === '1'); }
+		function syncOther(focus) {
+			if (!other) return;
+			var on = isOther();
+			other.hidden = !on;
+			if (!on) setError(form, 'tipoAttivitaAltro', '');
+			else if (focus && otherInput) otherInput.focus();
+		}
+		form.querySelectorAll('input[name="tipoAttivita"]').forEach(function (r) {
+			r.addEventListener('change', function () { syncOther(true); });
+		});
+		syncOther(false);
+
+		function done() {
+			form.classList.add('is-done');
+			form.querySelectorAll('.lead-form__step, .lead-form__actions, .lead-form__note').forEach(function (el) { el.hidden = true; });
+			var box = form.querySelector('[data-done]');
+			if (box) { box.hidden = false; box.focus(); }
+		}
+
+		form.addEventListener('submit', function (e) {
+			e.preventDefault();
+			if (form.classList.contains('is-busy')) return;
+			clearErrors(form);
+			var ok = true;
+			var tipo = checked(form, 'tipoAttivita');
+			if (form.querySelector('input[name="tipoAttivita"]') && !tipo) { setError(form, 'tipoAttivita', 'Scegli il tipo di attività'); ok = false; }
+			else if (isOther()) {
+				tipo = val(form, 'tipoAttivitaAltro');
+				if (!tipo) { setError(form, 'tipoAttivitaAltro', 'Scrivi che attività è'); ok = false; }
+			}
+			var mq = val(form, 'superficieMq');
+			if (mq && !/^\d{1,6}$/.test(mq)) { setError(form, 'superficieMq', 'Solo numeri'); ok = false; }
+			if (!val(form, 'zona')) { setError(form, 'zona', 'Indica zona o CAP'); ok = false; }
+			var prefix = val(form, 'prefisso') || '+39';
+			if (!val(form, 'telefono')) { setError(form, 'telefono', 'Telefono obbligatorio'); ok = false; }
+			else if (!phoneOkAny(prefix, val(form, 'telefono'))) { setError(form, 'telefono', 'Numero non valido'); ok = false; }
+			if (!isChecked(form, 'consentPrivacy')) { setError(form, 'consentPrivacy', 'Devi accettare la Privacy Policy per continuare'); ok = false; }
+			if (!ok) { focusFirstInvalid(form); return; }
+			var body = Object.assign({
+				tipo: 'b2b', telefono: prefix + digits(val(form, 'telefono')), zona: val(form, 'zona'), note: tipo,
+				consentPrivacy: true, consentMarketing: isChecked(form, 'consentMarketing'), honeypot: val(form, 'website'), pageUrl: pageUrl(), gclid: gclid()
+			}, utm());
+			if (mq) body.superficieMq = mq;
+			busy(form, true);
+			call(form, 'POST', '/api/leads', body).then(function () {
+				track('marketing_form_submit', { landing: landing, form: formName, cta_position: ctaPosition });
+				done();
+			}).catch(function (err) { showApiError(form, err.shown || MSG_GENERIC, err.status !== 400 && err.status !== 413); }).finally(function () { busy(form, false); });
+		});
+	}
+
 	document.querySelectorAll('[data-lead-form]').forEach(initMultiStep);
 	document.querySelectorAll('[data-lead-atomic]').forEach(initAtomic);
+	document.querySelectorAll('[data-lead-b2b]').forEach(initB2B);
 })();

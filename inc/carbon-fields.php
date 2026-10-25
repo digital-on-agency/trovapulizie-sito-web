@@ -576,6 +576,135 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'text', 'dc_cta_note', __( 'Nota sotto il bottone' ) )->set_help_text( $dc_vuoto ),
 		) );
 
+	// Landing B2B — pagina col template page-landing-b2b.php (SPEC-landing-sgrosso-commerciale, TICKET-58..61).
+	// Ogni testo ha il default nel template (ridisegno 25/10 + testi del live): un campo compilato vince.
+	$b2b_vuoto = __( 'Vuoto = testo di default del template.' );
+	Container::make( 'post_meta', __( 'Landing B2B — Sezioni' ) )
+		->where( 'post_template', '=', 'page-landing-b2b.php' )
+		->add_tab( __( 'Testata' ), array(
+			Field::make( 'text', 'b2b_promo_desktop', __( 'Promo bar, testo desktop' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'text', 'b2b_promo_mobile', __( 'Promo bar, testo mobile' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'text', 'b2b_nav_phone', __( 'Telefono in testata' ) )->set_help_text( __( 'Vuoto = 06 9151 6075. Vale anche per Chiama nella barra fissa e nella conferma del form.' ) ),
+			Field::make( 'text', 'b2b_nav_cta', __( 'Testo della CTA in testata' ) )->set_help_text( __( 'Vuoto = "Preventivo gratuito". Porta sempre al form.' ) ),
+		) )
+		->add_tab( __( 'Hero' ), array(
+			Field::make( 'text', 'b2b_hero_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'textarea', 'b2b_hero_title', __( 'Titolo (H1)' ) )->set_rows( 2 )->set_help_text( __( 'Un invio a capo = una riga. Vuoto = "Pulizie per uffici, negozi e locali. / Anche quando sei chiuso."' ) ),
+			Field::make( 'textarea', 'b2b_hero_subtitle', __( 'Sottotitolo' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'textarea', 'b2b_hero_bullets', __( 'Punti di valore (uno per riga)' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'text', 'b2b_hero_social', __( 'Riga sotto le stelle' ) )->set_help_text( __( 'Vuoto = "Uffici, retail e locali serviti a Roma".' ) ),
+			Field::make( 'image', 'b2b_hero_image', __( 'Foto di sfondo' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuota = lavasciuga su pavimento post-cantiere (assets/img/b2b/hero-pavimento.webp, con rendition mobile).' ) ),
+		) )
+		->add_tab( __( 'Form' ), array(
+			Field::make( 'text', 'b2b_form_title', __( 'Titolo della card' ) )->set_help_text( __( 'Vuoto = "Richiedi il preventivo gratuito".' ) ),
+			Field::make( 'text', 'b2b_form_subtitle', __( 'Testo sotto il titolo' ) )->set_help_text( __( 'Vuoto = "Sopralluogo gratuito in sede. Ti richiamiamo entro 1 ora."' ) ),
+			Field::make( 'textarea', 'b2b_form_activities', __( 'Tipi di attivita\' (uno per riga)' ) )->set_help_text( __( 'Vuoto = Ufficio / Negozio / Supermercato / Palestra / Altro. La voce "Altro" apre un campo di testo. Il valore scelto finisce nel campo note del lead.' ) ),
+			Field::make( 'text', 'b2b_form_cta', __( 'Bottone' ) )->set_help_text( __( 'Vuoto = "Richiedi il preventivo gratuito".' ) ),
+			Field::make( 'text', 'b2b_form_note', __( 'Nota sotto il bottone' ) )->set_help_text( __( 'Vuoto = "★ Gratis · con fattura · risposta in 1h".' ) ),
+		) )
+		->add_tab( __( 'Trust strip' ), array(
+			Field::make( 'textarea', 'b2b_trust_items', __( 'Garanzie (una per riga)' ) )->set_help_text( __( 'Vuoto = Sopralluogo gratuito in sede / Fattura su ogni intervento / Anche di notte o nel weekend / Roma e provincia.' ) ),
+		) )
+		->add_tab( __( 'Settori' ), array(
+			Field::make( 'text', 'b2b_sectors_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = SETTORI SERVITI.' ) ),
+			Field::make( 'text', 'b2b_sectors_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Vuoto = "Puliamo ogni tipo di attività".' ) ),
+			Field::make( 'text', 'b2b_sectors_areas_title', __( 'Titolo della colonna dei chip' ) )->set_help_text( __( 'Vuoto = "Cosa puliamo".' ) ),
+			Field::make( 'textarea', 'b2b_sectors_areas_text', __( 'Testo sotto i chip' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'text', 'b2b_sectors_cta', __( 'Bottone del pannello' ) )->set_help_text( __( 'Vuoto = "Richiedi il preventivo gratuito". Porta al form.' ) ),
+			Field::make( 'complex', 'b2b_sectors', __( 'Settori (vuoto = i quattro di default con le foto del live)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'key', __( 'Chiave (senza spazi, es. uffici)' ) ),
+					Field::make( 'text', 'label', __( 'Testo del tab' ) ),
+					Field::make( 'text', 'title', __( 'Titolo del pannello' ) ),
+					Field::make( 'textarea', 'text', __( 'Testo' ) ),
+					Field::make( 'text', 'highlight', __( 'Riga in evidenza' ) ),
+					Field::make( 'image', 'image', __( 'Foto' ) )->set_value_type( 'url' ),
+					Field::make( 'text', 'image_alt', __( 'Testo alternativo della foto' ) ),
+					Field::make( 'textarea', 'chips', __( 'Cosa puliamo (una voce per riga)' ) ),
+				) ),
+		) )
+		->add_tab( __( 'Lavori' ), array(
+			Field::make( 'text', 'b2b_works_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = LAVORI A ROMA.' ) ),
+			Field::make( 'text', 'b2b_works_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Vuoto = "Fine cantiere: il prima e dopo reale".' ) ),
+			Field::make( 'textarea', 'b2b_works_subtitle', __( 'Sottotitolo' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'image', 'b2b_works_before', __( 'Confronto: foto prima' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuota = vetrate prima della pulizia (live).' ) ),
+			Field::make( 'image', 'b2b_works_after', __( 'Confronto: foto dopo' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuota = vetrate dopo la pulizia (live).' ) ),
+			Field::make( 'text', 'b2b_works_compare_title', __( 'Confronto: titolo della card' ) )->set_help_text( __( 'Vuoto = "Vetrate di un locale commerciale".' ) ),
+			Field::make( 'textarea', 'b2b_works_compare_text', __( 'Confronto: testo della card' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'text', 'b2b_works_before_caption', __( 'Didascalia PRIMA' ) )->set_help_text( __( 'Vuoto = "Vetri velati da residui di cantiere".' ) ),
+			Field::make( 'text', 'b2b_works_after_caption', __( 'Didascalia DOPO' ) )->set_help_text( __( 'Vuoto = "Vetri puliti, riflesso limpido".' ) ),
+			Field::make( 'complex', 'b2b_works_gallery', __( 'Galleria (vuoto = le tre foto del live)' ) )
+				->add_fields( array(
+					Field::make( 'image', 'image', __( 'Foto' ) )->set_value_type( 'url' ),
+					Field::make( 'text', 'caption', __( 'Didascalia' ) ),
+				) ),
+		) )
+		->add_tab( __( 'Formule' ), array(
+			Field::make( 'text', 'b2b_plans_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = COME LAVORIAMO.' ) ),
+			Field::make( 'text', 'b2b_plans_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Vuoto = "Una volta sola o tutto l\'anno".' ) ),
+			Field::make( 'textarea', 'b2b_plans_subtitle', __( 'Sottotitolo' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'complex', 'b2b_plans', __( 'Card (vuoto = una-tantum e contratto ricorrente di default)' ) )
+				->set_help_text( __( 'I bottoni portano sempre al form in fondo alla pagina.' ) )
+				->add_fields( array(
+					Field::make( 'text', 'badge', __( 'Etichetta (es. UNA-TANTUM)' ) ),
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'textarea', 'text', __( 'Testo' ) ),
+					Field::make( 'textarea', 'bullets', __( 'Punti (uno per riga)' ) ),
+					Field::make( 'text', 'cta_label', __( 'Bottone: testo' ) ),
+					Field::make( 'checkbox', 'dark', __( 'Card scura' ) ),
+				) ),
+		) )
+		->add_tab( __( 'Perché noi' ), array(
+			Field::make( 'text', 'b2b_why_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = PERCHÉ NOI.' ) ),
+			Field::make( 'text', 'b2b_why_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Vuoto = "Un fornitore serio per la tua attività".' ) ),
+			Field::make( 'complex', 'b2b_why_items', __( 'Card (vuoto = le quattro di default)' ) )
+				->add_fields( array(
+					Field::make( 'select', 'icon', __( 'Icona' ) )->set_options( array( 'user-check' => 'Referente', 'clock' => 'Orologio', 'shield-check' => 'Scudo', 'spray' => 'Prodotti', 'check' => 'Spunta' ) ),
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'textarea', 'text', __( 'Testo' ) ),
+				) ),
+		) )
+		->add_tab( __( 'Come funziona' ), array(
+			Field::make( 'text', 'b2b_hiw_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = COME FUNZIONA.' ) ),
+			Field::make( 'text', 'b2b_hiw_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Vuoto = "Dal preventivo all\'intervento".' ) ),
+			Field::make( 'text', 'b2b_hiw_subtitle', __( 'Sottotitolo' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'complex', 'b2b_hiw_steps', __( 'Passi (vuoto = i tre del live)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'textarea', 'description', __( 'Descrizione' ) ),
+				) ),
+		) )
+		->add_tab( __( 'Recensioni' ), array(
+			Field::make( 'text', 'b2b_reviews_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = DICONO DI NOI.' ) ),
+			Field::make( 'text', 'b2b_reviews_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Vuoto = "Attività che si affidano a noi".' ) ),
+			Field::make( 'complex', 'b2b_reviews', __( 'Recensioni (vuoto = le tre del live, fittizie: da sostituire prima del cutover)' ) )
+				->set_help_text( __( 'Le card mostrano le iniziali del nome, non una foto.' ) )
+				->add_fields( array(
+					Field::make( 'text', 'author_name', __( 'Nome (es. Marco C.)' ) ),
+					Field::make( 'text', 'author_city', __( 'Attivita\' e zona (es. Studio, Prati)' ) ),
+					Field::make( 'textarea', 'review_text', __( 'Testo' ) ),
+				) ),
+		) )
+		->add_tab( __( 'FAQ' ), array(
+			Field::make( 'text', 'b2b_faq_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = DOMANDE FREQUENTI.' ) ),
+			Field::make( 'text', 'b2b_faq_title', __( 'Titolo' ) )->set_help_text( __( 'Vuoto = "Prima di richiedere il preventivo".' ) ),
+			Field::make( 'textarea', 'b2b_faq_subtitle', __( 'Testo sotto il titolo' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'complex', 'b2b_faq_items', __( 'Domande (vuoto = le sei del live)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'question', __( 'Domanda' ) ),
+					Field::make( 'textarea', 'answer', __( 'Risposta' ) ),
+				) ),
+			Field::make( 'text', 'b2b_faq_contact_title', __( 'Card contatto: titolo' ) )->set_help_text( __( 'Vuoto = "Rispondiamo di persona". Le foto vengono dalla card di contatto della Home.' ) ),
+			Field::make( 'textarea', 'b2b_faq_contact_text', __( 'Card contatto: testo' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'text', 'b2b_faq_contact_cta', __( 'Card contatto: bottone' ) )->set_help_text( __( 'Vuoto = "Richiedi il preventivo gratuito". Porta al form in fondo.' ) ),
+		) )
+		->add_tab( __( 'CTA finale' ), array(
+			Field::make( 'text', 'b2b_cta_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = ULTIMO PASSO.' ) ),
+			Field::make( 'text', 'b2b_cta_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Vuoto = "Un preventivo su misura per la tua attività".' ) ),
+			Field::make( 'textarea', 'b2b_cta_subtitle', __( 'Sottotitolo' ) )->set_help_text( $b2b_vuoto ),
+			Field::make( 'textarea', 'b2b_cta_bullets', __( 'Punti (uno per riga)' ) )->set_help_text( __( 'Vuoto = i quattro del ridisegno. Il form ripete titolo, testi e bottone della card della hero.' ) ),
+		) );
+
 	// Thank-you — pagina col template page-thank-you.php (TICKET-42). Riepilogo e passi sono fissi nel template:
 	// i dati della richiesta arrivano dal browser (sessionStorage), non da WordPress.
 	Container::make( 'post_meta', __( 'Thank-you — Testi' ) )

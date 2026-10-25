@@ -199,7 +199,9 @@ add_action( 'wp_enqueue_scripts', function () {
 	$moduli_home      = array( 'home-motion', 'hiw-sequence', 'hero-video', 'search-form' );
 	// Pagina Diventa cleaner (TICKET-51/54): barra fissa e calcolatore dei guadagni.
 	$moduli_cleaner   = array( 'sticky-cta', 'earnings-calculator', 'cleaner-motion' );
-	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php', 'page-cleaner-landing.php' );
+	// Landing B2B (TICKET-58/59): barra fissa doppia, tab dei settori e confronto prima/dopo, form a un passo.
+	$moduli_b2b       = array( 'sticky-cta', 'scenario-tabs', 'lead-form' );
+	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php', 'page-cleaner-landing.php', 'page-landing-b2b.php' );
 
 	$handles = array();
 	foreach ( $pagine_con_sezioni as $template ) {
@@ -220,6 +222,10 @@ add_action( 'wp_enqueue_scripts', function () {
 	if ( is_page_template( 'page-cleaner-landing.php' ) ) {
 		// Dei moduli condivisi usa solo reveal e FAQ: niente mappa, servizi, recensioni.
 		$handles = array_merge( array( 'reveal', 'faq-accordion' ), $moduli_cleaner );
+	}
+	if ( is_page_template( 'page-landing-b2b.php' ) ) {
+		// Dei moduli condivisi usa reveal e FAQ: niente mappa, servizi; le recensioni sono in griglia ferma.
+		$handles = array_merge( array( 'reveal', 'faq-accordion' ), $moduli_b2b );
 	}
 	if ( is_page_template( 'page-thank-you.php' ) ) {
 		$handles[] = 'thank-you';
