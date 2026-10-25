@@ -149,3 +149,4 @@ add_action( 'init', function () {
 	remove_action( 'wp_print_styles', 'print_emoji_styles' );
 } );
 require_once __DIR__ . "/inc/carbon-fields.php";
+require_once __DIR__ . '/inc/tracking.php';

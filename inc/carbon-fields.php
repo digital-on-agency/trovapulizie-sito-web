@@ -468,6 +468,26 @@ add_action( 'carbon_fields_register_fields', function () {
 		) );
 
 	// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)
+	// Tracking — Theme Options > Tracking (inc/tracking.php). ID pubblici (stanno nel sorgente di ogni pagina),
+	// non segreti: per questo vivono nel database e non in wp-config. Campo vuoto = snippet non emesso.
+	Container::make( 'theme_options', __( 'Tracking' ) )
+		->set_page_file( 'tp-tracking' )
+		->add_fields( array(
+			Field::make( 'html', 'tp_tracking_intro' )
+				->set_html( '<p>Un solo contenitore GTM per pagina: non aggiungere snippet altrove. Gli ID del live al 25/10/2026: GTM <code>GTM-WKN46NRS</code>, iubenda sito <code>3635239</code> e cookie policy <code>55307359</code>, Clarity <code>xtz09sh904</code>.</p>' ),
+			Field::make( 'text', 'tp_gtm_id', __( 'ID contenitore Google Tag Manager' ) )
+				->set_default_value( 'GTM-WKN46NRS' )
+				->set_help_text( __( 'Formato GTM-XXXXXXX. Vuoto = nessun GTM.' ) ),
+			Field::make( 'text', 'tp_iub_site_id', __( 'iubenda: siteId' ) )
+				->set_default_value( '3635239' ),
+			Field::make( 'text', 'tp_iub_policy_id', __( 'iubenda: cookiePolicyId' ) )
+				->set_default_value( '55307359' )
+				->set_help_text( __( 'Servono entrambi gli ID iubenda per il banner e il consent mode.' ) ),
+			Field::make( 'text', 'tp_clarity_id', __( 'ID progetto Microsoft Clarity' ) )
+				->set_default_value( 'xtz09sh904' )
+				->set_help_text( __( 'Vuoto = niente Clarity.' ) ),
+		) );
+
 	Container::make( 'theme_options', __( 'Footer' ) )
 		->set_page_file( 'tp-footer' )
 		->add_fields( array(
