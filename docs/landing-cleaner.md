@@ -44,6 +44,27 @@ Le liste "Titolo | testo" (requisiti, righe della stima) si leggono con `tp_pipe
   Posizioni: `navbar`, `hero`, `guadagni`, `per-chi`, `final`, `sticky`.
 - Title e description: quelli del live (`inc/seo.php`), sovrascrivibili dalla scheda SEO.
 
+## Movimento e hover
+
+`assets/js/cleaner-motion.js` (nessuna libreria). Niente di tutto questo con "riduci movimento"; senza JavaScript
+la pagina e' tutta visibile, perche' i blocchi si nascondono solo sotto `main.dc--motion`, classe messa dallo script.
+
+- Ingressi: trust strip, titoli di sezione, card dei passi, tile, colonna e card della stima, card "Per chi e'",
+  card dei requisiti, pill dei partner salgono in dissolvenza a cascata (80 ms fra fratelli, `--d`). A fine
+  ingresso lo script toglie `.dc-rv` (o dopo 900 ms + cascata, se `transitionend` non arriva) e da li' valgono le
+  transizioni di hover. Hero al caricamento: testo a cascata, telefono, poi le due card che ondeggiano (6 s).
+- Hover (solo `(hover: hover)`): card e tile -4px con ombra e bordo menta, e lo schermo dell'app dentro scorre di
+  28px; card "Per chi e'" -4px con badge che ruota; bottoni -2px con freccia +3px (`.dc-arrow`); bottone
+  secondario che si riempie di menta; spunte della trust strip, pill, chip e cursore del calcolatore.
+- Hero con mouse: il telefono si inclina (max 5 gradi in orizzontale, 3 in verticale) e le card si spostano in
+  parallasse, variabili `--rx --ry --px --py` sullo stage.
+- Stima: conta da zero quando la card entra in vista (800 ms), si ferma se l'utente tocca i comandi; impulso
+  della cifra a ogni cambio (`.is-bump`, da `earnings-calculator.js`).
+
+[ATTENZIONE] La regola d'ingresso e' `main.dc--motion .dc-rv`: con `.dc--motion .dc-rv` la regola delle
+transizioni di hover delle card dei passi (stessa specificita', dopo nel file) la sostituiva, l'opacita' cambiava di
+colpo e la classe non veniva mai tolta.
+
 ## Calcolatore
 
 `stima = arrotonda ai 50 euro (tariffa x ore a settimana x 4,33)`, lorda, senza percentuale di commissione.
@@ -63,6 +84,9 @@ vera: se l'app live ha un aspetto diverso, la pagina promette un'interfaccia che
 - `tools/qa-mobile.js <chrome> <url>`: riconosce `main.dc` (sezioni attese, barra fissa nascosta al caricamento,
   card flottanti solo su desktop, calcolatore attivato).
 - `tools/qa-cleaner.js <chrome> <url> [larghezza]`: formula, slider e chip, eventi delle CTA, link, partner, FAQPage.
+- `tools/qa-cleaner-motion.js <chrome> <url> [cartella]`: ingressi, conteggio, hover reali via CDP, parallasse,
+  "riduci movimento". Chromium headless dichiara `hover: none`: lo script lo avvia con le impostazioni Blink di un
+  mouse, altrimenti nessun hover scatterebbe.
 - `tools/qa-fullpage.js <chrome> <url> 1440 out.png 14000`: screenshot per il confronto col Figma.
 
 ## Limiti noti
