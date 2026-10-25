@@ -107,7 +107,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	// Solo sull'hub: la barra fissa non esiste sulla Home.
 	$moduli_hub       = array( 'sticky-cta', 'price-estimator' );
 	// Landing Sgrosso (ADR-004): barra fissa doppia; lead-form.js arriva con TICKET-40.
-	$moduli_sgrosso   = array( 'sticky-cta' );
+	$moduli_sgrosso   = array( 'sticky-cta', 'scenario-tabs' );
 	// Coreografia della sola Home (ADR-002): telefono pinnato, sequenza schermate, video hero.
 	$moduli_home      = array( 'home-motion', 'hiw-sequence', 'hero-video' );
 	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php' );

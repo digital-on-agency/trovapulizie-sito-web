@@ -368,6 +368,28 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'text', 'sg_cmp_team_title', __( 'Team: titolo' ) )->set_help_text( __( 'Vuoto = "Il team dell\'impresa scelta".' ) ),
 			Field::make( 'text', 'sg_cmp_team_sub', __( 'Team: riga sotto' ) )->set_help_text( __( 'Vuoto = "Squadra verificata e assicurata".' ) ),
 			Field::make( 'textarea', 'sg_cmp_note', __( 'Nota in fondo alla card' ) )->set_help_text( __( 'Vuoto = "Il prezzo definitivo e\' confermato dopo il sopralluogo gratuito. Nessuna sorpresa."' ) ),
+		) )
+		->add_tab( __( 'Quando serve' ), array(
+			Field::make( 'text', 'sg_when_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = QUANDO SERVE.' ) ),
+			Field::make( 'text', 'sg_when_title', __( 'Titolo (H2)' ) )->set_help_text( $sg_variant_help ),
+			Field::make( 'complex', 'sg_when_scenarios', __( 'Scenari (vuoto = i quattro del live)' ) )
+				->set_help_text( __( 'Sulla landing generica sono tab; sulle verticali esce solo lo scenario della variante. Le chiavi devono coincidere con i tipi di pulizia del form.' ) )
+				->add_fields( array(
+					Field::make( 'select', 'key', __( 'Chiave' ) )
+						->set_options( array( 'post-ristrutturazione' => 'Post-ristrutturazione', 'trasloco' => 'Trasloco', 'fine-affitto' => 'Fine affitto', 'prima-pulizia-a-fondo' => 'Prima pulizia a fondo' ) ),
+					Field::make( 'text', 'label', __( 'Etichetta della tab' ) ),
+					Field::make( 'text', 'title', __( 'Titolo del dettaglio' ) ),
+					Field::make( 'textarea', 'text', __( 'Testo' ) ),
+					Field::make( 'text', 'highlight', __( 'Riga in evidenza' ) ),
+					Field::make( 'image', 'before', __( 'Foto prima' ) )->set_value_type( 'url' ),
+					Field::make( 'image', 'after', __( 'Foto dopo' ) )->set_value_type( 'url' ),
+					Field::make( 'textarea', 'areas', __( 'Aree evidenziate (una per riga, fra quelle della lista)' ) ),
+				) ),
+			Field::make( 'textarea', 'sg_when_areas', __( 'Lista delle aree (una per riga)' ) )->set_help_text( __( 'Vuoto = Cucina / Bagni e calcare / Dietro i mobili / Vetri e infissi / Soffitti / Pavimenti.' ) ),
+			Field::make( 'text', 'sg_when_areas_title', __( 'Titolo del riquadro aree' ) )->set_help_text( __( 'Vuoto = "Tutte le aree, sempre".' ) ),
+			Field::make( 'textarea', 'sg_when_areas_text', __( 'Testo sotto le aree' ) )->set_help_text( __( 'Vuoto = "Lo sgrosso copre tutte le stanze a fondo. Cambia il focus in base alla tua situazione."' ) ),
+			Field::make( 'text', 'sg_when_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Calcola il preventivo gratis".' ) ),
+			Field::make( 'text', 'sg_when_cta_link', __( 'Bottone: link' ) )->set_help_text( __( 'Vuoto = #form.' ) ),
 		) );
 
 	// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)

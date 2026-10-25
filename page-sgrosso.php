@@ -160,6 +160,41 @@ get_header( 'landing', array(
 	) );
 	?>
 
+	<?php
+	// Quando serve (TICKET-44): quattro scenari dal live (SCENARIOS), tab solo sulla landing generica.
+	$scenarios = carbon_get_the_post_meta( 'sg_when_scenarios' );
+	if ( $scenarios ) {
+		$scenarios = array_map( function ( $s ) {
+			$s['areas'] = tp_lines( $s['areas'] ?? '' );
+			return $s;
+		}, $scenarios );
+	} else {
+		$img       = function ( $k, $s ) { return tp_theme_asset( 'assets/img/sgrosso/sgrosso-scenario-' . $k . '-' . $s . '.webp' ); };
+		$scenarios = array(
+			array( 'key' => 'post-ristrutturazione', 'label' => 'Post-ristrutturazione', 'title' => 'Post-ristrutturazione', 'text' => 'La ditta rimuove la polvere fine di cantiere e i residui di stucco, vernice e colla da pavimenti, vetri e superfici. La casa passa da cantiere a pronta da vivere.', 'highlight' => 'Pronta da arredare, senza polvere né aloni', 'before' => $img( 'post-ristrutturazione', 'prima' ), 'after' => $img( 'post-ristrutturazione', 'dopo' ), 'areas' => array( 'Vetri e infissi', 'Pavimenti' ) ),
+			array( 'key' => 'trasloco', 'label' => 'Trasloco', 'title' => 'Trasloco', 'text' => 'Sgrosso completo sulla casa vuota: interno di armadi e dispense, calcare, pavimenti. Che sia quella che lasci o quella dove entri, la trovi davvero pulita.', 'highlight' => 'Entri in una casa pulita, non "pulita da chi c\'era prima"', 'before' => $img( 'trasloco', 'prima' ), 'after' => $img( 'trasloco', 'dopo' ), 'areas' => array( 'Dietro i mobili', 'Pavimenti' ) ),
+			array( 'key' => 'fine-affitto', 'label' => 'Fine affitto', 'title' => 'Fine affitto', 'text' => "La ditta riporta l'appartamento com'era alla consegna: calcare, forno, fughe e segni d'uso. Per riconsegnare senza contestazioni o rimettere in affitto subito.", 'highlight' => 'Riconsegna serena, cauzione salva', 'before' => $img( 'fine-affitto', 'prima' ), 'after' => $img( 'fine-affitto', 'dopo' ), 'areas' => array( 'Cucina', 'Bagni e calcare' ) ),
+			array( 'key' => 'prima-pulizia-a-fondo', 'label' => 'Prima pulizia a fondo', 'title' => 'Prima pulizia a fondo', 'text' => 'Quando la pulizia normale non basta più: sporco stratificato, grasso in cucina, calcare vecchio. La ditta riparte da zero, stanza per stanza.', 'highlight' => 'Come il primo giorno, dalla prima passata', 'before' => $img( 'prima-pulizia', 'prima' ), 'after' => $img( 'prima-pulizia', 'dopo' ), 'areas' => array( 'Cucina', 'Soffitti' ) ),
+		);
+	}
+	$all_areas = tp_lines( carbon_get_the_post_meta( 'sg_when_areas' ) );
+	if ( ! $all_areas ) {
+		$all_areas = array( 'Cucina', 'Bagni e calcare', 'Dietro i mobili', 'Vetri e infissi', 'Soffitti', 'Pavimenti' );
+	}
+	get_template_part( 'template-parts/scenario-tabs', null, array(
+		'eyebrow'     => tp_sg_text( 'sg_when_eyebrow', $defaults, null, 'QUANDO SERVE' ),
+		'title'       => tp_sg_text( 'sg_when_title', $defaults, 'quando_serve_h2' ),
+		'scenarios'   => $scenarios,
+		'all_areas'   => $all_areas,
+		'areas_title' => tp_sg_text( 'sg_when_areas_title', $defaults, null, 'Tutte le aree, sempre' ),
+		'areas_text'  => tp_sg_text( 'sg_when_areas_text', $defaults, null, 'Lo sgrosso copre tutte le stanze a fondo. Cambia il focus in base alla tua situazione.' ),
+		'cta_label'   => tp_sg_text( 'sg_when_cta_label', $defaults, null, 'Calcola il preventivo gratis' ),
+		'cta_link'    => tp_sg_text( 'sg_when_cta_link', $defaults, null, '#form' ),
+		'default'     => $defaults['scenario'],
+		'show_tabs'   => 'sgrosso-casa' === $variant,
+	) );
+	?>
+
 	<?php get_template_part( 'template-parts/sticky-cta', null, array(
 		'variant'     => 'dual',
 		'label'       => 'Prenota sopralluogo', // Figma 4364:7540: accanto a Chiama la CTA lunga non entra a 390

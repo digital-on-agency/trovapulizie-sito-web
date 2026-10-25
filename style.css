@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.42.3
+Version: 0.43.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -4769,6 +4769,288 @@ a {
 	color: var(--tp-primary);
 }
 
+/* ---- Quando serve: tab per scenario e confronto prima/dopo (Figma 4364:6769 / 4364:7223) ------- */
+.sg-when {
+	padding: 78px 80px;
+	background: #F7F8FA;
+}
+.sg-when__inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 44px;
+	max-width: 1280px;
+	margin: 0 auto;
+}
+.sg-when__head {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 12px;
+	text-align: center;
+}
+.sg-when__head h2 {
+	margin: 0;
+	font-size: 34px;
+	line-height: 1.2;
+	letter-spacing: -0.68px;
+	font-weight: 800;
+	color: var(--tp-ink);
+}
+.sg-when__tabs {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 10px;
+	margin-top: -8px;
+}
+.sg-when__tab {
+	padding: 10px 16px;
+	border: 1px solid var(--tp-border-card);
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-white);
+	font: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--tp-text-body);
+	white-space: nowrap;
+	cursor: pointer;
+	transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.sg-when__tab:hover {
+	border-color: var(--tp-primary);
+	color: var(--tp-ink);
+}
+.sg-when__tab[aria-selected='true'] {
+	border-color: var(--tp-primary);
+	background: var(--tp-primary);
+	color: var(--tp-white);
+}
+.sg-when__tab:focus-visible {
+	outline: 2px solid var(--tp-primary-ink);
+	outline-offset: 2px;
+}
+.sg-when__panel {
+	display: grid;
+	grid-template-columns: 280px minmax(0, 1fr) 320px;
+	gap: 32px;
+	width: 100%;
+	padding: 36px;
+	background: var(--tp-white);
+	border: 1px solid var(--tp-border);
+	border-radius: 22px;
+}
+.sg-when__panel[hidden] {
+	display: none;
+}
+.sg-when__panel:focus-visible {
+	outline: 2px solid var(--tp-primary-ink);
+	outline-offset: 4px;
+}
+.sg-when__areas {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+.sg-when__areas-title {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--tp-ink);
+}
+.sg-when__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.sg-area {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 8px 12px;
+	border: 1px solid var(--tp-border-card);
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-white);
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--tp-text-body);
+}
+.sg-area::before {
+	content: '';
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--tp-field-border);
+}
+.sg-area.is-on {
+	border-color: var(--tp-primary);
+	background: var(--tp-mint);
+	color: var(--tp-primary-700);
+}
+.sg-area.is-on::before {
+	background: var(--tp-primary);
+}
+.sg-when__areas-text {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--tp-text-body);
+}
+/* Confronto prima/dopo: --pos e' la posizione della maniglia (0-100%), scritta dal JS leggendo l'input range */
+.sg-compare-media {
+	--pos: 50%;
+	position: relative;
+	aspect-ratio: 536 / 392;
+	width: 100%;
+	overflow: hidden;
+	border-radius: var(--tp-radius-xl);
+	background: var(--tp-bg-soft);
+	user-select: none;
+	-webkit-user-select: none;
+}
+.sg-compare-media img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	pointer-events: none;
+}
+.sg-compare-media__before {
+	clip-path: inset(0 calc(100% - var(--pos)) 0 0);
+}
+.sg-compare-media__divider {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: var(--pos);
+	width: 3px;
+	transform: translateX(-50%);
+	background: var(--tp-white);
+	pointer-events: none;
+	transition: box-shadow 0.15s;
+}
+.sg-compare-media.is-dragging .sg-compare-media__divider {
+	box-shadow: 0 0 12px 3px rgba(255, 255, 255, 0.9);
+}
+.sg-compare-media__handle {
+	position: absolute;
+	top: 50%;
+	left: var(--pos);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	transform: translate(-50%, -50%);
+	border-radius: 50%;
+	background: var(--tp-white);
+	box-shadow: 0 4px 12px rgba(15, 23, 41, 0.18);
+	font-size: 16px;
+	font-weight: 600;
+	letter-spacing: 1px;
+	color: var(--tp-text-heading);
+	pointer-events: none;
+	transition: transform 0.15s;
+}
+.sg-compare-media:hover .sg-compare-media__handle,
+.sg-compare-media.is-dragging .sg-compare-media__handle {
+	transform: translate(-50%, -50%) scale(1.1);
+}
+.sg-compare-media__label {
+	position: absolute;
+	bottom: 12px;
+	padding: 4px 10px;
+	border-radius: var(--tp-radius-pill);
+	background: rgba(0, 0, 0, 0.55);
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--tp-white);
+	pointer-events: none;
+}
+.sg-compare-media__label--before {
+	left: 12px;
+}
+.sg-compare-media__label--after {
+	right: 12px;
+}
+/* L'input range copre tutta l'immagine: invisibile, ma e' lui a ricevere mouse, dito e tastiera */
+.sg-compare-media__range {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	opacity: 0;
+	cursor: ew-resize;
+	-webkit-appearance: none;
+	appearance: none;
+	background: transparent;
+	touch-action: pan-y;
+}
+.sg-compare-media__range::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	width: 44px;
+	height: 100%;
+}
+.sg-compare-media__range::-moz-range-thumb {
+	width: 44px;
+	height: 100%;
+	border: 0;
+}
+.sg-compare-media:has(.sg-compare-media__range:focus-visible) {
+	outline: 2px solid var(--tp-primary-ink);
+	outline-offset: 3px;
+}
+.sg-when__detail {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 16px;
+}
+.sg-when__detail-title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 700;
+	color: var(--tp-ink);
+}
+.sg-when__detail-text {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.5;
+	color: #4B5563;
+}
+.sg-when__highlight {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 0;
+	padding: 12px 14px;
+	border-radius: var(--tp-radius-lg);
+	background: var(--tp-mint);
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.4;
+	color: var(--tp-primary-700);
+}
+.sg-when__highlight-check {
+	flex: none;
+	width: 13px;
+	height: 13px;
+	margin-top: 3px;
+	color: var(--tp-primary-600);
+}
+.sg-when__cta {
+	min-height: 44px;
+	padding: 0 20px;
+	border-radius: var(--tp-radius-pill);
+	font-size: 14px;
+	font-weight: 600;
+}
+
 /* ---- Barra fissa doppia (Chiama + CTA), Figma 4364:7535 ---------------------------------- */
 .sticky-cta--dual {
 	gap: 10px;
@@ -4954,6 +5236,47 @@ a {
 	.sg-compare__card {
 		padding: 20px;
 		border-radius: 18px;
+	}
+
+	/* Quando serve: immagine, aree, dettaglio in colonna (Figma 4364:7223) */
+	.sg-when {
+		padding: 50px 20px;
+	}
+	.sg-when__inner {
+		gap: 24px;
+	}
+	.sg-when__head h2 {
+		font-size: 26px;
+		letter-spacing: -0.52px;
+	}
+	.sg-when__tabs {
+		margin-top: 0;
+		gap: 8px;
+	}
+	.sg-when__tab {
+		padding: 9px 14px;
+		font-size: 13px;
+	}
+	.sg-when__panel {
+		grid-template-columns: 1fr;
+		gap: 20px;
+		padding: 20px;
+		border-radius: 18px;
+	}
+	.sg-when__areas {
+		order: 2;
+	}
+	.sg-compare-media {
+		order: 1;
+	}
+	.sg-when__detail {
+		order: 3;
+	}
+	.sg-when__cta {
+		width: 100%;
+		justify-content: center;
+		min-height: 52px;
+		border-radius: var(--tp-radius-lg);
 	}
 }
 
