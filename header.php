@@ -13,12 +13,20 @@
 <?php get_template_part( 'template-parts/head' ); ?>
 
 <?php
-$tp_nav_links = array(
+// Args (get_header( '', $args )): links = voci della barra (default: le ancore della Home), cta_label e
+// cta_href = bottone primario. La pagina Diventa cleaner (TICKET-51) passa le proprie ancore e il signup cleaner.
+$args = wp_parse_args( $args ?? array(), array(
+	'links'     => array(),
+	'cta_label' => 'Registrati',
+	'cta_href'  => '',
+) );
+$tp_nav_links = $args['links'] ?: array(
 	'#come-funziona'   => 'Come funziona',
 	'#servizi'         => 'Servizi',
 	'#prezzi'          => 'Prezzi',
 	'#diventa-cleaner' => 'Diventa cleaner',
 );
+$tp_nav_cta_href = $args['cta_href'] ?: tp_app_url();
 ?>
 <header class="navbar">
 	<a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="navbar__logo">
@@ -33,7 +41,7 @@ $tp_nav_links = array(
 		<?php // Puntano all'app, non piu' ad ancore inesistenti: erano le uniche due azioni sopra la
 		// piega e non facevano niente. La barra di ricerca della hero resta un segnaposto (ADR-001). ?>
 		<a href="<?php echo esc_url( tp_app_url( 'login' ) ); ?>" class="tp-btn tp-btn--secondary">Accedi</a>
-		<a href="<?php echo esc_url( tp_app_url() ); ?>" class="tp-btn tp-btn--primary">Registrati</a>
+		<a href="<?php echo esc_url( $tp_nav_cta_href ); ?>" class="tp-btn tp-btn--primary" data-cta-position="navbar"><?php echo esc_html( $args['cta_label'] ); ?></a>
 	</div>
 	<button type="button" class="navbar__burger" id="nav-burger" aria-expanded="false" aria-controls="nav-panel" aria-label="Apri il menu">
 		<span aria-hidden="true"></span>

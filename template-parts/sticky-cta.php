@@ -13,6 +13,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'variant'     => 'single',
 	'phone_href'  => '',
 	'phone_label' => 'Chiama',
+	'cta_position' => '', // opzionale: data-cta-position sul bottone (tracking, pagina Diventa cleaner)
 ) );
 if ( ! $args['label'] ) {
 	return;
@@ -26,7 +27,7 @@ $dual = 'dual' === $args['variant'] && $args['phone_href'];
 			<span><?php echo esc_html( $args['phone_label'] ); ?></span>
 		</a>
 	<?php endif; ?>
-	<a class="sticky-cta__btn tp-btn tp-btn--primary tp-btn--lg" href="<?php echo esc_url( $args['target'] ); ?>">
+	<a class="sticky-cta__btn tp-btn tp-btn--primary tp-btn--lg" href="<?php echo esc_url( $args['target'] ); ?>"<?php if ( $args['cta_position'] ) : ?> data-cta-position="<?php echo esc_attr( $args['cta_position'] ); ?>"<?php endif; ?>>
 		<?php echo esc_html( $args['label'] ); ?>
 	</a>
 </div>

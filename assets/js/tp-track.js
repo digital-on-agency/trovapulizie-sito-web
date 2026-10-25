@@ -75,8 +75,14 @@
 		var landing = window.tpLanding();
 		if (!landing) return;
 		var href = a.getAttribute('href') || '';
-		if (href.indexOf('tel:') === 0) window.tpTrack('marketing_click_to_call', { landing: landing });
-		else if (href.indexOf('wa.me') !== -1 || href.indexOf('whatsapp') !== -1) window.tpTrack('marketing_click_whatsapp', { landing: landing });
+		// data-cta-position (pagina Diventa cleaner, TICKET-51): posizione della CTA negli eventi. Le landing
+		// Sgrosso non lo usano, i loro eventi restano identici.
+		var pos = a.getAttribute('data-cta-position');
+		var extra = pos ? { cta_position: pos } : {};
+		function p(base) { for (var k in extra) base[k] = extra[k]; return base; }
+		if (href.indexOf('tel:') === 0) window.tpTrack('marketing_click_to_call', p({ landing: landing }));
+		else if (href.indexOf('wa.me') !== -1 || href.indexOf('whatsapp') !== -1) window.tpTrack('marketing_click_whatsapp', p({ landing: landing }));
 		else if (/#form(-bottom)?$/.test(href)) window.tpTrack('marketing_click_to_form', { landing: landing, target: href.slice(href.indexOf('#')) });
+		else if (pos) window.tpTrack('marketing_cta_click', { landing: landing, cta_position: pos, target: href });
 	}, true);
 })();

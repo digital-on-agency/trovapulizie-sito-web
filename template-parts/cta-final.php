@@ -12,6 +12,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'button_link' => '',
 	'note'        => '',
 	'image'       => '',
+	'cta_position' => '', // opzionale: data-cta-position sul bottone (tracking, pagina Diventa cleaner)
 ) );
 if ( ! $args['title'] && ! $args['button_text'] ) {
 	return;
@@ -25,7 +26,7 @@ $image = $args['image'] ?: tp_theme_asset( 'assets/img/mascotte-mocio.png' );
 			<?php if ( $args['title'] ) : ?><h2 class="cta-final__title"><?php echo esc_html( $args['title'] ); ?></h2><?php endif; ?>
 			<?php if ( $args['subtitle'] ) : ?><p class="cta-final__subtitle"><?php echo esc_html( $args['subtitle'] ); ?></p><?php endif; ?>
 			<?php if ( $args['button_text'] && $args['button_link'] ) : ?>
-				<a class="cta-final__button" href="<?php echo esc_url( $args['button_link'] ); ?>"><span><?php echo esc_html( $args['button_text'] ); ?></span><span class="cta-final__arrow" aria-hidden="true">&rarr;</span></a>
+				<a class="cta-final__button" href="<?php echo esc_url( $args['button_link'] ); ?>"<?php if ( $args['cta_position'] ) : ?> data-cta-position="<?php echo esc_attr( $args['cta_position'] ); ?>"<?php endif; ?>><span><?php echo esc_html( $args['button_text'] ); ?></span><span class="cta-final__arrow" aria-hidden="true">&rarr;</span></a>
 			<?php endif; ?>
 			<?php if ( $args['note'] ) : ?><p class="cta-final__note"><?php echo esc_html( $args['note'] ); ?></p><?php endif; ?>
 		</div>
