@@ -90,6 +90,8 @@ const PROBE = `(() => {
 	};
 	// Landing (page-sgrosso.php, page-thank-you.php): testata senza menu, barra fissa doppia, form card nel viewport.
 	const landingMain = document.querySelector('main.sgrosso, main.ty');
+	// Landing B2B (SPEC-landing-sgrosso-commerciale): main.sgrosso.b2b, sezioni proprie.
+	const b2b = !!(landingMain && landingMain.classList.contains('b2b'));
 	const vis = el => !!el && getComputedStyle(el).display !== 'none';
 	const landingNav = document.querySelector('.landing-nav') ? {
 		linksVisibili: vis(document.querySelector('.landing-nav__links')),
@@ -120,9 +122,11 @@ const PROBE = `(() => {
 		landingNav: landingNav,
 		forms: forms,
 		corti: corti,
-		sezioniLanding: (landingMain && landingMain.classList.contains('sgrosso')
+		sezioniLanding: (b2b
+			? ['.sg-hero', '.sg-trust', '.sg-when', '.b2b-works', '.dc-who', '.b2b-why', '.sg-steps', '.reviews', '.faq', '.sg-final', '[data-lead-b2b]#lead-hero', '[data-lead-b2b]#lead-bottom']
+			: (landingMain && landingMain.classList.contains('sgrosso')
 			? ['.sg-hero', '.sg-trust', '.sg-compare', '.sg-when', '.sg-steps', '.sg-calc', '.reviews', '.sg-coupon', '.faq', '.sg-final']
-			: (landingMain ? ['.ty__grid'] : [])).filter(sel => !document.querySelector(sel)),
+			: (landingMain ? ['.ty__grid'] : []))).filter(sel => !document.querySelector(sel)),
 		stickyCta: (() => {
 			const b = document.querySelector('[data-sticky-cta]');
 			return b ? { c: true, hidden: b.hidden } : { c: false };

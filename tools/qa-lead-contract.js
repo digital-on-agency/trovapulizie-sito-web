@@ -10,7 +10,8 @@ const args = process.argv.slice(2);
 const API = (args.find(a => a.startsWith('http')) || 'https://staging.api.trovapulizie.com').replace(/\/+$/, '');
 const realIdx = args.indexOf('--real');
 const REAL_EMAIL = realIdx !== -1 ? args[realIdx + 1] : '';
-const PAGE = 'https://staging.trovapulizie.it/roma/sgrosso-casa/';
+const PAGE = 'https://www.trovapulizie.it/roma/sgrosso-casa/';
+const PAGE_B2B = 'https://www.trovapulizie.it/roma/sgrosso-commerciale/';
 
 async function call(method, path, body) {
 	const res = await fetch(API + path, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
@@ -38,6 +39,10 @@ function check(name, ok, detail) { checks.push([name, ok, detail]); console.log(
 
 	r = await call('POST', '/api/leads', { tipo: 'b2c', email: 'qa@example.com', zona: 'Non specificata (calcolatore)', note: 'Calcolatore: 100mq · Post-ristrutturazione · extra: nessuno · stima 420-570€', consentPrivacy: true, consentMarketing: false, honeypot: 'bot', pageUrl: PAGE });
 	check('calcolatore atomico con honeypot -> 201 skipped', r.status === 201 && r.json.skipped === 'honeypot', r.status + ' ' + JSON.stringify(r.json));
+
+	// Landing B2B (SPEC-landing-sgrosso-commerciale §2): una sola POST tipo b2b, note = tipo di attivita'.
+	r = await call('POST', '/api/leads', { tipo: 'b2b', telefono: '+390691516075', zona: 'Prati', note: 'Palestra', superficieMq: '200', consentPrivacy: true, consentMarketing: false, honeypot: 'bot', pageUrl: PAGE_B2B });
+	check('b2b con honeypot -> 201 skipped senza record', r.status === 201 && r.json.ok === true && r.json.skipped === 'honeypot', r.status + ' ' + JSON.stringify(r.json));
 
 	if (REAL_EMAIL) {
 		console.log('--- giro reale (crea record su Airtable, da archiviare)');
