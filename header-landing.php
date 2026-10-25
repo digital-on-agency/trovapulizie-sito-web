@@ -17,6 +17,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'phone_label'   => '',
 	'phone_href'    => '',
 	'cta_label'     => '',
+	'cta_short'     => '', // testo sotto --tp-bp-desktop: accanto al logo la CTA lunga non entra (Figma 4364:7095)
 	'cta_href'      => '#form',
 ) );
 ?>
@@ -50,7 +51,10 @@ $args = wp_parse_args( $args ?? array(), array(
 			</a>
 		<?php endif; ?>
 		<?php if ( $args['cta_label'] ) : ?>
-			<a class="tp-btn tp-btn--primary landing-nav__cta" href="<?php echo esc_url( $args['cta_href'] ); ?>"><?php echo esc_html( $args['cta_label'] ); ?></a>
+			<a class="tp-btn tp-btn--primary landing-nav__cta" href="<?php echo esc_url( $args['cta_href'] ); ?>">
+				<span class="landing-nav__cta-full"><?php echo esc_html( $args['cta_label'] ); ?></span>
+				<?php if ( $args['cta_short'] ) : ?><span class="landing-nav__cta-short"><?php echo esc_html( $args['cta_short'] ); ?></span><?php endif; ?>
+			</a>
 		<?php endif; ?>
 	</div>
 </header>

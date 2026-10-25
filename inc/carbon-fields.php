@@ -335,6 +335,39 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'text', 'sg_form_subtitle', __( 'Testo sotto il titolo' ) )->set_help_text( __( "Vuoto = \"Ti risponderemo entro un'ora con una prima valutazione.\"" ) ),
 			Field::make( 'text', 'sg_form_cta', __( 'Bottone del passo 1' ) )->set_help_text( __( 'Vuoto = "Prenota sopralluogo gratuito". I passi 2 e 3 dicono Continua e Invia richiesta.' ) ),
 			Field::make( 'text', 'sg_form_note', __( 'Nota sotto il bottone' ) )->set_help_text( __( 'Vuoto = "Gratis · nessun impegno · risposta in 1h".' ) ),
+		) )
+		->add_tab( __( 'Trust bar' ), array(
+			Field::make( 'textarea', 'sg_trust_items', __( 'Garanzie (una per riga)' ) )
+				->set_help_text( __( 'Vuoto = Sopralluogo gratuito / Soddisfatti o ripuliamo / Verificati e assicurati / Roma e provincia. Sono promesse pubbliche: cambiarle qui vale anche come impegno.' ) ),
+		) )
+		->add_tab( __( 'Confrontiamo' ), array(
+			Field::make( 'text', 'sg_cmp_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = PERCHE\' TROVAPULIZIE.' ) ),
+			Field::make( 'textarea', 'sg_cmp_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Un invio a capo = una riga. Vuoto = "Confrontiamo tutta Roma / Tu paghi il prezzo migliore".' ) ),
+			Field::make( 'textarea', 'sg_cmp_subtitle', __( 'Sottotitolo' ) )->set_help_text( $sg_variant_help ),
+			Field::make( 'complex', 'sg_cmp_pillars', __( 'Pilastri (vuoto = i quattro del live)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'text', 'description', __( 'Descrizione' ) ),
+				) ),
+			Field::make( 'text', 'sg_cmp_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Calcola il preventivo gratis".' ) ),
+			Field::make( 'text', 'sg_cmp_cta_link', __( 'Bottone: link' ) )->set_help_text( __( 'Vuoto = #form.' ) ),
+			Field::make( 'separator', 'sg_cmp_card_sep', __( 'Card "Preventivi a confronto"' ) ),
+			Field::make( 'text', 'sg_cmp_card_title', __( 'Titolo card' ) )->set_help_text( __( 'Vuoto = "Preventivi a confronto".' ) ),
+			Field::make( 'text', 'sg_cmp_card_disclaimer', __( 'Riga sotto il titolo' ) )->set_help_text( __( 'Vuoto = "Esempio illustrativo di come funziona il confronto". Le offerte non sono imprese reali: la riga resta.' ) ),
+			Field::make( 'text', 'sg_cmp_card_chip', __( 'Chip a destra' ) )->set_help_text( __( 'Vuoto = "Roma e provincia".' ) ),
+			Field::make( 'complex', 'sg_cmp_offers', __( 'Offerte d\'esempio (vuoto = le tre del live)' ) )
+				->add_fields( array(
+					Field::make( 'image', 'logo', __( 'Logo (tondo, 36px)' ) )->set_value_type( 'url' ),
+					Field::make( 'text', 'name', __( 'Nome' ) ),
+					Field::make( 'text', 'badge', __( 'Riga sotto il nome' ) ),
+					Field::make( 'text', 'price', __( 'Prezzo' ) ),
+					Field::make( 'checkbox', 'highlighted', __( 'Evidenziata (miglior prezzo)' ) ),
+				) ),
+			Field::make( 'image', 'sg_cmp_team_image', __( 'Team: foto' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuota = foto del tema. Resa 74x52.' ) ),
+			Field::make( 'text', 'sg_cmp_team_eyebrow', __( 'Team: pillola' ) )->set_help_text( __( 'Vuoto = CHI VERRA\' A CASA TUA.' ) ),
+			Field::make( 'text', 'sg_cmp_team_title', __( 'Team: titolo' ) )->set_help_text( __( 'Vuoto = "Il team dell\'impresa scelta".' ) ),
+			Field::make( 'text', 'sg_cmp_team_sub', __( 'Team: riga sotto' ) )->set_help_text( __( 'Vuoto = "Squadra verificata e assicurata".' ) ),
+			Field::make( 'textarea', 'sg_cmp_note', __( 'Nota in fondo alla card' ) )->set_help_text( __( 'Vuoto = "Il prezzo definitivo e\' confermato dopo il sopralluogo gratuito. Nessuna sorpresa."' ) ),
 		) );
 
 	// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)

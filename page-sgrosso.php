@@ -51,6 +51,7 @@ get_header( 'landing', array(
 	'phone_label'   => $phone_label,
 	'phone_href'    => $phone_href,
 	'cta_label'     => tp_sg_text( 'sg_nav_cta', $defaults, null, 'Calcola il preventivo gratis' ),
+	'cta_short'     => 'Sopralluogo gratuito',
 	'cta_href'      => '#form',
 ) );
 ?>
@@ -111,9 +112,58 @@ get_header( 'landing', array(
 		</div>
 	</section>
 
+	<?php
+	// Trust bar (TICKET-43): quattro promesse pubbliche, le stesse del live.
+	$trust_items = tp_lines( carbon_get_the_post_meta( 'sg_trust_items' ) );
+	if ( ! $trust_items ) {
+		$trust_items = array( 'Sopralluogo gratuito', 'Soddisfatti o ripuliamo', 'Verificati e assicurati', 'Roma e provincia' );
+	}
+	get_template_part( 'template-parts/trust-bar', null, array( 'items' => $trust_items ) );
+
+	// Confrontiamo tutta Roma (TICKET-43): pilastri, CTA e card del comparatore con i contenuti del live
+	// quando i campi sono vuoti. Le offerte sono un esempio dichiarato (COMPARISON_OFFERS del live).
+	$pillars = carbon_get_the_post_meta( 'sg_cmp_pillars' );
+	if ( ! $pillars ) {
+		$pillars = array(
+			array( 'title' => 'Confronto del mercato', 'description' => 'Tutte le imprese attive su Roma e provincia' ),
+			array( 'title' => 'Solo imprese verificate', 'description' => 'Documenti, referenze e assicurazione controllati' ),
+			array( 'title' => 'Il prezzo migliore', 'description' => "L'offerta più conveniente a parità di servizio" ),
+			array( 'title' => 'Un solo referente', 'description' => 'Dal sopralluogo al lavoro finito, gestisci tutto con noi' ),
+		);
+	}
+	$offers = carbon_get_the_post_meta( 'sg_cmp_offers' );
+	if ( ! $offers ) {
+		$offers = array(
+			array( 'logo' => tp_theme_asset( 'assets/img/sgrosso/sgrosso-confronto-logo1.png' ), 'name' => 'Impresa A', 'badge' => 'Verificata · assicurata', 'price' => '€ 560', 'highlighted' => false ),
+			array( 'logo' => tp_theme_asset( 'assets/img/sgrosso/sgrosso-confronto-logo2.png' ), 'name' => 'Impresa B', 'badge' => 'Miglior prezzo a parità di servizio', 'price' => '€ 490', 'highlighted' => true ),
+			array( 'logo' => tp_theme_asset( 'assets/img/sgrosso/sgrosso-confronto-team.png' ), 'name' => 'Impresa C', 'badge' => 'Verificata · assicurata', 'price' => '€ 610', 'highlighted' => false ),
+		);
+	}
+	get_template_part( 'template-parts/comparison', null, array(
+		'eyebrow'         => tp_sg_text( 'sg_cmp_eyebrow', $defaults, null, 'PERCHÉ TROVAPULIZIE' ),
+		'title'           => tp_sg_text( 'sg_cmp_title', $defaults, null, "Confrontiamo tutta Roma\nTu paghi il prezzo migliore" ),
+		'subtitle'        => tp_sg_text( 'sg_cmp_subtitle', $defaults, 'confrontiamo_sub' ),
+		'pillars'         => $pillars,
+		'cta_label'       => tp_sg_text( 'sg_cmp_cta_label', $defaults, null, 'Calcola il preventivo gratis' ),
+		'cta_link'        => tp_sg_text( 'sg_cmp_cta_link', $defaults, null, '#form' ),
+		'card_title'      => tp_sg_text( 'sg_cmp_card_title', $defaults, null, 'Preventivi a confronto' ),
+		'card_disclaimer' => tp_sg_text( 'sg_cmp_card_disclaimer', $defaults, null, 'Esempio illustrativo di come funziona il confronto' ),
+		'card_chip'       => tp_sg_text( 'sg_cmp_card_chip', $defaults, null, 'Roma e provincia' ),
+		'offers'          => $offers,
+		'team'            => array(
+			'image'   => carbon_get_the_post_meta( 'sg_cmp_team_image' ) ?: tp_theme_asset( 'assets/img/sgrosso/sgrosso-confronto-team-photo.webp' ),
+			'eyebrow' => tp_sg_text( 'sg_cmp_team_eyebrow', $defaults, null, 'CHI VERRÀ A CASA TUA' ),
+			'title'   => tp_sg_text( 'sg_cmp_team_title', $defaults, null, "Il team dell'impresa scelta" ),
+			'sub'     => tp_sg_text( 'sg_cmp_team_sub', $defaults, null, 'Squadra verificata e assicurata' ),
+		),
+		'note'            => tp_sg_text( 'sg_cmp_note', $defaults, null, 'Il prezzo definitivo è confermato dopo il sopralluogo gratuito. Nessuna sorpresa.' ),
+	) );
+	?>
+
 	<?php get_template_part( 'template-parts/sticky-cta', null, array(
 		'variant'     => 'dual',
-		'label'       => 'Calcola il preventivo gratis',
+		'label'       => 'Prenota sopralluogo', // Figma 4364:7540: accanto a Chiama la CTA lunga non entra a 390
+
 		'target'      => '#form',
 		'watch'       => '#form',
 		'phone_href'  => $phone_href,

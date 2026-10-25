@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.41.0
+Version: 0.42.2
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -3775,6 +3775,9 @@ a {
 	border-radius: var(--tp-radius-pill);
 	font-size: 15px;
 }
+.landing-nav__cta-short {
+	display: none;
+}
 
 /* ---- Hero a pannello (Figma: rettangolo 1360x730 con raggio, foto sotto uno scrim bianco) ----- */
 .sg-hero {
@@ -4392,6 +4395,380 @@ a {
 	color: #4B5563;
 }
 
+/* ---- Elementi condivisi dalle sezioni della landing ---------------------------------------- */
+/* Eyebrow: 13px, maiuscolo dal contenuto, spaziatura 1.04px; variante a pillola con puntino (Figma 4364:6702) */
+.sg-eyebrow {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 1.04px;
+	color: var(--tp-primary-ink);
+}
+.sg-eyebrow--pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 7px 16px 7px 14px;
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-mint);
+	color: var(--tp-primary-700);
+}
+.sg-eyebrow--pill::before {
+	content: '';
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: var(--tp-primary);
+}
+/* CTA di sezione: raggio 12, freccia a destra (Figma 4364:6732) */
+.sg-cta {
+	min-height: 56px;
+	padding: 0 28px;
+	border-radius: var(--tp-radius-lg);
+	font-size: 15px;
+	font-weight: 600;
+}
+.sg-cta__arrow {
+	font-size: 18px;
+	line-height: 1;
+}
+/* Chip con puntino (card del comparatore) */
+.sg-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 7px 12px;
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-mint);
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--tp-primary-700);
+	white-space: nowrap;
+}
+.sg-chip::before {
+	content: '';
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: var(--tp-primary);
+}
+
+/* ---- Trust bar (Figma 4364:6684 / 4364:7139) ----------------------------------------------- */
+.sg-trust {
+	padding: 28px 80px;
+	background: #F0FBF7;
+}
+.sg-trust__bar {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 22px 24px;
+	list-style: none;
+	background: var(--tp-white);
+	border-radius: var(--tp-radius-xl);
+	box-shadow: var(--tp-shadow-card);
+}
+.sg-trust__bar li {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 0 56px;
+	font-size: 15px;
+	font-weight: 600;
+	color: #374151;
+	white-space: nowrap;
+}
+.sg-trust__bar li + li::before {
+	content: '';
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 1px;
+	background: var(--tp-border);
+}
+.sg-trust__tile {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 26px;
+	height: 26px;
+	border-radius: 8px;
+	background: var(--tp-mint);
+	color: var(--tp-primary-ink);
+}
+.sg-trust__check {
+	width: 13px;
+	height: 13px;
+}
+
+/* ---- Confrontiamo tutta Roma (Figma 4364:6697 / 4364:7154) --------------------------------- */
+.sg-compare {
+	position: relative;
+	overflow: hidden;
+	padding: 78px 80px;
+	background: var(--tp-white);
+}
+/* Blob decorativi del Figma, resi come gradienti radiali: niente immagini */
+.sg-compare::before,
+.sg-compare::after {
+	content: '';
+	position: absolute;
+	border-radius: 50%;
+	background: radial-gradient(circle, rgba(0, 200, 150, 0.1) 0%, rgba(0, 200, 150, 0) 70%);
+	pointer-events: none;
+}
+.sg-compare::before {
+	width: 520px;
+	height: 520px;
+	right: -140px;
+	top: 120px;
+}
+.sg-compare::after {
+	width: 420px;
+	height: 420px;
+	left: -160px;
+	bottom: -60px;
+}
+.sg-compare__inner {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	grid-template-columns: 560px minmax(0, 1fr);
+	grid-template-areas:
+		'head card'
+		'pillars card';
+	align-items: center;
+	column-gap: 64px;
+	row-gap: 24px;
+	max-width: 1280px;
+	margin: 0 auto;
+}
+.sg-compare__head {
+	grid-area: head;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 20px;
+	align-self: end;
+}
+.sg-compare__head h2 {
+	margin: 0;
+	font-size: 36px;
+	line-height: 1.2;
+	letter-spacing: -0.72px;
+	font-weight: 800;
+	color: var(--tp-ink);
+}
+.sg-compare__subtitle {
+	margin: 0;
+	font-size: 17px;
+	line-height: 1.5;
+	color: #4B5563;
+}
+.sg-compare__pillars {
+	grid-area: pillars;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 26px;
+	align-self: start;
+}
+.sg-pillars {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.sg-pillars__item {
+	display: flex;
+	align-items: flex-start;
+	gap: 13px;
+}
+.sg-pillars__tile {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 38px;
+	height: 38px;
+	margin-top: 3px;
+	border-radius: 10px;
+	background: var(--tp-primary);
+	color: var(--tp-white);
+}
+.sg-pillars__check {
+	width: 16px;
+	height: 16px;
+}
+.sg-pillars__text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.sg-pillars__title {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--tp-ink);
+}
+.sg-pillars__desc {
+	font-size: 14px;
+	line-height: 1.45;
+	color: #4B5563;
+}
+.sg-compare__card {
+	grid-area: card;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	padding: 28px;
+	background: var(--tp-white);
+	border: 1px solid var(--tp-border);
+	border-radius: 22px;
+	box-shadow: 0 18px 44px -12px rgba(0, 71, 54, 0.1);
+}
+.sg-compare__card-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+.sg-compare__card-title {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 600;
+	color: var(--tp-ink);
+}
+.sg-compare__card-disclaimer {
+	margin: 2px 0 0;
+	font-size: 11px;
+	color: #9CA3AF;
+}
+.sg-offers {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.sg-offers__row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 16px;
+	border: 1px solid var(--tp-border);
+	border-radius: 14px;
+	background: var(--tp-white);
+}
+.sg-offers__logo {
+	flex: none;
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+.sg-offers__text {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	flex: 1;
+}
+.sg-offers__name {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--tp-ink);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.sg-offers__badge {
+	font-size: 12px;
+	color: var(--tp-text-body);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.sg-offers__price {
+	flex: none;
+	font-size: 17px;
+	font-weight: 700;
+	color: #374151;
+}
+.sg-offers__row.is-best {
+	border-color: var(--tp-primary);
+	background: var(--tp-mint);
+}
+.sg-offers__row.is-best .sg-offers__badge {
+	font-weight: 600;
+	color: var(--tp-primary-700);
+}
+.sg-offers__row.is-best .sg-offers__price {
+	font-size: 20px;
+	color: var(--tp-primary-700);
+}
+.sg-team {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 14px 16px;
+	border-radius: 14px;
+	background: #F7F8FA;
+}
+.sg-team__img {
+	flex: none;
+	width: 74px;
+	height: 52px;
+	border-radius: 10px;
+	object-fit: cover;
+}
+.sg-team__text {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	min-width: 0;
+}
+.sg-team__eyebrow {
+	font-size: 11px;
+	font-weight: 600;
+	letter-spacing: 0.5px;
+	color: var(--tp-primary-ink);
+}
+.sg-team__title {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--tp-ink);
+}
+.sg-team__sub {
+	font-size: 12px;
+	color: var(--tp-text-body);
+}
+.sg-compare__note {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 0;
+	padding-top: 16px;
+	border-top: 1px solid var(--tp-border);
+	font-size: 13px;
+	line-height: 1.4;
+	color: #4B5563;
+}
+.sg-compare__note-check {
+	flex: none;
+	width: 13px;
+	height: 13px;
+	margin-top: 3px;
+	color: var(--tp-primary);
+}
+
 /* ---- Barra fissa doppia (Chiama + CTA), Figma 4364:7535 ---------------------------------- */
 .sticky-cta--dual {
 	gap: 10px;
@@ -4445,6 +4822,13 @@ a {
 		padding: 0 16px;
 		font-size: 14px;
 	}
+	.landing-nav__cta-short + .landing-nav__cta-full,
+	.landing-nav__cta-full:has(+ .landing-nav__cta-short) {
+		display: none;
+	}
+	.landing-nav__cta-short {
+		display: inline;
+	}
 
 	.sgrosso {
 		padding-bottom: 76px; /* spazio per la barra fissa */
@@ -4492,6 +4876,85 @@ a {
 	}
 	.sticky-cta--dual:not([hidden]) {
 		display: flex;
+	}
+
+	/* Trust bar: due righe da due, senza barra (Figma 4364:7139) */
+	.sg-trust {
+		padding: 18px 16px;
+	}
+	.sg-trust__bar {
+		display: grid;
+		grid-template-columns: auto auto;
+		justify-content: center;
+		gap: 12px 14px;
+		padding: 0;
+		background: transparent;
+		border-radius: 0;
+		box-shadow: none;
+	}
+	.sg-trust__bar li {
+		gap: 8px;
+		padding: 0;
+		font-size: 13px;
+	}
+	.sg-trust__bar li + li::before {
+		display: none;
+	}
+	.sg-trust__tile {
+		width: 18px;
+		height: 18px;
+		border-radius: 6px;
+	}
+	.sg-trust__check {
+		width: 10px;
+		height: 10px;
+	}
+	.sg-offers__name,
+	.sg-offers__badge {
+		white-space: normal;
+	}
+
+	/* Confrontiamo: testo, card, pilastri, CTA (Figma 4364:7154) */
+	.sg-compare {
+		padding: 50px 20px;
+	}
+	.sg-compare::before,
+	.sg-compare::after {
+		width: 320px;
+		height: 320px;
+	}
+	.sg-compare__inner {
+		grid-template-columns: 1fr;
+		grid-template-areas:
+			'head'
+			'card'
+			'pillars';
+		row-gap: 28px;
+	}
+	.sg-compare__head {
+		gap: 16px;
+	}
+	.sg-compare__head h2 {
+		font-size: 26px;
+		letter-spacing: -0.52px;
+	}
+	.sg-compare__subtitle {
+		font-size: 15px;
+	}
+	.sg-compare__pillars {
+		gap: 24px;
+	}
+	.sg-compare__pillars .sg-cta {
+		width: 100%;
+		justify-content: center;
+	}
+	.sg-pillars__tile {
+		width: 34px;
+		height: 34px;
+	}
+	.sg-compare__card {
+		padding: 20px;
+		border-radius: 18px;
 	}
 }
 
