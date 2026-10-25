@@ -52,8 +52,9 @@ $args = wp_parse_args( $args ?? array(), array(
 		<?php endif; ?>
 		<?php if ( $args['cta_label'] ) : ?>
 			<a class="tp-btn tp-btn--primary landing-nav__cta" href="<?php echo esc_url( $args['cta_href'] ); ?>">
-				<span class="landing-nav__cta-full"><?php echo esc_html( $args['cta_label'] ); ?></span>
+				<?php // Il testo corto precede quello lungo: sotto la soglia desktop il CSS nasconde il fratello successivo. ?>
 				<?php if ( $args['cta_short'] ) : ?><span class="landing-nav__cta-short"><?php echo esc_html( $args['cta_short'] ); ?></span><?php endif; ?>
+				<span class="landing-nav__cta-full"><?php echo esc_html( $args['cta_label'] ); ?></span>
 			</a>
 		<?php endif; ?>
 	</div>
