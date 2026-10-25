@@ -82,7 +82,7 @@
 		function p(base) { for (var k in extra) base[k] = extra[k]; return base; }
 		if (href.indexOf('tel:') === 0) window.tpTrack('marketing_click_to_call', p({ landing: landing }));
 		else if (href.indexOf('wa.me') !== -1 || href.indexOf('whatsapp') !== -1) window.tpTrack('marketing_click_whatsapp', p({ landing: landing }));
-		else if (/#form(-bottom)?$/.test(href)) window.tpTrack('marketing_click_to_form', { landing: landing, target: href.slice(href.indexOf('#')) });
+		else if (/#form(-bottom)?$/.test(href)) window.tpTrack('marketing_click_to_form', p({ landing: landing, target: href.slice(href.indexOf('#')) }));
 		else if (pos) window.tpTrack('marketing_cta_click', { landing: landing, cta_position: pos, target: href });
 	}, true);
 })();
