@@ -290,6 +290,53 @@ add_action( 'carbon_fields_register_fields', function () {
 		) );
 
 
+	// Landing Sgrosso — Figma 4364:6628 / 4364:7087, contenuti dal live. Solo sulle pagine col template
+	// page-sgrosso.php (cinque: generica + quattro verticali). I testi che cambiano per variante hanno il
+	// default in inc/sgrosso-variants.php: un campo vuoto = default della variante, un campo compilato vince.
+	$sg_variant_help = __( 'Vuoto = testo della variante scelta nella tab Variante.' );
+	Container::make( 'post_meta', __( 'Landing Sgrosso — Sezioni' ) )
+		->where( 'post_template', '=', 'page-sgrosso.php' )
+		->add_tab( __( 'Variante' ), array(
+			Field::make( 'select', 'sg_variant', __( 'Variante della landing' ) )
+				->set_options( array(
+					'sgrosso-casa'          => 'Sgrosso casa (generica, /roma/sgrosso-casa)',
+					'post-ristrutturazione' => 'Post-ristrutturazione',
+					'trasloco'              => 'Trasloco',
+					'fine-affitto'          => 'Fine affitto',
+					'prima-pulizia-a-fondo' => 'Prima pulizia a fondo',
+				) )
+				->set_help_text( __( 'Decide i testi di default, la tab aperta in Quando serve, il tipo di pulizia preselezionato nel form e il nome della landing negli eventi di tracking.' ) ),
+		) )
+		->add_tab( __( 'Testata' ), array(
+			Field::make( 'text', 'sg_promo_desktop', __( 'Promo bar, testo desktop' ) )
+				->set_help_text( __( 'Vuoto = "Sopralluogo gratuito · -30€ sul primo lavoro · ti rispondiamo entro 1 ora".' ) ),
+			Field::make( 'text', 'sg_promo_mobile', __( 'Promo bar, testo mobile' ) )
+				->set_help_text( __( 'Vuoto = "Sopralluogo gratuito · -30€ sul primo lavoro".' ) ),
+			Field::make( 'text', 'sg_nav_phone', __( 'Telefono in testata' ) )
+				->set_help_text( __( 'Vuoto = 06 9151 6075. Il link tel: si ricava dalle sole cifre.' ) ),
+			Field::make( 'text', 'sg_nav_cta', __( 'Testo della CTA in testata' ) )
+				->set_help_text( __( 'Vuoto = "Calcola il preventivo gratis". Porta sempre al form.' ) ),
+		) )
+		->add_tab( __( 'Hero' ), array(
+			Field::make( 'text', 'sg_hero_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( $sg_variant_help ),
+			Field::make( 'textarea', 'sg_hero_title', __( 'Titolo (H1)' ) )
+				->set_help_text( __( 'Un invio a capo = una riga nel titolo. Vuoto = titolo della variante.' ) ),
+			Field::make( 'textarea', 'sg_hero_subtitle', __( 'Sottotitolo' ) )->set_help_text( $sg_variant_help ),
+			Field::make( 'textarea', 'sg_hero_bullets', __( 'Punti di valore (uno per riga)' ) )
+				->set_help_text( __( 'Vuoto = i tre punti del live.' ) ),
+			Field::make( 'text', 'sg_hero_social', __( 'Riga sotto le stelle' ) )
+				->set_help_text( __( 'Vuoto = "Famiglie a Parioli, Prati, EUR e Roma Nord".' ) ),
+			Field::make( 'image', 'sg_hero_image', __( 'Foto di sfondo' ) )
+				->set_value_type( 'url' )
+				->set_help_text( __( 'Vuota = foto della variante nel tema (assets/img/sgrosso). Consigliati 1920x1071.' ) ),
+		) )
+		->add_tab( __( 'Form' ), array(
+			Field::make( 'text', 'sg_form_title', __( 'Titolo del passo 1' ) )->set_help_text( __( 'Vuoto = "I tuoi dati di contatto".' ) ),
+			Field::make( 'text', 'sg_form_subtitle', __( 'Testo sotto il titolo' ) )->set_help_text( __( "Vuoto = \"Ti risponderemo entro un'ora con una prima valutazione.\"" ) ),
+			Field::make( 'text', 'sg_form_cta', __( 'Bottone del passo 1' ) )->set_help_text( __( 'Vuoto = "Prenota sopralluogo gratuito". I passi 2 e 3 dicono Continua e Invia richiesta.' ) ),
+			Field::make( 'text', 'sg_form_note', __( 'Nota sotto il bottone' ) )->set_help_text( __( 'Vuoto = "Gratis · nessun impegno · risposta in 1h".' ) ),
+		) );
+
 	// Footer — Figma 3564:167. Theme Options > Footer, valido per tutte le pagine (footer.php)
 	Container::make( 'theme_options', __( 'Footer' ) )
 		->set_page_file( 'tp-footer' )

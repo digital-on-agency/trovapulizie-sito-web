@@ -9,7 +9,8 @@
 	'use strict';
 
 	var barra = document.querySelector('[data-sticky-cta]');
-	var hero = document.querySelector('.hub-hero');
+	// L'elemento osservato lo dice il markup (data-watch): la hero dell'hub o il form della landing.
+	var hero = document.querySelector(barra ? (barra.getAttribute('data-watch') || '.hub-hero') : '.hub-hero');
 	if (!barra || !hero || !('IntersectionObserver' in window)) return;
 
 	var soglia = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--tp-bp-desktop'), 10) || 1024;

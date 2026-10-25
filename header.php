@@ -10,16 +10,7 @@
  * ($tp_nav_links) e vengono rese sia nella barra desktop sia nel pannello.
  */
 ?>
-<!DOCTYPE html>
-<html <?php language_attributes(); ?>>
-<head>
-<meta charset="<?php bloginfo( 'charset' ); ?>">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<?php wp_head(); ?>
-</head>
-<body <?php body_class(); ?>>
-
-<a class="skip-link" href="#contenuto">Vai al contenuto</a>
+<?php get_template_part( 'template-parts/head' ); ?>
 
 <?php
 $tp_nav_links = array(

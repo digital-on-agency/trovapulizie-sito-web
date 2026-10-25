@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.40.0
+Version: 0.41.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -3667,6 +3667,831 @@ a {
 	.price__head {
 		text-align: left;
 		margin-bottom: 24px;
+	}
+}
+
+/* =========================
+   Landing Sgrosso (page-sgrosso.php) — Figma 4364:6628 desktop / 4364:7087 mobile, misure dal live React.
+   Testata leggera (header-landing.php), hero a pannello con foto e scrim, card del form in tre passi
+   (template-parts/lead-form.php), barra fissa doppia su mobile. SPEC-landing-sgrosso, TICKET-37/39/41.
+   ========================= */
+:root {
+	/* Scala del verde dell'app (theme.css del portale), usata dalle landing: promo bar e stati del form */
+	--tp-primary-600: #00A87E;
+	--tp-primary-700: #008866;
+	--tp-mint: #E6FFF5;
+	--tp-mint-border: #B3FFE0;
+	--tp-star: #FFB826;
+	--tp-ink: #030712;
+	--tp-field-bg: #F7F8FA;
+	--tp-field-border: #D1D5DB;
+	--tp-field-ring: rgba(0, 200, 150, 0.2);
+	--tp-error: #DC2626;
+}
+
+/* ---- Testata landing: promo bar + navbar senza menu ---------------------------------------- */
+.landing-promo {
+	padding: 11px 16px;
+	background: var(--tp-primary-700);
+	color: var(--tp-white);
+	text-align: center;
+}
+.landing-promo__text {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: 1.4;
+}
+.landing-promo__text--mobile {
+	display: none;
+}
+
+.landing-nav {
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 24px;
+	height: var(--tp-navbar-h);
+	padding: 0 80px;
+	background: var(--tp-white);
+}
+.landing-nav__logo {
+	display: flex;
+	align-items: center;
+	flex: none;
+}
+.landing-nav__logo img {
+	display: block;
+	height: 30px;
+	width: auto;
+}
+.landing-nav__links {
+	display: flex;
+	align-items: center;
+	gap: 32px;
+}
+.landing-nav__links a {
+	padding-block: 6px;
+	font-size: 15px;
+	color: var(--tp-text-body);
+	white-space: nowrap;
+}
+.landing-nav__links a:hover {
+	color: var(--tp-text-heading);
+}
+.landing-nav__actions {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	flex: none;
+}
+.landing-nav__phone {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 44px;
+	padding: 0 18px;
+	border: 1.5px solid var(--tp-border-card);
+	border-radius: var(--tp-radius-pill);
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--tp-text-heading);
+	white-space: nowrap;
+}
+.landing-nav__phone:hover {
+	border-color: var(--tp-primary);
+}
+.landing-nav__phone-icon {
+	width: 18px;
+	height: 18px;
+	color: var(--tp-primary-ink);
+}
+.landing-nav__cta {
+	min-height: 44px;
+	padding: 0 22px;
+	border-radius: var(--tp-radius-pill);
+	font-size: 15px;
+}
+
+/* ---- Hero a pannello (Figma: rettangolo 1360x730 con raggio, foto sotto uno scrim bianco) ----- */
+.sg-hero {
+	padding: 24px 40px 0;
+}
+.sg-hero__panel {
+	position: relative;
+	display: flex;
+	align-items: center;
+	min-height: 730px;
+	overflow: hidden;
+	border-radius: 32px;
+	background: var(--tp-mint);
+}
+.sg-hero__media {
+	position: absolute;
+	inset: 0;
+}
+.sg-hero__img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+/* Scrim come sul live (lg): bianco al 92% a sinistra, 32% a destra, cosi' il testo resta leggibile sulla foto */
+.sg-hero__scrim {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(90deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.32) 100%);
+	pointer-events: none;
+}
+.sg-hero__inner {
+	position: relative;
+	z-index: 1;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 420px;
+	align-items: center;
+	gap: 56px;
+	width: 100%;
+	padding: 48px 60px;
+}
+.sg-hero__copy {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 20px;
+	max-width: 764px;
+}
+.sg-hero__eyebrow {
+	display: inline-block;
+	margin: 0;
+	padding: 7px 14px;
+	border: 1px solid var(--tp-mint-border);
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-white);
+	font-size: 12px;
+	font-weight: 600;
+	letter-spacing: 0.72px;
+	color: var(--tp-primary-700);
+}
+.sg-hero h1 {
+	margin: 0;
+	max-width: 702px;
+	font-size: 50px;
+	line-height: 1.08;
+	letter-spacing: -1px;
+	font-weight: 800;
+	color: var(--tp-ink);
+}
+.sg-hero__subtitle {
+	margin: 0;
+	max-width: 520px;
+	font-size: 18px;
+	line-height: 1.5;
+	color: #374151;
+}
+.sg-hero__bullets {
+	list-style: none;
+	margin: 2px 0 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	font-size: 16px;
+	color: var(--tp-text-heading);
+}
+.sg-hero__bullets li {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.sg-hero__check {
+	flex: none;
+	width: 14px;
+	height: 14px;
+	color: var(--tp-primary);
+}
+.sg-hero__social {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 2px 0 0;
+	font-size: 14px;
+	color: var(--tp-text-body);
+}
+.sg-hero__stars {
+	font-size: 15px;
+	letter-spacing: 1px;
+	color: var(--tp-star);
+}
+.sg-hero__form {
+	width: 100%;
+	scroll-margin-top: calc(var(--tp-navbar-h) + 16px);
+}
+
+/* ---- Card del form lead (tre passi) ------------------------------------------------------- */
+.lead-form {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	padding: 28px;
+	background: var(--tp-white);
+	border: 1px solid var(--tp-border);
+	border-radius: 22px;
+	box-shadow: 0 18px 44px -12px rgba(0, 71, 54, 0.18);
+}
+.lead-form__hp {
+	position: absolute;
+	left: -9999px;
+	width: 0;
+	height: 0;
+	opacity: 0;
+}
+.lead-form__progress {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	margin-bottom: 20px;
+}
+.lead-form__progress-row {
+	display: flex;
+	justify-content: space-between;
+	font-size: 13px;
+	color: var(--tp-text-body);
+}
+.lead-form__progress-row b {
+	font-weight: 500;
+}
+.lead-form__step-name {
+	font-weight: 500;
+	color: var(--tp-primary-ink);
+}
+.lead-form__bars {
+	display: flex;
+	gap: 6px;
+}
+.lead-form__bars i {
+	flex: 1;
+	height: 5px;
+	border-radius: 999px;
+	background: #E5E7EB;
+}
+.lead-form__bars i.is-done {
+	background: var(--tp-primary);
+}
+.lead-form__step {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+.lead-form__step[hidden] {
+	display: none;
+}
+.lead-form__title {
+	margin: 0;
+	padding: 0;
+	font-size: 22px;
+	font-weight: 600;
+	letter-spacing: -0.22px;
+	color: var(--tp-ink);
+}
+.lead-form__sub {
+	margin: -8px 0 4px;
+	font-size: 14px;
+	line-height: 1.45;
+	color: #4B5563;
+}
+.lead-form__row {
+	display: flex;
+	gap: 12px;
+}
+.lead-form__row > * {
+	flex: 1;
+	min-width: 0;
+}
+.lead-form__group {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+.lead-form__label {
+	font-size: 13px;
+	font-weight: 500;
+	color: #374151;
+}
+
+/* Campo con etichetta flottante: a riposo e' centrata, con focus o valore sale a 11px (live FloatingInput) */
+.tp-field {
+	display: flex;
+	flex-direction: column;
+}
+.tp-field__box {
+	position: relative;
+}
+.tp-field input {
+	width: 100%;
+	padding: 24px 14px 9px;
+	border: 1px solid var(--tp-field-border);
+	border-radius: 10px;
+	background: var(--tp-field-bg);
+	font: inherit;
+	font-size: 15px;
+	color: #111827;
+	outline: none;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+.tp-field input:hover {
+	border-color: #9CA3AF;
+}
+.tp-field input:focus {
+	border-color: var(--tp-primary);
+	box-shadow: 0 0 0 2px var(--tp-field-ring);
+}
+.tp-field label {
+	position: absolute;
+	left: 14px;
+	top: 50%;
+	transform: translateY(-50%);
+	font-size: 15px;
+	color: var(--tp-text-body);
+	pointer-events: none;
+	transition: top 0.15s, transform 0.15s, font-size 0.15s, color 0.15s;
+}
+.tp-field input:focus + label,
+.tp-field input:not(:placeholder-shown) + label {
+	top: 12px;
+	transform: none;
+	font-size: 11px;
+}
+.tp-field input:focus + label {
+	color: var(--tp-primary-600);
+}
+.tp-field__error {
+	min-height: 12px;
+	margin: 4px 0 0;
+	font-size: 12px;
+	line-height: 1.2;
+	color: var(--tp-error);
+}
+.tp-field__error:empty {
+	margin: 0;
+	min-height: 8px;
+}
+.tp-field.is-invalid input,
+.tp-field.is-invalid .tp-field__box {
+	border-color: var(--tp-error);
+}
+/* Numeri senza le frecce del browser: il campo e' corto e le frecce coprono l'etichetta */
+.tp-field input[type='number'] {
+	-moz-appearance: textfield;
+	appearance: textfield;
+}
+.tp-field input[type='number']::-webkit-outer-spin-button,
+.tp-field input[type='number']::-webkit-inner-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+}
+
+/* Telefono: prefisso + separatore + numero in un solo riquadro (live PhoneInput variant floating) */
+.tp-field--phone .tp-field__box {
+	display: flex;
+	border: 1px solid var(--tp-field-border);
+	border-radius: 10px;
+	background: var(--tp-field-bg);
+	overflow: hidden;
+	transition: border-color 0.15s, box-shadow 0.15s;
+}
+.tp-field--phone .tp-field__box:focus-within {
+	border-color: var(--tp-primary);
+	box-shadow: 0 0 0 2px var(--tp-field-ring);
+}
+.tp-field__prefix {
+	position: relative;
+	flex: none;
+	display: flex;
+}
+.tp-field__prefix select {
+	padding: 16px 28px 16px 14px;
+	border: 0;
+	background: transparent;
+	font: inherit;
+	font-size: 15px;
+	color: #111827;
+	outline: none;
+	cursor: pointer;
+	-webkit-appearance: none;
+	appearance: none;
+}
+.tp-field__chevron {
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	width: 14px;
+	height: 14px;
+	transform: translateY(-50%);
+	color: var(--tp-text-body);
+	pointer-events: none;
+}
+.tp-field__sep {
+	flex: none;
+	width: 1px;
+	margin: 10px 0;
+	background: var(--tp-field-border);
+}
+.tp-field__num {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+}
+.tp-field--phone input {
+	border: 0;
+	border-radius: 0;
+	background: transparent;
+}
+.tp-field--phone input:focus {
+	box-shadow: none;
+}
+
+/* Suggerimenti indirizzo (HERE, TICKET-41) */
+.tp-field__suggest {
+	position: absolute;
+	z-index: 50;
+	left: 0;
+	right: 0;
+	top: calc(100% + 4px);
+	max-height: 220px;
+	margin: 0;
+	padding: 6px 0;
+	overflow: auto;
+	list-style: none;
+	background: var(--tp-white);
+	border: 1px solid var(--tp-border);
+	border-radius: 10px;
+	box-shadow: 0 12px 32px rgba(15, 23, 41, 0.12);
+}
+.tp-field__suggest[hidden] {
+	display: none;
+}
+.tp-field__suggest li {
+	padding: 9px 14px;
+	font-size: 14px;
+	color: var(--tp-text-heading);
+	cursor: pointer;
+}
+.tp-field__suggest li:hover,
+.tp-field__suggest li[aria-selected='true'] {
+	background: var(--tp-bg-soft);
+}
+
+/* Checkbox con riquadro disegnato (live CheckSquare): 22px, spunta bianca su verde */
+.tp-check {
+	position: relative;
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	font-size: 14px;
+	line-height: 1.4;
+	color: var(--tp-text-body);
+	cursor: pointer;
+}
+.tp-check input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+}
+.tp-check__box {
+	position: relative;
+	flex: none;
+	width: 22px;
+	height: 22px;
+	margin-top: 1px;
+	border: 1.5px solid var(--tp-field-border);
+	border-radius: 6px;
+	background: var(--tp-white);
+	transition: border-color 0.15s, background 0.15s;
+}
+.tp-check:hover .tp-check__box {
+	border-color: var(--tp-primary);
+}
+.tp-check input:checked + .tp-check__box {
+	border-color: var(--tp-primary);
+	background: var(--tp-primary);
+}
+.tp-check input:checked + .tp-check__box::after {
+	content: '';
+	position: absolute;
+	inset: 4px;
+	background: var(--tp-white);
+	-webkit-mask: url('assets/icons/ic-check.svg') center / contain no-repeat;
+	mask: url('assets/icons/ic-check.svg') center / contain no-repeat;
+}
+.tp-check input:focus-visible + .tp-check__box {
+	box-shadow: 0 0 0 2px var(--tp-field-ring);
+}
+.tp-check a {
+	color: var(--tp-primary-ink);
+	text-decoration: underline;
+}
+
+/* Pillole a scelta singola (radio nascosto): tipo appartamento, pavimento, arredata, urgenza */
+.tp-pills {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+.tp-pill {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 8px 16px;
+	border: 1px solid var(--tp-field-border);
+	border-radius: 999px;
+	background: var(--tp-white);
+	font-size: 14px;
+	color: #374151;
+	cursor: pointer;
+	transition: border-color 0.15s, background 0.15s;
+}
+.tp-pills--row .tp-pill {
+	flex: 1;
+	padding: 8px 8px;
+	font-size: 13px;
+	white-space: nowrap;
+}
+.tp-pill input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+}
+.tp-pill:hover {
+	border-color: var(--tp-primary);
+}
+.tp-pill:has(input:checked) {
+	border-color: var(--tp-primary);
+	background: var(--tp-mint);
+	font-weight: 500;
+	color: var(--tp-ink);
+}
+.tp-pill:has(input:focus-visible) {
+	box-shadow: 0 0 0 2px var(--tp-field-ring);
+}
+
+/* Cursore del livello di sporco: 5 tacche, descrizione sotto */
+.lead-form__range input[type='range'] {
+	width: 100%;
+	margin: 4px 0;
+	accent-color: var(--tp-primary);
+}
+.lead-form__range-desc {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.4;
+	color: var(--tp-text-body);
+}
+.lead-form__range-desc b {
+	font-weight: 600;
+	color: var(--tp-text-heading);
+}
+
+/* Card a scelta singola per il tipo di pulizia (passo 3) */
+.lead-form__choices {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+}
+.tp-choice {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	padding: 12px 14px;
+	border: 1px solid var(--tp-field-border);
+	border-radius: 12px;
+	background: var(--tp-white);
+	cursor: pointer;
+	transition: border-color 0.15s, background 0.15s;
+}
+.tp-choice input {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	opacity: 0;
+}
+.tp-choice__title {
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--tp-ink);
+}
+.tp-choice__sub {
+	font-size: 12px;
+	line-height: 1.35;
+	color: var(--tp-text-body);
+}
+.tp-choice:hover {
+	border-color: var(--tp-primary);
+}
+.tp-choice:has(input:checked) {
+	border-color: var(--tp-primary);
+	background: var(--tp-mint);
+}
+.tp-choice:has(input:focus-visible) {
+	box-shadow: 0 0 0 2px var(--tp-field-ring);
+}
+
+/* Foto (passo 3) */
+.lead-form__photos input[type='file'] {
+	font-size: 13px;
+	color: var(--tp-text-body);
+}
+.lead-form__photo-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.lead-form__photo-list:empty {
+	display: none;
+}
+.lead-form__photo-list li {
+	position: relative;
+	width: 56px;
+	height: 56px;
+	border-radius: 8px;
+	overflow: hidden;
+	border: 1px solid var(--tp-border);
+}
+.lead-form__photo-list img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+/* Errore dall'API, bottoni, nota */
+.lead-form__api-error {
+	margin: 12px 0 0;
+	padding: 10px 12px;
+	border-radius: 10px;
+	background: #FEF2F2;
+	font-size: 13px;
+	line-height: 1.4;
+	color: #B91C1C;
+}
+.lead-form__api-error[hidden] {
+	display: none;
+}
+.lead-form__api-error a {
+	font-weight: 600;
+	text-decoration: underline;
+}
+.lead-form__actions {
+	display: flex;
+	gap: 10px;
+	margin-top: 16px;
+}
+.lead-form__back {
+	flex: none;
+	padding: 0 16px;
+	border: 1px solid var(--tp-field-border);
+	border-radius: 12px;
+	background: var(--tp-white);
+	font: inherit;
+	font-size: 14px;
+	font-weight: 600;
+	color: #374151;
+	cursor: pointer;
+}
+.lead-form__back[hidden] {
+	display: none;
+}
+.lead-form__submit {
+	flex: 1;
+	min-height: 52px;
+	border-radius: 12px;
+	font-size: 15px;
+	font-weight: 600;
+}
+.lead-form__submit[disabled] {
+	opacity: 0.7;
+	cursor: wait;
+}
+.lead-form__note {
+	margin: 12px 0 0;
+	text-align: center;
+	font-size: 13px;
+	font-weight: 500;
+	color: #4B5563;
+}
+
+/* ---- Barra fissa doppia (Chiama + CTA), Figma 4364:7535 ---------------------------------- */
+.sticky-cta--dual {
+	gap: 10px;
+}
+.sticky-cta__call {
+	flex: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	height: 48px;
+	padding: 0 18px;
+	border: 1.5px solid var(--tp-primary);
+	border-radius: 12px;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--tp-primary-ink);
+}
+.sticky-cta__call-icon {
+	width: 18px;
+	height: 18px;
+}
+.sticky-cta--dual .sticky-cta__btn {
+	flex: 1;
+	height: 48px;
+	padding: 0 16px;
+	border-radius: 12px;
+	font-size: 15px;
+	font-weight: 600;
+}
+
+@media (max-width: 1023px) {
+	.landing-promo__text--desktop {
+		display: none;
+	}
+	.landing-promo__text--mobile,
+	.landing-promo__text--desktop:only-child {
+		display: block;
+	}
+	.landing-nav {
+		padding: 0 20px;
+	}
+	.landing-nav__logo img {
+		height: 28px;
+	}
+	.landing-nav__links,
+	.landing-nav__phone {
+		display: none;
+	}
+	.landing-nav__cta {
+		min-height: 41px;
+		padding: 0 16px;
+		font-size: 14px;
+	}
+
+	.sgrosso {
+		padding-bottom: 76px; /* spazio per la barra fissa */
+	}
+	.sg-hero {
+		padding: 0;
+	}
+	.sg-hero__panel {
+		min-height: 0;
+		border-radius: 0;
+	}
+	.sg-hero__scrim {
+		background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 50%, rgba(255, 255, 255, 0.48) 100%);
+	}
+	.sg-hero__inner {
+		grid-template-columns: 1fr;
+		gap: 20px;
+		padding: 30px 20px 24px;
+	}
+	.sg-hero__copy {
+		gap: 16px;
+	}
+	.sg-hero__eyebrow {
+		font-size: 11px;
+		letter-spacing: 0.55px;
+	}
+	.sg-hero h1 {
+		font-size: 32px;
+		line-height: 1.1;
+		letter-spacing: -0.64px;
+	}
+	.sg-hero__subtitle {
+		font-size: 16px;
+	}
+	.sg-hero__bullets {
+		gap: 10px;
+		font-size: 15px;
+	}
+	.sg-hero__social {
+		font-size: 13px;
+	}
+	.lead-form {
+		padding: 22px;
+		border-radius: 18px;
+	}
+	.sticky-cta--dual:not([hidden]) {
+		display: flex;
 	}
 }
 
