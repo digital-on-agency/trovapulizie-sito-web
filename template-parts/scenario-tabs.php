@@ -8,8 +8,12 @@
  *
  * Le verticali (variante diversa dalla generica) mostrano il solo scenario della variante, senza tab, come il live.
  *
- * Args: eyebrow, title, scenarios[] {key, label, title, text, highlight, before, after, areas[]}, all_areas[],
- * areas_title, areas_text, cta_label, cta_link, default (key), show_tabs (bool), id.
+ * Args: eyebrow, title, scenarios[] {key, label, title, text, highlight, before, after, areas[], image?, image_alt?,
+ * chips[]?}, all_areas[], areas_title, areas_text, cta_label, cta_link, cta_position, default (key), show_tabs (bool), id.
+ *
+ * Landing B2B (TICKET-59): uno scenario con `image` mostra una foto singola al posto del prima/dopo, e con `chips`
+ * la propria lista di voci (tutte evidenziate) al posto di all_areas. Le landing Sgrosso non passano ne' l'una ne'
+ * l'altra e restano identiche.
  */
 $args = wp_parse_args( $args ?? array(), array(
 	'eyebrow'     => '',
@@ -20,6 +24,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'areas_text'  => '',
 	'cta_label'   => '',
 	'cta_link'    => '#form',
+	'cta_position' => '',
 	'default'     => '',
 	'show_tabs'   => true,
 	'id'          => 'quando-serve',
@@ -58,11 +63,18 @@ $uid = sanitize_html_class( $args['id'] );
 		<?php foreach ( $scenarios as $s ) :
 			$on    = $s['key'] === $default;
 			$areas = array_map( 'trim', (array) ( $s['areas'] ?? array() ) );
+			$chips = array_values( array_filter( array_map( 'trim', (array) ( $s['chips'] ?? array() ) ) ) );
 			?>
 			<div class="sg-when__panel" role="tabpanel" id="<?php echo esc_attr( $uid . '-panel-' . $s['key'] ); ?>" data-key="<?php echo esc_attr( $s['key'] ); ?>" aria-labelledby="<?php echo esc_attr( $uid . '-tab-' . $s['key'] ); ?>" tabindex="0"<?php echo $on ? '' : ' hidden'; ?>>
 				<div class="sg-when__areas">
 					<?php if ( $args['areas_title'] ) : ?><p class="sg-when__areas-title"><?php echo esc_html( $args['areas_title'] ); ?></p><?php endif; ?>
-					<?php if ( $args['all_areas'] ) : ?>
+					<?php if ( $chips ) : ?>
+					<ul class="sg-when__chips">
+						<?php foreach ( $chips as $chip ) : ?>
+							<li class="sg-area is-on"><?php echo esc_html( $chip ); ?></li>
+						<?php endforeach; ?>
+					</ul>
+					<?php elseif ( $args['all_areas'] ) : ?>
 					<ul class="sg-when__chips">
 						<?php foreach ( $args['all_areas'] as $area ) : ?>
 							<li class="sg-area<?php echo in_array( $area, $areas, true ) ? ' is-on' : ''; ?>"><?php echo esc_html( $area ); ?></li>
@@ -72,7 +84,11 @@ $uid = sanitize_html_class( $args['id'] );
 					<?php if ( $args['areas_text'] ) : ?><p class="sg-when__areas-text"><?php echo esc_html( $args['areas_text'] ); ?></p><?php endif; ?>
 				</div>
 
-				<?php if ( ! empty( $s['after'] ) ) : ?>
+				<?php if ( ! empty( $s['image'] ) ) : ?>
+				<div class="sg-when__photo">
+					<img src="<?php echo esc_url( $s['image'] ); ?>" alt="<?php echo esc_attr( $s['image_alt'] ?? '' ); ?>" width="900" height="680" loading="lazy" decoding="async">
+				</div>
+				<?php elseif ( ! empty( $s['after'] ) ) : ?>
 				<div class="sg-compare-media" data-compare style="--pos: 50%">
 					<img class="sg-compare-media__after" src="<?php echo esc_url( $s['after'] ); ?>" alt="Dopo lo sgrosso" width="1072" height="784" loading="lazy" decoding="async">
 					<?php if ( ! empty( $s['before'] ) ) : ?>
@@ -93,7 +109,7 @@ $uid = sanitize_html_class( $args['id'] );
 						<p class="sg-when__highlight"><?php echo tp_icon_span( 'assets/icons/ic-check.svg', 'sg-when__highlight-check' ); ?><span><?php echo esc_html( $s['highlight'] ); ?></span></p>
 					<?php endif; ?>
 					<?php if ( $args['cta_label'] ) : ?>
-						<a class="tp-btn tp-btn--primary sg-when__cta" href="<?php echo esc_url( $args['cta_link'] ); ?>"><?php echo esc_html( $args['cta_label'] ); ?> <span class="sg-cta__arrow" aria-hidden="true">&rarr;</span></a>
+						<a class="tp-btn tp-btn--primary sg-when__cta" href="<?php echo esc_url( $args['cta_link'] ); ?>"<?php if ( $args['cta_position'] ) : ?> data-cta-position="<?php echo esc_attr( $args['cta_position'] ); ?>"<?php endif; ?>><?php echo esc_html( $args['cta_label'] ); ?> <span class="sg-cta__arrow" aria-hidden="true">&rarr;</span></a>
 					<?php endif; ?>
 				</div>
 			</div>

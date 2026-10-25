@@ -4,7 +4,8 @@
  * (professionista con partita IVA, CTA al signup) e una scura (impresa, CTA WhatsApp). Sotto 1024px impilate.
  *
  * Args: eyebrow, title, subtitle, id, cards[] {badge, title, text, bullets (array di stringhe), cta_label, cta_link,
- * cta_position, dark (bool)}.
+ * cta_position, dark (bool), cta_variant ('primary' | 'light' | 'ghost'; vuoto = light sulla card scura, primary
+ * sulla chiara)}. La landing B2B (TICKET-60) usa ghost sulla card chiara e primary sulla scura.
  * Badge e spunte della card scura su #08875E (4,6:1 col bianco): analisi UX §2. I link wa.me si aprono in una
  * nuova scheda; il click e' tracciato da tp-track.js (marketing_click_whatsapp con cta_position).
  * Senza card la sezione non esce.
@@ -32,8 +33,11 @@ if ( ! $cards ) {
 		</div>
 		<div class="dc-who__cards">
 			<?php foreach ( $cards as $c ) :
-				$dark = ! empty( $c['dark'] );
-				$wa   = ! empty( $c['cta_link'] ) && false !== strpos( $c['cta_link'], 'wa.me' );
+				$dark    = ! empty( $c['dark'] );
+				$wa      = ! empty( $c['cta_link'] ) && false !== strpos( $c['cta_link'], 'wa.me' );
+				$variant = $c['cta_variant'] ?? ( $dark ? 'light' : 'primary' );
+				$btn     = array( 'primary' => 'tp-btn--primary', 'light' => 'dc-btn--light', 'ghost' => 'tp-btn--secondary' );
+				$btn     = $btn[ $variant ] ?? 'tp-btn--primary';
 				?>
 				<article class="dc-who__card<?php echo $dark ? ' dc-who__card--dark' : ''; ?>">
 					<?php if ( ! empty( $c['badge'] ) ) : ?><span class="dc-who__badge" aria-hidden="true"><?php echo esc_html( $c['badge'] ); ?></span><?php endif; ?>
@@ -47,7 +51,7 @@ if ( ! $cards ) {
 						</ul>
 					<?php endif; ?>
 					<?php if ( ! empty( $c['cta_label'] ) && ! empty( $c['cta_link'] ) ) : ?>
-						<a class="tp-btn <?php echo $dark ? 'dc-btn--light' : 'tp-btn--primary'; ?> dc-who__cta" href="<?php echo esc_url( $c['cta_link'] ); ?>" data-cta-position="<?php echo esc_attr( $c['cta_position'] ?? 'per-chi' ); ?>"<?php echo $wa ? ' target="_blank" rel="noopener"' : ''; ?>><?php echo esc_html( $c['cta_label'] ); ?> <span class="dc-arrow" aria-hidden="true">&rarr;</span></a>
+						<a class="tp-btn <?php echo esc_attr( $btn ); ?> dc-who__cta" href="<?php echo esc_url( $c['cta_link'] ); ?>" data-cta-position="<?php echo esc_attr( $c['cta_position'] ?? 'per-chi' ); ?>"<?php echo $wa ? ' target="_blank" rel="noopener"' : ''; ?>><?php echo esc_html( $c['cta_label'] ); ?> <span class="dc-arrow" aria-hidden="true">&rarr;</span></a>
 					<?php endif; ?>
 				</article>
 			<?php endforeach; ?>

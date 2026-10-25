@@ -16,7 +16,8 @@
 
 	function initMedia(media) {
 		var range = media.querySelector('input[type="range"]');
-		if (!range) return;
+		if (!range || media.hasAttribute('data-compare-ready')) return;
+		media.setAttribute('data-compare-ready', '');
 		range.addEventListener('input', function () { setPos(media, Number(range.value)); });
 		range.addEventListener('pointerdown', function () { media.classList.add('is-dragging'); });
 		['pointerup', 'pointercancel', 'blur'].forEach(function (ev) {
@@ -63,4 +64,8 @@
 	}
 
 	document.querySelectorAll('[data-scenario-tabs]').forEach(initRoot);
+	// Confronti prima/dopo fuori dai tab (template-parts/works-gallery.php, landing B2B): stesso markup, stessa maniglia.
+	document.querySelectorAll('[data-compare]').forEach(function (media) {
+		if (!media.closest('[data-scenario-tabs]')) initMedia(media);
+	});
 })();

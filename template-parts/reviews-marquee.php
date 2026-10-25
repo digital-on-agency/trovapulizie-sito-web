@@ -2,7 +2,9 @@
 /**
  * Sezione "Social proof" — Figma 3564:96 (mobile 4023:1023).
  * Args: badge, badge_link, badge_logo (google|none), eyebrow, title, reviews (array del campo complex `reviews`:
- * author_name, author_city, avatar, review_text), layout ('marquee' | 'grid'), card ('side' | 'stars').
+ * author_name, author_city, avatar, review_text), layout ('marquee' | 'grid'), card ('side' | 'stars'),
+ * avatar_mode ('image' | 'initials': con 'initials' la card a stelle mostra le iniziali del nome in un cerchio al
+ * posto della foto, landing B2B TICKET-61; le recensioni del live non hanno foto vere).
  * Desktop: marquee continuo (CSS, 40 s, pausa su hover, sul focus e col bottone; set duplicato per il loop); mobile: prime 3 card impilate
  * statiche con reveal in stagger; reduced-motion: griglia statica. Riutilizzabile nelle landing.
  * Landing Sgrosso (Figma 4364:6920): layout 'grid' = tre card ferme centrate, card 'stars' = stelle sopra, citazione,
@@ -17,6 +19,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'reviews'    => array(),
 	'layout'     => 'marquee',
 	'card'       => 'side',
+	'avatar_mode' => 'image',
 ) );
 $reviews = array_values( array_filter( (array) $args['reviews'], function ( $r ) {
 	return ! empty( $r['review_text'] );
@@ -29,13 +32,26 @@ $render_card = function ( $r, $i ) use ( $total, $args ) {
 	$avatar = ! empty( $r['avatar'] ) ? $r['avatar'] : tp_theme_asset( 'assets/img/review-avatar-' . ( ( $i % 3 ) + 1 ) . '.png' );
 	$author = trim( (string) ( $r['author_name'] ?? '' ) );
 	$city   = trim( (string) ( $r['author_city'] ?? '' ) );
+	$initials = '';
+	if ( 'initials' === $args['avatar_mode'] ) {
+		foreach ( array_slice( preg_split( '/\s+/', $author ), 0, 2 ) as $w ) {
+			$w = preg_replace( '/[^\p{L}]/u', '', $w );
+			if ( $w ) {
+				$initials .= mb_strtoupper( mb_substr( $w, 0, 1 ) );
+			}
+		}
+	}
 	if ( 'stars' === $args['card'] ) :
 	?>
 	<article class="review-card review-card--stars" style="--i:<?php echo (int) $i; ?>">
 		<span class="review-card__stars" aria-label="5 stelle su 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
 		<blockquote class="review-card__text"><?php echo esc_html( trim( (string) $r['review_text'], "“”\"" ) ); ?></blockquote>
 		<div class="review-card__who">
-			<img class="review-card__avatar" src="<?php echo esc_url( $avatar ); ?>" alt="" width="40" height="40" loading="lazy">
+			<?php if ( $initials ) : ?>
+				<span class="review-card__initials" aria-hidden="true"><?php echo esc_html( $initials ); ?></span>
+			<?php else : ?>
+				<img class="review-card__avatar" src="<?php echo esc_url( $avatar ); ?>" alt="" width="40" height="40" loading="lazy">
+			<?php endif; ?>
 			<div>
 				<?php if ( $author ) : ?><p class="review-card__name"><?php echo esc_html( $author ); ?></p><?php endif; ?>
 				<?php if ( $city ) : ?><p class="review-card__city"><?php echo esc_html( $city ); ?></p><?php endif; ?>

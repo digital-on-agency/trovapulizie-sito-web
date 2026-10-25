@@ -5,7 +5,8 @@
  * a destra il form con id proprio (#form-bottom): le CTA della meta' inferiore della pagina puntano qui e non
  * risalgono all'hero. Il form riporta cta_position 'bottom' negli eventi.
  *
- * Args: eyebrow, title, subtitle, bullets[], image, form (array di args per template-parts/lead-form.php).
+ * Args: eyebrow, title, subtitle, bullets[], image (vuota = nessuna mascotte), form (array di args per la parte del
+ * form), form_part (default template-parts/lead-form; la landing B2B passa template-parts/lead-form-b2b).
  */
 $args = wp_parse_args( $args ?? array(), array(
 	'eyebrow'  => '',
@@ -14,6 +15,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'bullets'  => array(),
 	'image'    => '',
 	'form'     => array(),
+	'form_part' => 'template-parts/lead-form',
 ) );
 $form = wp_parse_args( (array) $args['form'], array(
 	'id'           => 'lead-bottom',
@@ -38,7 +40,7 @@ $form = wp_parse_args( (array) $args['form'], array(
 			<?php endif; ?>
 		</div>
 		<div class="sg-final__form" id="form-bottom">
-			<?php get_template_part( 'template-parts/lead-form', null, $form ); ?>
+			<?php get_template_part( $args['form_part'], null, $form ); ?>
 		</div>
 	</div>
 </section>
