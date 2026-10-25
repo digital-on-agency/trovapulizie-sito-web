@@ -1,0 +1,104 @@
+<?php
+/**
+ * SEO per pagina (TICKET-48): title, meta description e dati strutturati delle landing Sgrosso.
+ *
+ * Title e description: campo della scheda SEO se compilato, altrimenti sulle landing Sgrosso il default
+ * della variante (inc/sgrosso-variants.php, gli stessi testi di VARIANT_CONFIG del live), altrimenti il titolo
+ * WordPress e il motto del sito. JSON-LD Service sulle landing Sgrosso: stessa forma di serviceJsonLd() della SPA
+ * (front-end/src/lib/shared/jsonLd.ts): url canonico, areaServed Roma e provincia, offers con PriceSpecification
+ * 200-700 EUR (decisione Guido 03/10, solo sgrosso), provider LocalBusiness senza indirizzo stradale.
+ *
+ * [ATTENZIONE] Niente aggregateRating da nessuna parte: un placeholder di quel tipo era finito su 21 pagine del
+ * portale. Il FAQPage lo emette gia' template-parts/faq-accordion.php: non aggiungerne un secondo qui.
+ */
+require_once __DIR__ . '/sgrosso-variants.php';
+
+/** Default della variante quando la pagina corrente e' una landing Sgrosso, altrimenti null. */
+function tp_seo_sgrosso_defaults() {
+	if ( ! is_singular() || ! is_page_template( 'page-sgrosso.php' ) ) {
+		return null;
+	}
+	return tp_sg_defaults( carbon_get_the_post_meta( 'sg_variant' ) ?: 'sgrosso-casa' );
+}
+
+function tp_seo_title() {
+	$custom = is_singular() ? trim( (string) carbon_get_the_post_meta( 'seo_title' ) ) : '';
+	if ( $custom ) {
+		return $custom;
+	}
+	$d = tp_seo_sgrosso_defaults();
+	if ( $d ) {
+		return $d['page_title'];
+	}
+	if ( is_singular() && is_page_template( 'page-thank-you.php' ) ) {
+		return 'Richiesta ricevuta | Trovapulizie';
+	}
+	return '';
+}
+
+function tp_seo_description() {
+	$custom = is_singular() ? trim( (string) carbon_get_the_post_meta( 'seo_description' ) ) : '';
+	if ( $custom ) {
+		return $custom;
+	}
+	$d = tp_seo_sgrosso_defaults();
+	if ( $d ) {
+		return $d['page_description'];
+	}
+	if ( is_singular() && is_page_template( 'page-thank-you.php' ) ) {
+		return 'Richiesta ricevuta: il team Trovapulizie ti ricontatta entro 1 ora per confermare il tuo preventivo gratuito.';
+	}
+	return get_bloginfo( 'description' );
+}
+
+add_filter( 'pre_get_document_title', function ( $title ) {
+	$t = tp_seo_title();
+	return $t ? $t : $title;
+}, 20 );
+
+add_action( 'wp_head', function () {
+	$descrizione = tp_seo_description();
+	if ( $descrizione ) {
+		echo '<meta name="description" content="' . esc_attr( wp_strip_all_tags( $descrizione ) ) . '">' . "\n";
+	}
+}, 2 );
+
+add_action( 'wp_head', function () {
+	$d = tp_seo_sgrosso_defaults();
+	if ( ! $d ) {
+		return;
+	}
+	$dati = array(
+		'@context'    => 'https://schema.org',
+		'@type'       => 'Service',
+		'serviceType' => 'Pulizia straordinaria (sgrosso)',
+		'description' => wp_strip_all_tags( tp_seo_description() ),
+		'url'         => get_permalink(),
+		'areaServed'  => array(
+			array( '@type' => 'City', 'name' => 'Roma' ),
+			array( '@type' => 'AdministrativeArea', 'name' => 'Provincia di Roma' ),
+		),
+		'offers'      => array(
+			'@type'              => 'Offer',
+			'priceSpecification' => array(
+				'@type'         => 'PriceSpecification',
+				'minPrice'      => 200,
+				'maxPrice'      => 700,
+				'priceCurrency' => 'EUR',
+			),
+		),
+		'provider'    => array(
+			'@type'     => 'LocalBusiness',
+			'name'      => 'Trovapulizie',
+			'legalName' => 'Trovapulizie SRL',
+			'telephone' => '+393200980144',
+			'address'   => array(
+				'@type'           => 'PostalAddress',
+				'addressLocality' => 'Roma',
+				'addressRegion'   => 'Lazio',
+				'addressCountry'  => 'IT',
+			),
+		),
+	);
+	echo '<script type="application/ld+json">' . wp_json_encode( $dati, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
+}, 5 );

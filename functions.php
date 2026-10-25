@@ -89,17 +89,7 @@ add_filter( 'wp_sitemaps_posts_query_args', function ( $args, $post_type ) {
 	return $args;
 }, 10, 2 );
 
-/* Meta description: dal campo SEO della pagina, altrimenti dal motto del sito. Senza, la pagina si
-   presenta ai motori con un estratto scelto da loro. */
-add_action( 'wp_head', function () {
-	$descrizione = function_exists( 'carbon_get_the_post_meta' ) && is_singular() ? carbon_get_the_post_meta( 'seo_description' ) : '';
-	if ( ! $descrizione ) {
-		$descrizione = get_bloginfo( 'description' );
-	}
-	if ( $descrizione ) {
-		echo '<meta name="description" content="' . esc_attr( wp_strip_all_tags( $descrizione ) ) . '">' . "\n";
-	}
-}, 2 );
+/* Title, meta description e JSON-LD per pagina: inc/seo.php (campo SEO > default della variante > WordPress). */
 
 /* Dati strutturati LocalBusiness sulla pagina hub di citta' (TICKET-32). Un solo blocco per pagina,
    generato da qui e non da un plugin SEO: il tema non ne ha.
@@ -183,3 +173,4 @@ add_action( 'init', function () {
 } );
 require_once __DIR__ . "/inc/carbon-fields.php";
 require_once __DIR__ . '/inc/tracking.php';
+require_once __DIR__ . '/inc/seo.php';
