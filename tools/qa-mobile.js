@@ -110,6 +110,12 @@ const PROBE = `(() => {
 		// L'hub di citta' riusa le sezioni della Home ma non la sua coreografia: le verifiche
 		// su pin, telefono e hero della Home non valgono li' (SPEC-pagina-hub-roma).
 		hub: !!document.querySelector('main.hub-roma'),
+		// Pagina Diventa cleaner (SPEC-pagina-diventa-cleaner): navbar del sito, nessuna coreografia della Home.
+		cleaner: !!document.querySelector('main.dc'),
+		sezioniCleaner: ['.dc-hero', '.sg-trust', '.sg-steps--screens', '.dc-bento', '.dc-earn', '.dc-who', '.dc-req', '.faq', '.cta-final']
+			.filter(sel => !document.querySelector(sel)),
+		floatVisibili: [].filter.call(document.querySelectorAll('.dc-float'), el => el.getBoundingClientRect().width > 0).length,
+		calcPronto: (() => { const c = document.querySelector('[data-earn-controls]'); return c ? !c.hidden : null; })(),
 		landing: landingMain ? landingMain.className : '',
 		landingNav: landingNav,
 		forms: forms,
@@ -152,18 +158,18 @@ const PROBE = `(() => {
 			const errors = [];
 			if (r.scrollWidth > r.vw) errors.push('scroll orizzontale: scrollWidth ' + r.scrollWidth + ' > ' + r.vw);
 			const landing = !!r.landing;
-			const attesoMotion = (r.hub || landing) ? false : desktop;
+			const attesoMotion = (r.hub || landing || r.cleaner) ? false : desktop;
 			if (r.motionOk !== attesoMotion) errors.push('motion-ok ' + r.motionOk + ', atteso ' + attesoMotion);
 			if (!desktop && r.cdn.length) errors.push('risorse CDN richieste sotto soglia: ' + r.cdn.join(', '));
 			// Sotto soglia la sezione vale 300dvh con la sequenza attiva, circa 2 viewport nel fallback
 			// impilato; i 550vh del pin desktop (oltre 5 viewport) non devono comparire in nessuno dei due.
-			if (!desktop && !r.hub && !landing) {
+			if (!desktop && !r.hub && !landing && !r.cleaner) {
 				const atteso = r.seq.on ? 3 * r.seq.viewport : null;
 				if (atteso && Math.abs(r.hiwHeight - atteso) > atteso * 0.1) errors.push('Come funziona alta ' + r.hiwHeight + 'px, attesi circa ' + atteso + ' (300dvh)');
 				if (!r.seq.on && r.hiwHeight > 2.5 * r.seq.viewport) errors.push('fallback impilato alto ' + r.hiwHeight + 'px: sembra la sezione pinnata');
 			}
 			// Come funziona sotto soglia (TICKET-13 rev. 2): sequenza di schermate o fallback impilato.
-			if (!desktop && !r.hub && !landing) {
+			if (!desktop && !r.hub && !landing && !r.cleaner) {
 				if (r.steps.length !== 3) errors.push('passi di Come funziona: ' + r.steps.length + ', attesi 3');
 				if (r.videoSezione) errors.push(r.videoSezione + ' video ancora nella sezione: su mobile la sequenza e\' di immagini');
 				if (r.seq.on) {
@@ -209,6 +215,15 @@ const PROBE = `(() => {
 				if (r.sezioni.length) errors.push('sezioni mancanti: ' + r.sezioni.join(', '));
 				if (!r.stickyCta.c) errors.push('barra CTA fissa assente dal DOM');
 				else if (desktop && !r.stickyCta.hidden) errors.push('barra CTA fissa visibile su desktop');
+			}
+			// Diventa cleaner (TICKET-51..57): sezioni, barra fissa nascosta al caricamento, card flottanti solo su desktop.
+			if (r.cleaner) {
+				if (r.sezioniCleaner.length) errors.push('sezioni mancanti: ' + r.sezioniCleaner.join(', '));
+				if (!r.stickyCta.c) errors.push('barra CTA fissa assente dal DOM');
+				else if (!r.stickyCta.hidden) errors.push('barra CTA fissa visibile al caricamento');
+				if (desktop && r.floatVisibili !== 2) errors.push('card flottanti visibili ' + r.floatVisibili + ', attese 2');
+				if (!desktop && r.floatVisibili) errors.push('card flottanti visibili sotto soglia');
+				if (r.calcPronto !== true) errors.push('calcolatore dei guadagni non attivato dal JS');
 			}
 			// Peso dei media (TICKET-20): budget, rendition per mobile, nessun doppione fra URL diversi.
 			if (r.dup.length) errors.push('stesso file con URL diversi: ' + r.dup.join(', '));
