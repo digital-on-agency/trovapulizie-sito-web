@@ -475,3 +475,21 @@ refactor senza cambi di comportamento deve dare gli stessi valori.
   Prezzi/Accedi/Registrati, pagine linkate dal footer non esistenti.
 - Search bar della hero statica: il widget di ricerca reale e' il widget JS di ADR-001.
 - `placeholder-dev.mp4` tracciato ma non usato.
+
+## Barra di ricerca della hero (25/10/2026)
+
+Era un segnaposto (etichetta del servizio disegnata, nessun campo, bottone che non inviava nulla). Ora e' un
+`<form method="get">` verso l'app (`template-parts/search-bar.php` con `services`):
+
+- menu del servizio = `<select name="service">` con i tipi dell'app, letti dal server WordPress da
+  `GET /api/services/types` e tenuti in cache 6 ore (`tp_service_types()` in `functions.php`, elenco di ripiego se
+  l'API non risponde); primo il servizio per privati;
+- campo `address` obbligatorio (validazione del browser);
+- privati: `tp_search_target` in Theme Options > Integrazioni. Default `/home?address=...&service=...`: l'app
+  precompila l'indirizzo e il visitatore riconferma il servizio. `/results` solo dopo il backport in produzione del
+  commit `947de5d8` del portale: al 25/10 `SearchResults` di `master` non legge `address` dall'URL e resta su
+  "Ricerca in corso";
+- servizi solo aziende (Uffici, Condomini, Affitti brevi): `assets/js/search-form.js` cambia destinazione in
+  `/richiedi-preventivo?step=0&service=...&address=...` (in produzione l'app legge `service`, non ancora `address`).
+
+QA: `tools/qa-home-search.js <chrome> <url> [larghezza] [out.png]` (invio intercettato, tre casi).
