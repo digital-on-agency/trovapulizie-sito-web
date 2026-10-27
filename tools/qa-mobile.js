@@ -114,6 +114,8 @@ const PROBE = `(() => {
 		hub: !!document.querySelector('main.hub-roma'),
 		// Pagina Diventa cleaner (SPEC-pagina-diventa-cleaner): navbar del sito, nessuna coreografia della Home.
 		cleaner: !!document.querySelector('main.dc'),
+		// Pagina Contatti (SPEC-pagina-contatti): navbar del sito, nessuna coreografia della Home.
+		contact: !!document.querySelector('main.ct'),
 		sezioniCleaner: ['.dc-hero', '.sg-trust', '.sg-steps--screens', '.dc-bento', '.dc-earn', '.dc-who', '.dc-req', '.faq', '.cta-final']
 			.filter(sel => !document.querySelector(sel)),
 		floatVisibili: [].filter.call(document.querySelectorAll('.dc-float'), el => el.getBoundingClientRect().width > 0).length,
@@ -162,18 +164,19 @@ const PROBE = `(() => {
 			const errors = [];
 			if (r.scrollWidth > r.vw) errors.push('scroll orizzontale: scrollWidth ' + r.scrollWidth + ' > ' + r.vw);
 			const landing = !!r.landing;
-			const attesoMotion = (r.hub || landing || r.cleaner) ? false : desktop;
+			const altraPagina = r.hub || landing || r.cleaner || r.contact;
+			const attesoMotion = altraPagina ? false : desktop;
 			if (r.motionOk !== attesoMotion) errors.push('motion-ok ' + r.motionOk + ', atteso ' + attesoMotion);
 			if (!desktop && r.cdn.length) errors.push('risorse CDN richieste sotto soglia: ' + r.cdn.join(', '));
 			// Sotto soglia la sezione vale 300dvh con la sequenza attiva, circa 2 viewport nel fallback
 			// impilato; i 550vh del pin desktop (oltre 5 viewport) non devono comparire in nessuno dei due.
-			if (!desktop && !r.hub && !landing && !r.cleaner) {
+			if (!desktop && !altraPagina) {
 				const atteso = r.seq.on ? 3 * r.seq.viewport : null;
 				if (atteso && Math.abs(r.hiwHeight - atteso) > atteso * 0.1) errors.push('Come funziona alta ' + r.hiwHeight + 'px, attesi circa ' + atteso + ' (300dvh)');
 				if (!r.seq.on && r.hiwHeight > 2.5 * r.seq.viewport) errors.push('fallback impilato alto ' + r.hiwHeight + 'px: sembra la sezione pinnata');
 			}
 			// Come funziona sotto soglia (TICKET-13 rev. 2): sequenza di schermate o fallback impilato.
-			if (!desktop && !r.hub && !landing && !r.cleaner) {
+			if (!desktop && !altraPagina) {
 				if (r.steps.length !== 3) errors.push('passi di Come funziona: ' + r.steps.length + ', attesi 3');
 				if (r.videoSezione) errors.push(r.videoSezione + ' video ancora nella sezione: su mobile la sequenza e\' di immagini');
 				if (r.seq.on) {
