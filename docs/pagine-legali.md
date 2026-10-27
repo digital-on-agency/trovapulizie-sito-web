@@ -21,6 +21,11 @@ Trappole viste il 27/10:
 - Esisteva gia' una bozza con slug `privacy` (scheletro del 12/10) che `wp post list --name=privacy
   --post_status=any` non ha mostrato: la pagina nuova e' nata come `privacy-2`. Prima di creare una pagina
   controllare con una query su `post_name`.
-- La cache oggetti di LiteSpeed (attiva sul web, `object-life` 360 s) non e' raggiungibile da WP-CLI
-  (`wp_using_ext_object_cache()` falso, `wp cache flush` fallisce): dopo una modifica da CLI il web puo' vedere lo
-  stato vecchio del post fino a 6 minuti (qui: bozza -> redirect a `?page_id=37`).
+- La cache oggetti di LiteSpeed e' un memcached locale (`::1:11211`) che il PHP della CLI non raggiunge
+  (`wp_using_ext_object_cache()` falso, `wp cache flush` fallisce). Una modifica fatta da WP-CLI non invalida la
+  copia in cache: il web ha continuato a vedere la pagina 37 come bozza (redirect a `?page_id=37`, REST 401) anche
+  dopo 12 minuti, nonostante `object-life` 360 s. Rimedio usato: script PHP temporaneo nel docroot che carica
+  `wp-load.php` e chiama `clean_post_cache( ID )`, richiamato una volta e cancellato subito. Non usare `flush_all`
+  su memcached: e' condiviso con gli altri siti dell'account Hostinger.
+- La policy iubenda dice ancora "Privacy Policy di trovapulizie.com": il dominio va aggiornato sul pannello iubenda
+  al cutover su `www.trovapulizie.it`.
