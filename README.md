@@ -29,6 +29,7 @@ page-cleaner-landing.php  pagina /diventa-cleaner/ (docs/landing-cleaner.md)
 page-landing-b2b.php      landing /roma/sgrosso-commerciale/ (docs/landing-b2b.md)
 page-contact.php          pagina /contatti/ (docs/contatti.md)
 page-about.php            pagina /chi-siamo/ (docs/chi-siamo.md)
+page-legal.php            pagine legali /privacy/ e /terms/ (docs/pagine-legali.md)
 header-landing.php        testata delle landing (promo bar, navbar senza menu); head condiviso in template-parts/head.php
 inc/sgrosso-variants.php  testi di default per variante della landing Sgrosso
 inc/tracking.php          iubenda, GTM, Clarity da Theme Options
