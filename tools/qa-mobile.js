@@ -116,6 +116,8 @@ const PROBE = `(() => {
 		cleaner: !!document.querySelector('main.dc'),
 		// Pagina Contatti (SPEC-pagina-contatti): navbar del sito, nessuna coreografia della Home.
 		contact: !!document.querySelector('main.ct'),
+		// Pagina Chi siamo (SPEC-pagina-chi-siamo): navbar del sito, nessuna coreografia della Home.
+		about: !!document.querySelector('main.ab'),
 		sezioniCleaner: ['.dc-hero', '.sg-trust', '.sg-steps--screens', '.dc-bento', '.dc-earn', '.dc-who', '.dc-req', '.faq', '.cta-final']
 			.filter(sel => !document.querySelector(sel)),
 		floatVisibili: [].filter.call(document.querySelectorAll('.dc-float'), el => el.getBoundingClientRect().width > 0).length,
@@ -164,7 +166,7 @@ const PROBE = `(() => {
 			const errors = [];
 			if (r.scrollWidth > r.vw) errors.push('scroll orizzontale: scrollWidth ' + r.scrollWidth + ' > ' + r.vw);
 			const landing = !!r.landing;
-			const altraPagina = r.hub || landing || r.cleaner || r.contact;
+			const altraPagina = r.hub || landing || r.cleaner || r.contact || r.about;
 			const attesoMotion = altraPagina ? false : desktop;
 			if (r.motionOk !== attesoMotion) errors.push('motion-ok ' + r.motionOk + ', atteso ' + attesoMotion);
 			if (!desktop && r.cdn.length) errors.push('risorse CDN richieste sotto soglia: ' + r.cdn.join(', '));
