@@ -30,7 +30,7 @@ Stato al 15/10/2026: desktop completo (ver. tema 0.17.0). Mobile e tablet non an
 | `template-parts/faq-accordion.php` | Sezione FAQ (colonna contatto + accordion + JSON-LD) |
 | `template-parts/cta-final.php` | Sezione CTA finale |
 | `assets/js/nav-mobile.js` | Menu mobile della navbar (l'unico modulo caricato su tutte le pagine, non solo la Home) |
-| `assets/js/hiw-sequence.js` | Sequenza mobile di Come funziona: tre schermate in crossfade guidate dallo scroll |
+| `assets/js/hiw-carousel.js` | Carosello mobile di Come funziona: frecce, puntini e contatore sopra la fila con scroll-snap |
 | `assets/js/*.js` | Un modulo per comportamento, nessun bundler, nessuna dipendenza fra moduli tranne `phone-3d.js` -> `screen-timeline.js` (vedi §4) |
 | `assets/img/`, `assets/icons/`, `assets/video/` | Asset del tema usati come fallback quando il campo WP e' vuoto (vedi §7) |
 | `tools/` | Script di QA headless, pipeline del video dello schermo, encoding video. Non vanno sul server (vedi `tools/README.md`) |
@@ -386,18 +386,14 @@ tutta sezione; qui il testo e' su bianco, la foto e' un box alto 270 in flusso s
 (150x300) sporge dal bordo inferiore del box con un `margin-top` negativo di 168 (= 270 - 102 del Figma).
 La search bar va su tre righe con il divisore orizzontale e Cerca a tutta larghezza.
 
-**Come funziona sotto 1024px** (ADR-002 rev. 5): il contenuto della sezione resta sticky per circa due
-viewport (`height: 300dvh`, non `vh`: la barra di Safari che entra e esce cambia `vh` e sfaserebbe il pin)
-e dentro un unico telefono le tre schermate si alternano in crossfade, con i tre paragrafi in sincrono.
-Niente video: solo opacita', quindi funziona anche in Low Power Mode e su Safari iOS, dove autoplay e seek
-non sono affidabili. Le tre schermate stanno sovrapposte in `.hiw-seq` e si incrociano fra loro: la
-cornice del telefono e' una sola, perche' due bezel scuri a meta' opacita' lascerebbero passare lo sfondo.
-
-`assets/js/hiw-sequence.js` calcola il progresso da `scrollY` (nessuna libreria), tiene ferma ogni
-schermata e dissolve solo nella parte centrale di ogni intervallo (`FADE`), e mette `hiw-seq-ok` su
-`<html>`. Senza JavaScript o con `prefers-reduced-motion` la classe non arriva e restano i **tre blocchi
-impilati** del Figma `4020:965` (badge 44, testo 300, telefono 158x320 per blocco): e' il fallback, ed e'
-fedele al design.
+**Come funziona sotto 1024px** (carosello, decisione Guido 27/10, sostituisce la sequenza guidata dallo
+scroll di ADR-002 rev. 5): la lista dei passi diventa una fila orizzontale con `scroll-snap`, una card per
+passo col proprio telefono sopra (220x445, 200x405 fino a 400px: le schermate dell'app si leggono, a 158x320
+no) e numero, titolo e testo sotto. Si scorre col dito senza JavaScript; `assets/js/hiw-carousel.js` aggiunge
+frecce, puntini e "1 di 3" (`.hiw-nav`, visibile con `.hiw-car-ok` su `<html>`) e calcola il passo dalla
+card piu' vicina al centro. La sezione e' alta circa una viewport: niente pin, niente `300dvh`. Motivi del
+cambio: telefono troppo piccolo, telefono sotto il bordo dello schermo all'ingresso, tre viewport di
+scorrimento senza segnale di avanzamento. `hiw-sequence.js` e le regole `.hiw-seq` sono stati rimossi.
 
 Le tre schermate vengono da `tools/step-posters-export.sh`, che le estrae dal video desktop sui tempi di
 `T` in `assets/js/screen-timeline.js` (0,5 / 4,5 / 8,5 s, mezzo secondo dentro ogni passo per non cogliere
@@ -441,14 +437,8 @@ della rispettiva sezione; i numeri vengono dai frame mobile del Figma.
   riga), divisore, copyright e link legali. Sotto i 390px il corpo scende a 13px e il passo fra le colonne
   a 12: e' quanto basta a tenere le tre colonne su una riga a 360 senza troncare "Come guadagnare".
 
-**Come funziona sotto 1024px: lo stepper** (16/10). Prima i tre testi si alternavano nello stesso riquadro,
-uno per volta e centrati: non si capiva a che punto si fosse ne' quanti passi ci fossero. Ora sotto 1024px
-c'e' lo stesso stepper del desktop — i tre passi tutti visibili, numero di fianco al titolo, allineati a
-sinistra, linea di collegamento che si colora fino al passo corrente, e solo il passo in corso che apre il
-proprio paragrafo. `hiw-sequence.js` non tocca piu' l'opacita' dei testi: calcola il passo corrente dal peso
-maggiore e mette `is-active` / `is-done`; le schermate dentro al telefono continuano a incrociarsi.
-Il riquadro dei passi tiene un'altezza fissa (236px) perche' il telefono sotto non salti quando cambia la
-lunghezza del paragrafo, e titolo e sottotitolo sono allineati a sinistra come lo stepper.
+**Come funziona sotto 1024px: lo stepper** (16/10) — superato il 27/10 dal carosello descritto sopra:
+lo stepper verticale con il telefono sotto lasciava il telefono fuori dallo schermo all'ingresso della sezione.
 
 ## 11. QA
 
