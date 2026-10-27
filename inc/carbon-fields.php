@@ -22,7 +22,7 @@ add_action( 'carbon_fields_register_fields', function () {
 	// Scheda SEO su tutte le pagine (inc/seo.php). Title e description: campo compilato > default della
 	// variante sulle landing Sgrosso > titolo WordPress / motto del sito.
 	Container::make( 'post_meta', __( 'SEO' ) )
-		->where( 'post_type', '=', 'page' )
+		->where( 'post_type', 'IN', array( 'page', 'post' ) )
 		->set_context( 'side' )
 		->add_fields( array(
 			Field::make( 'text', 'seo_title', __( 'Title' ) )
@@ -753,6 +753,16 @@ add_action( 'carbon_fields_register_fields', function () {
 					Field::make( 'text', 'question', __( 'Domanda' ) ),
 					Field::make( 'textarea', 'answer', __( 'Risposta' ) ),
 				) ),
+		) );
+
+	// Articolo del blog (SPEC-blog, TICKET-71): servizio verso cui porta il box scuro nel testo.
+	Container::make( 'post_meta', __( 'Articolo' ) )
+		->where( 'post_type', '=', 'post' )
+		->set_context( 'side' )
+		->add_fields( array(
+			Field::make( 'select', 'tp_servizio', __( 'Servizio collegato' ) )
+				->set_options( array_merge( array( '' => 'Nessuno' ), wp_list_pluck( tp_blog_services(), 'label' ) ) )
+				->set_help_text( __( 'Il box va dove scrivi [tp_servizio] nel testo, altrimenti in fondo. Nessuno = niente box.' ) ),
 		) );
 
 	// Pagina legale — template page-legal.php (/privacy/, /terms/). Il testo sta nell'editor della pagina.

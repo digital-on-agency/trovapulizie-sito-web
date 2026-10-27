@@ -255,6 +255,10 @@ add_action( 'wp_enqueue_scripts', function () {
 		// Chi siamo (TICKET-66..69): solo ingressi a cascata; la mappa della hero e' statica.
 		$handles = array( 'reveal' );
 	}
+	if ( is_home() || is_category() || is_singular( 'post' ) ) {
+		// Blog (SPEC-blog): solo l'ingresso della CTA finale; indice e paginazione sono HTML puro.
+		$handles = array( 'reveal' );
+	}
 	if ( is_page_template( 'page-thank-you.php' ) ) {
 		$handles[] = 'thank-you';
 	}
@@ -280,4 +284,5 @@ add_action( 'init', function () {
 } );
 require_once __DIR__ . "/inc/carbon-fields.php";
 require_once __DIR__ . '/inc/tracking.php';
+require_once __DIR__ . '/inc/blog.php';
 require_once __DIR__ . '/inc/seo.php';

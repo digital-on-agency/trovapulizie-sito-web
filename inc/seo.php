@@ -26,6 +26,11 @@ function tp_seo_title() {
 	if ( $custom ) {
 		return $custom;
 	}
+	// Blog (SPEC-blog): indice, categorie e articoli, inc/blog.php.
+	$blog = tp_blog_seo_title();
+	if ( $blog ) {
+		return $blog;
+	}
 	$d = tp_seo_sgrosso_defaults();
 	if ( $d ) {
 		return $d['page_title'];
@@ -60,6 +65,10 @@ function tp_seo_description() {
 	$custom = is_singular() ? trim( (string) carbon_get_the_post_meta( 'seo_description' ) ) : '';
 	if ( $custom ) {
 		return $custom;
+	}
+	$blog = tp_blog_seo_description();
+	if ( $blog ) {
+		return $blog;
 	}
 	$d = tp_seo_sgrosso_defaults();
 	if ( $d ) {
