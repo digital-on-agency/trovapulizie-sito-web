@@ -1,20 +1,27 @@
 <?php
 /**
- * Canali diretti e dati aziendali — pagina Contatti (Figma 6803:953; TICKET-64). Due card affiancate: a sinistra i
- * canali (fondo menta: WhatsApp, email, orari, bottone), a destra la card bianca coi dati della societa'. Sotto
- * 1024px impilate, canali sopra. Stesso disegno del blocco "Dati aziendali" di Chi siamo (6795:1136).
+ * Canali diretti e dati aziendali — pagine Contatti (Figma 6803:953; TICKET-64) e Chi siamo (6795:1136; TICKET-69).
+ * Due card affiancate: i canali (fondo menta: WhatsApp, email, orari, bottone) e la card bianca coi dati della
+ * societa'. Sotto 1024px impilate; l'ordine lo decide `order`.
  *
  * Args:
  *   channels {eyebrow, title, text, whatsapp (numero in qualunque formato, vuoto = riga e bottone nascosti),
  *             email (vuoto = riga nascosta), cta_label}
  *   company  {eyebrow, name, rows[] {title, text}}
+ *   order    'channels' (default, Contatti: canali a sinistra e sopra) | 'company' (Chi siamo: dati a sinistra)
+ *   position prefisso di cta_position negli eventi (default 'contatti_canali'; il numero aggiunge '_numero')
+ *   id       id della sezione (default 'canali')
  * Il link WhatsApp esce da tp_whatsapp_parts(): stesso numero per testo, wa.me e JSON-LD (inc/seo.php).
  * Il click sul wa.me e' tracciato da tp-track.js (marketing_click_whatsapp, cta_position).
  */
 $args = wp_parse_args( $args ?? array(), array(
 	'channels' => array(),
 	'company'  => array(),
+	'order'    => 'channels',
+	'position' => 'contatti_canali',
+	'id'       => 'canali',
 ) );
+$pos = $args['position'];
 $ch = wp_parse_args( (array) $args['channels'], array(
 	'eyebrow'   => '',
 	'title'     => '',
@@ -37,7 +44,7 @@ if ( ! $wa && ! $email && ! $rows ) {
 	return;
 }
 ?>
-<section class="ct-info" id="canali" data-reveal>
+<section class="ct-info<?php echo 'company' === $args['order'] ? ' ct-info--company-first' : ''; ?>" id="<?php echo esc_attr( $args['id'] ); ?>" data-reveal>
 	<div class="ct-info__inner">
 		<?php if ( $wa || $email ) : ?>
 		<div class="ct-info__card ct-info__card--channels">
@@ -48,7 +55,7 @@ if ( ! $wa && ! $email && ! $rows ) {
 				<?php if ( $wa ) : ?>
 				<li class="ct-info__channel">
 					<span class="ct-info__channel-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8.5 8.5 0 0 1-12.6 7.4L3 21l1.6-5.2A8.5 8.5 0 1 1 21 12z"/></svg></span>
-					<span class="ct-info__channel-text"><span>WhatsApp</span><a href="<?php echo esc_url( $wa['link'] ); ?>" target="_blank" rel="noopener" data-cta-position="contatti_canali_numero"><?php echo esc_html( $wa['display'] ); ?></a></span>
+					<span class="ct-info__channel-text"><span>WhatsApp</span><a href="<?php echo esc_url( $wa['link'] ); ?>" target="_blank" rel="noopener" data-cta-position="<?php echo esc_attr( $pos ); ?>_numero"><?php echo esc_html( $wa['display'] ); ?></a></span>
 				</li>
 				<?php endif; ?>
 				<?php if ( $email ) : ?>
@@ -59,7 +66,7 @@ if ( ! $wa && ! $email && ! $rows ) {
 				<?php endif; ?>
 			</ul>
 			<?php if ( $wa && $ch['cta_label'] ) : ?>
-				<a class="ct-info__cta" href="<?php echo esc_url( $wa['link'] ); ?>" target="_blank" rel="noopener" data-cta-position="contatti_canali"><?php echo esc_html( $ch['cta_label'] ); ?></a>
+				<a class="ct-info__cta" href="<?php echo esc_url( $wa['link'] ); ?>" target="_blank" rel="noopener" data-cta-position="<?php echo esc_attr( $pos ); ?>"><?php echo esc_html( $ch['cta_label'] ); ?></a>
 			<?php endif; ?>
 		</div>
 		<?php endif; ?>

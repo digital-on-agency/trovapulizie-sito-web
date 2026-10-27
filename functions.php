@@ -221,7 +221,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	$moduli_cleaner   = array( 'sticky-cta', 'earnings-calculator', 'cleaner-motion' );
 	// Landing B2B (TICKET-58/59): barra fissa doppia, tab dei settori e confronto prima/dopo, form a un passo.
 	$moduli_b2b       = array( 'sticky-cta', 'scenario-tabs', 'lead-form' );
-	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php', 'page-cleaner-landing.php', 'page-landing-b2b.php', 'page-contact.php' );
+	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php', 'page-cleaner-landing.php', 'page-landing-b2b.php', 'page-contact.php', 'page-about.php' );
 
 	$handles = array();
 	foreach ( $pagine_con_sezioni as $template ) {
@@ -250,6 +250,10 @@ add_action( 'wp_enqueue_scripts', function () {
 	if ( is_page_template( 'page-contact.php' ) ) {
 		// Contatti (TICKET-63/65): solo ingressi a cascata e FAQ, nessun modulo proprio.
 		$handles = array( 'reveal', 'faq-accordion' );
+	}
+	if ( is_page_template( 'page-about.php' ) ) {
+		// Chi siamo (TICKET-66..69): solo ingressi a cascata; la mappa della hero e' statica.
+		$handles = array( 'reveal' );
 	}
 	if ( is_page_template( 'page-thank-you.php' ) ) {
 		$handles[] = 'thank-you';

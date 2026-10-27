@@ -45,6 +45,10 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-contact.php' ) ) {
 		return 'Contatti — Trovapulizie';
 	}
+	// Chi siamo (TICKET-66): pagina nuova, non esiste sul live.
+	if ( is_singular() && is_page_template( 'page-about.php' ) ) {
+		return 'Chi siamo — Trovapulizie';
+	}
 	return '';
 }
 
@@ -69,18 +73,26 @@ function tp_seo_description() {
 	if ( is_singular() && is_page_template( 'page-contact.php' ) ) {
 		return 'Come contattare Trovapulizie: scrivici su WhatsApp o a help@trovapulizie.it, oppure trova subito la pagina giusta per prenotare, chiedere un preventivo aziendale o lavorare con noi.';
 	}
+	if ( is_singular() && is_page_template( 'page-about.php' ) ) {
+		return "Trovapulizie è la startup romana che mette in contatto privati e aziende con imprese di pulizia verificate: chi siamo, come lavoriamo, il team e i dati della società.";
+	}
 	return get_bloginfo( 'description' );
 }
 
-/* Contatti (TICKET-64): Organization con ContactPoint, dagli stessi campi che la pagina mostra (numero ed email).
+/* Contatti (TICKET-64) e Chi siamo (TICKET-66): Organization con ContactPoint, dagli stessi campi che la pagina
+   Contatti mostra (numero ed email). Su Chi siamo anche data di fondazione e fondatori.
    Indirizzo solo a livello di citta', come il provider del Service qui sotto: lo streetAddress resta fuori finche'
    non si chiarisce se il profilo Google e' un'attivita' con area di servizio (CLAUDE.md cliente). */
 add_action( 'wp_head', function () {
-	if ( ! is_singular() || ! is_page_template( 'page-contact.php' ) ) {
+	$contatti = is_singular() && is_page_template( 'page-contact.php' );
+	$chi      = is_singular() && is_page_template( 'page-about.php' );
+	if ( ! $contatti && ! $chi ) {
 		return;
 	}
-	$campo = function ( $nome, $default ) {
-		$v = trim( (string) carbon_get_the_post_meta( $nome ) );
+	// I campi stanno sulla pagina Contatti: da Chi siamo si leggono da li'.
+	$fonte = $contatti ? get_the_ID() : (int) url_to_postid( home_url( '/contatti/' ) );
+	$campo = function ( $nome, $default ) use ( $fonte ) {
+		$v = $fonte ? trim( (string) carbon_get_post_meta( $fonte, $nome ) ) : '';
 		return '' !== $v ? $v : $default;
 	};
 	$wa    = tp_whatsapp_parts( $campo( 'ct_whatsapp', TP_CT_WHATSAPP ) );
@@ -116,6 +128,13 @@ add_action( 'wp_head', function () {
 	}
 	if ( $wa || $email ) {
 		$dati['contactPoint'] = $punto;
+	}
+	if ( $chi ) {
+		$dati['foundingDate'] = '2026-02-19';
+		$dati['founder']      = array(
+			array( '@type' => 'Person', 'name' => 'Christian Pascolini' ),
+			array( '@type' => 'Person', 'name' => 'Guido Spanu' ),
+		);
 	}
 	echo '<script type="application/ld+json">' . wp_json_encode( $dati, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
 }, 5 );

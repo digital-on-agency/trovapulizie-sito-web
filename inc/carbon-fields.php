@@ -755,6 +755,83 @@ add_action( 'carbon_fields_register_fields', function () {
 				) ),
 		) );
 
+	// Chi siamo — pagina col template page-about.php (SPEC-pagina-chi-siamo, TICKET-66..69).
+	// Ogni testo ha il default nel template (Figma 6795:895, hero 6814:895): un campo compilato vince.
+	$ab_vuoto = __( 'Vuoto = testo di default del template.' );
+	$ab_pipe  = __( 'Una voce per riga, "Titolo | testo". Vuoto = le voci del Figma.' );
+	Container::make( 'post_meta', __( 'Chi siamo — Sezioni' ) )
+		->where( 'post_template', '=', 'page-about.php' )
+		->add_tab( __( 'Hero' ), array(
+			Field::make( 'text', 'ab_hero_eyebrow', __( 'Pillola' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_hero_title', __( 'Titolo (H1)' ) )->set_rows( 2 )->set_help_text( __( 'Un invio a capo = una riga. Vuoto = "Mettiamo ordine / nelle pulizie di Roma."' ) ),
+			Field::make( 'text', 'ab_hero_accent', __( 'Parola del titolo in verde' ) )->set_help_text( __( 'Vuoto = "ordine". Deve comparire uguale nel titolo.' ) ),
+			Field::make( 'textarea', 'ab_hero_text', __( 'Testo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_hero_cta', __( 'Bottone principale' ) )->set_help_text( __( 'Vuoto = "Cerca un servizio". Porta alla ricerca della Home.' ) ),
+			Field::make( 'text', 'ab_hero_cta2', __( 'Secondo bottone' ) )->set_help_text( __( 'Vuoto = "Contattaci". Porta a /contatti/.' ) ),
+			Field::make( 'text', 'ab_float1_title', __( 'Card in alto: titolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_float1_text', __( 'Card in alto: testo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_float2_title', __( 'Card in basso: titolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_float2_text', __( 'Card in basso: testo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_stat1_value', __( 'Numero 1' ) )->set_help_text( __( 'Vuoto = 26. Solo copertura: mai quanti cleaner o imprese.' ) ),
+			Field::make( 'text', 'ab_stat1_label', __( 'Numero 1: etichetta' ) )->set_help_text( __( 'Vuoto = "quartieri attivi".' ) ),
+			Field::make( 'text', 'ab_stat2_value', __( 'Numero 2' ) )->set_help_text( __( 'Vuoto = 5.' ) ),
+			Field::make( 'text', 'ab_stat2_label', __( 'Numero 2: etichetta' ) )->set_help_text( __( 'Vuoto = "zone di Roma".' ) ),
+		) )
+		->add_tab( __( 'Perche\' esistiamo' ), array(
+			Field::make( 'text', 'ab_why_eyebrow', __( 'Pillola' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_why_title', __( 'Titolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_why_text', __( 'Paragrafi (uno per riga)' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_why_closing', __( 'Frase finale in grassetto' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_why_items', __( 'Card' ) )->set_help_text( $ab_pipe ),
+		) )
+		->add_tab( __( 'Cosa facciamo' ), array(
+			Field::make( 'text', 'ab_what_eyebrow', __( 'Pillola' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_what_title', __( 'Titolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_what_subtitle', __( 'Sottotitolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_what_left_title', __( 'Card chiara: titolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_what_left_items', __( 'Card chiara: punti (uno per riga)' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_what_right_title', __( 'Card scura: titolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_what_right_items', __( 'Card scura: punti (uno per riga)' ) )->set_help_text( $ab_vuoto ),
+		) )
+		->add_tab( __( 'Come lavoriamo' ), array(
+			Field::make( 'text', 'ab_rules_eyebrow', __( 'Pillola' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_rules_title', __( 'Titolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_rules_items', __( 'Regole' ) )->set_help_text( $ab_pipe ),
+		) )
+		->add_tab( __( 'Team' ), array(
+			Field::make( 'text', 'ab_team_eyebrow', __( 'Pillola' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_team_title', __( 'Titolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_team_subtitle', __( 'Sottotitolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'complex', 'ab_team_people', __( 'Persone (vuoto = le quattro del Figma)' ) )
+				->set_help_text( __( 'Con la foto la card e\' grande, senza foto e\' compatta con l\'iniziale.' ) )
+				->add_fields( array(
+					Field::make( 'text', 'name', __( 'Nome' ) ),
+					Field::make( 'text', 'role', __( 'Ruolo' ) ),
+					Field::make( 'textarea', 'bio', __( 'Bio' ) )->set_rows( 3 ),
+					Field::make( 'image', 'photo', __( 'Foto (5:6, almeno 440x528)' ) )->set_value_type( 'url' ),
+				) ),
+		) )
+		->add_tab( __( 'Storia' ), array(
+			Field::make( 'text', 'ab_story_eyebrow', __( 'Pillola' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_story_title', __( 'Titolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_story_steps', __( 'Tappe' ) )->set_help_text( __( 'Una per riga, "Data | Titolo | testo". L\'ultima e\' evidenziata. Vuoto = le cinque del Figma.' ) ),
+		) )
+		->add_tab( __( 'Dati e contatti' ), array(
+			Field::make( 'text', 'ab_co_eyebrow', __( 'Dati: pillola' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_co_name', __( 'Ragione sociale' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_co_rows', __( 'Righe (Voce | valore)' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_ch_eyebrow', __( 'Contatti: pillola' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_ch_title', __( 'Contatti: titolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_ch_text', __( 'Contatti: testo' ) )->set_help_text( __( 'Numero WhatsApp ed email arrivano dalla pagina Contatti.' ) ),
+			Field::make( 'text', 'ab_ch_cta', __( 'Contatti: bottone' ) )->set_help_text( $ab_vuoto ),
+		) )
+		->add_tab( __( 'CTA finale' ), array(
+			Field::make( 'text', 'ab_cta_title', __( 'Titolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'textarea', 'ab_cta_subtitle', __( 'Sottotitolo' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_cta_button', __( 'Bottone' ) )->set_help_text( $ab_vuoto ),
+			Field::make( 'text', 'ab_cta_note', __( 'Nota sotto il bottone' ) )->set_help_text( $ab_vuoto ),
+		) );
+
 	// Thank-you — pagina col template page-thank-you.php (TICKET-42). Riepilogo e passi sono fissi nel template:
 	// i dati della richiesta arrivano dal browser (sessionStorage), non da WordPress.
 	Container::make( 'post_meta', __( 'Thank-you — Testi' ) )
