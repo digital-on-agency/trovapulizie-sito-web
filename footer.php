@@ -5,7 +5,7 @@
  */
 $brand     = carbon_get_theme_option( 'footer_brand_text' );
 $tagline   = carbon_get_theme_option( 'footer_tagline' );
-$social    = (array) carbon_get_theme_option( 'footer_social' );
+$social    = array_filter( (array) carbon_get_theme_option( 'footer_social' ), function ( $s ) { return ! empty( $s['url'] ); } );
 $columns   = (array) carbon_get_theme_option( 'footer_columns' );
 $cta_text  = carbon_get_theme_option( 'footer_cta_text' );
 $cta_label = carbon_get_theme_option( 'footer_cta_label' );
@@ -27,14 +27,11 @@ $col_index = 0;
 					<?php foreach ( $social as $s ) :
 						$net  = $s['network'] ?? '';
 						$icon = isset( $networks[ $net ] ) ? tp_icon_span( 'assets/icons/social-' . $net . '.svg', 'site-footer__social-icon' ) : '';
-						if ( ! $icon ) { continue; }
+						// Senza URL l'icona non esce: un'icona social che non porta da nessuna parte (cutover-checklist A7).
+						if ( ! $icon || empty( $s['url'] ) ) { continue; }
 					?>
 					<li>
-						<?php if ( ! empty( $s['url'] ) ) : ?>
-							<a href="<?php echo esc_url( $s['url'] ); ?>" target="_blank" rel="noopener" aria-label="<?php echo esc_attr( $networks[ $net ] ); ?>"><?php echo $icon; ?></a>
-						<?php else : ?>
-							<span title="<?php echo esc_attr( $networks[ $net ] ); ?>"><?php echo $icon; ?></span>
-						<?php endif; ?>
+						<a href="<?php echo esc_url( $s['url'] ); ?>" target="_blank" rel="noopener" aria-label="<?php echo esc_attr( $networks[ $net ] ); ?>"><?php echo $icon; ?></a>
 					</li>
 					<?php endforeach; ?>
 				</ul>

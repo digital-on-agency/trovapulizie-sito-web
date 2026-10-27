@@ -87,7 +87,7 @@ $cta_args         = array(
 		</div>
 	<?php endif; ?>
 
-	<section class="hero">
+	<section class="hero" id="hero">
 		<div class="hero__box">
 			<?php if ( $hero_video ) : ?>
 				<!-- Timelapse disordine -> ordine: parte da JS (hero-video.js) solo senza "riduci movimento", sfuma sopra la foto e resta sull'ultimo frame -->
