@@ -27,6 +27,7 @@ page-sgrosso.php          template landing Sgrosso (cinque pagine, campo variant
 page-thank-you.php        thank-you dopo un lead (noindex)
 page-cleaner-landing.php  pagina /diventa-cleaner/ (docs/landing-cleaner.md)
 page-landing-b2b.php      landing /roma/sgrosso-commerciale/ (docs/landing-b2b.md)
+page-contact.php          pagina /contatti/ (docs/contatti.md)
 header-landing.php        testata delle landing (promo bar, navbar senza menu); head condiviso in template-parts/head.php
 inc/sgrosso-variants.php  testi di default per variante della landing Sgrosso
 inc/tracking.php          iubenda, GTM, Clarity da Theme Options
@@ -84,5 +85,5 @@ Un errore PHP nel tema manda in fatal tutto il sito: per questo il lint precede 
 
 ## Stato
 
-Home desktop e mobile, hub /roma/, cinque landing Sgrosso con form lead funzionante, Diventa cleaner e landing B2B (ver 0.54.x). Stato e prossimi passi nel vault,
+Home desktop e mobile, hub /roma/, cinque landing Sgrosso con form lead funzionante, Diventa cleaner, landing B2B e Contatti (ver 0.55.x). Stato e prossimi passi nel vault,
 `clients/trovapulizie/projects/sito-web/CLAUDE.md`.
