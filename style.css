@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.60.1
+Version: 0.61.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -807,21 +807,6 @@ a {
 	margin-top: 24px;
 }
 
-/* Sequenza mobile delle tre schermate (ADR-002 rev. 5): nascosta finche' hiw-sequence.js non attiva
-   hiw-seq-ok sotto la soglia desktop. Le tre immagini stanno sovrapposte dentro un solo telefono: si
-   incrociano le schermate, non le cornici (due bezel a meta' opacita' lascerebbero passare lo sfondo). */
-.hiw-seq {
-	display: none;
-}
-.hiw-seq__screen {
-	position: absolute;
-	inset: 0;
-	opacity: 0;
-}
-.hiw-seq__screen[data-seq="0"] {
-	opacity: 1;
-}
-
 /* Indicatore di avanzamento e segnale di scorrimento: esistono solo nella coreografia desktop
    (senza pin non c'e' niente da indicare, i tre passi si leggono tutti). */
 .hiw-progress,
@@ -1036,187 +1021,138 @@ a {
 	opacity: 0;
 }
 
-/* Mobile e tablet: tre blocchi impilati, Figma 4020:965 (blocchi 350x482, badge 44, testo 300, phone
-   158x320, nessun pin). Il clip di ogni passo lo avvia hiw-stacked.js. ADR-002 rev. 4, TICKET-13. */
+/* Mobile e tablet: carosello a scorrimento orizzontale (decisione Guido 27/10, al posto della sequenza guidata
+   dallo scroll di ADR-002 rev. 5). Ogni passo e' una card col proprio telefono in alto e il testo sotto; la fila
+   scorre col dito con scroll-snap, senza JavaScript. hiw-carousel.js aggiunge puntini, frecce e "1 di 3"
+   (.hiw-nav, visibile solo con .hiw-car-ok). Telefono 220x445: le schermate dell'app si leggono, a 158 no. */
 @media (max-width: 1023px) {
 	.how-it-works__sticky {
-		max-width: 390px;
-		padding: 48px 20px 0;
+		max-width: none;
+		padding: 48px 0 8px;
+	}
+	.how-it-works__title,
+	.how-it-works__subtitle {
+		padding: 0 20px;
 	}
 	.how-it-works__title {
 		font-size: 30px;
-		line-height: 45px;
+		line-height: 1.3;
 	}
 	.how-it-works__steps {
+		position: relative; /* offsetParent delle card: hiw-carousel.js misura gli offsetLeft sulla fila */
 		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 44px;
-		margin-top: 44px;
+		gap: 14px;
+		margin-top: 28px;
+		padding: 0 20px 4px;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scroll-padding: 0 20px;
+		overscroll-behavior-x: contain;
+		scrollbar-width: none;
+	}
+	.how-it-works__steps::-webkit-scrollbar {
+		display: none;
 	}
 	.how-it-works__step {
 		display: flex;
+		flex: 0 0 min(84%, 340px);
 		flex-direction: column;
 		align-items: center;
-		width: 100%;
-		max-width: 350px;
+		padding: 24px 20px 26px;
+		border-radius: 24px;
+		background: var(--tp-bg-soft);
 		text-align: center;
+		scroll-snap-align: center;
+	}
+	.how-it-works__phone-static {
+		--tp-phone-w: 220px;
+		--tp-phone-h: 445px;
+		--tp-phone-radius: 36px;
+		--tp-phone-screen-radius: 29px;
+		order: -1;
+		margin: 0 0 20px;
+		/* niente height qui: .tp-phone prende l'altezza dal token --tp-phone-h (una regola height
+		   su questo stesso elemento lo azzererebbe, i figli sono in position: absolute) */
+	}
+	.how-it-works__badge {
+		width: 32px;
+		height: 32px;
+		font-size: 15px;
 	}
 	.how-it-works__text {
-		margin-top: 14px;
+		margin-top: 10px;
+	}
+	.how-it-works__text h3 {
+		font-size: 19px;
 	}
 	.how-it-works__text p {
-		max-width: 300px;
+		max-width: 290px;
 		margin: 0 auto;
 		font-size: 15px;
 		line-height: 23px;
 	}
+	.hiw-car-ok .hiw-nav {
+		display: flex;
+	}
+}
+@media (max-width: 400px) {
 	.how-it-works__phone-static {
-		--tp-phone-w: 158px;
-		--tp-phone-h: 320px;
-		--tp-phone-radius: 28px;
-		--tp-phone-screen-radius: 22px;
-		margin-top: 14px;
-		/* niente height qui: .tp-phone prende l'altezza dal token --tp-phone-h (una regola height
-		   su questo stesso elemento lo azzererebbe, i figli sono in position: absolute) */
+		--tp-phone-w: 200px;
+		--tp-phone-h: 405px;
+		--tp-phone-radius: 33px;
+		--tp-phone-screen-radius: 26px;
 	}
 }
 
-/* Sequenza: il contenuto resta fermo per due viewport mentre schermate e paragrafi si alternano.
-   Altezze in dvh perche' su Safari iOS la barra che entra e esce cambia vh e sfaserebbe il pin. */
-@media (max-width: 1023px) {
-	.hiw-seq-ok .how-it-works {
-		height: 300dvh;
-	}
-	.hiw-seq-ok .how-it-works__sticky {
-		position: sticky;
-		top: var(--tp-navbar-h);
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		height: calc(100dvh - var(--tp-navbar-h));
-		padding-bottom: 24px;
-	}
-	/* Stepper, come su desktop: i tre passi restano tutti visibili con il numero di fianco al titolo,
-	   allineati a sinistra, uniti da una linea che si colora fino al passo corrente; solo il passo in
-	   corso apre il proprio paragrafo. Prima i tre testi si alternavano nello stesso riquadro, uno per
-	   volta e centrati: non si capiva a che punto si fosse ne' quanti passi ci fossero (16/10, Guido).
-	   L'altezza resta fissa, altrimenti il telefono sotto salta quando cambia la lunghezza del paragrafo. */
-	/* con lo stepper allineato a sinistra, un titolo centrato sopra resterebbe scollegato */
-	.hiw-seq-ok .how-it-works__sticky {
-		align-items: flex-start;
-		padding-left: 20px;
-		padding-right: 20px;
-	}
-	.hiw-seq-ok .how-it-works__title,
-	.hiw-seq-ok .how-it-works__subtitle {
-		text-align: left;
-	}
-	.hiw-seq-ok .hiw-seq {
-		align-self: center;
-	}
-	.hiw-seq-ok .how-it-works__steps {
-		position: relative;
-		display: flex;
-		flex-direction: column;
-		align-items: stretch;
-		width: 100%;
-		max-width: 350px;
-		height: 236px;
-		margin-top: 24px;
-		text-align: left;
-	}
-	.hiw-seq-ok .how-it-works__step {
-		position: relative;
-		display: grid;
-		grid-template-columns: 32px 1fr;
-		column-gap: 14px;
-		align-items: start;
-		margin: 0;
-		padding-bottom: 16px;
-		max-width: none;
-		text-align: left;
-		opacity: 1;
-	}
-	.hiw-seq-ok .how-it-works__step:last-child {
-		padding-bottom: 0;
-	}
-	/* linea di collegamento fra i pallini: e' l'indicatore di avanzamento */
-	.hiw-seq-ok .how-it-works__step:not(:last-child)::before {
-		content: '';
-		position: absolute;
-		left: 15px;
-		top: 32px;
-		bottom: 0;
-		width: 2px;
-		background: var(--tp-border);
-	}
-	.hiw-seq-ok .how-it-works__step.is-done::before {
-		background: var(--tp-primary);
-	}
-	.hiw-seq-ok .how-it-works__badge {
-		width: 32px;
-		height: 32px;
-		border-radius: 16px;
-		font-size: 14px;
-		background: var(--tp-border);
-		color: var(--tp-text-muted);
-		transition: background-color 260ms cubic-bezier(0.4, 0, 0.2, 1), color 260ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-	.hiw-seq-ok .how-it-works__step.is-done .how-it-works__badge,
-	.hiw-seq-ok .how-it-works__step.is-active .how-it-works__badge {
-		background: var(--tp-primary-ink);
-		color: var(--tp-white);
-	}
-	.hiw-seq-ok .how-it-works__text {
-		margin-top: 0;
-	}
-	.hiw-seq-ok .how-it-works__text h3 {
-		margin: 4px 0 0;
-		font-size: 17px;
-		line-height: 24px;
-		color: var(--tp-text-muted);
-		transition: color 260ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-	.hiw-seq-ok .how-it-works__step.is-done .how-it-works__text h3 {
-		color: var(--tp-text-body);
-	}
-	.hiw-seq-ok .how-it-works__step.is-active .how-it-works__text h3 {
-		color: var(--tp-text-heading);
-	}
-	/* il paragrafo del passo in corso si apre: 0fr -> 1fr e' l'unico modo di animare un'altezza automatica */
-	.hiw-seq-ok .how-it-works__text p {
-		display: grid;
-		grid-template-rows: 0fr;
-		max-width: none;
-		margin: 0;
-		font-size: 15px;
-		line-height: 23px;
-		opacity: 0;
-		overflow: hidden;
-		transition: grid-template-rows 320ms cubic-bezier(0.4, 0, 0.2, 1), opacity 240ms linear, margin-top 320ms cubic-bezier(0.4, 0, 0.2, 1);
-	}
-	.hiw-seq-ok .how-it-works__step.is-active .how-it-works__text p {
-		grid-template-rows: 1fr;
-		margin-top: 6px;
-		opacity: 1;
-	}
-	.hiw-seq-ok .how-it-works__text p > * {
-		min-height: 0;
-	}
-	.hiw-seq-ok .how-it-works__phone-static {
-		display: none;
-	}
-	.hiw-seq-ok .hiw-seq {
-		display: block;
-		margin-top: auto;
-	}
-	.hiw-seq__phone {
-		--tp-phone-w: 158px;
-		--tp-phone-h: 320px;
-		--tp-phone-radius: 28px;
-		--tp-phone-screen-radius: 22px;
-	}
+/* Navigazione del carosello (hiw-carousel.js): frecce ai lati, puntini e contatore al centro */
+.hiw-nav {
+	display: none;
+	align-items: center;
+	justify-content: center;
+	gap: 14px;
+	margin: 18px 0 0;
+}
+.hiw-nav__arrow {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 1px solid #D9E8E2;
+	border-radius: 50%;
+	background: var(--tp-white);
+	font-size: 18px;
+	color: #1A1A1A;
+	cursor: pointer;
+}
+.hiw-nav__arrow:disabled {
+	opacity: 0.35;
+	cursor: default;
+}
+.hiw-nav__dots {
+	display: flex;
+	gap: 6px;
+}
+.hiw-nav__dot {
+	width: 8px;
+	height: 8px;
+	padding: 0;
+	border: 0;
+	border-radius: 4px;
+	background: #CDE5DC;
+	transition: width 0.25s ease, background-color 0.25s ease;
+}
+.hiw-nav__dot.is-active {
+	width: 22px;
+	background: #067A55;
+}
+.hiw-nav__count {
+	min-width: 44px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #5B6472;
+	text-align: center;
 }
 
 /* =========================

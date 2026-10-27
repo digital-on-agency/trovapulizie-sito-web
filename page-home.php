@@ -175,8 +175,8 @@ $cta_args         = array(
 						<p><span><?php echo esc_html( $step['description'] ?? '' ); ?></span></p>
 					</div>
 					<?php
-					// Telefono del singolo passo: si vede solo nel fallback impilato (niente JS o
-					// reduced-motion). Nella sequenza mobile e su desktop resta nascosto. ADR-002 rev. 5.
+					// Telefono del singolo passo: su mobile e' la card del carosello (sopra il testo, via order),
+					// su desktop serve solo al ripiego senza coreografia (reduced-motion).
 					get_template_part( 'template-parts/phone-mockup', null, array(
 						'screen' => $screen,
 						'class'  => 'how-it-works__phone-static',
@@ -185,28 +185,16 @@ $cta_args         = array(
 				<?php endforeach; ?>
 			</ol>
 			<span class="hiw-scrollcue" aria-hidden="true"></span>
-			<?php
-			// Sequenza mobile (ADR-002 rev. 5): un solo telefono sticky, le tre schermate in crossfade
-			// guidate dallo scroll (assets/js/hiw-sequence.js). Senza JS o con reduced-motion resta
-			// nascosto e si vedono i tre blocchi impilati qui sopra.
-			$seq_screens = array();
-			foreach ( array_slice( $steps, 0, 3 ) as $i => $step ) {
-				$seq_screens[] = ! empty( $step['image'] ) ? tp_versioned_url( wp_get_attachment_url( $step['image'] ) ) : tp_theme_asset( 'assets/img/' . $step_fallbacks[ $i ] );
-			}
-			?>
-			<div class="hiw-seq" aria-hidden="true">
-				<div class="tp-phone hiw-seq__phone">
-					<?php for ( $i = 10; $i >= 1; $i-- ) : ?>
-						<span class="tp-phone__layer" style="--z:-<?php echo $i; ?>px"></span>
+			<?php // Navigazione del carosello mobile (hiw-carousel.js la mostra con .hiw-car-ok; su desktop non esiste). ?>
+			<div class="hiw-nav" role="group" aria-label="Passi di Come funziona">
+				<button type="button" class="hiw-nav__arrow" data-hiw-prev aria-label="Passo precedente">&larr;</button>
+				<span class="hiw-nav__dots">
+					<?php for ( $i = 0; $i < min( 3, count( $steps ) ); $i++ ) : ?>
+						<button type="button" class="hiw-nav__dot<?php echo 0 === $i ? ' is-active' : ''; ?>" data-hiw-dot="<?php echo $i; ?>" aria-label="Passo <?php echo $i + 1; ?>"<?php echo 0 === $i ? ' aria-current="step"' : ''; ?>></button>
 					<?php endfor; ?>
-					<div class="tp-phone__face">
-						<div class="tp-phone__screen">
-							<?php foreach ( $seq_screens as $i => $src ) : ?>
-								<img class="tp-phone__img hiw-seq__screen" data-seq="<?php echo $i; ?>" src="<?php echo esc_url( $src ); ?>" alt="">
-							<?php endforeach; ?>
-						</div>
-					</div>
-				</div>
+				</span>
+				<span class="hiw-nav__count" aria-live="polite" data-hiw-count>1 di <?php echo min( 3, count( $steps ) ); ?></span>
+				<button type="button" class="hiw-nav__arrow" data-hiw-next aria-label="Passo successivo">&rarr;</button>
 			</div>
 		</div>
 	</section>

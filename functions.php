@@ -216,7 +216,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	// Landing Sgrosso (ADR-004): barra fissa doppia; lead-form.js arriva con TICKET-40.
 	$moduli_sgrosso   = array( 'sticky-cta', 'scenario-tabs', 'sgrosso-estimator', 'lead-form' );
 	// Coreografia della sola Home (ADR-002): telefono pinnato, sequenza schermate, video hero.
-	$moduli_home      = array( 'home-motion', 'hiw-sequence', 'hero-video', 'search-form' );
+	$moduli_home      = array( 'home-motion', 'hiw-carousel', 'hero-video', 'search-form' );
 	// Pagina Diventa cleaner (TICKET-51/54): barra fissa e calcolatore dei guadagni.
 	$moduli_cleaner   = array( 'sticky-cta', 'earnings-calculator', 'cleaner-motion' );
 	// Landing B2B (TICKET-58/59): barra fissa doppia, tab dei settori e confronto prima/dopo, form a un passo.
