@@ -705,6 +705,44 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'textarea', 'b2b_cta_bullets', __( 'Punti (uno per riga)' ) )->set_help_text( __( 'Vuoto = i quattro del ridisegno. Il form ripete titolo, testi e bottone della card della hero.' ) ),
 		) );
 
+	// Landing zanzare — template page-landing-zanzare.php (SPEC-landing-zanzare, TICKET-73..76). Ogni testo ha il
+	// default del live nel template: un campo compilato vince (tp_zz()). Liste "una voce per riga".
+	$zz_vuoto = __( 'Vuoto = testo del live.' );
+	Container::make( 'post_meta', __( 'Landing zanzare — Sezioni' ) )
+		->where( 'post_template', '=', 'page-landing-zanzare.php' )
+		->add_tab( __( 'Testata e hero' ), array(
+			Field::make( 'text', 'zz_promo_desktop', __( 'Promo bar, desktop' ) )->set_help_text( __( 'Vuoto = "★ Stagione zanzare · intervento in 24–48h · sopralluogo gratuito". Fuori stagione conviene cambiarlo.' ) ),
+			Field::make( 'text', 'zz_promo_mobile', __( 'Promo bar, mobile' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'text', 'zz_phone', __( 'Telefono' ) )->set_help_text( __( 'Vuoto = 06 9151 6075.' ) ),
+			Field::make( 'text', 'zz_hero_eyebrow', __( 'Pillola' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'textarea', 'zz_hero_title', __( 'Titolo (H1)' ) )->set_rows( 2 )->set_help_text( __( 'Un invio a capo = una riga.' ) ),
+			Field::make( 'textarea', 'zz_hero_subtitle', __( 'Sottotitolo' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'textarea', 'zz_hero_bullets', __( 'Punti (uno per riga)' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'text', 'zz_hero_social', __( 'Riga accanto alle stelle' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'textarea', 'zz_trust_items', __( 'Trust strip (una voce per riga)' ) )->set_help_text( $zz_vuoto ),
+		) )
+		->add_tab( __( 'Form' ), array(
+			Field::make( 'text', 'zz_form_title', __( 'Titolo' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'text', 'zz_form_subtitle', __( 'Testo sotto il titolo' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'text', 'zz_form_coupon', __( 'Riga coupon' ) )->set_help_text( __( 'Vuoto = "−20% sul primo trattamento, con l\'email". Il backend non applica coupon: e\' solo un testo.' ) ),
+			Field::make( 'text', 'zz_form_email_label', __( 'Etichetta email' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'text', 'zz_form_urgency', __( 'Riga di urgenza (form in alto)' ) )->set_help_text( $zz_vuoto ),
+		) )
+		->add_tab( __( 'Sezioni' ), array(
+			Field::make( 'textarea', 'zz_auth_items', __( 'Autorita\' e sicurezza (Titolo | testo, una per riga)' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'textarea', 'zz_tiger_text', __( 'Zanzara tigre: testo' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'textarea', 'zz_tiger_chips', __( 'Zanzara tigre: focolai (uno per riga)' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'text', 'zz_b2b_title', __( 'Banner condomini: titolo' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'textarea', 'zz_b2b_text', __( 'Banner condomini: testo' ) )->set_help_text( $zz_vuoto ),
+			Field::make( 'text', 'zz_price1', __( 'Prezzo intervento singolo' ) )->set_help_text( __( 'Vuoto = "da €119".' ) ),
+			Field::make( 'text', 'zz_price2', __( 'Prezzo programma stagionale' ) )->set_help_text( __( 'Vuoto = "da €449".' ) ),
+			Field::make( 'complex', 'zz_faq_items', __( 'FAQ (vuoto = le nove del live)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'question', __( 'Domanda' ) ),
+					Field::make( 'textarea', 'answer', __( 'Risposta' ) ),
+				) ),
+		) );
+
 	// Contatti — pagina col template page-contact.php (SPEC-pagina-contatti, TICKET-63..65).
 	// Ogni testo ha il default nel template (Figma 6803:895): un campo compilato vince.
 	$ct_vuoto = __( 'Vuoto = testo di default del template.' );

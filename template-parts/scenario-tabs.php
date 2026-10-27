@@ -14,6 +14,8 @@
  * Landing B2B (TICKET-59): uno scenario con `image` mostra una foto singola al posto del prima/dopo, e con `chips`
  * la propria lista di voci (tutte evidenziate) al posto di all_areas. Le landing Sgrosso non passano ne' l'una ne'
  * l'altra e restano identiche.
+ * Landing zanzare (TICKET-74): `cta_label` per scenario sostituisce quella comune, `areas_text` per scenario la nota
+ * sotto le voci, e `preselect` mette data-preselect sulla CTA (lead-form.js sceglie quella voce nel form).
  */
 $args = wp_parse_args( $args ?? array(), array(
 	'eyebrow'     => '',
@@ -64,6 +66,7 @@ $uid = sanitize_html_class( $args['id'] );
 			$on    = $s['key'] === $default;
 			$areas = array_map( 'trim', (array) ( $s['areas'] ?? array() ) );
 			$chips = array_values( array_filter( array_map( 'trim', (array) ( $s['chips'] ?? array() ) ) ) );
+			$note  = ! empty( $s['areas_text'] ) ? $s['areas_text'] : $args['areas_text'];
 			?>
 			<div class="sg-when__panel" role="tabpanel" id="<?php echo esc_attr( $uid . '-panel-' . $s['key'] ); ?>" data-key="<?php echo esc_attr( $s['key'] ); ?>" aria-labelledby="<?php echo esc_attr( $uid . '-tab-' . $s['key'] ); ?>" tabindex="0"<?php echo $on ? '' : ' hidden'; ?>>
 				<div class="sg-when__areas">
@@ -81,7 +84,7 @@ $uid = sanitize_html_class( $args['id'] );
 						<?php endforeach; ?>
 					</ul>
 					<?php endif; ?>
-					<?php if ( $args['areas_text'] ) : ?><p class="sg-when__areas-text"><?php echo esc_html( $args['areas_text'] ); ?></p><?php endif; ?>
+					<?php if ( $note ) : ?><p class="sg-when__areas-text"><?php echo esc_html( $note ); ?></p><?php endif; ?>
 				</div>
 
 				<?php if ( ! empty( $s['image'] ) ) : ?>
@@ -108,8 +111,9 @@ $uid = sanitize_html_class( $args['id'] );
 					<?php if ( ! empty( $s['highlight'] ) ) : ?>
 						<p class="sg-when__highlight"><?php echo tp_icon_span( 'assets/icons/ic-check.svg', 'sg-when__highlight-check' ); ?><span><?php echo esc_html( $s['highlight'] ); ?></span></p>
 					<?php endif; ?>
-					<?php if ( $args['cta_label'] ) : ?>
-						<a class="tp-btn tp-btn--primary sg-when__cta" href="<?php echo esc_url( $args['cta_link'] ); ?>"<?php if ( $args['cta_position'] ) : ?> data-cta-position="<?php echo esc_attr( $args['cta_position'] ); ?>"<?php endif; ?>><?php echo esc_html( $args['cta_label'] ); ?> <span class="sg-cta__arrow" aria-hidden="true">&rarr;</span></a>
+					<?php $cta = ! empty( $s['cta_label'] ) ? $s['cta_label'] : $args['cta_label']; ?>
+					<?php if ( $cta ) : ?>
+						<a class="tp-btn tp-btn--primary sg-when__cta" href="<?php echo esc_url( $args['cta_link'] ); ?>"<?php if ( $args['cta_position'] ) : ?> data-cta-position="<?php echo esc_attr( $args['cta_position'] ); ?>"<?php endif; ?><?php if ( ! empty( $s['preselect'] ) ) : ?> data-preselect="<?php echo esc_attr( $s['preselect'] ); ?>"<?php endif; ?>><?php echo esc_html( $cta ); ?> <span class="sg-cta__arrow" aria-hidden="true">&rarr;</span></a>
 					<?php endif; ?>
 				</div>
 			</div>

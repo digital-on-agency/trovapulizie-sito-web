@@ -444,7 +444,7 @@
 
 		function done() {
 			form.classList.add('is-done');
-			form.querySelectorAll('.lead-form__step, .lead-form__actions, .lead-form__note').forEach(function (el) { el.hidden = true; });
+			form.querySelectorAll('.lead-form__step, .lead-form__actions, .lead-form__note, .lead-form__urgency').forEach(function (el) { el.hidden = true; });
 			var box = form.querySelector('[data-done]');
 			if (box) { box.hidden = false; box.focus(); }
 		}
@@ -455,7 +455,8 @@
 			clearErrors(form);
 			var ok = true;
 			var tipo = checked(form, 'tipoAttivita');
-			if (form.querySelector('input[name="tipoAttivita"]') && !tipo) { setError(form, 'tipoAttivita', 'Scegli il tipo di attività'); ok = false; }
+			var leadTipo = (selected() && selected().getAttribute('data-tipo')) || 'b2b';
+			if (form.querySelector('input[name="tipoAttivita"]') && !tipo) { setError(form, 'tipoAttivita', form.getAttribute('data-chooser-error') || 'Scegli il tipo di attività'); ok = false; }
 			else if (isOther()) {
 				tipo = val(form, 'tipoAttivitaAltro');
 				if (!tipo) { setError(form, 'tipoAttivitaAltro', 'Scrivi che attività è'); ok = false; }
@@ -466,13 +467,16 @@
 			var prefix = val(form, 'prefisso') || '+39';
 			if (!val(form, 'telefono')) { setError(form, 'telefono', 'Telefono obbligatorio'); ok = false; }
 			else if (!phoneOkAny(prefix, val(form, 'telefono'))) { setError(form, 'telefono', 'Numero non valido'); ok = false; }
+			var email = form.querySelector('input[name="email"]') ? val(form, 'email') : '';
+			if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setError(form, 'email', 'Email non valida'); ok = false; }
 			if (!isChecked(form, 'consentPrivacy')) { setError(form, 'consentPrivacy', 'Devi accettare la Privacy Policy per continuare'); ok = false; }
 			if (!ok) { focusFirstInvalid(form); return; }
 			var body = Object.assign({
-				tipo: 'b2b', telefono: prefix + digits(val(form, 'telefono')), zona: val(form, 'zona'), note: tipo,
+				tipo: leadTipo, telefono: prefix + digits(val(form, 'telefono')), zona: val(form, 'zona'), note: (form.getAttribute('data-note-prefix') || '') + tipo,
 				consentPrivacy: true, consentMarketing: isChecked(form, 'consentMarketing'), honeypot: val(form, 'website'), pageUrl: pageUrl(), gclid: gclid()
 			}, utm());
 			if (mq) body.superficieMq = mq;
+			if (email) body.email = email;
 			busy(form, true);
 			call(form, 'POST', '/api/leads', body).then(function () {
 				track('marketing_form_submit', { landing: landing, form: formName, cta_position: ctaPosition });
@@ -484,4 +488,18 @@
 	document.querySelectorAll('[data-lead-form]').forEach(initMultiStep);
 	document.querySelectorAll('[data-lead-atomic]').forEach(initAtomic);
 	document.querySelectorAll('[data-lead-b2b]').forEach(initB2B);
+
+	// CTA con data-preselect (tab "Per chi" della landing zanzare, TICKET-74): sceglie la voce nel form di arrivo.
+	// Il form e' il primo [data-lead-b2b] dentro l'ancora del link (#form), o l'ancora stessa.
+	document.addEventListener('click', function (e) {
+		var a = e.target && e.target.closest ? e.target.closest('a[data-preselect]') : null;
+		if (!a) return;
+		var hash = (a.getAttribute('href') || '').split('#')[1];
+		var box = hash ? document.getElementById(hash) : null;
+		var form = box ? (box.matches('[data-lead-b2b]') ? box : box.querySelector('[data-lead-b2b]')) : null;
+		if (!form) return;
+		form.querySelectorAll('input[name="tipoAttivita"]').forEach(function (r) {
+			if (r.value === a.getAttribute('data-preselect')) { r.checked = true; r.dispatchEvent(new Event('change', { bubbles: true })); }
+		});
+	});
 })();

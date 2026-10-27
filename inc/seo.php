@@ -46,6 +46,10 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {
 		return 'Pulizie commerciali Roma — Uffici, negozi e locali | Trovapulizie';
 	}
+	// Landing zanzare (TICKET-73): stesso title del live React.
+	if ( is_singular() && is_page_template( 'page-landing-zanzare.php' ) ) {
+		return 'Disinfestazione zanzare Roma — Sopralluogo gratuito | Trovapulizie';
+	}
 	// Contatti (TICKET-63): pagina nuova, non esiste sul live.
 	if ( is_singular() && is_page_template( 'page-contact.php' ) ) {
 		return 'Contatti — Trovapulizie';
@@ -82,6 +86,9 @@ function tp_seo_description() {
 	}
 	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {
 		return 'Pulizie commerciali a Roma per uffici, negozi e locali: preventivo su misura, fattura, personale verificato. Sopralluogo gratuito, risposta in 1 ora.';
+	}
+	if ( is_singular() && is_page_template( 'page-landing-zanzare.php' ) ) {
+		return 'Disinfestazione zanzare a Roma per privati e aziende: sopralluogo gratuito, trattamento professionale e garanzia sui risultati. Preventivo in giornata.';
 	}
 	if ( is_singular() && is_page_template( 'page-contact.php' ) ) {
 		return 'Come contattare Trovapulizie: scrivici su WhatsApp o a help@trovapulizie.it, oppure trova subito la pagina giusta per prenotare, chiedere un preventivo aziendale o lavorare con noi.';
@@ -168,13 +175,15 @@ add_action( 'wp_head', function () {
 	$d   = tp_seo_sgrosso_defaults();
 	// Landing B2B (TICKET-58): stesso Service, senza offerta: il live non pubblica prezzi per le aziende.
 	$b2b = is_singular() && is_page_template( 'page-landing-b2b.php' );
-	if ( ! $d && ! $b2b ) {
+	// Landing zanzare (TICKET-73): stesso Service della B2B, senza offerta.
+	$zz  = is_singular() && is_page_template( 'page-landing-zanzare.php' );
+	if ( ! $d && ! $b2b && ! $zz ) {
 		return;
 	}
 	$dati = array(
 		'@context'    => 'https://schema.org',
 		'@type'       => 'Service',
-		'serviceType' => $b2b ? 'Pulizie commerciali per uffici, negozi e locali' : 'Pulizia straordinaria (sgrosso)',
+		'serviceType' => $zz ? 'Disinfestazione zanzare' : ( $b2b ? 'Pulizie commerciali per uffici, negozi e locali' : 'Pulizia straordinaria (sgrosso)' ),
 		'description' => wp_strip_all_tags( tp_seo_description() ),
 		'url'         => get_permalink(),
 		'areaServed'  => array(
@@ -203,7 +212,7 @@ add_action( 'wp_head', function () {
 			),
 		),
 	);
-	if ( $b2b ) {
+	if ( $b2b || $zz ) {
 		unset( $dati['offers'] );
 	}
 	echo '<script type="application/ld+json">' . wp_json_encode( $dati, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";

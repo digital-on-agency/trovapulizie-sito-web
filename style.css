@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.59.0
+Version: 0.60.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -26,6 +26,7 @@ Version: 0.59.0
    16. Chi siamo (page-about.php): hero con mappa dei CAP, perche', regole, team, storia
    17. Pagine legali (page-legal.php): colonna di testo, iframe iubenda, tabelle
    18. Blog (home.php, category.php, single.php): indice, card, articolo, box servizio
+   19. Landing zanzare (page-landing-zanzare.php): fascia zanzara tigre, cosa facciamo, prezzi, aggiunte al form
    12. prefers-reduced-motion: blocco unico per tutte le sezioni
    Ogni sezione ha la propria media query sotto i 1024px; la soglia e' il token --tp-bp-desktop. */
 
@@ -9596,6 +9597,436 @@ main.dc--motion .dc-rv.is-in {
 	}
 }
 
+/* =========================
+   19. Landing zanzare — page-landing-zanzare.php, Figma 4849:884 (TICKET-73..76)
+   main.sgrosso.b2b.zz: eredita hero, trust strip, tab, passi, recensioni, FAQ e form finale di Sgrosso e B2B.
+   Classi zz-* per le tre sezioni nuove; le aggiunte al form (coupon, Chiama/WhatsApp, urgenza) valgono per il
+   componente lead-form-b2b e non cambiano la B2B, che non le usa.
+   ========================= */
+.lead-form__coupon {
+	align-self: flex-start;
+	margin: 0;
+	padding: 6px 12px;
+	border-radius: var(--tp-radius-pill);
+	background: #DDF7EC;
+	font-size: 13px;
+	font-weight: 600;
+	color: #067A55;
+}
+.lead-form__row--single {
+	grid-template-columns: 1fr;
+}
+/* Le azioni sono una riga flex (Indietro + Invia nel form a tre passi): Chiama/WhatsApp vanno a capo, a tutta larghezza */
+.lead-form__actions:has(.lead-form__contact) {
+	flex-wrap: wrap;
+}
+.lead-form__actions:has(.lead-form__contact) .lead-form__submit {
+	flex: 1 0 100%;
+}
+.lead-form__contact {
+	display: grid;
+	flex: 1 0 100%;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+}
+.lead-form__call,
+.lead-form__wa {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	min-height: 48px;
+	border: 1.5px solid #D9E8E2;
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-white);
+	font-size: 15px;
+	font-weight: 600;
+	color: #1A1A1A;
+	text-decoration: none;
+}
+.lead-form__wa {
+	border-color: #25D366;
+	background: #25D366;
+	color: #0B3D1E;
+}
+.lead-form__contact-icon {
+	width: 16px;
+	height: 16px;
+}
+.lead-form__urgency {
+	margin: 12px 0 0;
+	text-align: center;
+	font-size: 13px;
+	font-weight: 500;
+	color: #B45309;
+}
+
+.zz .sg-trust__bar li {
+	padding: 0 16px;
+}
+.zz .b2b-why {
+	background: var(--tp-white);
+}
+.zz .b2b-why__grid {
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+/* ---- Zanzara tigre (zanzare-tigre.php) ---- */
+.zz-tiger {
+	padding: 88px 80px;
+	background: #0B1220;
+}
+.zz-tiger__inner {
+	display: grid;
+	grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+	align-items: center;
+	gap: 64px;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+.zz-tiger__copy {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+.zz-tiger__eyebrow {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 1.3px;
+	color: var(--tp-primary);
+}
+.zz-tiger__title {
+	margin: 0;
+	font-size: 40px;
+	line-height: 1.1;
+	letter-spacing: -0.8px;
+	font-weight: 800;
+	color: var(--tp-white);
+}
+.zz-tiger__text {
+	margin: 0;
+	font-size: 17px;
+	line-height: 1.6;
+	color: #C9D1CE;
+}
+.zz-tiger__check {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--tp-white);
+}
+.zz-tiger__check-icon,
+.zz-tiger__chip-icon {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	color: var(--tp-primary);
+}
+.zz-tiger__box {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 28px;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 24px;
+	background: rgba(255, 255, 255, 0.04);
+}
+.zz-tiger__box-title {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 700;
+	color: var(--tp-white);
+}
+.zz-tiger__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.zz-tiger__chips li {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 8px 14px;
+	border-radius: var(--tp-radius-pill);
+	background: rgba(0, 200, 150, 0.12);
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--tp-white);
+}
+.zz-tiger__note {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.5;
+	color: #AEB8B5;
+}
+
+/* ---- Cosa facciamo (service-cards.php) ---- */
+.zz-services {
+	padding: 88px 80px;
+	background: #F6FBF9;
+}
+.zz-services__inner {
+	display: flex;
+	flex-direction: column;
+	gap: 40px;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+.zz-services__grid {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 20px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.zz-services__card {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 12px 12px 22px;
+	border: 1px solid #E6E6E6;
+	border-radius: 22px;
+	background: var(--tp-white);
+}
+.zz-services__img {
+	display: block;
+	width: 100%;
+	height: auto;
+	aspect-ratio: 16 / 10;
+	margin-bottom: 6px;
+	border-radius: 14px;
+	object-fit: cover;
+}
+.zz-services__title {
+	margin: 0 8px;
+	font-size: 18px;
+	font-weight: 700;
+	color: #1A1A1A;
+}
+.zz-services__text {
+	margin: 0 8px;
+	font-size: 15px;
+	line-height: 1.5;
+	color: #5B6472;
+}
+.zz-services__banner {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	padding: 24px 28px;
+	border-radius: 22px;
+	background: #00C896;
+}
+.zz-services__banner-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.25);
+}
+.zz-services__banner-check {
+	width: 20px;
+	height: 20px;
+	color: var(--tp-white);
+}
+.zz-services__banner-text {
+	flex: 1;
+	min-width: 0;
+	font-size: 15px;
+	line-height: 1.5;
+	color: #053B2A;
+}
+.zz-services__banner-text p {
+	margin: 0;
+}
+.zz-services__banner-title {
+	margin-bottom: 4px !important;
+	font-size: 18px;
+	font-weight: 700;
+}
+.zz-services__banner-cta {
+	flex: none;
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-white);
+	color: #067A55;
+}
+
+/* ---- Prezzi (pricing-tiers.php) ---- */
+.zz-price {
+	padding: 88px 80px;
+	background: var(--tp-white);
+}
+.zz-price__inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 40px;
+	max-width: 960px;
+	margin: 0 auto;
+}
+.zz-price__tiers {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 24px;
+	width: 100%;
+}
+.zz-price__tier {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	padding: 32px;
+	border: 1px solid #E6E6E6;
+	border-radius: 24px;
+	background: var(--tp-white);
+}
+.zz-price__tier.is-highlighted {
+	border: 2px solid var(--tp-primary);
+	box-shadow: 0 16px 36px -10px rgba(0, 200, 150, 0.28);
+}
+.zz-price__label {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	margin: 0;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 1px;
+	color: #067A55;
+}
+.zz-price__badge {
+	padding: 4px 10px;
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-primary);
+	color: var(--tp-white);
+}
+.zz-price__amount {
+	margin: 0;
+	font-size: 15px;
+	color: #5B6472;
+}
+.zz-price__amount strong {
+	font-size: 40px;
+	font-weight: 800;
+	letter-spacing: -0.8px;
+	color: #1A1A1A;
+}
+.zz-price__text {
+	margin: 0;
+	font-size: 15px;
+	color: #4B5563;
+}
+.zz-price__list {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 4px 0 0;
+	padding: 0;
+	list-style: none;
+}
+.zz-price__list li {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	font-size: 15px;
+	line-height: 1.45;
+	color: #1A1A1A;
+}
+.zz-price__check {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	margin-top: 3px;
+	color: #067A55;
+}
+.zz-price__cta {
+	margin-top: auto;
+	border-radius: var(--tp-radius-pill);
+}
+.zz-price__note {
+	margin: 0;
+	font-size: 14px;
+	color: #6B7280;
+}
+
+/* Ingressi a cascata (reveal.js) */
+.zz-services__card,
+.zz-price__tier {
+	opacity: 0;
+	transform: translateY(16px);
+	transition: opacity 0.5s ease, transform 0.5s ease;
+	transition-delay: calc(var(--i, 0) * 70ms);
+}
+.zz-services.is-in .zz-services__card,
+.zz-price.is-in .zz-price__tier {
+	opacity: 1;
+	transform: none;
+}
+
+@media (max-width: 1023px) {
+	.zz .b2b-why__grid,
+	.zz-services__grid {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.zz-tiger,
+	.zz-services,
+	.zz-price {
+		padding: 64px 24px;
+	}
+	.zz-tiger__inner {
+		grid-template-columns: 1fr;
+		gap: 32px;
+	}
+	.zz-tiger__title {
+		font-size: 32px;
+	}
+	.zz-services__banner {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+	.zz-price__tiers {
+		grid-template-columns: 1fr;
+	}
+}
+@media (max-width: 639px) {
+	.zz .b2b-why__grid,
+	.zz-services__grid {
+		grid-template-columns: 1fr;
+	}
+	.zz-tiger,
+	.zz-services,
+	.zz-price {
+		padding: 48px 16px;
+	}
+	.zz-tiger__title {
+		font-size: 28px;
+	}
+	.zz-tiger__box {
+		padding: 22px 18px;
+	}
+	.zz-price__tier {
+		padding: 24px 20px;
+	}
+	.zz-price__amount strong {
+		font-size: 34px;
+	}
+	.zz-services__banner-cta {
+		align-self: stretch;
+		justify-content: center;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.zones-map__caps path { transition: none; }
 	/* Diventa cleaner: niente ingressi (lo script non aggiunge .dc--motion), niente ondeggiamento, inclinazione,
@@ -9719,5 +10150,11 @@ main.dc--motion .dc-rv.is-in {
 	}
 	.bl-card__cover img {
 		transition: none;
+	}
+	.zz-services__card,
+	.zz-price__tier {
+		opacity: 1;
+		transform: none !important;
+		transition: none !important;
 	}
 }
