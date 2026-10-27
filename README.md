@@ -30,6 +30,7 @@ page-landing-b2b.php      landing /roma/sgrosso-commerciale/ (docs/landing-b2b.m
 page-contact.php          pagina /contatti/ (docs/contatti.md)
 page-about.php            pagina /chi-siamo/ (docs/chi-siamo.md)
 page-legal.php            pagine legali /privacy/ e /terms/ (docs/pagine-legali.md)
+home.php / category.php / single.php  blog: indice, categorie, articolo (docs/blog.md)
 header-landing.php        testata delle landing (promo bar, navbar senza menu); head condiviso in template-parts/head.php
 inc/sgrosso-variants.php  testi di default per variante della landing Sgrosso
 inc/tracking.php          iubenda, GTM, Clarity da Theme Options
@@ -87,5 +88,5 @@ Un errore PHP nel tema manda in fatal tutto il sito: per questo il lint precede 
 
 ## Stato
 
-Home desktop e mobile, hub /roma/, cinque landing Sgrosso con form lead funzionante, Diventa cleaner, landing B2B, Contatti e Chi siamo (ver 0.56.x). Stato e prossimi passi nel vault,
+Home desktop e mobile, hub /roma/, cinque landing Sgrosso con form lead funzionante, Diventa cleaner, landing B2B, Contatti, Chi siamo, pagine legali e blog (ver 0.58.x). Stato e prossimi passi nel vault,
 `clients/trovapulizie/projects/sito-web/CLAUDE.md`.
