@@ -285,4 +285,5 @@ add_action( 'init', function () {
 require_once __DIR__ . "/inc/carbon-fields.php";
 require_once __DIR__ . '/inc/tracking.php';
 require_once __DIR__ . '/inc/blog.php';
+require_once __DIR__ . '/inc/redirects.php';
 require_once __DIR__ . '/inc/seo.php';
