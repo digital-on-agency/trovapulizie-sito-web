@@ -755,6 +755,13 @@ add_action( 'carbon_fields_register_fields', function () {
 				) ),
 		) );
 
+	// Pagina legale — template page-legal.php (/privacy/, /terms/). Il testo sta nell'editor della pagina.
+	Container::make( 'post_meta', __( 'Pagina legale' ) )
+		->where( 'post_template', '=', 'page-legal.php' )
+		->add_fields( array(
+			Field::make( 'text', 'lg_iubenda_url', __( 'Policy iubenda (URL)' ) )->set_help_text( __( 'Compilato = la policy viene incorporata sopra il testo della pagina. Privacy: https://www.iubenda.com/privacy-policy/55307359' ) ),
+		) );
+
 	// Chi siamo — pagina col template page-about.php (SPEC-pagina-chi-siamo, TICKET-66..69).
 	// Ogni testo ha il default nel template (Figma 6795:895, hero 6814:895): un campo compilato vince.
 	$ab_vuoto = __( 'Vuoto = testo di default del template.' );

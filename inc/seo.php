@@ -49,6 +49,10 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-about.php' ) ) {
 		return 'Chi siamo — Trovapulizie';
 	}
+	// Pagine legali: stesso schema del live ("Privacy Policy — TrovaPulizie", "Termini e Condizioni — Trovapulizie").
+	if ( is_singular() && is_page_template( 'page-legal.php' ) ) {
+		return get_the_title() . ' — Trovapulizie';
+	}
 	return '';
 }
 
