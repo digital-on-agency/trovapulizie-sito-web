@@ -35,6 +35,7 @@ header-landing.php        testata delle landing (promo bar, navbar senza menu); 
 inc/sgrosso-variants.php  testi di default per variante della landing Sgrosso
 inc/tracking.php          iubenda, GTM, Clarity da Theme Options
 inc/seo.php               title, description e JSON-LD per pagina
+inc/redirects.php         redirect del dominio pubblico per il cutover (rotte dell'app su app., /partner, /help, quartieri, sw.js)
 index.php                 fallback per le altre pagine
 template-parts/           sezioni riutilizzabili (args via get_template_part) + phone-mockup
 assets/js/                un modulo per comportamento
