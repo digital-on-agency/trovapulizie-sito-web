@@ -69,12 +69,14 @@ const PROBE = `(() => {
 			testo: txt ? Math.round(txt.getBoundingClientRect().width) : null
 		};
 	});
-	const seqPhone = document.querySelector('.hiw-seq__phone');
+	// Carosello di Come funziona sotto soglia (decisione Guido 27/10, sostituisce la sequenza di ADR-002 rev. 5)
+	const track = document.querySelector('.how-it-works__steps');
 	const seq = {
-		on: document.documentElement.classList.contains('hiw-seq-ok'),
-		schermate: document.querySelectorAll('.hiw-seq__screen').length,
-		phone: seqPhone ? Math.round(seqPhone.getBoundingClientRect().width) + 'x' + Math.round(seqPhone.getBoundingClientRect().height) : null,
-		sticky: (() => { const k = document.querySelector('.how-it-works__sticky'); return k ? getComputedStyle(k).position : null; })(),
+		on: document.documentElement.classList.contains('hiw-car-ok'),
+		scorre: track ? getComputedStyle(track).overflowX : null,
+		snap: track ? getComputedStyle(track).scrollSnapType : null,
+		riga: (() => { const c = document.querySelectorAll('.how-it-works__step'); return c.length > 1 ? Math.round(c[0].getBoundingClientRect().top) === Math.round(c[1].getBoundingClientRect().top) : null; })(),
+		nav: (() => { const n = document.querySelector('.hiw-nav'); return n ? getComputedStyle(n).display !== 'none' : false; })(),
 		viewport: Math.round(window.innerHeight)
 	};
 	// Nessun video deve restare nella sezione: su mobile la sequenza e' di immagini (ADR-002 rev. 5)
@@ -173,27 +175,18 @@ const PROBE = `(() => {
 			const attesoMotion = altraPagina ? false : desktop;
 			if (r.motionOk !== attesoMotion) errors.push('motion-ok ' + r.motionOk + ', atteso ' + attesoMotion);
 			if (!desktop && r.cdn.length) errors.push('risorse CDN richieste sotto soglia: ' + r.cdn.join(', '));
-			// Sotto soglia la sezione vale 300dvh con la sequenza attiva, circa 2 viewport nel fallback
-			// impilato; i 550vh del pin desktop (oltre 5 viewport) non devono comparire in nessuno dei due.
-			if (!desktop && !altraPagina) {
-				const atteso = r.seq.on ? 3 * r.seq.viewport : null;
-				if (atteso && Math.abs(r.hiwHeight - atteso) > atteso * 0.1) errors.push('Come funziona alta ' + r.hiwHeight + 'px, attesi circa ' + atteso + ' (300dvh)');
-				if (!r.seq.on && r.hiwHeight > 2.5 * r.seq.viewport) errors.push('fallback impilato alto ' + r.hiwHeight + 'px: sembra la sezione pinnata');
-			}
-			// Come funziona sotto soglia (TICKET-13 rev. 2): sequenza di schermate o fallback impilato.
+			// Come funziona sotto soglia: carosello orizzontale, card affiancate, telefono 220x445 (200x405 fino a
+			// 400px), navigazione visibile con lo script, sezione alta circa una viewport (niente pin, niente 300dvh).
 			if (!desktop && !altraPagina) {
 				if (r.steps.length !== 3) errors.push('passi di Come funziona: ' + r.steps.length + ', attesi 3');
-				if (r.videoSezione) errors.push(r.videoSezione + ' video ancora nella sezione: su mobile la sequenza e\' di immagini');
-				if (r.seq.on) {
-					// Sequenza (ADR-002 rev. 5): un telefono solo, tre schermate, contenuto sticky.
-					if (r.seq.schermate !== 3) errors.push('schermate della sequenza: ' + r.seq.schermate + ', attese 3');
-					if (r.seq.phone !== '158x320') errors.push('telefono della sequenza ' + r.seq.phone + ', atteso 158x320');
-					if (r.seq.sticky !== 'sticky') errors.push('il contenuto della sezione non e\' sticky');
-				} else {
-					r.steps.forEach((st, i) => {
-						if (st.phone !== '158x320') errors.push('blocco ' + (i + 1) + ': telefono ' + st.phone + ', atteso 158x320');
-					});
-				}
+				if (r.videoSezione) errors.push(r.videoSezione + ' video ancora nella sezione: su mobile ci sono solo immagini');
+				if (r.seq.scorre !== 'auto' || !/x/.test(r.seq.snap || '') || r.seq.riga !== true) errors.push('carosello non attivo: overflow ' + r.seq.scorre + ', snap ' + r.seq.snap + ', card in riga ' + r.seq.riga);
+				if (!r.seq.on || !r.seq.nav) errors.push('navigazione del carosello assente (hiw-car-ok ' + r.seq.on + ')');
+				const atteso = w <= 400 ? '200x405' : '220x445';
+				r.steps.forEach((st, i) => {
+					if (st.phone !== atteso) errors.push('card ' + (i + 1) + ': telefono ' + st.phone + ', atteso ' + atteso);
+				});
+				if (r.hiwHeight > 1.4 * r.seq.viewport) errors.push('Come funziona alta ' + r.hiwHeight + 'px: oltre una viewport e mezza');
 				// Hero mobile (TICKET-12): box 270 di altezza e telefono 150x300 che ne sporge sotto.
 				if (!r.hero.box || r.hero.box[3] !== 270) errors.push('box hero alto ' + (r.hero.box && r.hero.box[3]) + ', atteso 270');
 				if (!r.hero.phone || r.hero.phone[2] !== 150 || r.hero.phone[3] !== 300) errors.push('telefono hero ' + JSON.stringify(r.hero.phone) + ', atteso 150x300');
