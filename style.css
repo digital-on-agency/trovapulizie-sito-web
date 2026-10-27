@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.54.2
+Version: 0.55.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -22,6 +22,7 @@ Version: 0.54.2
    (segue: landing Sgrosso, testata landing, form lead, thank-you)
    13. Diventa cleaner (page-cleaner-landing.php): hero, schermi, bento, calcolatore guadagni, per chi e', requisiti
    14. Landing B2B (page-landing-b2b.php): form a un passo, settori con foto, lavori, formule, perche' noi
+   15. Contatti (page-contact.php): smistamento a card, canali diretti e dati aziendali
    12. prefers-reduced-motion: blocco unico per tutte le sezioni
    Ogni sezione ha la propria media query sotto i 1024px; la soglia e' il token --tp-bp-desktop. */
 
@@ -7688,6 +7689,367 @@ main.dc--motion .dc-rv.is-in {
 	}
 }
 
+/* =========================
+   15. Contatti — page-contact.php, Figma 6803:895 (TICKET-63..65)
+   Classi ct-*; riusa .faq. Smistamento a quattro card (route-cards.php), canali e dati aziendali
+   (company-contacts.php, stesso disegno del blocco di Chi siamo 6795:1136). Verde del marchio solo sulle CTA;
+   testo e icone verdi su fondo chiaro in #067A55 (come Diventa cleaner e landing B2B).
+   ========================= */
+.ct > section {
+	scroll-margin-top: var(--tp-navbar-h);
+}
+
+/* ---- Smistamento: testa centrata e quattro card (route-cards.php) ---- */
+.ct-route {
+	padding: 96px 80px 112px;
+	background: #F6FBF9;
+}
+.ct-route__inner {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 56px;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+.ct-route__head {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	text-align: center;
+}
+.ct-route__eyebrow,
+.ct-info__eyebrow {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	letter-spacing: 1.3px;
+	color: #067A55;
+}
+.ct-route__title {
+	margin: 0;
+	font-size: 56px;
+	line-height: 1.15;
+	letter-spacing: -1px;
+	font-weight: 700;
+	color: #1A1A1A;
+}
+.ct-route__sub {
+	max-width: 640px;
+	margin: 0;
+	font-size: 18px;
+	line-height: 1.5;
+	color: #4B5563;
+}
+.ct-route__cards {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 24px;
+	width: 100%;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.ct-route__card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 16px;
+	min-height: 360px;
+	padding: 32px;
+	border: 1px solid #E6E6E6;
+	border-radius: 28px;
+	background: var(--tp-white);
+	box-shadow: 0 12px 32px rgba(13, 51, 38, 0.1);
+}
+.ct-route__card--dark {
+	border-color: #12171A;
+	background: #12171A;
+	box-shadow: none;
+}
+.ct-route__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	background: #F0FBF7;
+	color: #067A55;
+}
+.ct-route__card--dark .ct-route__icon {
+	background: var(--tp-primary);
+	color: var(--tp-white);
+}
+.ct-route__card-title {
+	margin: 0;
+	font-size: 20px;
+	line-height: 1.3;
+	font-weight: 700;
+	color: #1A1A1A;
+}
+.ct-route__card--dark .ct-route__card-title {
+	color: var(--tp-white);
+}
+.ct-route__text {
+	margin: 0;
+	font-size: 15px;
+	line-height: 1.5;
+	color: #5B6472;
+}
+.ct-route__card--dark .ct-route__text {
+	color: #C9D1CE;
+}
+.ct-route__link {
+	margin-top: auto;
+	font-size: 15px;
+	font-weight: 600;
+	color: #067A55;
+	text-decoration: none;
+}
+.ct-route__card--dark .ct-route__link {
+	color: var(--tp-primary);
+}
+/* L'intera card e' l'area cliccabile: ::after del link, non padding (reference_css_hitarea_padding_translate_bug) */
+.ct-route__link::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+}
+.ct-route__link:focus-visible {
+	outline: none;
+}
+.ct-route__link:focus-visible::after {
+	outline: 3px solid var(--tp-focus);
+	outline-offset: 3px;
+}
+.ct-route__arrow {
+	display: inline-block;
+	transition: transform 0.2s ease;
+}
+
+/* ---- Canali diretti e dati aziendali (company-contacts.php) ---- */
+.ct-info {
+	padding: 96px 80px;
+	background: var(--tp-white);
+}
+.ct-info__inner {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 24px;
+	align-items: start;
+	max-width: 1200px;
+	margin: 0 auto;
+}
+.ct-info__card {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 20px;
+	padding: 40px;
+	border-radius: 28px;
+}
+.ct-info__card--channels {
+	background: #F0FBF7;
+}
+.ct-info__card--company {
+	border: 1px solid #E6E6E6;
+	background: var(--tp-white);
+	box-shadow: 0 12px 32px rgba(13, 51, 38, 0.1);
+}
+.ct-info__title {
+	margin: 0;
+	font-size: 28px;
+	line-height: 1.3;
+	font-weight: 700;
+	color: #1A1A1A;
+}
+.ct-info__text {
+	margin: 0;
+	font-size: 16px;
+	line-height: 1.5;
+	color: #5B6472;
+}
+.ct-info__channels {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.ct-info__channel {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+}
+.ct-info__channel-icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex: none;
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background: var(--tp-white);
+	color: #067A55;
+}
+.ct-info__channel-text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	font-size: 13px;
+	color: #5B6472;
+}
+.ct-info__channel-text a {
+	font-size: 17px;
+	font-weight: 600;
+	color: #1A1A1A;
+	text-decoration: none;
+}
+.ct-info__cta {
+	display: inline-flex;
+	align-items: center;
+	min-height: 56px;
+	margin-top: 4px;
+	padding: 0 28px;
+	border: 1.5px solid var(--tp-primary);
+	border-radius: var(--tp-radius-pill);
+	background: var(--tp-white);
+	font-size: 16px;
+	font-weight: 600;
+	color: #067A55;
+	text-decoration: none;
+}
+.ct-info__rows {
+	width: 100%;
+	margin: 0;
+}
+.ct-info__row {
+	display: grid;
+	grid-template-columns: 160px minmax(0, 1fr);
+	gap: 16px;
+	padding: 14px 0;
+	border-top: 1px solid #EBEDF0;
+	font-size: 15px;
+	line-height: 1.5;
+}
+.ct-info__row dt {
+	color: #5B6472;
+}
+.ct-info__row dd {
+	margin: 0;
+	font-weight: 600;
+	color: #1A1A1A;
+}
+
+/* Reveal a cascata (reveal.js mette .is-in sulla sezione). Ombra e hover nella stessa transizione: una seconda
+   regola con la stessa specificita' la sostituirebbe (trappola in docs/landing-cleaner.md). */
+.ct-route__card,
+.ct-info__card {
+	opacity: 0;
+	transform: translateY(16px);
+	transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+	transition-delay: calc(var(--i, 0) * 70ms), calc(var(--i, 0) * 70ms), 0s, 0s;
+}
+.ct-info__card--company {
+	--i: 1;
+}
+.ct-route.is-in .ct-route__card,
+.ct-info.is-in .ct-info__card {
+	opacity: 1;
+	transform: none;
+}
+@media (hover: hover) {
+	.ct-route__card:hover {
+		border-color: #B3FFE0;
+		box-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.16);
+	}
+	.ct-route__card--dark:hover {
+		border-color: #12171A;
+	}
+	.ct-route__card:hover .ct-route__arrow {
+		transform: translateX(4px);
+	}
+	.ct-info__cta:hover {
+		background: var(--tp-primary);
+		color: var(--tp-white);
+	}
+	.ct-info__channel-text a:hover {
+		color: #067A55;
+	}
+}
+
+@media (max-width: 1023px) {
+	.ct-route {
+		padding: 64px 24px 72px;
+	}
+	.ct-route__inner {
+		gap: 40px;
+	}
+	.ct-route__title {
+		font-size: 40px;
+	}
+	.ct-route__sub {
+		font-size: 17px;
+	}
+	.ct-route__cards {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 16px;
+	}
+	.ct-route__card {
+		min-height: 0;
+		padding: 28px;
+	}
+	.ct-route__link {
+		margin-top: 8px;
+	}
+	.ct-info {
+		padding: 64px 24px;
+	}
+	.ct-info__inner {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+}
+@media (max-width: 639px) {
+	.ct-route {
+		padding: 48px 16px 56px;
+	}
+	.ct-route__title {
+		font-size: 34px;
+	}
+	.ct-route__cards {
+		grid-template-columns: 1fr;
+	}
+	.ct-route__card {
+		gap: 12px;
+		padding: 24px;
+		border-radius: 20px;
+	}
+	.ct-info {
+		padding: 48px 16px;
+	}
+	.ct-info__card {
+		padding: 28px 24px;
+		border-radius: 20px;
+	}
+	.ct-info__title {
+		font-size: 24px;
+	}
+	.ct-info__row {
+		grid-template-columns: 1fr;
+		gap: 2px;
+	}
+	.ct-info__cta {
+		align-self: stretch;
+		justify-content: center;
+	}
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.zones-map__caps path { transition: none; }
 	/* Diventa cleaner: niente ingressi (lo script non aggiunge .dc--motion), niente ondeggiamento, inclinazione,
@@ -7792,6 +8154,13 @@ main.dc--motion .dc-rv.is-in {
 	.b2b-works__item {
 		opacity: 1;
 		transform: none;
+		transition: none !important;
+	}
+	.ct-route__card,
+	.ct-info__card,
+	.ct-route__arrow {
+		opacity: 1;
+		transform: none !important;
 		transition: none !important;
 	}
 }

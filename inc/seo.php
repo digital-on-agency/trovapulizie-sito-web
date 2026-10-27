@@ -41,6 +41,10 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {
 		return 'Pulizie commerciali Roma — Uffici, negozi e locali | Trovapulizie';
 	}
+	// Contatti (TICKET-63): pagina nuova, non esiste sul live.
+	if ( is_singular() && is_page_template( 'page-contact.php' ) ) {
+		return 'Contatti — Trovapulizie';
+	}
 	return '';
 }
 
@@ -62,8 +66,59 @@ function tp_seo_description() {
 	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {
 		return 'Pulizie commerciali a Roma per uffici, negozi e locali: preventivo su misura, fattura, personale verificato. Sopralluogo gratuito, risposta in 1 ora.';
 	}
+	if ( is_singular() && is_page_template( 'page-contact.php' ) ) {
+		return 'Come contattare Trovapulizie: scrivici su WhatsApp o a help@trovapulizie.it, oppure trova subito la pagina giusta per prenotare, chiedere un preventivo aziendale o lavorare con noi.';
+	}
 	return get_bloginfo( 'description' );
 }
+
+/* Contatti (TICKET-64): Organization con ContactPoint, dagli stessi campi che la pagina mostra (numero ed email).
+   Indirizzo solo a livello di citta', come il provider del Service qui sotto: lo streetAddress resta fuori finche'
+   non si chiarisce se il profilo Google e' un'attivita' con area di servizio (CLAUDE.md cliente). */
+add_action( 'wp_head', function () {
+	if ( ! is_singular() || ! is_page_template( 'page-contact.php' ) ) {
+		return;
+	}
+	$campo = function ( $nome, $default ) {
+		$v = trim( (string) carbon_get_the_post_meta( $nome ) );
+		return '' !== $v ? $v : $default;
+	};
+	$wa    = tp_whatsapp_parts( $campo( 'ct_whatsapp', TP_CT_WHATSAPP ) );
+	$email = sanitize_email( $campo( 'ct_email', TP_CT_EMAIL ) );
+	$punto = array(
+		'@type'             => 'ContactPoint',
+		'contactType'       => 'customer support',
+		'areaServed'        => 'Roma',
+		'availableLanguage' => 'it',
+	);
+	if ( $wa ) {
+		$punto['telephone'] = $wa['e164'];
+	}
+	if ( $email ) {
+		$punto['email'] = $email;
+	}
+	$dati = array(
+		'@context'  => 'https://schema.org',
+		'@type'     => 'Organization',
+		'name'      => 'Trovapulizie',
+		'legalName' => 'Trovapulizie SRL',
+		'url'       => home_url( '/' ),
+		'vatID'     => 'IT18445521000',
+		'address'   => array(
+			'@type'           => 'PostalAddress',
+			'addressLocality' => 'Roma',
+			'addressRegion'   => 'Lazio',
+			'addressCountry'  => 'IT',
+		),
+	);
+	if ( $email ) {
+		$dati['email'] = $email;
+	}
+	if ( $wa || $email ) {
+		$dati['contactPoint'] = $punto;
+	}
+	echo '<script type="application/ld+json">' . wp_json_encode( $dati, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
+}, 5 );
 
 add_filter( 'pre_get_document_title', function ( $title ) {
 	$t = tp_seo_title();

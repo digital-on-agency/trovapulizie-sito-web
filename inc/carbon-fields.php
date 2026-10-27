@@ -705,6 +705,56 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'textarea', 'b2b_cta_bullets', __( 'Punti (uno per riga)' ) )->set_help_text( __( 'Vuoto = i quattro del ridisegno. Il form ripete titolo, testi e bottone della card della hero.' ) ),
 		) );
 
+	// Contatti — pagina col template page-contact.php (SPEC-pagina-contatti, TICKET-63..65).
+	// Ogni testo ha il default nel template (Figma 6803:895): un campo compilato vince.
+	$ct_vuoto = __( 'Vuoto = testo di default del template.' );
+	Container::make( 'post_meta', __( 'Contatti — Sezioni' ) )
+		->where( 'post_template', '=', 'page-contact.php' )
+		->add_tab( __( 'Smistamento' ), array(
+			Field::make( 'text', 'ct_hero_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = CONTATTI.' ) ),
+			Field::make( 'text', 'ct_hero_title', __( 'Titolo (H1)' ) )->set_help_text( __( 'Vuoto = "Come possiamo aiutarti?"' ) ),
+			Field::make( 'textarea', 'ct_hero_subtitle', __( 'Sottotitolo' ) )->set_help_text( $ct_vuoto ),
+			Field::make( 'complex', 'ct_cards', __( 'Card (vuoto = le quattro del Figma)' ) )
+				->set_help_text( __( "L'icona decide anche la posizione negli eventi di tracking (casa, azienda, lavora, prenotato). La card scura e' quella del contatto vero." ) )
+				->add_fields( array(
+					Field::make( 'select', 'icon', __( 'Icona' ) )->set_options( array(
+						'home'      => 'Casa',
+						'building'  => 'Azienda',
+						'user-plus' => 'Lavora con noi',
+						'chat'      => 'Messaggio',
+					) ),
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'textarea', 'text', __( 'Testo' ) )->set_rows( 3 ),
+					Field::make( 'text', 'link_label', __( 'Testo del link' ) ),
+					Field::make( 'text', 'link', __( 'Link' ) )->set_help_text( __( 'URL completo o percorso (es. /diventa-cleaner/). WhatsApp: https://wa.me/393200980144' ) ),
+					Field::make( 'checkbox', 'dark', __( 'Card scura' ) ),
+				) ),
+		) )
+		->add_tab( __( 'Canali' ), array(
+			Field::make( 'text', 'ct_ch_eyebrow', __( 'Pillola' ) )->set_help_text( __( 'Vuoto = CANALI DIRETTI.' ) ),
+			Field::make( 'text', 'ct_ch_title', __( 'Titolo' ) )->set_help_text( __( 'Vuoto = "Scrivici".' ) ),
+			Field::make( 'textarea', 'ct_ch_text', __( 'Testo (orari)' ) )->set_help_text( __( 'Vuoto = "Per qualsiasi altra domanda. Rispondiamo nei giorni lavorativi."' ) ),
+			Field::make( 'text', 'ct_whatsapp', __( 'Numero WhatsApp' ) )->set_help_text( __( 'Vuoto = 320 098 0144. Vale per la card "Hai gia\' prenotato", il bottone e i dati strutturati.' ) ),
+			Field::make( 'text', 'ct_email', __( 'Email' ) )->set_help_text( __( 'Vuoto = help@trovapulizie.it.' ) ),
+			Field::make( 'text', 'ct_ch_cta', __( 'Bottone' ) )->set_help_text( __( 'Vuoto = "Scrivici su WhatsApp".' ) ),
+		) )
+		->add_tab( __( 'Dati aziendali' ), array(
+			Field::make( 'text', 'ct_co_eyebrow', __( 'Pillola' ) )->set_help_text( __( 'Vuoto = DATI AZIENDALI.' ) ),
+			Field::make( 'text', 'ct_co_name', __( 'Ragione sociale' ) )->set_help_text( __( 'Vuoto = "Trovapulizie S.R.L."' ) ),
+			Field::make( 'textarea', 'ct_co_rows', __( 'Righe (Voce | valore, una per riga)' ) )->set_help_text( __( 'Vuoto = sede legale, partita IVA, REA, iscrizione.' ) ),
+		) )
+		->add_tab( __( 'FAQ' ), array(
+			Field::make( 'text', 'ct_faq_eyebrow', __( 'Pillola' ) )->set_help_text( __( 'Vuoto = DOMANDE FREQUENTI.' ) ),
+			Field::make( 'text', 'ct_faq_title', __( 'Titolo' ) )->set_help_text( __( 'Vuoto = "Prima di scriverci".' ) ),
+			Field::make( 'textarea', 'ct_faq_subtitle', __( 'Testo sotto il titolo' ) )->set_help_text( $ct_vuoto ),
+			Field::make( 'complex', 'ct_faq_items', __( 'Domande (vuoto = le quattro di default)' ) )
+				->set_help_text( __( 'Una domanda senza risposta non esce, ne\' in pagina ne\' nei dati strutturati.' ) )
+				->add_fields( array(
+					Field::make( 'text', 'question', __( 'Domanda' ) ),
+					Field::make( 'textarea', 'answer', __( 'Risposta' ) ),
+				) ),
+		) );
+
 	// Thank-you — pagina col template page-thank-you.php (TICKET-42). Riepilogo e passi sono fissi nel template:
 	// i dati della richiesta arrivano dal browser (sessionStorage), non da WordPress.
 	Container::make( 'post_meta', __( 'Thank-you — Testi' ) )

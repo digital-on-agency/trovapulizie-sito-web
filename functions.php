@@ -38,6 +38,26 @@ function tp_link_lines( $text ) {
 	}
 	return $out;
 }
+// Canali pubblici del brand (decisione Guido 27/10, CLAUDE.md cliente): default della pagina Contatti e del suo JSON-LD.
+define( 'TP_CT_WHATSAPP', '320 098 0144' );
+define( 'TP_CT_EMAIL', 'help@trovapulizie.it' );
+
+/**
+ * Numero WhatsApp in qualunque formato ("320 098 0144", "+39 3200980144") -> testo da mostrare, link wa.me (con
+ * testo precompilato opzionale) e formato E.164 per il JSON-LD. Prefisso 39 se manca. Null se il numero e' vuoto o
+ * troppo corto. Pagina Contatti (TICKET-64): una sola fonte per card, canali e dati strutturati.
+ */
+function tp_whatsapp_parts( $numero, $testo = '' ) {
+	$cifre = preg_replace( '/\D+/', '', (string) $numero );
+	if ( strlen( $cifre ) < 9 ) {
+		return null;
+	}
+	$e164    = 0 === strpos( $cifre, '39' ) && strlen( $cifre ) > 10 ? $cifre : '39' . $cifre;
+	$locale  = substr( $e164, 2 );
+	$display = preg_replace( '/^(\d{3})(\d{3})(\d+)$/', '$1 $2 $3', $locale );
+	$link    = 'https://wa.me/' . $e164 . ( '' !== $testo ? '?text=' . rawurlencode( $testo ) : '' );
+	return array( 'display' => $display, 'link' => $link, 'e164' => '+' . $e164 );
+}
 // Textarea "Titolo | testo" per riga -> array di [title, text] (testo opzionale). Pagina Diventa cleaner (TICKET-56).
 function tp_pipe_lines( $text ) {
 	$out = array();
@@ -201,7 +221,7 @@ add_action( 'wp_enqueue_scripts', function () {
 	$moduli_cleaner   = array( 'sticky-cta', 'earnings-calculator', 'cleaner-motion' );
 	// Landing B2B (TICKET-58/59): barra fissa doppia, tab dei settori e confronto prima/dopo, form a un passo.
 	$moduli_b2b       = array( 'sticky-cta', 'scenario-tabs', 'lead-form' );
-	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php', 'page-cleaner-landing.php', 'page-landing-b2b.php' );
+	$pagine_con_sezioni = array( 'page-home.php', 'page-hub-roma.php', 'page-sgrosso.php', 'page-cleaner-landing.php', 'page-landing-b2b.php', 'page-contact.php' );
 
 	$handles = array();
 	foreach ( $pagine_con_sezioni as $template ) {
@@ -226,6 +246,10 @@ add_action( 'wp_enqueue_scripts', function () {
 	if ( is_page_template( 'page-landing-b2b.php' ) ) {
 		// Dei moduli condivisi usa reveal e FAQ: niente mappa, servizi; le recensioni sono in griglia ferma.
 		$handles = array_merge( array( 'reveal', 'faq-accordion' ), $moduli_b2b );
+	}
+	if ( is_page_template( 'page-contact.php' ) ) {
+		// Contatti (TICKET-63/65): solo ingressi a cascata e FAQ, nessun modulo proprio.
+		$handles = array( 'reveal', 'faq-accordion' );
 	}
 	if ( is_page_template( 'page-thank-you.php' ) ) {
 		$handles[] = 'thank-you';
