@@ -291,3 +291,4 @@ require_once __DIR__ . '/inc/tracking.php';
 require_once __DIR__ . '/inc/blog.php';
 require_once __DIR__ . '/inc/redirects.php';
 require_once __DIR__ . '/inc/seo.php';
+require_once __DIR__ . '/inc/survey.php';

@@ -17,8 +17,9 @@
  * - /sw.js: service worker che si deregistra (la SPA lo registrava su www, pass-through e senza cache).
  *
  * [ATTENZIONE] Mai rimandare all'app un percorso che l'app considera pubblico (isPublicPath): il DomainGuard
- * dell'app lo rimanda al dominio pubblico e il giro diventa un ciclo. /survey-dubai resta 404 finche' l'app non
- * la serve solo da app.trovapulizie.com.
+ * dell'app lo rimanda al dominio pubblico e il giro diventa un ciclo. /survey-dubai e' una pagina WordPress
+ * (inc/survey.php, v2 di OnField): non e' tra i prefissi dell'app e non va mai rimandata a app.trovapulizie.com.
+ * La v1 React del portale si dismette al cutover (cutover-checklist N2).
  */
 
 const TP_APP_ORIGIN = 'https://app.trovapulizie.com';

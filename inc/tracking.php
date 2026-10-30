@@ -27,6 +27,9 @@ function tp_tracking_ids() {
 }
 
 add_action( 'wp_head', function () {
+	if ( function_exists( 'tp_is_survey_page' ) && tp_is_survey_page() ) {
+		return; // La survey OnField non ha tracking: raccoglie dati personali (inc/survey.php).
+	}
 	$ids = tp_tracking_ids();
 
 	if ( $ids['iub_site'] && $ids['iub_policy'] ) {
@@ -105,6 +108,9 @@ function gtag(){dataLayer.push(arguments);}
 }, 0 );
 
 add_action( 'wp_body_open', function () {
+	if ( function_exists( 'tp_is_survey_page' ) && tp_is_survey_page() ) {
+		return;
+	}
 	$ids = tp_tracking_ids();
 	if ( $ids['gtm'] ) {
 		echo '<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=' . esc_attr( $ids['gtm'] ) . '" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>' . "\n";
