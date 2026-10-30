@@ -11,6 +11,7 @@ Trovapulizie, scorporato dall'app transazionale React (`portale-transazionale`).
 - `docs/brand-kit.md`: token di design estratti dal Figma (colori, font, raggi, ombre) con i node-id di provenienza.
 - `docs/landing-sgrosso.md`: landing Sgrosso (cinque pagine su un template, form lead con chiamate dirette all'API,
   tracking, SEO, QA).
+- `docs/survey-dubai.md`: survey OnField v2 (pagina, tabella, endpoint, admin, QA).
 - `tools/README.md`: script di QA, pipeline del video dello schermo, encoding.
 - Decisioni (ADR), spec e stato del progetto: vault `clients/trovapulizie/projects/sito-web/`.
 
@@ -36,6 +37,8 @@ header-landing.php        testata delle landing (promo bar, navbar senza menu); 
 inc/sgrosso-variants.php  testi di default per variante della landing Sgrosso
 inc/tracking.php          iubenda, GTM, Clarity da Theme Options
 inc/seo.php               title, description e JSON-LD per pagina
+page-survey.php           survey OnField v2 /survey-dubai/ (docs/survey-dubai.md)
+inc/survey.php            survey: definizione, tabella, endpoint, noindex; inc/survey-admin.php: elenco e CSV
 inc/redirects.php         redirect del dominio pubblico per il cutover (rotte dell'app su app., /partner, /help, quartieri, sw.js)
 index.php                 fallback per le altre pagine
 template-parts/           sezioni riutilizzabili (args via get_template_part) + phone-mockup
