@@ -8,6 +8,7 @@
  *   schermate) e alla validazione lato server. Un cambio di testo o di domanda e' una nuova versione (TP_SURVEY_VERSION):
  *   per questo i testi non stanno in Carbon Fields.
  * - Salvataggio nel database di WordPress (tabella {prefix}tp_survey_response, survey_version = 2), nessun webhook.
+ *   Copia di ogni risposta nel gestionale interno (Airtable): inc/survey-airtable.php.
  *   Admin: inc/survey-admin.php (elenco, dettaglio, cancellazione, export CSV).
  * - Endpoint POST /wp-json/tp/v1/survey (+ /survey/feedback): nonce, tempo minimo dal caricamento firmato (anti-bot),
  *   honeypot, rate limit per IP (hash, mai l'IP in chiaro), consenso obbligatorio, almeno WhatsApp o email.
@@ -19,7 +20,7 @@
  */
 
 const TP_SURVEY_VERSION     = 2;
-const TP_SURVEY_DB_VERSION  = '1';
+const TP_SURVEY_DB_VERSION  = '2'; // 2: colonne at_* della copia nel gestionale interno (inc/survey-airtable.php)
 const TP_SURVEY_BRAND       = 'OnField';
 const TP_SURVEY_MIN_SECONDS = 12;
 const TP_SURVEY_MAX_PER_HOUR = 10; // salvataggi per IP e per ora
@@ -182,6 +183,13 @@ function tp_survey_install() {
 		consent_ref varchar(60) NOT NULL DEFAULT '',
 		ip_hash char(16) NOT NULL DEFAULT '',
 		user_agent varchar(255) NOT NULL DEFAULT '',
+		at_status varchar(10) NOT NULL DEFAULT 'pending',
+		at_tries tinyint(3) unsigned NOT NULL DEFAULT 0,
+		at_error varchar(255) NOT NULL DEFAULT '',
+		at_record_id varchar(20) NOT NULL DEFAULT '',
+		at_contact_id varchar(20) NOT NULL DEFAULT '',
+		at_opp_id varchar(20) NOT NULL DEFAULT '',
+		at_synced_at datetime DEFAULT NULL,
 		PRIMARY KEY  (id),
 		KEY survey_version (survey_version),
 		KEY created_at (created_at)
@@ -481,6 +489,7 @@ function tp_survey_rest_create( WP_REST_Request $req ) {
 	}
 	$id = (int) $wpdb->insert_id; // subito: il transient del rate limit scrive a sua volta e cambia insert_id
 	tp_survey_rate_limited( 'c', TP_SURVEY_MAX_PER_HOUR, true );
+	do_action( 'tp_survey_saved', $id );
 	return new WP_REST_Response( array( 'ok' => true, 'id' => $id, 'key' => tp_survey_feedback_key( $id ) ), 201 );
 }
 
@@ -509,7 +518,11 @@ function tp_survey_rest_feedback( WP_REST_Request $req ) {
 		'UPDATE ' . tp_survey_table() . " SET feedback = %s WHERE id = %d AND feedback = '' AND created_at >= %s",
 		$text, $id, $limit
 	) );
+	if ( $done ) {
+		do_action( 'tp_survey_feedback_saved', $id );
+	}
 	return new WP_REST_Response( array( 'ok' => (bool) $done ), 200 );
 }
 
 require_once __DIR__ . '/survey-admin.php';
+require_once __DIR__ . '/survey-airtable.php';
