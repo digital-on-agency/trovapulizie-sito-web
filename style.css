@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.63.0
+Version: 0.63.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -643,6 +643,12 @@ a {
 /* 31/10: passaggio dal bezel CSS al 3D in dissolvenza incrociata. Prima era un cambio secco, spesso a meta'
    scroll; ora il canvas c'e' gia' (trasparente) e is-3d arriva solo quando ha disegnato un fotogramma vero
    (home-motion.js). Il bezel tiene la sua posa finche' e' sparito, poi il JS gli toglie il transform. */
+/* Il canvas e' largo 1200px: fra 1024 e 1199 di viewport, nella hero (prima dell'aggancio) usciva dalla pagina
+   e creava scroll orizzontale. Taglio solo in orizzontale; il telefono agganciato e' position: fixed e non
+   passa da questo ritaglio. */
+.motion-ok .hero {
+	overflow-x: clip;
+}
 .motion-ok .hero__phone-3d {
 	display: block;
 	opacity: 0;
