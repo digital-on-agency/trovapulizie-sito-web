@@ -1,8 +1,11 @@
 <?php
 /**
  * Survey OnField: copia di ogni risposta nel gestionale interno (Airtable, base "Contabilita' & Marketing").
- * Decisioni Guido 30/10/2026: tabella "Survey OnField", invio a ogni risposta, i rami A (prova) e B (demo) aprono anche
- * un'Opportunita' collegata al Contatto. La copia di riferimento resta nella tabella WordPress: Airtable e' una copia.
+ * Decisioni Guido 30/10/2026: tabella "Survey OnField", invio a ogni risposta. La copia di riferimento resta nella tabella
+ * WordPress: Airtable e' una copia.
+ * Decisione Guido 31/10/2026 (SPEC-lead-onfield): ogni risposta con un recapito (email o WhatsApp), di qualunque ramo e con
+ * o senza consenso, apre un'Opportunita' OnField: Fase OnField "Nuovo", Campagna "Survey Dubai". Il lead si lavora nella
+ * pagina /lead-onfield del gestionale; il consenso resta sul Contatto e la pagina lo mostra.
  *
  * - Il salvataggio della risposta non aspetta Airtable: a ogni risposta (e a ogni commento) si pianifica un evento cron
  *   immediato; un secondo evento ogni 15 minuti riprova le righe rimaste indietro (al massimo TP_SURVEY_AT_MAX_TRIES).
@@ -16,6 +19,7 @@ const TP_SURVEY_AT_BASE      = 'appXiH9eh4Ko9H108';
 const TP_SURVEY_AT_SURVEY    = 'tbl4qMC0DfOMBcYFr';
 const TP_SURVEY_AT_CONTACTS  = 'tbl9AUHD1kF5o7MJJ';
 const TP_SURVEY_AT_OPPS      = 'tbl0avctPioRGc1hH';
+const TP_SURVEY_AT_CAMPAIGN  = 'recfRZJB5mDn6qkZ0'; // Campagne > "Survey Dubai"
 const TP_SURVEY_AT_MAX_TRIES = 5;
 
 /** Etichette leggibili dei rami, uguali alle opzioni del campo "Ramo" su Airtable. */
@@ -187,15 +191,17 @@ function tp_survey_at_sync_row( $id ) {
 		$set( array( 'at_contact_id' => $contact_id ) );
 	}
 
-	// 2. Opportunita': solo rami A (prova) e B (demo), una volta sola.
+	// 2. Opportunita': ogni risposta con un recapito, una volta sola (at_opp_id sulla riga evita il doppione al nuovo tentativo).
 	$opp_id = (string) $r['at_opp_id'];
-	if ( in_array( $r['branch'], array( 'A', 'B' ), true ) && '' === $opp_id ) {
+	if ( $has_contact && '' !== $contact_id && '' === $opp_id ) {
 		list( $res, $err ) = tp_survey_at_request( 'POST', TP_SURVEY_AT_OPPS, array(
 			'typecast' => true,
 			'records'  => array( array( 'fields' => array_filter( array(
 				'Contatto'             => '' !== $contact_id ? array( $contact_id ) : null,
 				'Stato'                => 'Da contattare',
 				'Servizio'             => 'OnField',
+				'Fase OnField'         => 'Nuovo',
+				'Campagna'             => array( TP_SURVEY_AT_CAMPAIGN ),
 				'Zona'                 => 'Dubai',
 				'Canale'               => 'Form web',
 				'Landing / Form'       => 'trovapulizie.it/survey-dubai',

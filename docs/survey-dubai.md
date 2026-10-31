@@ -71,3 +71,21 @@ dati personali e il marchio e' un altro. Titolo e `lang="en"` propri.
 `node tools/qa-survey.js <chrome> <url-base> <cartella-screenshot> [admin]`. Su WordPress Playground (`@wp-playground/cli`,
 tema montato in `wp-content/themes/trovapulizie`) gira per intero, admin compreso (utente `admin` / `password`). Sullo
 slot reale le prove di scrittura vanno seguite dalla cancellazione delle risposte di prova.
+
+## Copia nel gestionale interno (Airtable)
+
+`inc/survey-airtable.php` copia ogni risposta nella base Airtable del gestionale interno (`appXiH9eh4Ko9H108`), fuori
+dal salvataggio: cron immediato a ogni risposta e giro ogni 15 minuti per le righe rimaste indietro. Token in
+`wp-config.php` (`TP_AIRTABLE_SURVEY_TOKEN`), mai nel repo. Manuale: `wp tp-survey sync [<id>] [--all]`.
+
+Per ogni risposta, una volta sola (gli id Airtable restano sulla riga WordPress):
+
+1. **Contatto**, solo se c'e' un recapito: cercato per email o numero, altrimenti creato (Tipo `SaaS Prospect`, Mercato
+   `Dubai`, consenso con data e riferimento).
+2. **Opportunita'** (dal 31/10/2026, SPEC-lead-onfield del gestionale): per **ogni** risposta con un recapito, di
+   qualunque ramo. Servizio `OnField`, Fase OnField `Nuovo`, Campagna `Survey Dubai` (`recfRZJB5mDn6qkZ0`), Stato
+   `Da contattare`, note col riepilogo. Fino al 30/10 la creavano solo i rami A e B. Si lavora nella pagina
+   `/lead-onfield` del gestionale.
+3. **Risposta** nella tabella `Survey OnField`, collegata a Contatto e Opportunita'.
+
+Una risposta cancellata dall'admin WordPress resta su Airtable: si cancella a mano anche li'.
