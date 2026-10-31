@@ -96,9 +96,22 @@ Decisione e vincoli: ADR-002 (rev. 3). Qui il meccanismo.
 caso mette `motion-ok` su `<html>`. Tutto il CSS della coreografia e' sotto `.motion-ok`. Senza la classe la
 pagina e' statica: telefono fermo nella hero, step in griglia con lo schermo statico (`how-it-works__phone-static`).
 
-GSAP 3.13 + ScrollTrigger si caricano da cdnjs solo quando la sezione entra a meta' viewport di distanza
-(IntersectionObserver `rootMargin: 50%`). Three.js r186 arriva via importmap (in `functions.php`) e
-`phone-3d.js` viene importato dinamicamente solo con WebGL2; se fallisce resta il bezel CSS.
+GSAP 3.13 + ScrollTrigger, il video dello schermo e Three.js partono al load della pagina, nel primo momento
+libero (`requestIdleCallback`, timeout 1,5 s), oppure al primo scroll se arriva prima. Three.js r186 arriva via
+importmap (in `functions.php`, versioni minificate generate da jsDelivr) e `phone-3d.js` viene importato
+dinamicamente solo con WebGL2; se fallisce resta il bezel CSS. Il video dello zoom-through (6 MB) si scarica
+invece solo quando la sezione e' a mezzo viewport.
+
+[ATTENZIONE] Fino al 31/10 tutto partiva quando la sezione arrivava a mezzo viewport: a 1440x900, in cima alla
+Home, non succedeva, e GSAP arrivava solo dopo il primo scroll. Il telefono si aggancia dopo circa 450 px (3-4
+scatti di rotella): se GSAP arrivava piu' tardi, il telefono scorreva via con la pagina e poi saltava nella posa
+agganciata, e il passaggio al 3D cadeva a meta' scroll. Non riportare l'avvio alla vicinanza della sezione.
+
+**Passaggio dal bezel CSS al 3D.** Il canvas sta gia' sopra il bezel, trasparente; `phone-3d.js` espone
+`ready`, che si risolve dopo il primo render con un fotogramma vero del video. Solo allora `home-motion.js`
+mette `.is-3d` e i due telefoni si scambiano in dissolvenza (0,25 s); il bezel segue le pose finche' non e'
+sparito (`cssPhoneOn`). Senza fotogramma (video che non arriva) resta il bezel. Lo schermo del bezel mostra
+`come-funziona-hero-poster.jpg`, il primo fotogramma del video, quindi nello scambio cambia solo la cornice.
 
 ### Unita' di scroll
 `.motion-ok .how-it-works` e' alta 550vh. Il telefono viene pinnato (ScrollTrigger, `pinSpacing: false`,
@@ -110,7 +123,7 @@ GSAP 3.13 + ScrollTrigger si caricano da cdnjs solo quando la sezione entra a me
 | prima del pin (`p < p0`) | handoff: il telefono va dalla posa hero alla posa s1 | trigger A |
 | 0 - 3 | video scrubbed; `q = u/3` in 0..1; step attivo = terzo corrente; pose s1 -> s2 -> s3 -> out | trigger A |
 | q 0.82 - 0.94 | `--hiw-text-fade` 1 -> 0: titolo e step sfumano mentre il telefono si raddrizza | trigger A |
-| 3 - 4 | zoom-through: l'overlay parte dal rettangolo esatto dello schermo (`screenRect()`) e cresce fino al viewport | trigger A (`zoom(z)`) |
+| 3 - 4 | zoom-through: l'overlay parte dal rettangolo esatto dello schermo (`screenRect()`) e cresce fino al viewport. L'overlay e' sempre grande quanto il viewport: il rettangolo e' un `clip-path: inset()` e il video scala con un `transform` (dal 31/10; prima left/top/width/height, un ricalcolo di layout per fotogramma) | trigger A (`zoom(z)`) |
 | 4 - 4.5 | tenuta a tutto schermo, telefono rilasciato | `syncBeyondPin()` |
 | 4.5 - 5.5 | rientro: overlay dal viewport al rettangolo della foto della prima card, velo verde che cresce | `syncBeyondPin()` (`shrink(s)`) |
 | >= 5.5 | atterraggio: `cardTakeover(true)`, la card mostra il video in loop (`is-live`), overlay spento | `syncBeyondPin()` + IntersectionObserver sulla card |
@@ -125,6 +138,9 @@ Costanti in `home-motion.js`: `VIDEO_VH = 3`, `ZOOM_VH = 1`, `HOLD_VH = 0.5`, `S
 va aggiornato anche `height: 550vh` nel CSS.
 
 Snap: durante i 3 viewport del video lo scroll si aggancia ai terzi (0, 1, 2, 3); oltre e' libero.
+Dal 31/10 l'aggancio segue la direzione dello scroll (`self.direction`, margine 0,06): scorrendo in avanti si va
+al terzo successivo anche dopo pochi px. Con l'arrotondamento al piu' vicino, chi scorreva meno di mezzo terzo
+veniva riportato indietro (misurato: 300 px di rotella, 300 px di ritorno).
 `?nosnap=1` nell'URL disattiva lo snap (serve al QA per fermarsi a q intermedi).
 
 Perche' due meccanismi: un secondo ScrollTrigger per tenuta e rientro non funziona nei salti (link ad ancora,
@@ -354,8 +370,8 @@ Hostinger (LiteSpeed) cacha HTML e asset per 7 giorni. Regola:
 | Cosa | Da dove | Quando |
 |---|---|---|
 | Poppins | Google Fonts (`wp_enqueue_style`) | sempre |
-| GSAP 3.13.0 + ScrollTrigger | cdnjs, caricati da `home-motion.js` | Home, solo con `motion-ok`, quando la sezione si avvicina |
-| Three.js 0.186.1 + addons | jsdelivr via importmap in `wp_head` | Home, import dinamico da `home-motion.js` solo con WebGL2 |
+| GSAP 3.13.0 + ScrollTrigger | cdnjs, caricati da `home-motion.js` | Home, solo con `motion-ok`, al load della pagina o al primo scroll |
+| Three.js 0.186.1 + addons | jsdelivr via importmap in `wp_head` (`.min.js` generati da jsDelivr, il pacchetto r186 non li contiene; la voce su `three.core.js` rimappa l'import interno sulla versione minificata) | Home, import dinamico da `home-motion.js` solo con WebGL2 |
 | Carbon Fields | Composer (`vendor/`, non tracciato) | sempre (`composer install` in locale; sul server `vendor/` e' gia' presente) |
 
 ## 10. Breakpoint e gating motion
