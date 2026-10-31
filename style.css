@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.62.0
+Version: 0.63.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -640,12 +640,20 @@ a {
 	width: 100% !important;
 	height: 100% !important;
 }
+/* 31/10: passaggio dal bezel CSS al 3D in dissolvenza incrociata. Prima era un cambio secco, spesso a meta'
+   scroll; ora il canvas c'e' gia' (trasparente) e is-3d arriva solo quando ha disegnato un fotogramma vero
+   (home-motion.js). Il bezel tiene la sua posa finche' e' sparito, poi il JS gli toglie il transform. */
+.motion-ok .hero__phone-3d {
+	display: block;
+	opacity: 0;
+	transition: opacity 0.25s ease;
+}
 .hero__phone.is-3d .hero__phone-3d {
 	display: block;
+	opacity: 1;
 }
 .hero__phone.is-3d .tp-phone {
 	opacity: 0;
-	transform: none !important;
 }
 
 /* Hero mobile e tablet — Figma 4018:973. Struttura diversa dal desktop: li' il testo sta sopra la foto,
@@ -990,20 +998,23 @@ a {
 }
 .motion-ok #hiw-phone {
 	will-change: transform;
+	transition: opacity 0.25s ease; /* dissolvenza verso il telefono 3D (.is-3d) */
 }
 
 
-/* Overlay dello zoom-through (ADR-002 rev. 3): fisso, sotto la navbar (z 10), geometria impostata da JS;
-   il velo verde (lo stesso della card servizio) sfuma durante il rientro nella card */
+/* Overlay dello zoom-through (ADR-002 rev. 3): fisso, sotto la navbar (z 10), il velo verde (lo stesso della
+   card servizio) sfuma durante il rientro nella card. Dal 31/10 e' sempre grande quanto il viewport: il
+   rettangolo visibile e' un clip-path e il video scala con un transform, entrambi scritti da home-motion.js
+   (prima si animavano left/top/width/height, con un ricalcolo di layout a ogni fotogramma). */
 .hiw-zoom {
 	display: none;
 	position: fixed;
-	left: 0;
-	top: 0;
+	inset: 0;
 	z-index: 9;
 	overflow: hidden;
 	opacity: 0;
 	pointer-events: none;
+	clip-path: inset(50%);
 }
 .hiw-zoom.is-on {
 	display: block;
@@ -1013,6 +1024,8 @@ a {
 	width: 100%;
 	height: 100%;
 	object-fit: cover;
+	transform-origin: 50% 50%;
+	will-change: transform;
 }
 .hiw-zoom__veil {
 	position: absolute;

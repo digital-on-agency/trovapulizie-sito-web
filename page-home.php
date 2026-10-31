@@ -140,7 +140,10 @@ $cta_args         = array(
 				// Poster/schermo del telefono: va caricato gia' ridimensionato (~360px di larghezza).
 				// Lo schermo e' largo 146px su mobile e 294 su desktop: i PNG a piena risoluzione del
 				// Figma (1170px, 86-97 KB serviti) sono fuori misura su ogni viewport (TICKET-20).
-				'screen' => tp_versioned_url( $hiw_poster ) ?: tp_theme_asset( 'assets/img/' . $step_fallbacks[0] ),
+				// Ripiego: il primo fotogramma del video dello schermo (31/10), lo stesso che mostra il telefono 3D
+				// quando subentra al bezel CSS. Col poster del passo 1 (ricerca gia' scritta) lo schermo cambiava
+				// contenuto nel passaggio.
+				'screen' => tp_versioned_url( $hiw_poster ) ?: tp_theme_asset( 'assets/img/come-funziona-hero-poster.jpg' ),
 				'video'  => tp_versioned_url( $hiw_video ), // il video e' cachato 7 giorni dall'hosting: la versione del tema lo invalida
 				// Stesso URL dell'<img> della sequenza (tp_versioned_url su entrambi): senza il ?ver
 				// il poster e l'immagine sono due richieste per lo stesso file (TICKET-20).

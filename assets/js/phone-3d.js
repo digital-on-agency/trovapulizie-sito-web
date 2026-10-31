@@ -158,11 +158,19 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 
 	const unitPerPx = PHONE.h / phonePx;
 	let pending = false;
-	function render() { pending = false; renderer.render(scene, camera); }
+	// ready: si risolve dopo il primo render con un fotogramma del video nella texture. home-motion.js mostra
+	// il canvas solo da li', prima lo schermo sarebbe nero.
+	let hasFrame = false, resolveReady;
+	const ready = new Promise(r => { resolveReady = r; });
+	function render() {
+		pending = false;
+		renderer.render(scene, camera);
+		if (hasFrame && resolveReady) { resolveReady(); resolveReady = null; }
+	}
 	function requestRender() { if (!pending) { pending = true; requestAnimationFrame(render); } }
 	// Il primo frame arriva alla texture solo dopo un seek: a 0 esatto Chrome e Safari lasciano lo schermo nero
-	function primeFrame() { if (video.currentTime < 0.001) video.currentTime = 0.001; else { tex.needsUpdate = true; requestRender(); } }
-	video.addEventListener('seeked', function () { tex.needsUpdate = true; requestRender(); });
+	function primeFrame() { if (video.currentTime < 0.001) video.currentTime = 0.001; else { hasFrame = true; tex.needsUpdate = true; requestRender(); } }
+	video.addEventListener('seeked', function () { hasFrame = true; tex.needsUpdate = true; requestRender(); });
 	video.addEventListener('loadeddata', primeFrame);
 	if (video.readyState >= 2) primeFrame();
 
@@ -192,5 +200,5 @@ export async function createPhone3D({ container, video, modelUrl, phonePx, width
 	}
 
 	requestRender();
-	return { setPose, setProgress, render: requestRender, screenRect };
+	return { setPose, setProgress, render: requestRender, screenRect, ready };
 }

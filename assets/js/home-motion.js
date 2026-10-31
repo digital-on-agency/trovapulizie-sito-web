@@ -2,7 +2,7 @@
    zoom-through e atterraggio nella card Servizi (ADR-002 rev. 3). Mappa completa: docs/homepage.md §4.
 
    Parte solo con viewport >= --tp-bp-desktop (1024px) e senza "riduci movimento" (classe motion-ok su <html>); carica GSAP +
-   ScrollTrigger da CDN quando la sezione si avvicina e, con WebGL2, importa phone-3d.js (altrimenti resta il
+   ScrollTrigger da CDN al load della pagina (o al primo scroll, se arriva prima) e, con WebGL2, importa phone-3d.js (altrimenti resta il
    bezel CSS con transform). Unita' di scroll dalla cima della sezione (viewport): 0-3 video (q = u/3, step
    a terzi), 3-4 zoom-through, 4-4.5 tenuta, 4.5-5.5 rientro nella card, >= 5.5 card live. Il CSS
    (.motion-ok .how-it-works { height: 550vh }) deve restare allineato alle costanti *_VH qui sotto.
@@ -76,6 +76,9 @@
 		return o;
 	}
 	var phone3d = null;
+	// 31/10: il bezel CSS segue le pose finche' non e' sparito del tutto. Durante la dissolvenza verso il 3D
+	// i due telefoni sono sovrapposti e devono stare nella stessa posa, o il passaggio si vede.
+	var cssPhoneOn = true;
 	var lastRaw = null;
 	var lastPose = null;
 	function apply(p) {
@@ -84,8 +87,8 @@
 		var s = p.s * (1 + (kv - 1) * p.k);
 		lastRaw = p;
 		lastPose = { x: p.x, y: p.y, ry: p.ry, rx: p.rx, rz: p.rz, s: s };
-		if (phone3d) { phone3d.setPose(lastPose, sx, window.innerHeight); return; }
-		phone.style.transform = 'translate(' + (p.x * sx) + 'px,' + (p.y * window.innerHeight) + 'px) rotateY(' + p.ry + 'deg) rotateX(' + p.rx + 'deg) rotateZ(' + p.rz + 'deg) scale(' + s + ')';
+		if (phone3d) phone3d.setPose(lastPose, sx, window.innerHeight);
+		if (cssPhoneOn) phone.style.transform = 'translate(' + (p.x * sx) + 'px,' + (p.y * window.innerHeight) + 'px) rotateY(' + p.ry + 'deg) rotateX(' + p.rx + 'deg) rotateZ(' + p.rz + 'deg) scale(' + s + ')';
 	}
 
 	function hasWebGL2() {
@@ -98,10 +101,14 @@
 			return mod.createPhone3D({ container: host, video: video, modelUrl: pinEl.dataset.model || '', phonePx: 608, width: 1200, height: 960 });
 		}).then(function (api) {
 			phone3d = api;
-			pinEl.classList.add('is-3d');
-			phone.style.transform = '';
 			apply(lastRaw || POSES.hero);
 			if (video.readyState >= 2) video.currentTime = Math.max(video.currentTime, 0.001);
+			// Il canvas si mostra solo quando ha disegnato un fotogramma vero del video: prima lo schermo 3D e'
+			// nero. Finche' il video non arriva resta il bezel CSS (anche per sempre, se non arriva mai).
+			return api.ready;
+		}).then(function () {
+			pinEl.classList.add('is-3d'); // dissolvenza incrociata in CSS (0.25 s)
+			setTimeout(function () { cssPhoneOn = false; phone.style.transform = ''; }, 320);
 		}).catch(function (e) { console.warn('phone-3d non disponibile, resta il phone CSS', e); });
 	}
 	// Comparsa di titolo e step: dipende da dove sta la sezione nel viewport, non dal trigger del pin.
@@ -169,20 +176,29 @@
 		zoomEl.classList.toggle('is-on', on);
 		if (on) playSafe(zoomVideo); else if (zoomVideo) zoomVideo.pause();
 	}
+	// Larghezza utile del viewport: senza la barra di scorrimento, come l'overlay fisso (inset: 0)
+	function vpW() { return document.documentElement.clientWidth || window.innerWidth; }
+	function vpH() { return document.documentElement.clientHeight || window.innerHeight; }
 	var lastBox = '';
+	// 31/10: l'overlay resta grande quanto il viewport e il rettangolo visibile e' un clip-path; il video dentro
+	// scala in modo uniforme (copre il rettangolo, come object-fit: cover) con un transform. Prima si animavano
+	// left/top/width/height: un ricalcolo di layout a ogni fotogramma dello zoom (CLS ~0.4 misurato), scatti su
+	// PC poco potenti. Qui niente layout: clip-path e transform.
 	function setBox(r, radius, veil, opacity) {
 		var key = [r.left, r.top, r.width, r.height, radius, opacity, veil].map(function (n) { return Math.round(n * 100); }).join(',');
 		if (key === lastBox) return;
 		lastBox = key;
-		zoomEl.style.left = r.left + 'px';
-		zoomEl.style.top = r.top + 'px';
-		zoomEl.style.width = r.width + 'px';
-		zoomEl.style.height = r.height + 'px';
-		zoomEl.style.borderRadius = radius + 'px';
+		var vw = vpW(), vh = vpH();
+		var px = function (n) { return n.toFixed(2) + 'px'; }; // niente notazione esponenziale (1e-5) nelle stringhe CSS
+		zoomEl.style.clipPath = 'inset(' + px(r.top) + ' ' + px(vw - r.left - r.width) + ' ' + px(vh - r.top - r.height) + ' ' + px(r.left) + ' round ' + px(radius) + ')';
+		if (zoomVideo) {
+			var s = Math.max(r.width / vw, r.height / vh);
+			zoomVideo.style.transform = 'translate(' + px(r.left + r.width / 2 - vw / 2) + ',' + px(r.top + r.height / 2 - vh / 2) + ') scale(' + s.toFixed(4) + ')';
+		}
 		zoomEl.style.opacity = opacity.toFixed(3);
 		if (zoomVeil) zoomVeil.style.opacity = veil.toFixed(3);
 	}
-	function viewportRect() { return { left: 0, top: 0, width: window.innerWidth, height: window.innerHeight }; }
+	function viewportRect() { return { left: 0, top: 0, width: vpW(), height: vpH() }; }
 	function mixRect(a, b, e) { return { left: lerp(a.left, b.left, e), top: lerp(a.top, b.top, e), width: lerp(a.width, b.width, e), height: lerp(a.height, b.height, e) }; }
 	var cardRadius = null; // il raggio della card non cambia durante lo scroll: letto una volta
 	function cardRect() {
@@ -236,8 +252,17 @@
 		}
 
 		boot3d();
-		// Il video dello zoom-through (pesante) si scarica solo quando la sezione si avvicina, come il video dello schermo
-		if (zoomVideo) { zoomVideo.preload = 'auto'; zoomVideo.load(); }
+		// Il video dello zoom-through (6 MB) serve solo alla fine della sezione: si scarica quando la sezione si
+		// avvicina, non all'avvio (che ora avviene al load della pagina, vedi in fondo)
+		if (zoomVideo) {
+			var loadZoom = function () { zoomVideo.preload = 'auto'; zoomVideo.load(); };
+			if ('IntersectionObserver' in window) {
+				var zio = new IntersectionObserver(function (entries) {
+					if (entries.some(function (e) { return e.isIntersecting; })) { zio.disconnect(); loadZoom(); }
+				}, { rootMargin: '50% 0px' });
+				zio.observe(section);
+			} else loadZoom();
+		}
 
 		measureSection();
 		ScrollTrigger.addEventListener('refreshInit', measureSection);
@@ -253,11 +278,17 @@
 			invalidateOnRefresh: true,
 			onRefresh: function (self) { p0 = Math.max(0, Math.min(1, (sectionTop() - self.start) / (self.end - self.start))); },
 			snap: /[?&]nosnap/.test(location.search) ? undefined : {
-				snapTo: function (p) {
+				// 31/10: aggancio nella direzione dello scroll. Con Math.round chi scorreva meno di mezzo terzo e si
+				// fermava veniva riportato indietro (misurato: 300 px di rotella, poi 300 px di ritorno), e la pagina
+				// sembrava non voler andare avanti. Ora si va al terzo successivo nella direzione presa; il margine
+				// evita che un residuo di pochi px dopo un aggancio faccia saltare al terzo dopo.
+				snapTo: function (p, self) {
 					if (p < p0) return p;
 					var n = pinUnits(), u = (p - p0) / (1 - p0) * n;
 					if (u > VIDEO_VH + 0.02) return p; // zoom-through e tenuta: scroll libero
-					var k = Math.round(u);
+					var dir = self && self.direction, eps = 0.06;
+					var k = dir > 0 ? Math.ceil(u - eps) : dir < 0 ? Math.floor(u + eps) : Math.round(u);
+					k = Math.max(0, Math.min(VIDEO_VH, k));
 					return p0 + (1 - p0) * k / n;
 				},
 				duration: { min: 0.1, max: 0.3 }
@@ -334,12 +365,23 @@
 		});
 	}
 
-	if ('IntersectionObserver' in window) {
-		var io = new IntersectionObserver(function (entries) {
-			if (entries.some(function (e) { return e.isIntersecting; })) { io.disconnect(); boot(); }
-		}, { rootMargin: '50% 0px' });
-		io.observe(section);
-	} else {
+	// Avvio (31/10): al load della pagina, nel primo momento libero, oppure al primo scroll se arriva prima.
+	// Prima si partiva quando la sezione era a mezzo viewport: a 1440x900 in cima alla Home non succedeva, quindi
+	// GSAP, video e Three.js partivano solo al primo scroll, e il telefono si aggancia dopo ~450 px (3-4 scatti di
+	// rotella). Se GSAP arrivava dopo, il telefono scorreva via con la pagina e poi saltava nella posa agganciata;
+	// il passaggio al 3D e il suo avvio (che occupa il processore) cadevano a meta' scroll.
+	var booted = false;
+	function bootOnce() {
+		if (booted) return;
+		booted = true;
+		window.removeEventListener('scroll', bootOnce);
 		boot();
 	}
+	function whenIdle(fn) {
+		if ('requestIdleCallback' in window) requestIdleCallback(fn, { timeout: 1500 });
+		else setTimeout(fn, 200);
+	}
+	window.addEventListener('scroll', bootOnce, { passive: true });
+	if (document.readyState === 'complete') whenIdle(bootOnce);
+	else window.addEventListener('load', function () { whenIdle(bootOnce); });
 })();
