@@ -277,7 +277,10 @@ add_action( 'wp_head', function () {
 	if ( ! is_page_template( 'page-home.php' ) ) {
 		return;
 	}
-	echo '<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>' . "\n";
+	// 31/10: versioni minificate (420 -> 195 KB compressi). Il pacchetto r186 non le contiene: le genera
+	// jsDelivr (.min.js). three.module.min.js importa "./three.core.js" non minificato: la terza voce
+	// rimappa quell'URL sulla versione minificata.
+	echo '<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.min.js","https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.core.js":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.core.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>' . "\n";
 }, 1 );
 
 add_action( 'init', function () {
