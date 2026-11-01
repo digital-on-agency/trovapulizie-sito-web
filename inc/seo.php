@@ -500,7 +500,17 @@ add_action( 'wp_head', function () {
 		array( 'name' => 'Roma', 'item' => home_url( '/roma/' ) ),
 	);
 	if ( '/roma/' !== $corrente ) {
-		$voci[] = array( 'name' => wp_strip_all_tags( get_the_title() ), 'item' => get_permalink() );
+		// Il post_title delle landing Sgrosso e' lo slug (pagine create da WP-CLI): nel breadcrumb vale l'anchor
+		// di tp_service_pages(), lo stesso del blocco Altri servizi e del footer. Il titolo resta il ripiego.
+		$nome     = wp_strip_all_tags( get_the_title() );
+		$corrente = tp_current_path();
+		foreach ( tp_service_pages() as $percorso => $anchor ) {
+			if ( trailingslashit( $percorso ) === $corrente ) {
+				$nome = $anchor;
+				break;
+			}
+		}
+		$voci[] = array( 'name' => $nome, 'item' => get_permalink() );
 	}
 	$elementi = array();
 	foreach ( $voci as $i => $v ) {
