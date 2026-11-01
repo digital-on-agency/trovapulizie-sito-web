@@ -12,8 +12,10 @@
  *   -> 301 su app.trovapulizie.com con percorso e query. /terms resta qui (pagina legale).
  * - /partner -> /diventa-cleaner/; /help -> /contatti/; /sitemap.xml -> /wp-sitemap.xml.
  * - /pulizie-<quartiere> -> /roma/pulizie-<quartiere>/ (come vercel.json). Se la pagina del quartiere non e'
- *   pubblicata, e per gli URL di produzione senza pagina (zanzare), 302 temporaneo sull'hub /roma/: quando la
- *   pagina esiste la regola smette di scattare da sola.
+ *   pubblicata, e per gli URL di produzione senza pagina, 301 sull'hub /roma/ (SPEC-seo-post-cutover, TICKET-77:
+ *   il 302 lasciava in indice i 21 URL dei quartieri senza trasferire il valore). Quando la pagina del quartiere
+ *   nasce, il 301 si ripunta da solo sulla nuova pagina (tp_published_page_exists() e' valutata a ogni richiesta).
+ * - Mappa esplicita dei vecchi URL commerciali (tp_legacy_map()), sempre 301 e a un solo salto.
  * - /sw.js: service worker che si deregistra (la SPA lo registrava su www, pass-through e senza cache).
  *
  * [ATTENZIONE] Mai rimandare all'app un percorso che l'app considera pubblico (isPublicPath): il DomainGuard
@@ -56,7 +58,17 @@ function tp_is_app_path( $path ) {
 	return false;
 }
 
-/** URL di produzione che non hanno ancora una pagina WordPress: 302 sull'hub finche' la pagina non esiste. */
+/** Vecchi URL della SPA con destinazione fissa (TICKET-77): sempre 301, un solo salto. */
+function tp_legacy_map() {
+	return array(
+		'/pulizie-commerciali-roma' => '/roma/sgrosso-commerciale/',
+		'/pulizie-aziende-roma'     => '/roma/sgrosso-commerciale/',
+		'/pulizie-casa-roma'        => '/roma/',
+		'/zanzare-roma'             => '/roma/zanzare-disinfestazione/',
+	);
+}
+
+/** URL di produzione che non hanno ancora una pagina WordPress: 301 sull'hub finche' la pagina non esiste. */
 function tp_pending_paths() {
 	return array( '/roma/zanzare-disinfestazione' );
 }
@@ -96,18 +108,15 @@ add_action( 'init', function () {
 		$target = home_url( '/contatti/' );
 	} elseif ( '/sitemap.xml' === $bare ) {
 		$target = home_url( '/wp-sitemap.xml' );
-	} elseif ( preg_match( '#^/pulizie-([a-z-]+)$#', $bare, $m ) && 'pulizie-casa-roma' !== 'pulizie-' . $m[1] && 'pulizie-aziende-roma' !== 'pulizie-' . $m[1] ) {
-		// Un solo salto: se la pagina del quartiere non c'e' ancora si va diretti all'hub, in 302.
+	} elseif ( isset( tp_legacy_map()[ $bare ] ) ) {
+		// Prima della regola dei quartieri: /pulizie-commerciali-roma ne e' un falso positivo.
+		$target = home_url( tp_legacy_map()[ $bare ] );
+	} elseif ( preg_match( '#^/pulizie-([a-z-]+)$#', $bare, $m ) ) {
+		// Un solo salto: se la pagina del quartiere non c'e' ancora si va diretti all'hub. Sempre 301.
 		$nuovo = '/roma/pulizie-' . $m[1];
-		if ( tp_published_page_exists( $nuovo ) ) {
-			$target = home_url( $nuovo . '/' );
-		} else {
-			$target = home_url( '/roma/' );
-			$code   = 302;
-		}
+		$target = tp_published_page_exists( $nuovo ) ? home_url( $nuovo . '/' ) : home_url( '/roma/' );
 	} elseif ( ( preg_match( '#^/roma/pulizie-[a-z-]+$#', $bare ) || in_array( $bare, tp_pending_paths(), true ) ) && ! tp_published_page_exists( $bare ) ) {
 		$target = home_url( '/roma/' );
-		$code   = 302;
 	}
 	if ( $target ) {
 		wp_redirect( $target, $code, 'Trovapulizie' );
