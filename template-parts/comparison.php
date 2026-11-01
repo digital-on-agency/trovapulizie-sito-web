@@ -30,7 +30,7 @@ $args = wp_parse_args( $args ?? array(), array(
 $offers = array_values( array_filter( (array) $args['offers'], function ( $o ) {
 	return ! empty( $o['name'] );
 } ) );
-$team   = wp_parse_args( (array) $args['team'], array( 'image' => '', 'eyebrow' => '', 'title' => '', 'sub' => '' ) );
+$team   = wp_parse_args( (array) $args['team'], array( 'image' => '', 'image_alt' => '', 'eyebrow' => '', 'title' => '', 'sub' => '' ) );
 ?>
 <section class="sg-compare" id="perche">
 	<div class="sg-compare__inner">
@@ -103,7 +103,7 @@ $team   = wp_parse_args( (array) $args['team'], array( 'image' => '', 'eyebrow' 
 			<?php if ( $team['title'] ) : ?>
 			<div class="sg-team">
 				<?php if ( $team['image'] ) : ?>
-					<img class="sg-team__img" src="<?php echo esc_url( $team['image'] ); ?>" alt="" width="74" height="52" loading="lazy" decoding="async">
+					<img class="sg-team__img" src="<?php echo esc_url( $team['image'] ); ?>" alt="<?php echo esc_attr( $team['image_alt'] ); ?>" width="74" height="52" loading="lazy" decoding="async">
 				<?php endif; ?>
 				<span class="sg-team__text">
 					<?php if ( $team['eyebrow'] ) : ?><span class="sg-team__eyebrow"><?php echo esc_html( $team['eyebrow'] ); ?></span><?php endif; ?>

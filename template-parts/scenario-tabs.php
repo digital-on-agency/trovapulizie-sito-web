@@ -93,9 +93,9 @@ $uid = sanitize_html_class( $args['id'] );
 				</div>
 				<?php elseif ( ! empty( $s['after'] ) ) : ?>
 				<div class="sg-compare-media" data-compare style="--pos: 50%">
-					<img class="sg-compare-media__after" src="<?php echo esc_url( $s['after'] ); ?>" alt="Dopo lo sgrosso" width="1072" height="784" loading="lazy" decoding="async">
+					<img class="sg-compare-media__after" src="<?php echo esc_url( $s['after'] ); ?>" alt="<?php echo esc_attr( $s['after_alt'] ?? 'Dopo lo sgrosso' ); ?>" width="1072" height="784" loading="lazy" decoding="async">
 					<?php if ( ! empty( $s['before'] ) ) : ?>
-						<img class="sg-compare-media__before" src="<?php echo esc_url( $s['before'] ); ?>" alt="Prima dello sgrosso" width="1072" height="784" loading="lazy" decoding="async">
+						<img class="sg-compare-media__before" src="<?php echo esc_url( $s['before'] ); ?>" alt="<?php echo esc_attr( $s['before_alt'] ?? 'Prima dello sgrosso' ); ?>" width="1072" height="784" loading="lazy" decoding="async">
 						<span class="sg-compare-media__divider" aria-hidden="true"></span>
 						<span class="sg-compare-media__handle" aria-hidden="true">&lsaquo;&rsaquo;</span>
 						<span class="sg-compare-media__label sg-compare-media__label--before" aria-hidden="true">PRIMA</span>

@@ -69,6 +69,7 @@ get_header( '', array(
 				<?php get_template_part( 'template-parts/phone-mockup', null, array(
 					'screen' => carbon_get_the_post_meta( 'dc_hero_screen' ) ?: $img( 'dashboard-hero' ),
 					'class'  => 'dc-hero__phone',
+					'alt'    => tp_img_alt( carbon_get_the_post_meta( 'dc_hero_screen' ), "Dashboard dell'app Trovapulizie per cleaner: richieste di lavoro, guadagni e agenda" ),
 				) ); ?>
 				<?php
 				$floats = array(

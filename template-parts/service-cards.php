@@ -31,7 +31,7 @@ $b = wp_parse_args( (array) $args['banner'], array( 'title' => '', 'text' => '',
 		<ul class="zz-services__grid">
 			<?php foreach ( $items as $i => $it ) : ?>
 				<li class="zz-services__card" style="--i:<?php echo (int) $i; ?>">
-					<?php if ( ! empty( $it['image'] ) ) : ?><img class="zz-services__img" src="<?php echo esc_url( $it['image'] ); ?>" alt="" width="900" height="502" loading="lazy" decoding="async"><?php endif; ?>
+					<?php if ( ! empty( $it['image'] ) ) : ?><img class="zz-services__img" src="<?php echo esc_url( $it['image'] ); ?>" alt="<?php echo esc_attr( $it['alt'] ?? $it['title'] . ': trattamento contro le zanzare a Roma' ); ?>" width="900" height="502" loading="lazy" decoding="async"><?php endif; ?>
 					<h3 class="zz-services__title"><?php echo esc_html( $it['title'] ); ?></h3>
 					<?php if ( ! empty( $it['text'] ) ) : ?><p class="zz-services__text"><?php echo esc_html( $it['text'] ); ?></p><?php endif; ?>
 				</li>

@@ -10115,3 +10115,99 @@ main.dc--motion .dc-rv.is-in {
 		transition: none !important;
 	}
 }
+
+/* =========================
+   Altri servizi a Roma (SPEC-seo-post-cutover, TICKET-78): link interni in fondo alle pagine, dopo la CTA finale.
+   Stessa larghezza e stesso raggio di .cta-final__card, fondo chiaro. Colonna "Servizi a Roma" del footer.
+   ========================= */
+.related-services {
+	padding: 0 20px 72px;
+}
+.related-services__card {
+	max-width: 1164px;
+	margin: 0 auto;
+	padding: 40px 48px;
+	box-sizing: border-box;
+	border: 1px solid var(--tp-border-card);
+	border-radius: var(--tp-radius-2xl);
+	background: var(--tp-bg-soft);
+	box-shadow: 0 10px 30px 0 rgba(15, 33, 26, 0.04);
+}
+.related-services__title {
+	margin: 0 0 24px;
+	font-size: 28px;
+	font-weight: 700;
+	line-height: 1.2;
+	color: var(--tp-text-heading);
+}
+.related-services__list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+	gap: 12px;
+}
+.related-services__link {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	min-height: 44px;
+	padding: 14px 18px;
+	box-sizing: border-box;
+	border: 1px solid var(--tp-border-card);
+	border-radius: var(--tp-radius-lg);
+	background: var(--tp-white);
+	font-size: 16px;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--tp-text-heading);
+	text-decoration: none;
+	transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+.related-services__arrow {
+	color: var(--tp-primary);
+	transition: transform 0.25s ease;
+}
+.related-services__link:hover {
+	transform: translateY(-2px);
+	border-color: var(--tp-primary);
+	box-shadow: 0 12px 24px -12px rgba(15, 33, 26, 0.25);
+}
+.related-services__link:hover .related-services__arrow {
+	transform: translateX(3px);
+}
+.related-services__link:focus-visible {
+	outline: 2px solid var(--tp-focus);
+	outline-offset: 2px;
+}
+@media (max-width: 1023px) {
+	.related-services {
+		padding-bottom: 56px;
+	}
+	.related-services__card {
+		padding: 28px 20px;
+	}
+	.related-services__title {
+		font-size: 22px;
+		margin-bottom: 18px;
+	}
+	.related-services__list {
+		grid-template-columns: 1fr;
+	}
+	/* Footer: la colonna dei servizi occupa una riga intera, le altre restano affiancate. */
+	.site-footer .site-footer__col.site-footer__services {
+		flex: 1 1 100%;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.related-services__link,
+	.related-services__arrow {
+		transition: none;
+	}
+	.related-services__link:hover,
+	.related-services__link:hover .related-services__arrow {
+		transform: none;
+	}
+}

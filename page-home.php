@@ -243,6 +243,8 @@ $cta_args         = array(
 
 		<?php get_template_part( 'template-parts/cta-final', null, $cta_args ); ?>
 
+		<?php get_template_part( 'template-parts/related-services' ); ?>
+
 </main>
 <?php
 get_footer();

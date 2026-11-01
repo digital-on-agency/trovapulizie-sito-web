@@ -3,6 +3,7 @@
  * Bezel CSS del telefono (.tp-phone, Figma 3743:3095): faccia frontale + 10 strati translateZ per lo spessore.
  * Args: screen (URL immagine dello schermo), video (URL mp4: se presente lo schermo e' un <video> muto con
  * preload="none" e poster = poster o screen), poster (URL), class (classi extra), id,
+ * alt (testo alternativo dello schermo, vuoto = decorativo: lo schermo e' un'immagine ripetuta nel testo accanto),
  * lazy (true: il video esce con data-src invece di src, lo assegna hiw-stacked.js quando il blocco entra
  * nel viewport, cosi' i clip dei passi non ancora visti non vengono proprio richiesti).
  * Usi: hero (#hiw-phone, con il video scrubbed da home-motion.js) e step di Come funziona
@@ -11,7 +12,7 @@
  * Misura dai token --tp-phone-w/h/radius/screen-radius (default 294x608): le versioni piccole li
  * ridefiniscono, senza transform: scale (ADR-002 rev. 4).
  */
-$args = wp_parse_args( $args ?? array(), array( 'screen' => '', 'video' => '', 'poster' => '', 'class' => '', 'id' => '', 'lazy' => false ) );
+$args = wp_parse_args( $args ?? array(), array( 'screen' => '', 'video' => '', 'poster' => '', 'class' => '', 'id' => '', 'lazy' => false, 'alt' => '' ) );
 ?>
 <div class="tp-phone <?php echo esc_attr( $args['class'] ); ?>"<?php if ( $args['id'] ) : ?> id="<?php echo esc_attr( $args['id'] ); ?>"<?php endif; ?>>
 	<?php for ( $i = 10; $i >= 1; $i-- ) : ?>
@@ -22,7 +23,7 @@ $args = wp_parse_args( $args ?? array(), array( 'screen' => '', 'video' => '', '
 			<?php if ( $args['video'] ) : ?>
 				<video class="tp-phone__video" muted playsinline preload="none" poster="<?php echo esc_url( $args['poster'] ?: $args['screen'] ); ?>" <?php echo $args['lazy'] ? 'data-src' : 'src'; ?>="<?php echo esc_url( $args['video'] ); ?>"></video>
 			<?php elseif ( $args['screen'] ) : ?>
-				<img class="tp-phone__img" src="<?php echo esc_url( $args['screen'] ); ?>" alt="">
+				<img class="tp-phone__img" src="<?php echo esc_url( $args['screen'] ); ?>" alt="<?php echo esc_attr( $args['alt'] ); ?>">
 			<?php endif; ?>
 		</div>
 	</div>
