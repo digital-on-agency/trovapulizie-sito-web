@@ -241,3 +241,106 @@ add_action( 'wp_head', function () {
 	}
 	echo '<script type="application/ld+json">' . wp_json_encode( $dati, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
 }, 5 );
+
+/* ---- Open Graph e Twitter Card (SPEC-seo-post-cutover, TICKET-79) ----------------------------------------------
+   Stesso hook wp_head dei meta esistenti, priorita' 3 (subito dopo la meta description a 2). Nessun altro hook del
+   tema ne' plugin SEO emette og: o twitter: (verificato con grep sul tema: questo e' l'unico punto).
+   title = titolo del documento, description = meta description, url = canonical della pagina. Niente sulle pagine
+   noindex di servizio (thank-you, survey) e su 404 e ricerca. */
+
+/** URL canonico della pagina corrente (lo stesso che WordPress stampa in rel=canonical per le pagine singole). */
+function tp_seo_canonical_url() {
+	if ( is_singular() ) {
+		return (string) wp_get_canonical_url();
+	}
+	if ( is_home() ) {
+		return tp_blog_url();
+	}
+	if ( is_category() ) {
+		return (string) get_category_link( get_queried_object_id() );
+	}
+	return home_url( '/' );
+}
+
+/**
+ * Immagine Open Graph della pagina: array( url, width, height ) con width/height a 0 se non note.
+ * Ordine: immagine in evidenza; hero della pagina quando e' un campo o un file del tema (landing Sgrosso:
+ * campo sg_hero_image, altrimenti la foto della variante; landing B2B: campo b2b_hero_image); infine
+ * assets/img/og-default.jpg (1200x630, ricavata dalla foto della hero della Home).
+ */
+function tp_seo_og_image() {
+	if ( is_singular() ) {
+		$id = get_post_thumbnail_id();
+		if ( $id ) {
+			$src = wp_get_attachment_image_src( $id, 'large' );
+			if ( $src ) {
+				return array( 'url' => $src[0], 'width' => (int) $src[1], 'height' => (int) $src[2] );
+			}
+		}
+		if ( is_page_template( 'page-sgrosso.php' ) ) {
+			$campo = trim( (string) carbon_get_the_post_meta( 'sg_hero_image' ) );
+			if ( $campo ) {
+				return array( 'url' => $campo, 'width' => 0, 'height' => 0 );
+			}
+			$d = tp_seo_sgrosso_defaults();
+			if ( $d && ! empty( $d['hero_image'] ) ) {
+				return array( 'url' => tp_theme_asset( 'assets/img/sgrosso/' . $d['hero_image'] . '.jpg' ), 'width' => 1920, 'height' => 1071 );
+			}
+		}
+		if ( is_page_template( 'page-landing-b2b.php' ) ) {
+			$campo = trim( (string) carbon_get_the_post_meta( 'b2b_hero_image' ) );
+			if ( $campo ) {
+				return array( 'url' => $campo, 'width' => 0, 'height' => 0 );
+			}
+		}
+	}
+	return array( 'url' => tp_theme_asset( 'assets/img/og-default.jpg' ), 'width' => 1200, 'height' => 630 );
+}
+
+add_action( 'wp_head', function () {
+	if ( is_404() || is_search() ) {
+		return;
+	}
+	if ( is_singular() && ( is_page_template( 'page-thank-you.php' ) || is_page_template( 'page-survey.php' ) ) ) {
+		return;
+	}
+	$title       = wp_strip_all_tags( wp_get_document_title() );
+	$descrizione = wp_strip_all_tags( tp_seo_description() );
+	$url         = tp_seo_canonical_url();
+	$img         = tp_seo_og_image();
+	$tipo        = is_singular( 'post' ) ? 'article' : 'website';
+
+	$og = array(
+		'og:type'        => $tipo,
+		'og:title'       => $title,
+		'og:description' => $descrizione,
+		'og:url'         => $url,
+		'og:site_name'   => 'Trovapulizie',
+		'og:locale'      => 'it_IT',
+		'og:image'       => $img['url'],
+	);
+	if ( $img['width'] && $img['height'] ) {
+		$og['og:image:width']  = (string) $img['width'];
+		$og['og:image:height'] = (string) $img['height'];
+	}
+	$tw = array(
+		'twitter:card'        => 'summary_large_image',
+		'twitter:title'       => $title,
+		'twitter:description' => $descrizione,
+		'twitter:image'       => $img['url'],
+	);
+	foreach ( $og as $chiave => $valore ) {
+		if ( '' === (string) $valore ) {
+			continue;
+		}
+		$campo = in_array( $chiave, array( 'og:url', 'og:image' ), true ) ? esc_url( $valore ) : esc_attr( $valore );
+		echo '<meta property="' . esc_attr( $chiave ) . '" content="' . $campo . '">' . "\n";
+	}
+	foreach ( $tw as $chiave => $valore ) {
+		if ( '' === (string) $valore ) {
+			continue;
+		}
+		$campo = 'twitter:image' === $chiave ? esc_url( $valore ) : esc_attr( $valore );
+		echo '<meta name="' . esc_attr( $chiave ) . '" content="' . $campo . '">' . "\n";
+	}
+}, 3 );
