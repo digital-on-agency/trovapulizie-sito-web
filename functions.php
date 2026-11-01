@@ -178,28 +178,8 @@ add_filter( 'wp_sitemaps_posts_query_args', function ( $args, $post_type ) {
 
 /* Title, meta description e JSON-LD per pagina: inc/seo.php (campo SEO > default della variante > WordPress). */
 
-/* Dati strutturati LocalBusiness sulla pagina hub di citta' (TICKET-32). Un solo blocco per pagina,
-   generato da qui e non da un plugin SEO: il tema non ne ha.
-
-   [ATTENZIONE] Niente aggregateRating finche' non ci sono recensioni vere: un placeholder di quel
-   tipo e' gia' finito pubblicato su 21 pagine del portale. Niente telefono segnaposto. */
-add_action( 'wp_head', function () {
-	if ( ! is_page_template( 'page-hub-roma.php' ) ) {
-		return;
-	}
-	$dati = array(
-		'@context'    => 'https://schema.org',
-		'@type'       => 'LocalBusiness',
-		'name'        => get_bloginfo( 'name' ),
-		'url'         => get_permalink(),
-		'description' => wp_strip_all_tags( (string) carbon_get_the_post_meta( 'seo_description' ) ) ?: get_bloginfo( 'description' ),
-		'areaServed'  => array(
-			'@type' => 'City',
-			'name'  => 'Roma',
-		),
-	);
-	echo '<script type="application/ld+json">' . wp_json_encode( $dati, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
-}, 5 );
+/* Dati strutturati del sito (Organization e WebSite in Home, LocalBusiness sull'hub, BreadcrumbList): inc/seo.php.
+   Il LocalBusiness dell'hub e' stato spostato li' con TICKET-80. */
 
 add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_style( 'trovapulizie-fonts', 'https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap', array(), null );

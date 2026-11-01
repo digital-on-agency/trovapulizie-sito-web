@@ -344,3 +344,152 @@ add_action( 'wp_head', function () {
 		echo '<meta name="' . esc_attr( $chiave ) . '" content="' . $campo . '">' . "\n";
 	}
 }, 3 );
+
+/* ---- Dati strutturati: Organization e WebSite (Home), LocalBusiness (hub), BreadcrumbList (SPEC-seo-post-cutover,
+   TICKET-80). Service e FAQPage restano dove sono (sopra e template-parts/faq-accordion.php).
+
+   [ATTENZIONE] Niente aggregateRating finche' non ci sono recensioni vere: un placeholder di quel tipo e' finito
+   pubblicato su 21 pagine del portale. Niente telefono segnaposto, niente openingHours (nessun campo li contiene),
+   nessun indirizzo stradale: solo citta', regione e paese finche' il Profilo Google Business non lo espone. */
+
+/** Indirizzo postale senza via, uguale a quello gia' usato dal Service e da Organization di Contatti. */
+function tp_seo_address() {
+	return array(
+		'@type'           => 'PostalAddress',
+		'addressLocality' => 'Roma',
+		'addressRegion'   => 'Lazio',
+		'addressCountry'  => 'IT',
+	);
+}
+
+/** Profili social con URL compilato in Theme Options > Footer, per `sameAs`. Vuoto se nessuno e' compilato. */
+function tp_seo_same_as() {
+	$urls = array();
+	foreach ( (array) carbon_get_theme_option( 'footer_social' ) as $s ) {
+		$u = ! empty( $s['url'] ) ? esc_url_raw( trim( (string) $s['url'] ) ) : '';
+		if ( $u ) {
+			$urls[] = $u;
+		}
+	}
+	return array_values( array_unique( $urls ) );
+}
+
+/** Email di contatto: campo della pagina Contatti se compilato, altrimenti TP_CT_EMAIL (come Organization di Contatti). */
+function tp_seo_contact_email() {
+	$fonte = (int) url_to_postid( home_url( '/contatti/' ) );
+	$email = $fonte ? sanitize_email( trim( (string) carbon_get_post_meta( $fonte, 'ct_email' ) ) ) : '';
+	return $email ?: TP_CT_EMAIL;
+}
+
+/** Dati comuni di Organization e LocalBusiness: nome, ragione sociale, telefono e email ufficiali, indirizzo, sameAs. */
+function tp_seo_business_base() {
+	$base = array(
+		'name'      => 'Trovapulizie',
+		'legalName' => 'Trovapulizie SRL',
+		'url'       => home_url( '/' ),
+		'telephone' => '+393200980144',
+		'email'     => tp_seo_contact_email(),
+		'address'   => tp_seo_address(),
+	);
+	$same = tp_seo_same_as();
+	if ( $same ) {
+		$base['sameAs'] = $same;
+	}
+	return $base;
+}
+
+function tp_seo_print_jsonld( $dati ) {
+	echo '<script type="application/ld+json">' . wp_json_encode( $dati, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
+}
+
+/* Home: Organization + WebSite. Stessi dati di Chi siamo (nome, ragione sociale, P.IVA, email, contactPoint). */
+add_action( 'wp_head', function () {
+	if ( ! is_singular() || ! is_page_template( 'page-home.php' ) ) {
+		return;
+	}
+	$org = array_merge(
+		array( '@context' => 'https://schema.org', '@type' => 'Organization' ),
+		tp_seo_business_base(),
+		array(
+			'logo'         => tp_theme_asset( 'assets/img/logo.png' ),
+			'vatID'        => 'IT18445521000',
+			'contactPoint' => array(
+				'@type'             => 'ContactPoint',
+				'contactType'       => 'customer support',
+				'telephone'         => '+393200980144',
+				'email'             => tp_seo_contact_email(),
+				'areaServed'        => 'Roma',
+				'availableLanguage' => 'it',
+			),
+		)
+	);
+	tp_seo_print_jsonld( $org );
+	tp_seo_print_jsonld( array(
+		'@context'   => 'https://schema.org',
+		'@type'      => 'WebSite',
+		'url'        => home_url( '/' ),
+		'name'       => 'Trovapulizie',
+		'inLanguage' => 'it',
+	) );
+}, 5 );
+
+/* Hub /roma/: LocalBusiness completo. priceRange dalla tariffa oraria dei campi della pagina (gli stessi numeri
+   della FAQ e del calcolatore); omesso se i campi non sono numerici. image = foto della pagina o di default. */
+add_action( 'wp_head', function () {
+	if ( ! is_singular() || ! is_page_template( 'page-hub-roma.php' ) ) {
+		return;
+	}
+	$min = trim( (string) ( carbon_get_the_post_meta( 'roma_price_min' ) ?: 15 ) );
+	$max = trim( (string) ( carbon_get_the_post_meta( 'roma_price_max' ) ?: 20 ) );
+	$img = tp_seo_og_image();
+	$dati = array_merge(
+		array( '@context' => 'https://schema.org', '@type' => 'LocalBusiness' ),
+		tp_seo_business_base(),
+		array(
+			'url'         => get_permalink(),
+			'description' => wp_strip_all_tags( tp_seo_description() ),
+			'image'       => $img['url'],
+			'areaServed'  => array(
+				'@type' => 'City',
+				'name'  => 'Roma',
+			),
+		)
+	);
+	if ( is_numeric( $min ) && is_numeric( $max ) ) {
+		$dati['priceRange'] = 'EUR ' . $min . '-' . $max . '/ora';
+	}
+	tp_seo_print_jsonld( $dati );
+}, 5 );
+
+/* BreadcrumbList: hub (Home > Roma) e le 7 pagine di servizio (Home > Roma > titolo della pagina), URL assoluti. */
+add_action( 'wp_head', function () {
+	if ( ! is_singular( 'page' ) ) {
+		return;
+	}
+	$servizi = tp_service_pages();
+	$corrente = tp_current_path();
+	if ( ! isset( $servizi[ $corrente ] ) ) {
+		return;
+	}
+	$voci = array(
+		array( 'name' => 'Home', 'item' => home_url( '/' ) ),
+		array( 'name' => 'Roma', 'item' => home_url( '/roma/' ) ),
+	);
+	if ( '/roma/' !== $corrente ) {
+		$voci[] = array( 'name' => wp_strip_all_tags( get_the_title() ), 'item' => get_permalink() );
+	}
+	$elementi = array();
+	foreach ( $voci as $i => $v ) {
+		$elementi[] = array(
+			'@type'    => 'ListItem',
+			'position' => $i + 1,
+			'name'     => $v['name'],
+			'item'     => $v['item'],
+		);
+	}
+	tp_seo_print_jsonld( array(
+		'@context'        => 'https://schema.org',
+		'@type'           => 'BreadcrumbList',
+		'itemListElement' => $elementi,
+	) );
+}, 5 );
