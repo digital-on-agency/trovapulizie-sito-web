@@ -79,11 +79,11 @@ get_header( 'landing', array(
 		<div class="sg-hero__panel">
 			<div class="sg-hero__media" aria-hidden="true">
 				<?php if ( $hero_image_field ) : ?>
-					<img class="sg-hero__img" src="<?php echo esc_url( $hero_image_field ); ?>" alt="" width="1920" height="1071" fetchpriority="high" decoding="async">
+					<img class="sg-hero__img" src="<?php echo esc_url( $hero_image_field ); ?>" alt="<?php echo esc_attr( tp_img_alt( $hero_image_field, 'Lavasciuga professionale su un pavimento dopo i lavori, pulizie commerciali a Roma' ) ); ?>" width="1920" height="1071" fetchpriority="high" decoding="async">
 				<?php else : ?>
 					<picture>
 						<source media="(max-width: 767px)" srcset="<?php echo esc_url( $img( 'hero-pavimento-720' ) ); ?>" type="image/webp">
-						<img class="sg-hero__img" src="<?php echo esc_url( $img( 'hero-pavimento' ) ); ?>" alt="" width="1000" height="1133" fetchpriority="high" decoding="async">
+						<img class="sg-hero__img" src="<?php echo esc_url( $img( 'hero-pavimento' ) ); ?>" alt="Lavasciuga professionale su un pavimento dopo i lavori, pulizie commerciali a Roma" width="1000" height="1133" fetchpriority="high" decoding="async">
 					</picture>
 				<?php endif; ?>
 				<div class="sg-hero__scrim"></div>

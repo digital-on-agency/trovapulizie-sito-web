@@ -67,11 +67,11 @@ get_header( 'landing', array(
 		<div class="sg-hero__panel">
 			<div class="sg-hero__media" aria-hidden="true">
 				<?php if ( $hero_image_field ) : ?>
-					<img class="sg-hero__img" src="<?php echo esc_url( $hero_image_field ); ?>" alt="" width="1920" height="1071" fetchpriority="high" decoding="async">
+					<img class="sg-hero__img" src="<?php echo esc_url( $hero_image_field ); ?>" alt="<?php echo esc_attr( tp_img_alt( $hero_image_field, $defaults['hero_alt'] ) ); ?>" width="1920" height="1071" fetchpriority="high" decoding="async">
 				<?php else : ?>
 					<picture>
 						<source srcset="<?php echo esc_url( tp_theme_asset( $hero_image_base . '.webp' ) ); ?>" type="image/webp">
-						<img class="sg-hero__img" src="<?php echo esc_url( tp_theme_asset( $hero_image_base . '.jpg' ) ); ?>" alt="" width="1920" height="1071" fetchpriority="high" decoding="async">
+						<img class="sg-hero__img" src="<?php echo esc_url( tp_theme_asset( $hero_image_base . '.jpg' ) ); ?>" alt="<?php echo esc_attr( $defaults['hero_alt'] ); ?>" width="1920" height="1071" fetchpriority="high" decoding="async">
 					</picture>
 				<?php endif; ?>
 				<div class="sg-hero__scrim"></div>
@@ -152,6 +152,7 @@ get_header( 'landing', array(
 		'offers'          => $offers,
 		'team'            => array(
 			'image'   => carbon_get_the_post_meta( 'sg_cmp_team_image' ) ?: tp_theme_asset( 'assets/img/sgrosso/sgrosso-confronto-team-photo.webp' ),
+			'image_alt' => tp_img_alt( carbon_get_the_post_meta( 'sg_cmp_team_image' ), 'Due addette di una ditta di pulizie al lavoro in un appartamento a Roma, con mocio, secchi e cartello di pavimento bagnato' ),
 			'eyebrow' => tp_sg_text( 'sg_cmp_team_eyebrow', $defaults, null, 'CHI VERRÀ A CASA TUA' ),
 			'title'   => tp_sg_text( 'sg_cmp_team_title', $defaults, null, "Il team dell'impresa scelta" ),
 			'sub'     => tp_sg_text( 'sg_cmp_team_sub', $defaults, null, 'Squadra verificata e assicurata' ),
@@ -176,6 +177,12 @@ get_header( 'landing', array(
 			array( 'key' => 'fine-affitto', 'label' => 'Fine affitto', 'title' => 'Fine affitto', 'text' => "La ditta riporta l'appartamento com'era alla consegna: calcare, forno, fughe e segni d'uso. Per riconsegnare senza contestazioni o rimettere in affitto subito.", 'highlight' => 'Riconsegna serena, cauzione salva', 'before' => $img( 'fine-affitto', 'prima' ), 'after' => $img( 'fine-affitto', 'dopo' ), 'areas' => array( 'Cucina', 'Bagni e calcare' ) ),
 			array( 'key' => 'prima-pulizia-a-fondo', 'label' => 'Prima pulizia a fondo', 'title' => 'Prima pulizia a fondo', 'text' => 'Quando la pulizia normale non basta più: sporco stratificato, grasso in cucina, calcare vecchio. La ditta riparte da zero, stanza per stanza.', 'highlight' => 'Come il primo giorno, dalla prima passata', 'before' => $img( 'prima-pulizia', 'prima' ), 'after' => $img( 'prima-pulizia', 'dopo' ), 'areas' => array( 'Cucina', 'Soffitti' ) ),
 		);
+	}
+	// Alt di prima/dopo (TICKET-82), per i due rami: l'alt dell'allegato se c'e', altrimenti il titolo dello scenario.
+	foreach ( $scenarios as $i => $s ) {
+		$nome = trim( (string) ( $s['title'] ?? '' ) );
+		$scenarios[ $i ]['before_alt'] = tp_img_alt( $s['before'] ?? '', $nome ? 'Prima della pulizia: ' . $nome . ' a Roma' : 'Prima dello sgrosso' );
+		$scenarios[ $i ]['after_alt']  = tp_img_alt( $s['after'] ?? '', $nome ? 'Dopo la pulizia: ' . $nome . ' a Roma' : 'Dopo lo sgrosso' );
 	}
 	$all_areas = tp_lines( carbon_get_the_post_meta( 'sg_when_areas' ) );
 	if ( ! $all_areas ) {

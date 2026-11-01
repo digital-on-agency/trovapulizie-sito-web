@@ -83,7 +83,7 @@ $hero_bullets = tp_lines( tp_zz( 'zz_hero_bullets', '' ) ) ?: array( 'Intervento
 			<div class="sg-hero__media" aria-hidden="true">
 				<picture>
 					<source media="(max-width: 767px)" srcset="<?php echo esc_url( $img( 'hero-720' ) ); ?>" type="image/webp">
-					<img class="sg-hero__img" src="<?php echo esc_url( $img( 'hero' ) ); ?>" alt="" width="1376" height="768" fetchpriority="high" decoding="async">
+					<img class="sg-hero__img" src="<?php echo esc_url( $img( 'hero' ) ); ?>" alt="Giardino all'italiana con siepi, vasi di limoni e gerani e un pergolato, trattato contro le zanzare a Roma" width="1376" height="768" fetchpriority="high" decoding="async">
 				</picture>
 				<div class="sg-hero__scrim"></div>
 			</div>

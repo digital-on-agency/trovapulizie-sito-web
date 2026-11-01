@@ -27,6 +27,7 @@ function tp_sg_variants() {
 			'faq_first_a'      => 'Dipende da dimensione e stato della casa: per questo il sopralluogo è gratuito. Vedi il prezzo fisso prima di decidere, senza sorprese.',
 			'calc_h2'          => 'Quanto costa il tuo sgrosso?',
 			'hero_image'       => 'sgrosso-hero',
+			'hero_alt'         => "Soggiorno luminoso e appena pulito a Roma, con parquet, divano e piante dopo uno sgrosso",
 		),
 		'post-ristrutturazione' => array(
 			'scenario'         => 'post-ristrutturazione',
@@ -42,6 +43,7 @@ function tp_sg_variants() {
 			'faq_first_a'      => 'Dipende da dimensione e quantità di residui di cantiere: per questo il sopralluogo è gratuito. Vedi il prezzo fisso prima di decidere, senza sorprese.',
 			'calc_h2'          => 'Quanto costa la pulizia post-cantiere?',
 			'hero_image'       => 'sgrosso-hero-post-ristrutturazione',
+			'hero_alt'         => "Stanza appena ristrutturata a Roma con scala, telo e rullo da pittura, pronta per la pulizia post-cantiere",
 		),
 		'trasloco' => array(
 			'scenario'         => 'trasloco',
@@ -57,6 +59,7 @@ function tp_sg_variants() {
 			'faq_first_a'      => 'Dipende da dimensione e stato della casa — quella che lasci o quella dove entri: per questo il sopralluogo è gratuito. Vedi il prezzo fisso prima di decidere, senza sorprese.',
 			'calc_h2'          => 'Quanto costa la pulizia post-trasloco?',
 			'hero_image'       => 'sgrosso-hero-trasloco',
+			'hero_alt'         => "Stanza vuota a Roma con scatole di cartone vicino alla finestra, pronta per la pulizia post trasloco",
 		),
 		'fine-affitto' => array(
 			'scenario'         => 'fine-affitto',
@@ -72,6 +75,7 @@ function tp_sg_variants() {
 			'faq_first_a'      => 'Dipende da dimensione e stato della casa: per questo il sopralluogo è gratuito. Vedi il prezzo fisso prima di decidere, senza sorprese — e senza rischiare la cauzione.',
 			'calc_h2'          => 'Quanto costa la pulizia di fine affitto?',
 			'hero_image'       => 'sgrosso-hero-fine-affitto',
+			'hero_alt'         => "Salotto con divano e mazzo di chiavi sul tavolo, pulito per la riconsegna a fine affitto a Roma",
 		),
 		'prima-pulizia-a-fondo' => array(
 			'scenario'         => 'prima-pulizia-a-fondo',
@@ -87,6 +91,7 @@ function tp_sg_variants() {
 			'faq_first_a'      => 'Dipende da dimensione e livello di sporco accumulato: per questo il sopralluogo è gratuito. Vedi il prezzo fisso prima di decidere, senza sorprese.',
 			'calc_h2'          => 'Quanto costa la tua pulizia straordinaria?',
 			'hero_image'       => 'sgrosso-hero-prima-pulizia',
+			'hero_alt'         => "Salotto con poltrona e libreria e polvere sulle superfici, da pulire a fondo con una pulizia straordinaria a Roma",
 		),
 	);
 }

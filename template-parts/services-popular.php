@@ -73,7 +73,7 @@ $icon_keys = array( 'casa', 'uffici', 'cantieri', 'condomini', 'sanificazione', 
 					<?php endif; ?>
 				</div>
 				<div class="services__visual">
-					<img src="<?php echo esc_url( $image ); ?>" alt="" loading="lazy">
+					<img src="<?php echo esc_url( $image ); ?>" alt="<?php echo esc_attr( tp_img_alt( $s['card_image'] ?? '', ! empty( $s['card_title'] ) ? $s['card_title'] . ' a Roma con Trovapulizie' : 'Servizio di pulizia a Roma con Trovapulizie' ) ); ?>" loading="lazy">
 					<?php if ( 0 === $i && $args['video_first'] ) : ?><video class="services__video" muted loop playsinline preload="none" src="<?php echo esc_url( $args['video_first'] ); ?>" aria-hidden="true" tabindex="-1"></video><?php endif; ?>
 					<?php if ( ! empty( $s['visual_label'] ) ) : ?><span class="services__visual-label"><?php echo esc_html( $s['visual_label'] ); ?></span><?php endif; ?>
 				</div>

@@ -31,6 +31,26 @@ function tp_service_pages() {
 	);
 }
 
+/**
+ * Testo alternativo di un'immagine data per URL (campi Carbon di tipo url): l'alt dell'allegato della media library
+ * se esiste (_wp_attachment_image_alt), altrimenti $fallback. Le immagini statiche del tema non passano di qui: hanno
+ * l'alt scritto nel template (TICKET-82). Risultato in cache per URL: stessa immagine, una sola query.
+ */
+function tp_img_alt( $url, $fallback ) {
+	static $cache = array();
+	$url = trim( (string) $url );
+	// Vuoto o file del tema: non sono allegati, niente query.
+	if ( '' === $url || 0 === strpos( $url, get_stylesheet_directory_uri() ) ) {
+		return $fallback;
+	}
+	if ( ! isset( $cache[ $url ] ) ) {
+		$id            = attachment_url_to_postid( preg_replace( '/\?.*$/', '', $url ) );
+		$alt           = $id ? trim( (string) get_post_meta( $id, '_wp_attachment_image_alt', true ) ) : '';
+		$cache[ $url ] = $alt;
+	}
+	return '' !== $cache[ $url ] ? $cache[ $url ] : $fallback;
+}
+
 /** Percorso normalizzato (con slash finale) dell'URL corrente, per confrontarlo con tp_service_pages(). */
 function tp_current_path() {
 	$path = (string) wp_parse_url( get_permalink(), PHP_URL_PATH );
