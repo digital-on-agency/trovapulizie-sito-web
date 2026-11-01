@@ -13,6 +13,30 @@
  */
 require_once __DIR__ . '/sgrosso-variants.php';
 
+/**
+ * Pagine di servizio e hub di Roma con l'anchor text fisso della SPEC-seo-post-cutover (TICKET-78).
+ * Unica fonte per il blocco "Altri servizi a Roma", la colonna del footer e il BreadcrumbList (TICKET-80):
+ * percorso => anchor. L'hub e' la prima voce. Gli anchor portano la keyword della pagina, mai "scopri di piu'".
+ */
+function tp_service_pages() {
+	return array(
+		'/roma/'                               => 'Pulizie casa a Roma',
+		'/roma/sgrosso-casa/'                  => 'Sgrosso casa Roma',
+		'/roma/sgrosso-post-ristrutturazione/' => 'Pulizia post-ristrutturazione Roma',
+		'/roma/sgrosso-trasloco/'              => 'Pulizia post trasloco Roma',
+		'/roma/sgrosso-fine-affitto/'          => 'Pulizia fine affitto Roma',
+		'/roma/sgrosso-prima-pulizia/'         => 'Pulizia straordinaria casa Roma',
+		'/roma/sgrosso-commerciale/'           => 'Pulizie commerciali Roma',
+		'/roma/zanzare-disinfestazione/'       => 'Disinfestazione zanzare Roma',
+	);
+}
+
+/** Percorso normalizzato (con slash finale) dell'URL corrente, per confrontarlo con tp_service_pages(). */
+function tp_current_path() {
+	$path = (string) wp_parse_url( get_permalink(), PHP_URL_PATH );
+	return trailingslashit( $path );
+}
+
 /** Default della variante quando la pagina corrente e' una landing Sgrosso, altrimenti null. */
 function tp_seo_sgrosso_defaults() {
 	if ( ! is_singular() || ! is_page_template( 'page-sgrosso.php' ) ) {

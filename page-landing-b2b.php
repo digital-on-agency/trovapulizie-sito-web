@@ -309,6 +309,8 @@ get_header( 'landing', array(
 	) );
 	?>
 
+	<?php get_template_part( 'template-parts/related-services' ); ?>
+
 	<?php get_template_part( 'template-parts/sticky-cta', null, array(
 		'variant'     => 'dual',
 		'label'       => 'Richiedi preventivo',

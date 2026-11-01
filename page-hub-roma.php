@@ -185,6 +185,8 @@ $intro_text    = carbon_get_the_post_meta( 'roma_intro_text' );
 		</section>
 	<?php endif; ?>
 
+	<?php get_template_part( 'template-parts/related-services' ); ?>
+
 	<?php get_template_part( 'template-parts/sticky-cta', null, array(
 		'label'  => 'Trova pulizie nella tua zona',
 		'target' => '#cerca',

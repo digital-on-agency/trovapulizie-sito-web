@@ -247,6 +247,8 @@ $hero_bullets = tp_lines( tp_zz( 'zz_hero_bullets', '' ) ) ?: array( 'Intervento
 	) );
 	?>
 
+	<?php get_template_part( 'template-parts/related-services' ); ?>
+
 	<?php get_template_part( 'template-parts/sticky-cta', null, array(
 		'variant'     => 'dual',
 		'label'       => 'Prenota sopralluogo',

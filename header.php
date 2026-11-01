@@ -2,8 +2,8 @@
 /**
  * Head + navbar (Figma 3564:5, mobile 4018:965). Primo elemento del body: il link di salto al contenuto,
  * visibile solo quando prende il focus. Navbar sticky alta --tp-navbar-h (style.css): da quel token
- * derivano il box hero e l'offset di Come funziona. Voci di default assolute: Come funziona e Servizi alle sezioni
- * della Home, Prezzi al calcolatore dell'hub /roma/, Diventa cleaner alla sua pagina. Accedi e Registrati portano all'app
+ * derivano il box hero e l'offset di Come funziona. Voci di default assolute: Come funziona alla sezione
+ * della Home, Servizi all'hub /roma/ (link interno verso le pagine di servizio, TICKET-78), Prezzi al calcolatore dell'hub /roma/, Diventa cleaner alla sua pagina. Accedi e Registrati portano all'app
  * (tp_app_url()), non ad ancore vuote.
  * Sotto --tp-bp-desktop la barra mostra logo, Registrati e l'hamburger (Figma 4018:971): le voci di menu e
  * Accedi stanno nel pannello, aperto da assets/js/nav-mobile.js. Le voci hanno un'unica sorgente
@@ -24,7 +24,7 @@ $args = wp_parse_args( $args ?? array(), array(
 // Home). Prezzi va al calcolatore dell'hub, l'unico posto del sito con i prezzi (cutover-checklist A6).
 $tp_nav_links = $args['links'] ?: array(
 	home_url( '/#come-funziona' )     => 'Come funziona',
-	home_url( '/#servizi' )           => 'Servizi',
+	home_url( '/roma/' )              => 'Servizi',
 	home_url( '/roma/#quanto-costa' ) => 'Prezzi',
 	home_url( '/diventa-cleaner/' )   => 'Diventa cleaner',
 );

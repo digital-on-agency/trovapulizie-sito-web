@@ -45,6 +45,13 @@ $col_index = 0;
 				</ul>
 			</div>
 			<?php endforeach; ?>
+			<?php // Colonna "Servizi a Roma" (SPEC-seo-post-cutover, TICKET-78): link interni a hub e pagine di servizio su ogni pagina, anchor fissi da tp_service_pages(). ?>
+			<div class="site-footer__col site-footer__services" style="--i:<?php echo $col_index++; ?>">
+				<p class="site-footer__heading">Servizi a Roma</p>
+				<ul class="site-footer__links">
+					<?php foreach ( tp_service_pages() as $percorso => $anchor ) : ?><li><a href="<?php echo esc_url( home_url( $percorso ) ); ?>"><?php echo esc_html( $anchor ); ?></a></li><?php endforeach; ?>
+				</ul>
+			</div>
 			<?php if ( $cta_text || $cta_label ) : ?>
 			<div class="site-footer__col site-footer__cta" style="--i:<?php echo $col_index++; ?>">
 				<?php if ( $cta_text ) : ?><p class="site-footer__cta-text"><?php echo nl2br( esc_html( $cta_text ) ); ?></p><?php endif; ?>
