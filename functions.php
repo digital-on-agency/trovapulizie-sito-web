@@ -283,6 +283,17 @@ add_action( 'wp_head', function () {
 	echo '<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.min.js","https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.core.js":"https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.core.min.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"}}</script>' . "\n";
 }, 1 );
 
+// Preload della foto della hero, l'elemento LCP della Home: come sfondo CSS il browser la scopre solo
+// dopo aver scaricato e letto style.css. Una rendition per lato della soglia, come nel CSS.
+add_action( 'wp_head', function () {
+	if ( ! is_page_template( 'page-home.php' ) ) {
+		return;
+	}
+	$img = get_stylesheet_directory_uri() . '/assets/img/';
+	echo '<link rel="preload" as="image" type="image/webp" fetchpriority="high" href="' . esc_url( $img . 'hero-box.webp' ) . '" media="(min-width: 1024px)">' . "\n";
+	echo '<link rel="preload" as="image" fetchpriority="high" href="' . esc_url( $img . 'hero-box-720.jpg' ) . '" media="(max-width: 1023px)">' . "\n";
+}, 2 );
+
 add_action( 'init', function () {
 	remove_action( 'wp_head', 'wp_generator' );
 	// Script delle emoji di WordPress: 22 KB per sostituire emoji che il tema non usa (TICKET-20).

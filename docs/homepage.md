@@ -59,7 +59,7 @@ Container `post_meta` "Home — Sezioni", visibile solo sulle pagine con templat
 
 | Tab | Campi | Note |
 |---|---|---|
-| Hero | `hero_title` (textarea: un invio = una riga), `hero_subtitle`, `hero_trust_badge`, `hero_video` (file mp4) | Il video e' il timelapse disordine -> ordine (§6.1). Senza video resta `hero-box.png` |
+| Hero | `hero_title` (textarea: un invio = una riga), `hero_subtitle`, `hero_trust_badge`, `hero_video` (file mp4) | Il video e' il timelapse disordine -> ordine (§6.1). Senza video resta la foto `hero-box.webp` (`hero-box.jpg` di riserva) |
 | Come funziona | `how_it_works_title`, `how_it_works_subtitle`, `how_it_works_video` (mp4 all-intra), `how_it_works_poster` (immagine), `how_it_works_zoom_video` (mp4), `how_it_works_steps` (complex max 3: `title`, `description`, `image`) | `image` dello step e' lo schermo statico per mobile e reduced-motion; vuoto = `screen-stepN-*.png` del tema |
 | Telefono 3D | `phone_model_url` (GLB opzionale), `phone_model_credit` | Vuoto = corpo procedurale Three.js. Il credito finisce nel footer accanto al copyright |
 | Servizi Popolari | `services_title`, `services_subtitle`, `services_proof_avatar`, `services_proof_title`, `services_proof_sub`, `services_proof_rating`, `popular_services` (complex max 6: `tab_label`, `tab_icon` select, `includes` textarea una voce per riga, `card_title`, `card_description`, `highlight`, `card_image`, `visual_label`, `link`, `link_text`) | `tab_icon` deve esistere come `assets/icons/tab-<valore>.svg`; valore sconosciuto = `casa` |
@@ -238,7 +238,7 @@ blocco unico in coda a `style.css` che azzera transizioni e animazioni di tutte 
 | Sezione | Figma | Template | JS | Note di implementazione |
 |---|---|---|---|---|
 | Navbar | `3564:5`, mobile `4018:965` | `header.php` | - | Altezza `--tp-navbar-h`: 72px desktop, 65px sotto 1024 (il token si ridefinisce, non l'altezza della barra). Sotto soglia: hamburger e pannello |
-| Hero | `3564:17` | inline | `hero-video.js` | Box con foto `hero-box.png` + scrim verde (`::after`) + video timelapse con `preload="none"`: lo carica il JS solo senza reduced-motion, `is-playing` lo fa sfumare sopra la foto, resta sull'ultimo frame. Search bar = markup statico (il widget reale e' in ADR-001) |
+| Hero | `3564:17` | inline | `hero-video.js` | Box con foto `hero-box.webp` (preload in `wp_head`, `fetchpriority=high`) + scrim verde (`::after`) + video timelapse con `preload="none"`: lo carica il JS solo senza reduced-motion, `is-playing` lo fa sfumare sopra la foto, resta sull'ultimo frame. Search bar = markup statico (il widget reale e' in ADR-001) |
 | Servizi popolari | `3828:1079` | `services-popular.php` | `services-tabs.js` | Tab con `role="tab"`, frecce sinistra/destra, indicatore che scivola (`has-indicator`/`is-ready`), card tutte nella stessa cella grid e solo quella attiva visibile (`is-active`, `is-enter` per il rise). Icone tab = SVG a maschera (`tp_icon_span`, utility `.tp-icon-mask`). Mascotte decorativa che entra da destra. La prima card ospita il video dello zoom (§4) |
 | Social proof | `3564:96` | `reviews-marquee.php` | - | Marquee CSS 40 s con il set di card duplicato (`aria-hidden` sul secondo), pausa in hover. Il contenitore non usa `overflow: hidden` per non tagliare ombre e lift. Badge con logo Google (`google-g.svg`) |
 | Dove siamo attivi | `3564:114` | `zones-map.php` | - | Mappa raster (niente draw-in). Overlay Centro e Prati in coordinate percentuali con `--zones-op` come opacita' a regime, pulse all'ingresso, alone radar in loop. Citta' come chip senza link |

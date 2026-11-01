@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.63.1
+Version: 0.64.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -409,7 +409,9 @@ a {
 	right: 0;
 	border-radius: 40px;
 	overflow: hidden;
-	background-image: url('assets/img/hero-box.png');
+	/* WebP da 66 KB (il PNG di partenza pesava 1,8 MB ed era l'elemento LCP), JPG per chi non legge image-set */
+	background-image: url('assets/img/hero-box.jpg');
+	background-image: image-set(url('assets/img/hero-box.webp') type('image/webp'), url('assets/img/hero-box.jpg') type('image/jpeg'));
 	background-size: cover;
 	background-position: center;
 	box-shadow: 0 12px 40px -8px rgba(5, 89, 61, 0.06);
