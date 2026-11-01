@@ -62,6 +62,10 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-thank-you.php' ) ) {
 		return 'Richiesta ricevuta | Trovapulizie';
 	}
+	// Hub /roma/ (TICKET-81): senza campo SEO compilato il title era il solo titolo della pagina ("Roma").
+	if ( is_singular() && is_page_template( 'page-hub-roma.php' ) ) {
+		return 'Pulizie casa a Roma, prenoti in 2 minuti | Trovapulizie';
+	}
 	// Diventa cleaner (TICKET-51): stesso title del live React.
 	if ( is_singular() && is_page_template( 'page-cleaner-landing.php' ) ) {
 		return 'Diventa cleaner Trovapulizie — Lavora con clienti verificati a Roma';

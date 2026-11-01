@@ -18,7 +18,7 @@ function tp_sg_variants() {
 			'eyebrow'          => 'SGROSSO CASA · ROMA',
 			'h1'               => 'Sgrosso casa: la tua casa torna come nuova',
 			'subtitle'         => 'Pulizia straordinaria una tantum post-cantiere, post-trasloco o casa trascurata — non un abbonamento.',
-			'page_title'       => 'Sgrosso casa Roma — Pulizia straordinaria una tantum, sopralluogo gratuito | Trovapulizie',
+			'page_title'       => 'Sgrosso casa Roma: pulizia straordinaria, sopralluogo gratuito | Trovapulizie',
 			'page_description' => 'Sgrosso casa a Roma: pulizia straordinaria post-cantiere o trasloco con imprese verificate. Sopralluogo gratuito, prezzo fisso, nessuna sorpresa.',
 			'quando_serve_h2'  => 'Uno sgrosso per ogni situazione',
 			'confrontiamo_sub' => "Non scegli a caso: mettiamo a confronto le imprese di pulizia verificate della tua zona e ti proponiamo l'offerta più conveniente per il tuo sgrosso.",
