@@ -335,8 +335,19 @@
 			var landed = pinUnits() + HOLD_VH + SHRINK_VH * LAND_AT;
 			if (u >= landed) { if (!cardLive) shrink(1); cardTakeover(true); return; }
 			if (cardLive && activeTab !== 0) return;
+			if (u >= pinUnits() + HOLD_VH) {
+				var sh = Math.min(1, (u - pinUnits() - HOLD_VH) / SHRINK_VH);
+				// Atterraggio geometrico: arrivando con un salto (link ad ancora) ci si ferma spesso con il rientro a meta', ma
+				// l'overlay e' gia' a pochi px dalla card: se la differenza e' sotto i 12 px si passa subito alla card
+				if (cardVisual && !cardLive) {
+					var rc = cardRect(), rm = mixRect(viewportRect(), rc, easeInOut(sh));
+					if (Math.abs(rm.height - rc.height) < 12 && Math.abs(rm.top - rc.top) < 12) { shrink(1); cardTakeover(true); return; }
+				}
+				if (cardLive) cardTakeover(false);
+				shrink(sh);
+				return;
+			}
 			if (cardLive) cardTakeover(false);
-			if (u >= pinUnits() + HOLD_VH) shrink(Math.min(1, (u - pinUnits() - HOLD_VH) / SHRINK_VH));
 			else if (u >= pinUnits()) zoom(1);
 		}
 		// Cambio tab nei Servizi (services-tabs.js): con una tab diversa dalla prima l'overlay dello zoom si spegne subito
