@@ -47,6 +47,7 @@
 			}
 		});
 		placeIndicator();
+		document.dispatchEvent(new CustomEvent('tp:services-tab', { detail: i })); // home-motion.js: spegne l'overlay dello zoom
 		if (focus) tabs[i].focus();
 	}
 	tabs.forEach(function (t, i) {

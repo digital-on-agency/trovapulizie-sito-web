@@ -170,6 +170,8 @@
 		return { left: r.left, top: r.top, width: r.width, height: r.height, radius: parseFloat(getComputedStyle(el).borderRadius) || 0 };
 	}
 	var zoomOn = false, cardLive = false;
+	// 02/11: quota del rientro a cui si atterra (vedi syncBeyondPin) e tab attiva nei Servizi (vedi in fondo)
+	var LAND_AT = 0.92, activeTab = 0;
 	function showOverlay(on) {
 		if (!zoomEl || zoomOn === on) return;
 		zoomOn = on;
@@ -225,8 +227,9 @@
 	}
 	// Atterraggio: la foto della prima card diventa il video (stesso file, stesso istante); tornando indietro il contrario
 	function cardTakeover(on) {
-		if (!cardVideo || cardLive === on) return;
+		if (cardLive === on) return;
 		cardLive = on;
+		if (!cardVideo) { if (on) showOverlay(false); else shrink(1); return; } // senza video nella card l'overlay va comunque spento
 		cardVisual.classList.toggle('is-live', on);
 		if (on) {
 			cardVideo.preload = 'auto'; // stesso file dell'overlay (6 MB): si scarica solo quando serve davvero
@@ -324,12 +327,23 @@
 			// Prima che il trigger A si attivi nessuno scriverebbe la dissolvenza d'ingresso: la scrive qui
 			if (u < 0) setTextFade(entryFade());
 			if (u < pinUnits() && !cardLive) return; // sotto il pin l'overlay lo guida il trigger A (scrubbed)
-			var landed = pinUnits() + HOLD_VH + SHRINK_VH;
-			if (u >= landed) { cardTakeover(true); return; }
+			// 02/11: l'atterraggio scattava solo a fine rientro (u >= 5,5), cioe' con la sezione Servizi esattamente in cima
+			// al viewport. Chi si fermava poco prima (quasi tutti) restava con l'overlay acceso al 90-99%, ritagliato sulla
+			// card: cambiando tab il video della donna copriva la foto di ogni servizio. Ora si atterra al 92% del rientro
+			// (differenza di pochi px, chiusa con shrink(1) prima del passaggio) e, con un'altra tab attiva, non si torna
+			// indietro: l'overlay non deve mai stare sopra una card diversa dalla prima.
+			var landed = pinUnits() + HOLD_VH + SHRINK_VH * LAND_AT;
+			if (u >= landed) { if (!cardLive) shrink(1); cardTakeover(true); return; }
+			if (cardLive && activeTab !== 0) return;
 			if (cardLive) cardTakeover(false);
 			if (u >= pinUnits() + HOLD_VH) shrink(Math.min(1, (u - pinUnits() - HOLD_VH) / SHRINK_VH));
 			else if (u >= pinUnits()) zoom(1);
 		}
+		// Cambio tab nei Servizi (services-tabs.js): con una tab diversa dalla prima l'overlay dello zoom si spegne subito
+		document.addEventListener('tp:services-tab', function (e) {
+			activeTab = e.detail;
+			if (activeTab !== 0 && zoomOn) { shrink(1); cardTakeover(true); }
+		});
 		var syncQueued = false;
 		function onScroll() {
 			if (syncQueued) return;
