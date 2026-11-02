@@ -5,6 +5,11 @@
  * Il prezzo "conta" fino al valore in 720 ms (rAF); la prima volta parte da zero quando la card entra nel viewport.
  * Con prefers-reduced-motion il valore cambia di colpo. L'invio del form non e' qui: lo fa il modulo lead
  * (lead-form.js) sui form con data-lead-atomic.
+ *
+ * Modulo condiviso della formula (TICKET-84): window.tpStimaSgrosso(mq, extra, coef) e' la formula pura;
+ * window.tpSgrossoStima(mq, extra) la applica ai coefficienti della sezione [data-estimator] della pagina e
+ * restituisce {min, max}, oppure null se la sezione manca o i metri quadri non sono validi. Il passo Contatto del
+ * form (lead-form.js) usa questa: nessuna seconda copia della formula. Va caricato prima di lead-form.js.
  */
 (function () {
 	'use strict';
@@ -23,14 +28,27 @@
 		};
 	}
 
-	function initRoot(root) {
-		var c = {
+	/** Coefficienti dai data-attribute della sezione (default del live se mancano). */
+	function readCoef(root) {
+		return {
 			base: parseFloat(root.getAttribute('data-base')) || 200,
 			perMq: parseFloat(root.getAttribute('data-per-mq')) || 2.2,
 			extraMin: parseFloat(root.getAttribute('data-extra-min')) || 25,
 			extraMax: parseFloat(root.getAttribute('data-extra-max')) || 40,
 			maxMult: parseFloat(root.getAttribute('data-max-mult')) || 1.35
 		};
+	}
+
+	/** Stima della pagina per mq ed extra dati, con i coefficienti del calcolatore; null se non calcolabile. */
+	function stimaPagina(mq, extra) {
+		var root = document.querySelector('[data-estimator]');
+		var n = Number(mq);
+		if (!root || !isFinite(n) || n <= 0) return null;
+		return stima(n, Number(extra) || 0, readCoef(root));
+	}
+
+	function initRoot(root) {
+		var c = readCoef(root);
 		var range = root.querySelector('input[name="mq"]');
 		var outMq = root.querySelector('[data-mq-out]');
 		var outMin = root.querySelector('[data-price-min]');
@@ -112,5 +130,6 @@
 	}
 
 	document.querySelectorAll('[data-estimator]').forEach(initRoot);
-	window.tpStimaSgrosso = stima; // verificabile dalla console e dai test headless
+	window.tpStimaSgrosso = stima; // formula pura, verificabile dalla console e dai test headless
+	window.tpSgrossoStima = stimaPagina; // formula con i coefficienti della pagina, usata dal form
 })();

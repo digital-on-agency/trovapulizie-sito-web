@@ -107,6 +107,21 @@ withChrome(BIN, URL, { port: 9347, width: WIDTH, mobile: WIDTH < 800, height: WI
 	const sec2 = JSON.parse(await ev(`(function(){ var f=${F}; var st=f.querySelector('[data-step="2"]'); return JSON.stringify({ n: f.querySelector('[data-step-n]').textContent, name: f.querySelector('[data-step-name]').textContent, btn: f.querySelector('[data-submit]').textContent.trim(), emailReq: f.querySelector('[name=email]').required, back: !f.querySelector('[data-back]').hidden }); })()`));
 	check('passo 2 "Contatto": bottone di invio, email non obbligatoria, Indietro presente', sec2.n === '2' && sec2.name === 'Contatto' && sec2.btn === 'Prenota il sopralluogo gratuito' && !sec2.emailReq && sec2.back, JSON.stringify(sec2));
 
+	// @T84-begin
+	// ---- TICKET-84: stima nel passo 2 ---------------------------------------------------------------------------
+	const stimaOf = (mq) => ev(`(function(){ var root=document.querySelector('[data-estimator]'); var c={ base: parseFloat(root.getAttribute('data-base')), perMq: parseFloat(root.getAttribute('data-per-mq')), extraMin: parseFloat(root.getAttribute('data-extra-min')), extraMax: parseFloat(root.getAttribute('data-extra-max')), maxMult: parseFloat(root.getAttribute('data-max-mult')) }; var s=window.tpStimaSgrosso(${mq}, 0, c); return s.min + '-' + s.max; })()`);
+	const line = () => ev(`(function(){ var e=${F}.querySelector('[data-estimate]'); var l=${F}.querySelector('[data-estimate-line]'); return JSON.stringify({ hidden: e ? e.hidden : 'assente', line: l ? l.textContent : '', note: e ? e.textContent : '' }); })()`).then(JSON.parse);
+	let ln = await line();
+	check('stima 80 mq: "Stima indicativa: 380-510 euro" e nota sul sopralluogo', !ln.hidden && ln.line === 'Stima indicativa: 380-510 euro' && /Il prezzo definitivo dopo il sopralluogo gratuito/.test(ln.note), JSON.stringify(ln));
+	await shotForm('form-passo-2');
+	for (const mq of ['30', '120', '250']) {
+		await ev(`${F}.querySelector('[data-back]').click()`); await sleep(200);
+		await setf('mq', mq); await submit(); await sleep(400);
+		ln = await line();
+		const exp = await stimaOf(mq);
+		check('stima ' + mq + ' mq uguale a stima() del calcolatore (' + exp + '), ricalcolata al ritorno', ln.line === 'Stima indicativa: ' + exp + ' euro', ln.line);
+	}
+	// @T84-end
 	await ev(`${F}.querySelector('[data-back]').click()`); await sleep(200);
 	check('Indietro dal passo 2 riporta al passo 1 con i dati intatti', (await stepN()) === '1' && (await ev(`${F}.querySelector('[name=indirizzo]').value`)) === 'Via Tuscolana 118, Roma', await stepN());
 	await setf('mq', '80'); await submit(); await sleep(400);
@@ -220,6 +235,17 @@ withChrome(BIN, URL, { port: 9347, width: WIDTH, mobile: WIDTH < 800, height: WI
 	check('calcolatore: POST atomico', !!ca && ca.body.tipo === 'b2c' && ca.body.email === 'qa-calc@example.com' && ca.body.zona === 'Non specificata (calcolatore)' && /^Calcolatore: \d+mq · .+ · extra: nessuno · stima \d+-\d+€$/.test(ca.body.note) && ca.body.consentPrivacy === true && !ca.body.contactOnly, JSON.stringify(ca && ca.body));
 	check('calcolatore: navigazione a /thank-you/', (await ev('location.pathname')) === '/thank-you/', await ev('location.pathname'));
 
+	// @T84-begin
+	// ---- Formula non disponibile: la riga della stima non compare, il passo 2 funziona -----------------------------------------------------
+	await send('Page.addScriptToEvaluateOnNewDocument', { source: "Object.defineProperty(window,'tpSgrossoStima',{get:function(){return undefined;},set:function(){},configurable:true}); Object.defineProperty(window,'tpStimaSgrosso',{get:function(){return undefined;},set:function(){},configurable:true});" });
+	await load();
+	await fillStep1('80'); await submit(); await sleep(500);
+	ln = await line();
+	check('formula assente: la riga della stima non compare e il passo 2 e usabile', (await stepN()) === '2' && (ln.hidden === true || ln.line === ''), JSON.stringify(ln));
+	await fillStep2(); await submit(); await sleep(1500);
+	check('formula assente: l invio del passo 2 funziona comunque', (await stepN()) === '3' && contactCalls().length === 1, contactCalls().length);
+
+	// @T84-end
 
 	const ko = checks.filter(c => !c[1]).length;
 	console.log(ko ? 'ESITO: ' + ko + ' controlli falliti su ' + checks.length : 'ESITO: verde (' + checks.length + ' controlli)');

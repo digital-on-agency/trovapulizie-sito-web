@@ -3988,6 +3988,27 @@ a {
 	line-height: 1.45;
 	color: #4B5563;
 }
+.lead-form__estimate {
+	padding: 12px 14px;
+	border: 1px solid var(--tp-primary);
+	border-radius: 12px;
+	background: var(--tp-mint);
+}
+.lead-form__estimate[hidden] {
+	display: none;
+}
+.lead-form__estimate-line {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 700;
+	color: var(--tp-primary-700);
+}
+.lead-form__estimate-note {
+	margin: 2px 0 0;
+	font-size: 12px;
+	line-height: 1.4;
+	color: #4B5563;
+}
 .lead-form__row {
 	display: flex;
 	gap: 12px;

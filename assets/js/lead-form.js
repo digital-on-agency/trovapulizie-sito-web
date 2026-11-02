@@ -227,7 +227,7 @@
 		var stepLabels = ['La casa', 'Contatto', 'Dettagli'];
 		var MQ_MIN = 10, MQ_MAX = 500;
 		var fired = {};
-		var state = { step: 1, contattoId: '', contattoToken: '', opportunitaId: '', opportunitaToken: '', photos: [], levelTouched: false };
+		var state = { step: 1, contattoId: '', contattoToken: '', opportunitaId: '', opportunitaToken: '', photos: [], levelTouched: false, extra: 0 };
 
 		var levels = {};
 		try { levels = JSON.parse((form.querySelector('[data-sporco-levels]') || {}).textContent || '{}'); } catch (e) {}
@@ -314,6 +314,18 @@
 			return completo ? base : base + ' (form non completato)';
 		}
 
+		// Stima indicativa del passo 2 con la formula unica del calcolatore (window.tpSgrossoStima, sgrosso-estimator.js):
+		// se il modulo manca o non restituisce un risultato la riga resta nascosta e il passo funziona uguale.
+		function renderEstimate() {
+			var box = form.querySelector('[data-estimate]'), line = form.querySelector('[data-estimate-line]');
+			if (!box || !line) return;
+			var s = null;
+			try { if (typeof window.tpSgrossoStima === 'function') s = window.tpSgrossoStima(mqValue(), state.extra); } catch (e) { s = null; }
+			if (!s || !isFinite(s.min) || !isFinite(s.max)) { box.hidden = true; line.textContent = ''; return; }
+			line.textContent = 'Stima indicativa: ' + s.min + '-' + s.max + ' euro';
+			box.hidden = false;
+		}
+
 		function show(step) {
 			state.step = step;
 			steps.forEach(function (fs) { fs.hidden = parseInt(fs.getAttribute('data-step'), 10) !== step; });
@@ -327,6 +339,7 @@
 			clearErrors(form);
 			var cur = form.querySelector('[data-step="' + step + '"]');
 			if (step === 2) {
+				renderEstimate();
 				var first = cur.querySelector('input:not([type="hidden"]):not([type="radio"]):not([type="checkbox"])');
 				if (first) first.focus();
 			} else if (step === 3) {

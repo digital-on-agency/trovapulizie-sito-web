@@ -97,6 +97,11 @@ $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '
 	<fieldset class="lead-form__step" data-step="2" hidden>
 		<legend class="lead-form__title" tabindex="-1">I tuoi contatti</legend>
 
+		<div class="lead-form__estimate" data-estimate hidden>
+			<p class="lead-form__estimate-line" data-estimate-line></p>
+			<p class="lead-form__estimate-note">Il prezzo definitivo dopo il sopralluogo gratuito</p>
+		</div>
+
 		<div class="tp-field" data-field="nome">
 			<div class="tp-field__box">
 				<input id="<?php echo esc_attr( $p ); ?>-nome" name="nome" type="text" placeholder=" " autocomplete="name" required>
