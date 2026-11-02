@@ -3774,6 +3774,9 @@ a {
 .landing-nav__cta-short {
 	display: none;
 }
+.landing-nav__cta--short {
+	display: none; /* due link distinti per larghezza (header-landing.php con cta_full_href) */
+}
 
 /* ---- Hero a pannello (Figma: rettangolo 1360x730 con raggio, foto sotto uno scrim bianco) ----- */
 .sg-hero {
@@ -3878,6 +3881,23 @@ a {
 	margin: 2px 0 0;
 	font-size: 14px;
 	color: var(--tp-text-body);
+}
+.sg-hero__social-link {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 6px 0;
+	margin: -6px 0; /* area di tocco piu' alta senza spostare la riga */
+	color: inherit;
+	text-decoration: none;
+}
+.sg-hero__social-link:hover > span:last-child {
+	text-decoration: underline;
+}
+.sg-hero__social-link:focus-visible {
+	outline: 2px solid var(--tp-primary);
+	outline-offset: 2px;
+	border-radius: 6px;
 }
 .sg-hero__stars {
 	font-size: 15px;
@@ -4412,6 +4432,40 @@ a {
 	opacity: 0.7;
 	cursor: wait;
 }
+/* Evidenziamento breve del form quando la CTA della testata lo trova gia' visibile (TICKET-86, max 1,2 s) */
+.lead-form.is-attention {
+	animation: lead-attention 1.2s ease-out;
+}
+@keyframes lead-attention {
+	0% {
+		box-shadow: 0 0 0 0 rgba(0, 200, 150, 0.55), 0 18px 44px -12px rgba(0, 71, 54, 0.18);
+	}
+	60% {
+		box-shadow: 0 0 0 10px rgba(0, 200, 150, 0), 0 18px 44px -12px rgba(0, 71, 54, 0.18);
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(0, 200, 150, 0), 0 18px 44px -12px rgba(0, 71, 54, 0.18);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.lead-form.is-attention {
+		animation: none;
+		box-shadow: 0 0 0 3px var(--tp-primary), 0 18px 44px -12px rgba(0, 71, 54, 0.18);
+	}
+}
+/* Atterraggio dei link interni della landing sgrosso: scorrimento morbido (statico con riduci movimento) e sezioni
+   sotto la testata sticky. Esclusi i template B2B e zanzare, che condividono la classe .sgrosso. */
+html:has(main.sgrosso:not(.b2b)) {
+	scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+	html:has(main.sgrosso:not(.b2b)) {
+		scroll-behavior: auto;
+	}
+}
+main.sgrosso:not(.b2b) :where(#quanto-costa, #recensioni, #prezzi) {
+	scroll-margin-top: var(--tp-navbar-h);
+}
 .lead-form__note {
 	margin: 12px 0 0;
 	text-align: center;
@@ -4734,6 +4788,32 @@ a {
 	font-size: 17px;
 	font-weight: 700;
 	color: #374151;
+}
+/* Schede cliccabili (TICKET-86): il nome e' il link, l'area di tocco copre tutta la scheda */
+.sg-offers__row:has(.sg-offers__link) {
+	position: relative;
+	cursor: pointer;
+	transition: border-color 0.15s;
+}
+.sg-offers__row:has(.sg-offers__link):hover {
+	border-color: var(--tp-primary);
+}
+.sg-offers__link {
+	color: var(--tp-ink);
+	text-decoration: none;
+}
+.sg-offers__link::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+}
+.sg-offers__link:focus-visible {
+	outline: none;
+}
+.sg-offers__link:focus-visible::after {
+	outline: 2px solid var(--tp-primary);
+	outline-offset: 2px;
 }
 .sg-offers__row.is-best {
 	border-color: var(--tp-primary);
@@ -5970,6 +6050,12 @@ a {
 	}
 	.landing-nav__cta-short {
 		display: inline;
+	}
+	.landing-nav__cta--full {
+		display: none;
+	}
+	.landing-nav__cta--short {
+		display: inline-flex;
 	}
 
 	.sgrosso {

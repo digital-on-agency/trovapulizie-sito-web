@@ -10,8 +10,9 @@
  * `disclaimer` non va svuotato. Senza offerte la card non esce, i pilastri si'.
  *
  * Args: eyebrow, title, subtitle, pillars[] {title, description}, cta_label, cta_link, card_title,
- * card_disclaimer, card_chip, offers[] {logo, name, badge, price, highlighted}, team {image, eyebrow,
- * title, sub}, note.
+ * card_disclaimer, card_chip, offers[] {logo, name, badge, price, highlighted}, offer_link (ancora verso cui
+ * portano le schede delle offerte, es. #quanto-costa: il nome di ogni scheda diventa un link la cui area copre
+ * tutta la scheda; vuoto = schede non cliccabili, TICKET-86), team {image, eyebrow, title, sub}, note.
  */
 $args = wp_parse_args( $args ?? array(), array(
 	'eyebrow'         => '',
@@ -24,6 +25,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'card_disclaimer' => '',
 	'card_chip'       => '',
 	'offers'          => array(),
+	'offer_link'      => '',
 	'team'            => array(),
 	'note'            => '',
 ) );
@@ -90,7 +92,11 @@ $team   = wp_parse_args( (array) $args['team'], array( 'image' => '', 'image_alt
 							<img class="sg-offers__logo" src="<?php echo esc_url( $offer['logo'] ); ?>" alt="" width="36" height="36" loading="lazy" decoding="async">
 						<?php endif; ?>
 						<span class="sg-offers__text">
-							<span class="sg-offers__name"><?php echo esc_html( $offer['name'] ); ?></span>
+							<?php if ( $args['offer_link'] ) : ?>
+								<a class="sg-offers__name sg-offers__link" href="<?php echo esc_url( $args['offer_link'] ); ?>"><?php echo esc_html( $offer['name'] ); ?></a>
+							<?php else : ?>
+								<span class="sg-offers__name"><?php echo esc_html( $offer['name'] ); ?></span>
+							<?php endif; ?>
 							<?php if ( ! empty( $offer['badge'] ) ) : ?>
 								<span class="sg-offers__badge"><?php echo esc_html( $offer['badge'] ); ?></span>
 							<?php endif; ?>

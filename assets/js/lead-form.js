@@ -523,6 +523,41 @@
 	document.querySelectorAll('[data-lead-atomic]').forEach(initAtomic);
 	document.querySelectorAll('[data-lead-b2b]').forEach(initB2B);
 
+	// CTA della testata con data-form-focus (TICKET-86): se il form e' gia' visibile a schermo il tocco non scorre
+	// (non c'e' dove andare, e prima non succedeva nulla): porta il focus sul primo campo del passo corrente e
+	// evidenzia il form per 1,2 s (classe .is-attention; con prefers-reduced-motion il CSS la rende statica).
+	// Se il form non e' visibile resta il comportamento del link: scorre a #form.
+	(function () {
+		var timer = null;
+		function formOf(a) {
+			var hash = (a.getAttribute('href') || '').split('#')[1];
+			var box = hash ? document.getElementById(hash) : null;
+			return box ? (box.matches('[data-lead-form]') ? box : box.querySelector('[data-lead-form]')) : null;
+		}
+		function mostlyVisible(el) {
+			var r = el.getBoundingClientRect();
+			var vh = window.innerHeight || document.documentElement.clientHeight;
+			var shown = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+			return shown >= Math.min(r.height, vh) * 0.5;
+		}
+		function firstField(form) {
+			var step = form.querySelector('[data-step]:not([hidden])') || form;
+			return step.querySelector('input:not([type="hidden"]):not([type="radio"]):not([type="checkbox"]):not([type="range"]):not([type="file"])') || step.querySelector('input:not([type="hidden"])');
+		}
+		document.addEventListener('click', function (e) {
+			var a = e.target && e.target.closest ? e.target.closest('a[data-form-focus]') : null;
+			if (!a) return;
+			var form = formOf(a);
+			if (!form || !mostlyVisible(form)) return;
+			e.preventDefault();
+			var f = firstField(form);
+			if (f) f.focus();
+			form.classList.add('is-attention');
+			clearTimeout(timer);
+			timer = setTimeout(function () { form.classList.remove('is-attention'); }, 1200);
+		});
+	})();
+
 	// CTA con data-preselect (tab "Per chi" della landing zanzare, TICKET-74): sceglie la voce nel form di arrivo.
 	// Il form e' il primo [data-lead-b2b] dentro l'ancora del link (#form), o l'ancora stessa.
 	document.addEventListener('click', function (e) {

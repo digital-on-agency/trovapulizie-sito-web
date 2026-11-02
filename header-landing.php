@@ -6,7 +6,11 @@
  * una sola CTA verso il form. Sotto --tp-bp-desktop restano logo e CTA (TICKET-39).
  *
  * Args: promo_desktop, promo_mobile (testi della promo bar, vuoti = niente barra), links (href => label),
- * phone_label, phone_href, cta_label, cta_href.
+ * phone_label, phone_href, cta_label, cta_href, cta_short, cta_full_href, cta_focus.
+ * Con cta_short e cta_full_href la testata ha due link distinti, uno per larghezza: quello corto (mobile) va a cta_href,
+ * quello lungo (desktop) a cta_full_href. Senza cta_full_href resta un solo link con i due testi (landing B2B, zanzare,
+ * thank-you). cta_focus aggiunge data-form-focus al link verso il form: se il form e' gia' visibile il tocco ne porta il
+ * focus sul primo campo del passo corrente invece di scorrere (assets/js/lead-form.js, TICKET-86).
  */
 get_template_part( 'template-parts/head' );
 
@@ -19,7 +23,10 @@ $args = wp_parse_args( $args ?? array(), array(
 	'cta_label'     => '',
 	'cta_short'     => '', // testo sotto --tp-bp-desktop: accanto al logo la CTA lunga non entra (Figma 4364:7095)
 	'cta_href'      => '#form',
+	'cta_full_href' => '', // vuoto = un solo link; valorizzato = due link distinti per larghezza
+	'cta_focus'     => false,
 ) );
+$cta_focus_attr = $args['cta_focus'] ? ' data-form-focus' : '';
 ?>
 <?php if ( $args['promo_desktop'] || $args['promo_mobile'] ) : ?>
 <div class="landing-promo">
@@ -50,8 +57,11 @@ $args = wp_parse_args( $args ?? array(), array(
 				<span><?php echo esc_html( $args['phone_label'] ); ?></span>
 			</a>
 		<?php endif; ?>
-		<?php if ( $args['cta_label'] ) : ?>
-			<a class="tp-btn tp-btn--primary landing-nav__cta" href="<?php echo esc_url( $args['cta_href'] ); ?>">
+		<?php if ( $args['cta_label'] && $args['cta_short'] && $args['cta_full_href'] ) : ?>
+			<a class="tp-btn tp-btn--primary landing-nav__cta landing-nav__cta--short" href="<?php echo esc_url( $args['cta_href'] ); ?>"<?php echo $cta_focus_attr; ?>><?php echo esc_html( $args['cta_short'] ); ?></a>
+			<a class="tp-btn tp-btn--primary landing-nav__cta landing-nav__cta--full" href="<?php echo esc_url( $args['cta_full_href'] ); ?>"><?php echo esc_html( $args['cta_label'] ); ?></a>
+		<?php elseif ( $args['cta_label'] ) : ?>
+			<a class="tp-btn tp-btn--primary landing-nav__cta" href="<?php echo esc_url( $args['cta_href'] ); ?>"<?php echo $cta_focus_attr; ?>>
 				<?php // Il testo corto precede quello lungo: sotto la soglia desktop il CSS nasconde il fratello successivo. ?>
 				<?php if ( $args['cta_short'] ) : ?><span class="landing-nav__cta-short"><?php echo esc_html( $args['cta_short'] ); ?></span><?php endif; ?>
 				<span class="landing-nav__cta-full"><?php echo esc_html( $args['cta_label'] ); ?></span>

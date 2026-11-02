@@ -41,6 +41,26 @@ if ( ! $hero_bullets ) {
 	);
 }
 
+// Ancore interne (TICKET-86): i link verso #quanto-costa e #recensioni escono solo se la sezione di arrivo esiste
+// nella variante. Calcolatore: sgrosso-estimator.php non produce nulla senza tipi; recensioni: reviews-marquee.php
+// scarta le voci senza testo e, senza voci, non produce nulla.
+$calc_types = tp_lines( carbon_get_the_post_meta( 'sg_calc_types' ) );
+if ( ! $calc_types ) {
+	$calc_types = array( 'Post-ristrutturazione', 'Trasloco', 'Fine affitto', 'Prima pulizia a fondo' );
+}
+$sg_reviews = carbon_get_the_post_meta( 'sg_reviews' );
+if ( ! $sg_reviews ) {
+	$sg_reviews = array(
+		array( 'author_name' => 'Giulia R.', 'author_city' => 'Parioli, Roma', 'avatar' => '', 'review_text' => 'Casa presa in affitto in condizioni pietose. Dopo lo sgrosso sembrava nuova. Sopralluogo puntuale e preventivo onesto.' ),
+		array( 'author_name' => 'Luca M.', 'author_city' => 'Prati, Roma', 'avatar' => '', 'review_text' => 'Post-trasloco avevo bisogno di una pulizia seria. Prezzo concordato prima, zero sorprese. Lavoro impeccabile.' ),
+		array( 'author_name' => 'Anna F.', 'author_city' => 'EUR, Roma', 'avatar' => '', 'review_text' => "Dopo la ristrutturazione la casa era coperta di polvere di cantiere. In un giorno l'hanno resa pronta da abitare, vernice e stucco residui compresi." ),
+	);
+}
+$has_calc    = (bool) array_filter( array_map( 'trim', $calc_types ) );
+$has_reviews = (bool) array_filter( (array) $sg_reviews, function ( $r ) {
+	return ! empty( $r['review_text'] );
+} );
+
 get_header( 'landing', array(
 	'promo_desktop' => tp_sg_text( 'sg_promo_desktop', $defaults, null, 'Sopralluogo gratuito · -30€ sul primo lavoro · ti rispondiamo entro 1 ora' ),
 	'promo_mobile'  => tp_sg_text( 'sg_promo_mobile', $defaults, null, 'Sopralluogo gratuito · -30€ sul primo lavoro' ),
@@ -53,6 +73,8 @@ get_header( 'landing', array(
 	'cta_label'     => tp_sg_text( 'sg_nav_cta', $defaults, null, 'Calcola il preventivo gratis' ),
 	'cta_short'     => 'Sopralluogo gratuito',
 	'cta_href'      => '#form',
+	'cta_full_href' => '#form',
+	'cta_focus'     => true,
 ) );
 ?>
 <main class="sgrosso" id="contenuto" data-landing="<?php echo esc_attr( $landing ); ?>" data-variant="<?php echo esc_attr( $variant ); ?>">
@@ -90,8 +112,11 @@ get_header( 'landing', array(
 					<?php $social = tp_sg_text( 'sg_hero_social', $defaults, null, 'Famiglie a Parioli, Prati, EUR e Roma Nord' ); ?>
 					<?php if ( $social ) : ?>
 						<p class="sg-hero__social">
+							<?php // Verso le recensioni solo se la sezione esiste nella variante: altrimenti resta testo, non cliccabile (TICKET-86). ?>
+							<?php if ( $has_reviews ) : ?><a class="sg-hero__social-link" href="#recensioni"><?php endif; ?>
 							<span class="sg-hero__stars" aria-label="5 stelle su 5">&#9733;&#9733;&#9733;&#9733;&#9733;</span>
 							<span><?php echo esc_html( $social ); ?></span>
+							<?php if ( $has_reviews ) : ?></a><?php endif; ?>
 						</p>
 					<?php endif; ?>
 				</div>
@@ -151,6 +176,7 @@ get_header( 'landing', array(
 		'card_disclaimer' => tp_sg_text( 'sg_cmp_card_disclaimer', $defaults, null, 'Esempio illustrativo di come funziona il confronto' ),
 		'card_chip'       => tp_sg_text( 'sg_cmp_card_chip', $defaults, null, 'Roma e provincia' ),
 		'offers'          => $offers,
+		'offer_link'      => $has_calc ? '#quanto-costa' : '',
 		'team'            => array(
 			'image'   => carbon_get_the_post_meta( 'sg_cmp_team_image' ) ?: tp_theme_asset( 'assets/img/sgrosso/sgrosso-confronto-team-photo.webp' ),
 			'image_alt' => tp_img_alt( carbon_get_the_post_meta( 'sg_cmp_team_image' ), 'Due addette di una ditta di pulizie al lavoro in un appartamento a Roma, con mocio, secchi e cartello di pavimento bagnato' ),
@@ -221,10 +247,6 @@ get_header( 'landing', array(
 	) );
 
 	// Quanto costa (TICKET-46): calcolatore con la formula del live, tipo preselezionato dalla variante.
-	$calc_types = tp_lines( carbon_get_the_post_meta( 'sg_calc_types' ) );
-	if ( ! $calc_types ) {
-		$calc_types = array( 'Post-ristrutturazione', 'Trasloco', 'Fine affitto', 'Prima pulizia a fondo' );
-	}
 	$calc_extras = tp_lines( carbon_get_the_post_meta( 'sg_calc_extras' ) );
 	if ( ! $calc_extras ) {
 		$calc_extras = array( 'Forno e cappa', 'Vetri e infissi', 'Balconi e terrazzi', 'Sanificazione a vapore' );
@@ -262,14 +284,6 @@ get_header( 'landing', array(
 	// Recensioni (TICKET-47): componente della Home in layout a griglia con la card a stelle; le tre voci del live
 	// sono dichiarate fittizie nel sorgente (REVIEWS, avatar casuali di pravatar): qui gli avatar segnaposto del tema.
 	// Importate per decisione di Guido del 25/10, da sostituire con recensioni vere prima del cutover (SPEC §6).
-	$sg_reviews = carbon_get_the_post_meta( 'sg_reviews' );
-	if ( ! $sg_reviews ) {
-		$sg_reviews = array(
-			array( 'author_name' => 'Giulia R.', 'author_city' => 'Parioli, Roma', 'avatar' => '', 'review_text' => 'Casa presa in affitto in condizioni pietose. Dopo lo sgrosso sembrava nuova. Sopralluogo puntuale e preventivo onesto.' ),
-			array( 'author_name' => 'Luca M.', 'author_city' => 'Prati, Roma', 'avatar' => '', 'review_text' => 'Post-trasloco avevo bisogno di una pulizia seria. Prezzo concordato prima, zero sorprese. Lavoro impeccabile.' ),
-			array( 'author_name' => 'Anna F.', 'author_city' => 'EUR, Roma', 'avatar' => '', 'review_text' => "Dopo la ristrutturazione la casa era coperta di polvere di cantiere. In un giorno l'hanno resa pronta da abitare, vernice e stucco residui compresi." ),
-		);
-	}
 	get_template_part( 'template-parts/reviews-marquee', null, array(
 		'eyebrow' => tp_sg_text( 'sg_reviews_eyebrow', $defaults, null, 'DICONO DI NOI' ),
 		'title'   => tp_sg_text( 'sg_reviews_title', $defaults, null, 'Case rimesse a nuovo, a Roma' ),
