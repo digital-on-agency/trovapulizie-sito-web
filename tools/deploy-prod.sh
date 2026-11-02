@@ -8,7 +8,7 @@ BASE="${1:?commit base}"
 KEY=/home/guido/.ssh/hostinger_mfm; PORT=65002; HOST=u528603797@76.13.12.182
 D='domains/trovapulizie.it/public_html/wp-content/themes/trovapulizie'
 cd "$(dirname "$0")/.."
-FILES=$(git diff --name-only "$BASE"..HEAD | tr '\n' ' ')
+FILES=$(git diff --name-only "$BASE"..HEAD | grep -v -E '^(tools|docs)/' | tr '\n' ' ')  # tools/ e docs/ non vanno sul server
 [ -n "$FILES" ] || { echo "nessun file da copiare"; exit 0; }
 echo "file: $(echo $FILES | wc -w)"
 TGZ=$(mktemp /tmp/tp-deploy.XXXXXX.tgz)
@@ -16,7 +16,7 @@ tar czf "$TGZ" $FILES
 scp -i "$KEY" -P "$PORT" -q "$TGZ" "$HOST:~/tp-deploy.tgz"
 rm -f "$TGZ"
 ssh -i "$KEY" -p "$PORT" -o BatchMode=yes "$HOST" "set -e
-cd ~/$D && EX=\$(for f in $FILES; do [ -f \$f ] && echo \$f; done); if [ -n \"\$EX\" ]; then tar czf ~/tp-backup-\$(date +%Y%m%d-%H%M)-pre-deploy.tgz \$EX && echo 'backup ok'; else echo 'backup: nessun file esistente da salvare'; fi
+cd ~/$D && EX=\$(for f in $FILES; do [ -f \$f ] && echo \$f; done; true); if [ -n \"\$EX\" ]; then tar czf ~/tp-backup-\$(date +%Y%m%d-%H%M)-pre-deploy.tgz \$EX && echo 'backup ok'; else echo 'backup: nessun file esistente da salvare'; fi
 rm -rf ~/tp-stage && mkdir ~/tp-stage && tar xzf ~/tp-deploy.tgz -C ~/tp-stage
 cd ~/tp-stage && for f in \$(find . -name '*.php'); do php -l \$f > /dev/null; done && echo 'php -l: nessun errore'
 cp -r ~/tp-stage/. ~/$D/ && echo 'copiato'
