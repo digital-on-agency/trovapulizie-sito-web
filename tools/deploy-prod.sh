@@ -16,7 +16,7 @@ tar czf "$TGZ" $FILES
 scp -i "$KEY" -P "$PORT" -q "$TGZ" "$HOST:~/tp-deploy.tgz"
 rm -f "$TGZ"
 ssh -i "$KEY" -p "$PORT" -o BatchMode=yes "$HOST" "set -e
-cd ~/$D && EX=\$(for f in $FILES; do [ -f \$f ] && echo \$f; done); if [ -n "\$EX" ]; then tar czf ~/tp-backup-\$(date +%Y%m%d-%H%M)-pre-deploy.tgz \$EX && echo 'backup ok'; else echo 'backup: nessun file esistente da salvare'; fi
+cd ~/$D && EX=\$(for f in $FILES; do [ -f \$f ] && echo \$f; done); if [ -n \"\$EX\" ]; then tar czf ~/tp-backup-\$(date +%Y%m%d-%H%M)-pre-deploy.tgz \$EX && echo 'backup ok'; else echo 'backup: nessun file esistente da salvare'; fi
 rm -rf ~/tp-stage && mkdir ~/tp-stage && tar xzf ~/tp-deploy.tgz -C ~/tp-stage
 cd ~/tp-stage && for f in \$(find . -name '*.php'); do php -l \$f > /dev/null; done && echo 'php -l: nessun errore'
 cp -r ~/tp-stage/. ~/$D/ && echo 'copiato'
