@@ -1,25 +1,29 @@
 <?php
 /**
- * Form lead in tre passi (ADR-004, TICKET-40). Markup dei tre passi; il comportamento (passaggio di
- * passo, validazioni, chiamate alle rotte /api/leads, eventi dataLayer) vive in assets/js/lead-form.js.
+ * Form lead in tre passi (ADR-004, TICKET-40; ordine invertito da SPEC-landing-sgrosso-conversione-mobile,
+ * TICKET-83): 1 La casa (tipo di intervento, metri quadri, indirizzo: nessun dato personale), 2 Contatto
+ * (nome, cellulare, email facoltativa, privacy: qui nasce il lead), 3 Dettagli e foto (facoltativo).
+ * Markup dei tre passi; il comportamento (passaggio di passo, validazioni, chiamate alle rotte /api/leads,
+ * eventi dataLayer) vive in assets/js/lead-form.js.
  * Senza JavaScript resta visibile il solo passo 1 e il bottone non fa nulla: e' voluto, il contratto
- * dell'API richiede tre chiamate con token e non e' esprimibile come submit HTML.
+ * dell'API richiede piu' chiamate con token e non e' esprimibile come submit HTML.
  *
  * Valori delle opzioni = opzioni Airtable esatte (typecast:false lato backend) e chiavi del motore
  * preventivo: SPEC-landing-sgrosso §2 "Vincoli verificati" punto 1. Non cambiarli senza il backend.
  *
  * Args: id (prefisso degli id interni, obbligatorio e unico in pagina), cta_position (hero|bottom),
- * landing, default_tipo (chiave preselezionata del tipo di pulizia), title, subtitle, cta_label, note,
- * privacy_url.
+ * landing, default_tipo (chiave preselezionata del tipo di pulizia), title e subtitle (passo 1), step1_label
+ * (bottone del passo 1), cta_label (bottone del passo 2, quello che crea il lead), note, privacy_url.
  */
 $args = wp_parse_args( $args ?? array(), array(
 	'id'           => 'lead',
 	'cta_position' => 'hero',
 	'landing'      => 'sgrosso-casa',
 	'default_tipo' => 'post-ristrutturazione',
-	'title'        => 'I tuoi dati di contatto',
-	'subtitle'     => "Ti risponderemo entro un'ora con una prima valutazione.",
-	'cta_label'    => 'Prenota sopralluogo gratuito',
+	'title'        => 'La tua casa',
+	'subtitle'     => 'Tre informazioni e vedi subito una stima indicativa.',
+	'step1_label'  => 'Vedi la stima',
+	'cta_label'    => 'Prenota il sopralluogo gratuito',
 	'note'         => 'Gratis · nessun impegno · risposta in 1h',
 	'privacy_url'  => home_url( '/privacy/' ),
 ) );
@@ -50,14 +54,48 @@ $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '
 	<div class="lead-form__progress">
 		<div class="lead-form__progress-row">
 			<span>Passo <b data-step-n>1</b> di 3</span>
-			<span class="lead-form__step-name" data-step-name>Contatto</span>
+			<span class="lead-form__step-name" data-step-name>La casa</span>
 		</div>
 		<div class="lead-form__bars" aria-hidden="true"><i class="is-done"></i><i></i><i></i></div>
 	</div>
 
 	<fieldset class="lead-form__step" data-step="1">
-		<legend class="lead-form__title"><?php echo esc_html( $args['title'] ); ?></legend>
+		<legend class="lead-form__title" tabindex="-1"><?php echo esc_html( $args['title'] ); ?></legend>
 		<?php if ( $args['subtitle'] ) : ?><p class="lead-form__sub"><?php echo esc_html( $args['subtitle'] ); ?></p><?php endif; ?>
+
+		<div class="lead-form__group">
+			<span class="lead-form__label">Tipo di intervento</span>
+			<div class="lead-form__choices">
+				<?php foreach ( $tipi_pulizia as $key => $t ) : ?>
+					<label class="tp-choice">
+						<input type="radio" name="tipoPulizia" value="<?php echo esc_attr( $key ); ?>" data-label="<?php echo esc_attr( $t[0] ); ?>"<?php checked( $key, $args['default_tipo'] ); ?>>
+						<span class="tp-choice__title"><?php echo esc_html( $t[0] ); ?></span>
+						<span class="tp-choice__sub"><?php echo esc_html( $t[1] ); ?></span>
+					</label>
+				<?php endforeach; ?>
+			</div>
+		</div>
+
+		<div class="tp-field" data-field="mq">
+			<div class="tp-field__box">
+				<input id="<?php echo esc_attr( $p ); ?>-mq" name="mq" type="number" inputmode="numeric" min="10" max="500" placeholder=" " required>
+				<label for="<?php echo esc_attr( $p ); ?>-mq">Metri quadri *</label>
+			</div>
+			<p class="tp-field__error" data-error-for="mq" aria-live="polite"></p>
+		</div>
+
+		<div class="tp-field" data-field="indirizzo">
+			<div class="tp-field__box">
+				<input id="<?php echo esc_attr( $p ); ?>-indirizzo" name="indirizzo" type="text" placeholder=" " autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="<?php echo esc_attr( $p ); ?>-indirizzo-list" data-here-key="<?php echo esc_attr( tp_here_key() ); ?>" required>
+				<label for="<?php echo esc_attr( $p ); ?>-indirizzo">Indirizzo *</label>
+				<ul class="tp-field__suggest" id="<?php echo esc_attr( $p ); ?>-indirizzo-list" role="listbox" hidden></ul>
+			</div>
+			<p class="tp-field__error" data-error-for="indirizzo" aria-live="polite"></p>
+		</div>
+	</fieldset>
+
+	<fieldset class="lead-form__step" data-step="2" hidden>
+		<legend class="lead-form__title" tabindex="-1">I tuoi contatti</legend>
 
 		<div class="tp-field" data-field="nome">
 			<div class="tp-field__box">
@@ -80,7 +118,7 @@ $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '
 				<span class="tp-field__sep" aria-hidden="true"></span>
 				<span class="tp-field__num">
 					<input id="<?php echo esc_attr( $p ); ?>-cellulare" name="cellulare" type="tel" inputmode="tel" placeholder=" " autocomplete="tel-national" required>
-					<label for="<?php echo esc_attr( $p ); ?>-cellulare">Telefono *</label>
+					<label for="<?php echo esc_attr( $p ); ?>-cellulare">Cellulare *</label>
 				</span>
 			</div>
 			<p class="tp-field__error" data-error-for="cellulare" aria-live="polite"></p>
@@ -88,19 +126,10 @@ $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '
 
 		<div class="tp-field" data-field="email">
 			<div class="tp-field__box">
-				<input id="<?php echo esc_attr( $p ); ?>-email" name="email" type="email" placeholder=" " autocomplete="email" inputmode="email" required>
-				<label for="<?php echo esc_attr( $p ); ?>-email">Email *</label>
+				<input id="<?php echo esc_attr( $p ); ?>-email" name="email" type="email" placeholder=" " autocomplete="email" inputmode="email">
+				<label for="<?php echo esc_attr( $p ); ?>-email">Email (facoltativa)</label>
 			</div>
 			<p class="tp-field__error" data-error-for="email" aria-live="polite"></p>
-		</div>
-
-		<div class="tp-field" data-field="indirizzo">
-			<div class="tp-field__box">
-				<input id="<?php echo esc_attr( $p ); ?>-indirizzo" name="indirizzo" type="text" placeholder=" " autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="<?php echo esc_attr( $p ); ?>-indirizzo-list" data-here-key="<?php echo esc_attr( tp_here_key() ); ?>" required>
-				<label for="<?php echo esc_attr( $p ); ?>-indirizzo">Indirizzo *</label>
-				<ul class="tp-field__suggest" id="<?php echo esc_attr( $p ); ?>-indirizzo-list" role="listbox" hidden></ul>
-			</div>
-			<p class="tp-field__error" data-error-for="indirizzo" aria-live="polite"></p>
 		</div>
 
 		<label class="tp-check" data-field="consentPrivacy">
@@ -116,24 +145,16 @@ $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '
 		</label>
 	</fieldset>
 
-	<fieldset class="lead-form__step" data-step="2" hidden>
-		<legend class="lead-form__title">Dettagli dell'abitazione</legend>
+	<fieldset class="lead-form__step" data-step="3" hidden>
+		<legend class="lead-form__title" tabindex="-1">Richiesta ricevuta</legend>
+		<p class="lead-form__sub">Ti ricontattiamo noi. Se vuoi un preventivo più preciso, aggiungi qualche dettaglio e le foto: è facoltativo.</p>
 
-		<div class="lead-form__row">
-			<div class="tp-field" data-field="mq">
-				<div class="tp-field__box">
-					<input id="<?php echo esc_attr( $p ); ?>-mq" name="mq" type="number" inputmode="numeric" min="10" max="500" placeholder=" " required>
-					<label for="<?php echo esc_attr( $p ); ?>-mq">Mq *</label>
-				</div>
-				<p class="tp-field__error" data-error-for="mq" aria-live="polite"></p>
+		<div class="tp-field" data-field="bagni">
+			<div class="tp-field__box">
+				<input id="<?php echo esc_attr( $p ); ?>-bagni" name="bagni" type="number" inputmode="numeric" min="1" max="6" placeholder=" ">
+				<label for="<?php echo esc_attr( $p ); ?>-bagni">Bagni</label>
 			</div>
-			<div class="tp-field" data-field="bagni">
-				<div class="tp-field__box">
-					<input id="<?php echo esc_attr( $p ); ?>-bagni" name="bagni" type="number" inputmode="numeric" min="1" max="6" placeholder=" " required>
-					<label for="<?php echo esc_attr( $p ); ?>-bagni">Bagni *</label>
-				</div>
-				<p class="tp-field__error" data-error-for="bagni" aria-live="polite"></p>
-			</div>
+			<p class="tp-field__error" data-error-for="bagni" aria-live="polite"></p>
 		</div>
 
 		<div class="lead-form__group">
@@ -155,13 +176,12 @@ $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '
 		</div>
 
 		<div class="lead-form__group" data-field="arredata">
-			<span class="lead-form__label">La casa è arredata? *</span>
+			<span class="lead-form__label">La casa è arredata?</span>
 			<div class="tp-pills tp-pills--row">
 				<?php foreach ( $arredata as $t ) : ?>
-					<label class="tp-pill"><input type="radio" name="arredata" value="<?php echo esc_attr( $t ); ?>" required><span><?php echo esc_html( $t ); ?></span></label>
+					<label class="tp-pill"><input type="radio" name="arredata" value="<?php echo esc_attr( $t ); ?>"><span><?php echo esc_html( $t ); ?></span></label>
 				<?php endforeach; ?>
 			</div>
-			<p class="tp-field__error" data-error-for="arredata" aria-live="polite"></p>
 		</div>
 
 		<div class="lead-form__group lead-form__range">
@@ -170,23 +190,6 @@ $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '
 			<input type="hidden" name="livelloSporco" value="normale">
 			<p class="lead-form__range-desc"><b data-sporco-title>Condizione normale</b> <span data-sporco-sub>Sporco normale accumulato, un po' di grasso in cucina, calcare leggero.</span></p>
 			<script type="application/json" data-sporco-levels><?php echo wp_json_encode( $sporco, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ); ?></script>
-		</div>
-	</fieldset>
-
-	<fieldset class="lead-form__step" data-step="3" hidden>
-		<legend class="lead-form__title">Il servizio</legend>
-
-		<div class="lead-form__group">
-			<span class="lead-form__label">Tipo di pulizia</span>
-			<div class="lead-form__choices">
-				<?php foreach ( $tipi_pulizia as $key => $t ) : ?>
-					<label class="tp-choice">
-						<input type="radio" name="tipoPulizia" value="<?php echo esc_attr( $key ); ?>" data-label="<?php echo esc_attr( $t[0] ); ?>"<?php checked( $key, $args['default_tipo'] ); ?>>
-						<span class="tp-choice__title"><?php echo esc_html( $t[0] ); ?></span>
-						<span class="tp-choice__sub"><?php echo esc_html( $t[1] ); ?></span>
-					</label>
-				<?php endforeach; ?>
-			</div>
 		</div>
 
 		<div class="lead-form__group">
@@ -210,7 +213,8 @@ $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '
 
 	<div class="lead-form__actions">
 		<button type="button" class="lead-form__back" data-back hidden>Indietro</button>
-		<button type="submit" class="tp-btn tp-btn--primary lead-form__submit" data-submit data-labels='["<?php echo esc_attr( $args['cta_label'] ); ?>","Continua","Invia richiesta"]'><?php echo esc_html( $args['cta_label'] ); ?></button>
+		<button type="button" class="lead-form__skip" data-skip hidden>Salta</button>
+		<button type="submit" class="tp-btn tp-btn--primary lead-form__submit" data-submit data-labels='<?php echo esc_attr( wp_json_encode( array( $args['step1_label'], $args['cta_label'], 'Invia i dettagli' ), JSON_UNESCAPED_UNICODE ) ); ?>'><?php echo esc_html( $args['step1_label'] ); ?></button>
 	</div>
 	<?php if ( $args['note'] ) : ?><p class="lead-form__note" data-note><?php echo esc_html( $args['note'] ); ?></p><?php endif; ?>
 </form>

@@ -334,9 +334,9 @@ add_action( 'carbon_fields_register_fields', function () {
 				->set_help_text( __( 'Vuota = foto della variante nel tema (assets/img/sgrosso). Consigliati 1920x1071.' ) ),
 		) )
 		->add_tab( __( 'Form' ), array(
-			Field::make( 'text', 'sg_form_title', __( 'Titolo del passo 1' ) )->set_help_text( __( 'Vuoto = "I tuoi dati di contatto".' ) ),
-			Field::make( 'text', 'sg_form_subtitle', __( 'Testo sotto il titolo' ) )->set_help_text( __( "Vuoto = \"Ti risponderemo entro un'ora con una prima valutazione.\"" ) ),
-			Field::make( 'text', 'sg_form_cta', __( 'Bottone del passo 1' ) )->set_help_text( __( 'Vuoto = "Prenota sopralluogo gratuito". I passi 2 e 3 dicono Continua e Invia richiesta.' ) ),
+			Field::make( 'text', 'sg_form_title', __( 'Titolo del passo 1 (La casa)' ) )->set_help_text( __( 'Vuoto = "La tua casa".' ) ),
+			Field::make( 'text', 'sg_form_subtitle', __( 'Testo sotto il titolo' ) )->set_help_text( __( 'Vuoto = "Tre informazioni e vedi subito una stima indicativa."' ) ),
+			Field::make( 'text', 'sg_form_cta', __( 'Bottone del passo 2 (Contatto)' ) )->set_help_text( __( 'Vuoto = "Prenota il sopralluogo gratuito". Il passo 1 dice "Vedi la stima", il passo 3 "Invia i dettagli".' ) ),
 			Field::make( 'text', 'sg_form_note', __( 'Nota sotto il bottone' ) )->set_help_text( __( 'Vuoto = "Gratis · nessun impegno · risposta in 1h".' ) ),
 		) )
 		->add_tab( __( 'Trust bar' ), array(

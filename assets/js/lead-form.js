@@ -2,17 +2,21 @@
  * Modulo lead delle landing (ADR-004, TICKET-40/41/46). Nessuna libreria.
  *
  * Form in tre passi [data-lead-form] (template-parts/lead-form.php), stesso contratto della SPA
- * (front-end/src/lib/marketing/leads.ts, SPEC-landing-sgrosso §2):
- *   passo 1  POST  {api}/api/leads                          contactOnly:true  -> {contattoId, token}
- *   passo 2  POST  {api}/api/leads/:contattoId/opportunita  token             -> {opportunitaId, token}
- *   passo 3  PATCH {api}/api/leads/:opportunitaId           token, step:3, final:true, foto
+ * (front-end/src/lib/marketing/leads.ts, SPEC-landing-sgrosso §2), con l'ordine di
+ * SPEC-landing-sgrosso-conversione-mobile (TICKET-83):
+ *   passo 1  La casa    nessuna chiamata: tipo di intervento, metri quadri, indirizzo
+ *   passo 2  Contatto   POST  {api}/api/leads                          contactOnly:true  -> {contattoId, token}
+ *                       POST  {api}/api/leads/:contattoId/opportunita  token             -> {opportunitaId, token}
+ *                       al contatto scatta preventivo_sgrosso_submitted {fase:'contatto'} (conversione Ads)
+ *   passo 3  Dettagli   facoltativo: PATCH {api}/api/leads/:opportunitaId  token, step:3, final:true, foto
+ *                       (innesca il PDF); "Salta" porta alla thank-you senza chiamate
  * Form atomico [data-lead-atomic] (calcolatore): POST {api}/api/leads con email, zona e note gia' nei campi.
  * Form B2B a un passo [data-lead-b2b] (landing Pulizie commerciali, SPEC-landing-sgrosso-commerciale §2): POST
  * {api}/api/leads con tipo b2b, telefono fisso o cellulare, zona, note = tipo di attivita', superficieMq facoltativa;
  * al 201 la card mostra la conferma al posto dei campi (nessuna thank-you) ed emette marketing_form_submit.
- * Eventi dataLayer via tpTrack (tp-track.js): preventivo_sgrosso_step {step, step_name, landing, cta_position,
- * tipoPulizia}, preventivo_sgrosso_submitted, marketing_form_submit {landing, form}. Poi sessionStorage
- * tp_thankyou e navigazione a /thank-you/.
+ * Eventi dataLayer via tpTrack (tp-track.js): preventivo_sgrosso_step {step, step_name casa|contatto, landing,
+ * cta_position, tipoPulizia}, preventivo_sgrosso_submitted {..., fase:'contatto'}, marketing_form_submit {landing,
+ * form:'dettagli'}. Poi sessionStorage tp_thankyou e navigazione a /thank-you/.
  *
  * Base URL dell'API in data-api sul form (Theme Options > Integrazioni); chiave HERE in data-here-key sull'input
  * indirizzo: vuota = campo di testo semplice.
@@ -217,10 +221,13 @@
 		var steps = Array.prototype.slice.call(form.querySelectorAll('[data-step]'));
 		var submitBtn = form.querySelector('[data-submit]');
 		var backBtn = form.querySelector('[data-back]');
+		var skipBtn = form.querySelector('[data-skip]');
 		var labels = []; try { labels = JSON.parse(submitBtn.getAttribute('data-labels') || '[]'); } catch (e) {}
-		var stepNames = ['contatto', 'abitazione', 'servizio'];
-		var stepLabels = ['Contatto', 'Abitazione', 'Servizio'];
-		var state = { step: 1, contattoId: '', contattoToken: '', opportunitaId: '', opportunitaToken: '', photos: [] };
+		var stepNames = ['casa', 'contatto', 'dettagli'];
+		var stepLabels = ['La casa', 'Contatto', 'Dettagli'];
+		var MQ_MIN = 10, MQ_MAX = 500;
+		var fired = {};
+		var state = { step: 1, contattoId: '', contattoToken: '', opportunitaId: '', opportunitaToken: '', photos: [], levelTouched: false };
 
 		var levels = {};
 		try { levels = JSON.parse((form.querySelector('[data-sporco-levels]') || {}).textContent || '{}'); } catch (e) {}
@@ -236,7 +243,7 @@
 				if (s) s.textContent = levels[k][1];
 				range.setAttribute('aria-valuetext', levels[k][0]);
 			};
-			range.addEventListener('input', syncLevel);
+			range.addEventListener('input', function () { state.levelTouched = true; syncLevel(); });
 			syncLevel();
 		}
 
@@ -281,6 +288,7 @@
 		function tipoPulizia() { return checked(form, 'tipoPulizia'); }
 		function tipoPuliziaLabel() { var el = form.querySelector('input[name="tipoPulizia"]:checked'); return el ? (el.getAttribute('data-label') || el.value) : ''; }
 		function telefono() { return val(form, 'prefisso') + digits(val(form, 'cellulare')); }
+		function mqValue() { var v = val(form, 'mq'); return /^\d+$/.test(v) ? parseInt(v, 10) : NaN; }
 
 		function datiPulizia(step, completo) {
 			var d = {
@@ -291,7 +299,7 @@
 				pavimento: checked(form, 'pavimento') || undefined,
 				bagni: val(form, 'bagni') || undefined,
 				arredata: checked(form, 'arredata') || undefined,
-				livello_sporco: hiddenLevel ? hiddenLevel.value || undefined : undefined,
+				livello_sporco: step === 3 && state.levelTouched && hiddenLevel ? hiddenLevel.value || undefined : undefined, // il valore predefinito del cursore non e' una risposta
 				urgenza: checked(form, 'urgenza') || undefined,
 				_step: step,
 				_completo: completo
@@ -313,70 +321,95 @@
 			var nm = form.querySelector('[data-step-name]'); if (nm) nm.textContent = stepLabels[step - 1];
 			Array.prototype.forEach.call(form.querySelectorAll('.lead-form__bars i'), function (bar, i) { bar.classList.toggle('is-done', i < step); });
 			if (submitBtn && labels[step - 1]) submitBtn.textContent = labels[step - 1];
-			if (backBtn) backBtn.hidden = step === 1;
+			// Dal passo 3 il lead esiste: non si torna indietro (un secondo invio del passo 2 creerebbe un duplicato).
+			if (backBtn) backBtn.hidden = step !== 2;
+			if (skipBtn) skipBtn.hidden = step !== 3;
 			clearErrors(form);
-			var first = form.querySelector('[data-step="' + step + '"] input:not([type="hidden"]):not([type="radio"]):not([type="checkbox"]), [data-step="' + step + '"] input[type="radio"]');
-			if (first && step > 1) first.focus();
+			var cur = form.querySelector('[data-step="' + step + '"]');
+			if (step === 2) {
+				var first = cur.querySelector('input:not([type="hidden"]):not([type="radio"]):not([type="checkbox"])');
+				if (first) first.focus();
+			} else if (step === 3) {
+				// Niente tastiera sul telefono: il focus va al titolo, che annuncia la conferma.
+				var title = cur.querySelector('legend'); if (title) title.focus({ preventScroll: true });
+			}
+		}
+
+		// Nel campo telefono il primo controllo del DOM e' il prefisso: il focus deve andare al numero.
+		function focusInvalid() {
+			var f = form.querySelector('.is-invalid input:not([type="hidden"])') || form.querySelector('.is-invalid select');
+			if (f) f.focus();
 		}
 
 		function validateStep1() {
 			var ok = true;
-			if (!val(form, 'nome')) { setError(form, 'nome', 'Nome obbligatorio'); ok = false; }
-			if (!val(form, 'cellulare')) { setError(form, 'cellulare', 'Numero obbligatorio'); ok = false; }
-			else if (!phoneOk(val(form, 'prefisso'), val(form, 'cellulare'))) { setError(form, 'cellulare', 'Numero non valido'); ok = false; }
-			if (!val(form, 'email')) { setError(form, 'email', 'Email obbligatoria'); ok = false; }
-			else if (!EMAIL_RE.test(val(form, 'email'))) { setError(form, 'email', 'Email non valida'); ok = false; }
+			if (!tipoPulizia()) { setError(form, 'tipoPulizia', 'Scegli il tipo di intervento'); ok = false; }
+			var mq = mqValue();
+			if (!val(form, 'mq')) { setError(form, 'mq', 'Metri quadri obbligatori'); ok = false; }
+			else if (isNaN(mq) || mq < MQ_MIN || mq > MQ_MAX) { setError(form, 'mq', 'Inserisci un valore tra ' + MQ_MIN + ' e ' + MQ_MAX + ' mq'); ok = false; }
 			if (!val(form, 'indirizzo')) { setError(form, 'indirizzo', 'Indirizzo obbligatorio'); ok = false; }
-			if (!isChecked(form, 'consentPrivacy')) { setError(form, 'consentPrivacy', 'Devi accettare la Privacy Policy per continuare'); ok = false; }
 			return ok;
 		}
 		function validateStep2() {
 			var ok = true;
-			if (!val(form, 'mq')) { setError(form, 'mq', 'Metri quadri obbligatori'); ok = false; }
-			if (!val(form, 'bagni')) { setError(form, 'bagni', 'Numero di bagni obbligatorio'); ok = false; }
-			if (!checked(form, 'arredata')) { setError(form, 'arredata', 'Indica se la casa è arredata'); ok = false; }
+			if (!val(form, 'nome')) { setError(form, 'nome', 'Nome obbligatorio'); ok = false; }
+			if (!val(form, 'cellulare')) { setError(form, 'cellulare', 'Numero obbligatorio'); ok = false; }
+			else if (!phoneOk(val(form, 'prefisso'), val(form, 'cellulare'))) { setError(form, 'cellulare', 'Numero non valido'); ok = false; }
+			if (val(form, 'email') && !EMAIL_RE.test(val(form, 'email'))) { setError(form, 'email', 'Email non valida'); ok = false; }
+			if (!isChecked(form, 'consentPrivacy')) { setError(form, 'consentPrivacy', 'Devi accettare la Privacy Policy per continuare'); ok = false; }
 			return ok;
 		}
 
-		function fireStep(n) { track('preventivo_sgrosso_step', { step: n, step_name: stepNames[n - 1], landing: landing, cta_position: ctaPosition, tipoPulizia: tipoPulizia() || undefined }); }
+		// Ogni evento di passo parte una volta sola per form: tornare indietro e riavanzare non lo duplica.
+		function fireStep(n) { if (fired[n]) return; fired[n] = true; track('preventivo_sgrosso_step', { step: n, step_name: stepNames[n - 1], landing: landing, cta_position: ctaPosition, tipoPulizia: tipoPulizia() || undefined }); }
 
+		// Passo 1: nessuna chiamata, nessun dato personale.
 		function submitStep1() {
+			fireStep(1);
+			show(2);
+			return Promise.resolve();
+		}
+		// Passo 2: nascono Contatto e Opportunita'. Il recapito e' acquisito col primo POST: se il secondo fallisce il
+		// Contatto resta e la conversione scatta comunque (il team lo vede in Airtable).
+		function submitStep2() {
 			var p = Promise.resolve();
 			if (!state.contattoId) {
 				var body = Object.assign({
-					tipo: 'b2c', nome: val(form, 'nome'), email: val(form, 'email'), telefono: telefono(), zona: val(form, 'indirizzo'),
+					tipo: 'b2c', nome: val(form, 'nome'), telefono: telefono(), zona: val(form, 'indirizzo'),
 					consentPrivacy: true, consentMarketing: isChecked(form, 'consentMarketing'), honeypot: val(form, 'website'),
 					contactOnly: true, pageUrl: pageUrl()
 				}, utm());
+				if (val(form, 'email')) body.email = val(form, 'email');
 				p = call(form, 'POST', '/api/leads', body).then(function (r) {
 					if (r && r.contattoId && r.token) { state.contattoId = r.contattoId; state.contattoToken = r.token; }
 				});
 			}
-			return p.then(function () { fireStep(1); show(2); });
-		}
-		function submitStep2() {
-			var p = Promise.resolve();
-			if (state.contattoId && state.contattoToken && !state.opportunitaId) {
+			return p.then(function () {
+				if (!state.contattoId || !state.contattoToken || state.opportunitaId) return null;
 				var body = {
 					token: state.contattoToken, tipo: 'b2c', zona: val(form, 'indirizzo'), note: note(false),
 					superficieMq: val(form, 'mq') || undefined, datiPulizia: datiPulizia(2, false), gclid: gclid(), pageUrl: pageUrl()
 				};
-				p = call(form, 'POST', '/api/leads/' + encodeURIComponent(state.contattoId) + '/opportunita', body).then(function (r) {
+				return call(form, 'POST', '/api/leads/' + encodeURIComponent(state.contattoId) + '/opportunita', body).then(function (r) {
 					if (r && r.opportunitaId && r.token) { state.opportunitaId = r.opportunitaId; state.opportunitaToken = r.token; }
-				});
-			}
-			return p.then(function () { fireStep(2); show(3); });
+				}, function () { /* l'opportunita' si recupera dal Contatto: il passo 3 salta il PATCH */ });
+			}).then(function () {
+				fireStep(2);
+				track('preventivo_sgrosso_submitted', { landing: landing, cta_position: ctaPosition, tipoPulizia: tipoPulizia(), fase: 'contatto' });
+				show(3);
+			});
 		}
+		function thankYou() {
+			gotoThankYou({ zona: val(form, 'indirizzo'), tipoCasa: tipoPuliziaLabel(), email: val(form, 'email'), coupon: '-30€ sul primo lavoro' });
+		}
+		// Passo 3: dettagli e foto. Senza Opportunita' (secondo POST fallito) non c'e' nulla da aggiornare.
 		function submitStep3() {
-			var p = Promise.resolve();
-			if (state.opportunitaId && state.opportunitaToken) {
-				var body = { token: state.opportunitaToken, step: 3, final: true, datiPulizia: datiPulizia(3, true), note: note(true) };
-				if (state.photos.length) body.foto = state.photos;
-				p = call(form, 'PATCH', '/api/leads/' + encodeURIComponent(state.opportunitaId), body);
-			}
-			return p.then(function () {
-				track('preventivo_sgrosso_submitted', { landing: landing, cta_position: ctaPosition, tipoPulizia: tipoPulizia() });
-				gotoThankYou({ zona: val(form, 'indirizzo'), tipoCasa: tipoPuliziaLabel(), email: val(form, 'email'), coupon: '-30€ sul primo lavoro' });
+			if (!(state.opportunitaId && state.opportunitaToken)) { thankYou(); return Promise.resolve(); }
+			var body = { token: state.opportunitaToken, step: 3, final: true, datiPulizia: datiPulizia(3, true), note: note(true) };
+			if (state.photos.length) body.foto = state.photos;
+			return call(form, 'PATCH', '/api/leads/' + encodeURIComponent(state.opportunitaId), body).then(function () {
+				track('marketing_form_submit', { landing: landing, form: 'dettagli' });
+				thankYou();
 			});
 		}
 
@@ -385,13 +418,14 @@
 			if (form.classList.contains('is-busy')) return;
 			clearErrors(form);
 			var run;
-			if (state.step === 1) { if (!validateStep1()) { focusFirstInvalid(form); return; } run = submitStep1; }
-			else if (state.step === 2) { if (!validateStep2()) { focusFirstInvalid(form); return; } run = submitStep2; }
+			if (state.step === 1) { if (!validateStep1()) { focusInvalid(); return; } run = submitStep1; }
+			else if (state.step === 2) { if (!validateStep2()) { focusInvalid(); return; } run = submitStep2; }
 			else run = submitStep3;
 			busy(form, true);
 			run().catch(function (err) { showApiError(form, err.shown || MSG_GENERIC, err.status !== 400 && err.status !== 413); }).finally(function () { busy(form, false); });
 		});
-		if (backBtn) backBtn.addEventListener('click', function () { if (state.step > 1) show(state.step - 1); });
+		if (backBtn) backBtn.addEventListener('click', function () { if (state.step === 2) show(1); });
+		if (skipBtn) skipBtn.addEventListener('click', function () { if (state.step === 3 && !form.classList.contains('is-busy')) thankYou(); });
 		show(1);
 	}
 

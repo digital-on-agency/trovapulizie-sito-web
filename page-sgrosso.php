@@ -102,9 +102,10 @@ get_header( 'landing', array(
 						'cta_position' => 'hero',
 						'landing'      => $landing,
 						'default_tipo' => $defaults['scenario'],
-						'title'        => tp_sg_text( 'sg_form_title', $defaults, null, 'I tuoi dati di contatto' ),
-						'subtitle'     => tp_sg_text( 'sg_form_subtitle', $defaults, null, "Ti risponderemo entro un'ora con una prima valutazione." ),
-						'cta_label'    => tp_sg_text( 'sg_form_cta', $defaults, null, 'Prenota sopralluogo gratuito' ),
+						'title'        => tp_sg_text( 'sg_form_title', $defaults, null, 'La tua casa' ),
+						'subtitle'     => tp_sg_text( 'sg_form_subtitle', $defaults, null, 'Tre informazioni e vedi subito una stima indicativa.' ),
+						'step1_label'  => 'Vedi la stima',
+						'cta_label'    => tp_sg_text( 'sg_form_cta', $defaults, null, 'Prenota il sopralluogo gratuito' ),
 						'note'         => tp_sg_text( 'sg_form_note', $defaults, null, 'Gratis · nessun impegno · risposta in 1h' ),
 					) ); ?>
 				</div>
@@ -332,9 +333,10 @@ get_header( 'landing', array(
 			'cta_position' => 'bottom',
 			'landing'      => $landing,
 			'default_tipo' => $defaults['scenario'],
-			'title'        => tp_sg_text( 'sg_form_title', $defaults, null, 'I tuoi dati di contatto' ),
-			'subtitle'     => tp_sg_text( 'sg_form_subtitle', $defaults, null, "Ti risponderemo entro un'ora con una prima valutazione." ),
-			'cta_label'    => tp_sg_text( 'sg_form_cta', $defaults, null, 'Prenota sopralluogo gratuito' ),
+			'title'        => tp_sg_text( 'sg_form_title', $defaults, null, 'La tua casa' ),
+			'subtitle'     => tp_sg_text( 'sg_form_subtitle', $defaults, null, 'Tre informazioni e vedi subito una stima indicativa.' ),
+			'step1_label'  => 'Vedi la stima',
+			'cta_label'    => tp_sg_text( 'sg_form_cta', $defaults, null, 'Prenota il sopralluogo gratuito' ),
 			'note'         => tp_sg_text( 'sg_form_note', $defaults, null, 'Gratis · nessun impegno · risposta in 1h' ),
 		),
 	) );

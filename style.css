@@ -3951,6 +3951,9 @@ a {
 .lead-form__step[hidden] {
 	display: none;
 }
+.lead-form__title:focus {
+	outline: none; /* focus programmatico al cambio di passo: annuncia il titolo, senza anello */
+}
 .lead-form__title {
 	margin: 0;
 	padding: 0;
@@ -4378,7 +4381,8 @@ a {
 	gap: 10px;
 	margin-top: 16px;
 }
-.lead-form__back {
+.lead-form__back,
+.lead-form__skip {
 	flex: none;
 	padding: 0 16px;
 	border: 1px solid var(--tp-field-border);
@@ -4390,11 +4394,15 @@ a {
 	color: #374151;
 	cursor: pointer;
 }
-.lead-form__back[hidden] {
+.lead-form__back[hidden],
+.lead-form__skip[hidden] {
 	display: none;
 }
 .lead-form__submit {
 	flex: 1;
+	min-width: 0; /* con Indietro accanto l'etichetta lunga del passo 2 va a capo invece di allargare la card */
+	white-space: normal;
+	line-height: 1.25;
 	min-height: 52px;
 	border-radius: 12px;
 	font-size: 15px;
