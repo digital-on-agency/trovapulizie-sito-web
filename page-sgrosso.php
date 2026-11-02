@@ -73,7 +73,7 @@ get_header( 'landing', array(
 	'cta_label'     => tp_sg_text( 'sg_nav_cta', $defaults, null, 'Calcola il preventivo gratis' ),
 	'cta_short'     => 'Sopralluogo gratuito',
 	'cta_href'      => '#form',
-	'cta_full_href' => '#form',
+	'cta_full_href' => $has_calc ? '#quanto-costa' : '#form', // "Calcola il preventivo gratis" porta al calcolatore (TICKET-85)
 	'cta_focus'     => true,
 ) );
 ?>
@@ -171,7 +171,7 @@ get_header( 'landing', array(
 		'subtitle'        => tp_sg_text( 'sg_cmp_subtitle', $defaults, 'confrontiamo_sub' ),
 		'pillars'         => $pillars,
 		'cta_label'       => tp_sg_text( 'sg_cmp_cta_label', $defaults, null, 'Calcola il preventivo gratis' ),
-		'cta_link'        => tp_sg_text( 'sg_cmp_cta_link', $defaults, null, '#form' ),
+		'cta_link'        => tp_sg_text( 'sg_cmp_cta_link', $defaults, null, $has_calc ? '#quanto-costa' : '#form' ),
 		'card_title'      => tp_sg_text( 'sg_cmp_card_title', $defaults, null, 'Preventivi a confronto' ),
 		'card_disclaimer' => tp_sg_text( 'sg_cmp_card_disclaimer', $defaults, null, 'Esempio illustrativo di come funziona il confronto' ),
 		'card_chip'       => tp_sg_text( 'sg_cmp_card_chip', $defaults, null, 'Roma e provincia' ),
@@ -223,7 +223,8 @@ get_header( 'landing', array(
 		'areas_title' => tp_sg_text( 'sg_when_areas_title', $defaults, null, 'Tutte le aree, sempre' ),
 		'areas_text'  => tp_sg_text( 'sg_when_areas_text', $defaults, null, 'Lo sgrosso copre tutte le stanze a fondo. Cambia il focus in base alla tua situazione.' ),
 		'cta_label'   => tp_sg_text( 'sg_when_cta_label', $defaults, null, 'Calcola il preventivo gratis' ),
-		'cta_link'    => tp_sg_text( 'sg_when_cta_link', $defaults, null, '#form' ),
+		'cta_link'    => tp_sg_text( 'sg_when_cta_link', $defaults, null, $has_calc ? '#quanto-costa' : '#form' ),
+		'anchor_aliases' => array( 'cosa-include' ), // sitelink Ads: la sezione che dice cosa comprende il servizio (TICKET-85)
 		'default'     => $defaults['scenario'],
 		'show_tabs'   => 'sgrosso-casa' === $variant,
 	) );

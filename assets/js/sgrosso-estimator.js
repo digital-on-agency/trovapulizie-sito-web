@@ -112,6 +112,27 @@
 			el.addEventListener('change', function () { update(true); });
 		});
 
+		// "Prenota il sopralluogo con questi dati" (TICKET-85): precompila il form della pagina (tipo, metri quadri, extra
+		// per la stima del passo 2) tramite window.tpLeadFormPrefill di lead-form.js, scorre al form e porta il focus
+		// sull'indirizzo. Il form e' #form (hero) oppure, se manca, #form-bottom; se mancano entrambi il pulsante resta nascosto.
+		var book = root.querySelector('[data-calc-book]');
+		function formBox() { return document.getElementById('form') || document.getElementById('form-bottom'); }
+		if (book && formBox()) {
+			book.hidden = false;
+			book.addEventListener('click', function () {
+				var box = formBox();
+				if (!box) return;
+				var s = read();
+				var form = box.querySelector('[data-lead-form]');
+				var prefilled = false;
+				if (form && typeof window.tpLeadFormPrefill === 'function') prefilled = window.tpLeadFormPrefill(form, { tipo: s.tipo, mq: s.mq, extra: s.extras.length });
+				if (window.tpTrack) window.tpTrack('marketing_cta_click', { landing: window.tpLanding ? window.tpLanding() : '', cta_position: 'calcolatore' });
+				box.scrollIntoView(); // lo scorrimento morbido o istantaneo lo decide il CSS (prefers-reduced-motion)
+				if (prefilled) { var addr = form.querySelector('input[name="indirizzo"]'); if (addr) addr.focus({ preventScroll: true }); }
+				if (window.history && history.replaceState) history.replaceState(null, '', '#' + box.id);
+			});
+		}
+
 		if (result && 'IntersectionObserver' in window && !reduce) {
 			var io = new IntersectionObserver(function (entries) {
 				if (!entries.some(function (e) { return e.isIntersecting; })) return;

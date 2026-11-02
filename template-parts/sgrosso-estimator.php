@@ -11,8 +11,12 @@
  * Il form porta data-lead-atomic: l'invio (POST /api/leads atomico, evento marketing_form_submit {form:'calcolatore'})
  * lo gestisce il modulo lead (assets/js/lead-form.js, TICKET-40). Senza quel modulo il bottone non fa nulla.
  *
+ * Ancora #prezzi: alias vuoto di #quanto-costa (sitelink Ads, TICKET-85). Pulsante "Prenota il sopralluogo con questi dati":
+ * porta al form (#form, o #form-bottom) con tipo e metri quadri gia' compilati e gli extra nella stima del passo 2;
+ * nascosto finche' il JS non trova un form di arrivo (sgrosso-estimator.js). L'invio per sola email resta l'azione secondaria.
+ *
  * Args: eyebrow, title, subtitle, types[], default_type, extras[], mq_default, coef {base, per_mq, extra_min,
- * extra_max, max_mult}, result_label, cta_title, coupon_amount, coupon_text, cta_label, note, landing, privacy_url.
+ * extra_max, max_mult}, result_label, book_label, cta_title, coupon_amount, coupon_text, cta_label, note, landing, privacy_url.
  */
 $args = wp_parse_args( $args ?? array(), array(
 	'eyebrow'       => '',
@@ -24,6 +28,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'mq_default'    => 100,
 	'coef'          => array(),
 	'result_label'  => 'STIMA INDICATIVA',
+	'book_label'    => 'Prenota il sopralluogo con questi dati',
 	'cta_title'     => 'Ricevi il preventivo esatto',
 	'coupon_amount' => '-30€',
 	'coupon_text'   => "sul primo lavoro, con l'email",
@@ -50,6 +55,7 @@ $uid     = 'calc-' . wp_unique_id();
 	data-base="<?php echo esc_attr( $coef['base'] ); ?>" data-per-mq="<?php echo esc_attr( $coef['per_mq'] ); ?>"
 	data-extra-min="<?php echo esc_attr( $coef['extra_min'] ); ?>" data-extra-max="<?php echo esc_attr( $coef['extra_max'] ); ?>"
 	data-max-mult="<?php echo esc_attr( $coef['max_mult'] ); ?>">
+	<span class="sg-anchor" id="prezzi"></span>
 	<div class="sg-calc__inner">
 		<div class="sg-section-head" data-reveal>
 			<?php if ( $args['eyebrow'] ) : ?><p class="sg-eyebrow"><?php echo esc_html( $args['eyebrow'] ); ?></p><?php endif; ?>
@@ -93,6 +99,9 @@ $uid     = 'calc-' . wp_unique_id();
 				<p class="sg-calc__result-label"><?php echo esc_html( $args['result_label'] ); ?></p>
 				<p class="sg-calc__price" aria-live="polite"><span data-price-min><?php echo $min_ini; ?></span>€ – <span data-price-max><?php echo $max_ini; ?></span>€</p>
 				<p class="sg-calc__meta">≈ <span data-meta-mq><?php echo (int) $mq; ?></span> m² · <span data-meta-tipo><?php echo esc_html( $default_type ); ?></span> · <span data-meta-extra>0</span> extra</p>
+				<?php if ( $args['book_label'] ) : ?>
+				<button type="button" class="sg-btn-light sg-calc__book" data-calc-book hidden><?php echo esc_html( $args['book_label'] ); ?> <span class="sg-cta__arrow" aria-hidden="true">&rarr;</span></button>
+				<?php endif; ?>
 				<hr class="sg-calc__divider">
 				<?php if ( $args['cta_title'] ) : ?><p class="sg-calc__cta-title"><?php echo esc_html( $args['cta_title'] ); ?></p><?php endif; ?>
 				<?php if ( $args['coupon_amount'] ) : ?>

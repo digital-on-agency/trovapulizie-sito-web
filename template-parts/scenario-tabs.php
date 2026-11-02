@@ -9,7 +9,8 @@
  * Le verticali (variante diversa dalla generica) mostrano il solo scenario della variante, senza tab, come il live.
  *
  * Args: eyebrow, title, scenarios[] {key, label, title, text, highlight, before, after, areas[], image?, image_alt?,
- * chips[]?}, all_areas[], areas_title, areas_text, cta_label, cta_link, cta_position, default (key), show_tabs (bool), id.
+ * chips[]?}, all_areas[], areas_title, areas_text, cta_label, cta_link, cta_position, default (key), show_tabs (bool), id,
+ * anchor_aliases[] (id aggiuntivi come ancore vuote a inizio sezione, es. 'cosa-include' per i sitelink Ads).
  *
  * Landing B2B (TICKET-59): uno scenario con `image` mostra una foto singola al posto del prima/dopo, e con `chips`
  * la propria lista di voci (tutte evidenziate) al posto di all_areas. Le landing Sgrosso non passano ne' l'una ne'
@@ -26,6 +27,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'areas_text'  => '',
 	'cta_label'   => '',
 	'cta_link'    => '#form',
+	'anchor_aliases' => array(),
 	'cta_position' => '',
 	'default'     => '',
 	'show_tabs'   => true,
@@ -48,6 +50,7 @@ if ( ! $args['show_tabs'] ) {
 $uid = sanitize_html_class( $args['id'] );
 ?>
 <section class="sg-when" id="<?php echo esc_attr( $args['id'] ); ?>" data-scenario-tabs>
+	<?php foreach ( (array) $args['anchor_aliases'] as $alias ) : ?><span class="sg-anchor" id="<?php echo esc_attr( $alias ); ?>"></span><?php endforeach; ?>
 	<div class="sg-when__inner">
 		<div class="sg-when__head" data-reveal>
 			<?php if ( $args['eyebrow'] ) : ?><p class="sg-eyebrow"><?php echo esc_html( $args['eyebrow'] ); ?></p><?php endif; ?>

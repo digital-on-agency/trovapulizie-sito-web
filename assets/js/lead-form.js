@@ -426,6 +426,31 @@
 			});
 		}
 
+		// Precompilazione dal calcolatore (TICKET-85): window.tpLeadFormPrefill(form, {tipo, mq, extra}). Tipo = etichetta o
+		// chiave del tipo di intervento; mq entro 10-500; extra = numero di extra scelti, che entra nella stima del passo 2.
+		// Rispetta il passo corrente: al passo 1 compila e basta, al passo 2 riporta al passo 1 per far rivedere i dati,
+		// dal passo 3 non fa nulla (il lead esiste gia': ritorna false).
+		form.tpPrefill = function (d) {
+			if (state.step === 3) return false;
+			d = d || {};
+			if (d.tipo) {
+				var want = String(d.tipo).trim().toLowerCase();
+				Array.prototype.forEach.call(form.querySelectorAll('input[name="tipoPulizia"]'), function (r) {
+					if (r.value.toLowerCase() === want || (r.getAttribute('data-label') || '').toLowerCase() === want) r.checked = true;
+				});
+			}
+			var mq = parseInt(d.mq, 10);
+			var mqInput = form.querySelector('input[name="mq"]');
+			if (mqInput && !isNaN(mq)) {
+				mqInput.value = String(Math.min(MQ_MAX, Math.max(MQ_MIN, mq)));
+				mqInput.dispatchEvent(new Event('input', { bubbles: true }));
+			}
+			state.extra = Math.max(0, parseInt(d.extra, 10) || 0);
+			if (state.step === 2) show(1);
+			else clearErrors(form);
+			return true;
+		};
+
 		form.addEventListener('submit', function (e) {
 			e.preventDefault();
 			if (form.classList.contains('is-busy')) return;
@@ -532,6 +557,7 @@
 		});
 	}
 
+	window.tpLeadFormPrefill = function (form, data) { return !!(form && typeof form.tpPrefill === 'function' && form.tpPrefill(data)); };
 	document.querySelectorAll('[data-lead-form]').forEach(initMultiStep);
 	document.querySelectorAll('[data-lead-atomic]').forEach(initAtomic);
 	document.querySelectorAll('[data-lead-b2b]').forEach(initB2B);

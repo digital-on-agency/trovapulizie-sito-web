@@ -4484,8 +4484,41 @@ html:has(main.sgrosso:not(.b2b)) {
 		scroll-behavior: auto;
 	}
 }
-main.sgrosso:not(.b2b) :where(#quanto-costa, #recensioni, #prezzi) {
+main.sgrosso:not(.b2b) :where(#quanto-costa, #recensioni, #prezzi, #cosa-include) {
 	scroll-margin-top: var(--tp-navbar-h);
+}
+main.sgrosso:not(.b2b) #form-bottom {
+	scroll-margin-top: calc(var(--tp-navbar-h) + 16px);
+}
+/* Ancora vuota a inizio sezione (alias #prezzi, #cosa-include dei sitelink Ads): nessuna altezza, solo il bersaglio */
+.sg-anchor {
+	display: block;
+	height: 0;
+	overflow: hidden;
+}
+/* Pulsante chiaro sulla card verde del calcolatore: porta al form con i dati scelti */
+.sg-btn-light {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	width: 100%;
+	padding: 15px 20px;
+	border: 0;
+	border-radius: 12px;
+	background: var(--tp-white);
+	font: inherit;
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--tp-primary-700);
+	cursor: pointer;
+}
+.sg-btn-light[hidden] {
+	display: none;
+}
+.sg-btn-light:focus-visible {
+	outline: none;
+	box-shadow: 0 0 0 3px var(--tp-primary-700), 0 0 0 6px var(--tp-white);
 }
 .lead-form__note {
 	margin: 12px 0 0;

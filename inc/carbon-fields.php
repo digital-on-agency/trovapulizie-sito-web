@@ -318,7 +318,7 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'text', 'sg_nav_phone', __( 'Telefono in testata' ) )
 				->set_help_text( __( 'Vuoto = 06 9151 6075. Il link tel: si ricava dalle sole cifre.' ) ),
 			Field::make( 'text', 'sg_nav_cta', __( 'Testo della CTA in testata' ) )
-				->set_help_text( __( 'Vuoto = "Calcola il preventivo gratis". Porta sempre al form.' ) ),
+				->set_help_text( __( 'Vuoto = "Calcola il preventivo gratis". Porta al calcolatore (#quanto-costa); il link corto "Sopralluogo gratuito" su mobile porta al form.' ) ),
 		) )
 		->add_tab( __( 'Hero' ), array(
 			Field::make( 'text', 'sg_hero_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( $sg_variant_help ),
@@ -353,7 +353,7 @@ add_action( 'carbon_fields_register_fields', function () {
 					Field::make( 'text', 'description', __( 'Descrizione' ) ),
 				) ),
 			Field::make( 'text', 'sg_cmp_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Calcola il preventivo gratis".' ) ),
-			Field::make( 'text', 'sg_cmp_cta_link', __( 'Bottone: link' ) )->set_help_text( __( 'Vuoto = #form.' ) ),
+			Field::make( 'text', 'sg_cmp_cta_link', __( 'Bottone: link' ) )->set_help_text( __( 'Vuoto = #quanto-costa (il calcolatore).' ) ),
 			Field::make( 'separator', 'sg_cmp_card_sep', __( 'Card "Preventivi a confronto"' ) ),
 			Field::make( 'text', 'sg_cmp_card_title', __( 'Titolo card' ) )->set_help_text( __( 'Vuoto = "Preventivi a confronto".' ) ),
 			Field::make( 'text', 'sg_cmp_card_disclaimer', __( 'Riga sotto il titolo' ) )->set_help_text( __( 'Vuoto = "Esempio illustrativo di come funziona il confronto". Le offerte non sono imprese reali: la riga resta.' ) ),
@@ -392,7 +392,7 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'text', 'sg_when_areas_title', __( 'Titolo del riquadro aree' ) )->set_help_text( __( 'Vuoto = "Tutte le aree, sempre".' ) ),
 			Field::make( 'textarea', 'sg_when_areas_text', __( 'Testo sotto le aree' ) )->set_help_text( __( 'Vuoto = "Lo sgrosso copre tutte le stanze a fondo. Cambia il focus in base alla tua situazione."' ) ),
 			Field::make( 'text', 'sg_when_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Calcola il preventivo gratis".' ) ),
-			Field::make( 'text', 'sg_when_cta_link', __( 'Bottone: link' ) )->set_help_text( __( 'Vuoto = #form.' ) ),
+			Field::make( 'text', 'sg_when_cta_link', __( 'Bottone: link' ) )->set_help_text( __( 'Vuoto = #quanto-costa (il calcolatore).' ) ),
 		) )
 		->add_tab( __( 'Quanto costa' ), array(
 			Field::make( 'text', 'sg_calc_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Vuoto = CALCOLA LA STIMA.' ) ),
