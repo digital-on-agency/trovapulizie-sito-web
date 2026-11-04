@@ -97,6 +97,12 @@ body { margin: 0; background: #fff; }
 .sv__textarea { min-height: 112px; resize: vertical; margin-top: 4px; }
 .sv__helper { margin: 6px 0 0; font-size: 13px; color: var(--sv-muted); }
 .sv__helper--pair { margin: -6px 0 16px; }
+.sv__phone { display: flex; gap: 8px; }
+.sv__phone .sv__input { flex: 1 1 auto; min-width: 0; }
+.sv__phone .sv__select {
+	flex: 0 0 auto; width: auto; max-width: 40%; padding-right: 34px; cursor: pointer;
+	background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23596270' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 14px center;
+}
 
 .sv__consent { display: flex; align-items: flex-start; gap: 12px; margin: 8px 0 20px; padding: 12px; border: 1.5px solid transparent; border-radius: 12px; font-size: 14px; line-height: 1.45; color: var(--sv-body); cursor: pointer; }
 .sv__consent input { flex: none; width: 22px; height: 22px; margin: 1px 0 0; accent-color: var(--sv-green); }

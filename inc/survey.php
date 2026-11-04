@@ -11,7 +11,7 @@
  *   Copia di ogni risposta nel gestionale interno (Airtable): inc/survey-airtable.php.
  *   Admin: inc/survey-admin.php (elenco, dettaglio, cancellazione, export CSV).
  * - Endpoint POST /wp-json/tp/v1/survey (+ /survey/feedback): nonce, tempo minimo dal caricamento firmato (anti-bot),
- *   honeypot, rate limit per IP (hash, mai l'IP in chiaro), consenso obbligatorio, almeno WhatsApp o email.
+ *   honeypot, rate limit per IP (hash, mai l'IP in chiaro), consenso obbligatorio, email obbligatoria, WhatsApp facoltativo.
  * - Pagina noindex,nofollow (meta + X-Robots-Tag), fuori dalla sitemap, mai in cache LiteSpeed (il nonce deve restare
  *   fresco), senza tracking del sito (GTM, Clarity, iubenda): il form raccoglie dati personali e il marchio e' OnField.
  *
@@ -107,11 +107,20 @@ function tp_survey_definition() {
 			),
 			'fields'  => array(
 				'name'     => array( 'Name', 'Your name' ),
-				'whatsapp' => array( 'WhatsApp', '+971 5x xxx xxxx' ),
 				'email'    => array( 'Email', 'you@company.com' ),
+				'whatsapp' => array( 'WhatsApp (optional)', '5x xxx xxxx' ),
 				'company'  => array( 'Company name (optional)', 'Your company' ),
 			),
-			'helper'  => 'WhatsApp or email, whichever you prefer.',
+			'helper'  => 'Add WhatsApp if you prefer to talk there.',
+			// Prefisso del numero WhatsApp (sigla ISO del paese): il primo e' il default. Valore '' = "Other": il numero si
+			// scrive col suo +.
+			'prefixes' => array(
+				array( '+971', 'AE +971' ), array( '+966', 'SA +966' ), array( '+974', 'QA +974' ), array( '+965', 'KW +965' ),
+				array( '+973', 'BH +973' ), array( '+968', 'OM +968' ), array( '+91', 'IN +91' ), array( '+92', 'PK +92' ),
+				array( '+63', 'PH +63' ), array( '+20', 'EG +20' ), array( '+962', 'JO +962' ), array( '+961', 'LB +961' ),
+				array( '+44', 'GB +44' ), array( '+39', 'IT +39' ), array( '+1', 'US/CA +1' ), array( '', 'Other' ),
+			),
+			'prefix_label' => 'Country code',
 			'consent' => 'I agree that ' . $brand . ' may contact me about this survey and the product.',
 			'privacy' => 'Privacy policy',
 			'skip'    => 'Leave your contact anyway',
@@ -430,16 +439,16 @@ function tp_survey_validate( array $p, array $def ) {
 		if ( '' === $data['name'] ) {
 			$errs['name'] = true;
 		}
+		// Il client invia il numero gia' col prefisso internazionale (selettore o "+" scritto a mano).
 		$wa_digits = preg_replace( '/\D+/', '', $data['whatsapp'] );
-		if ( '' !== $data['whatsapp'] && ( strlen( $wa_digits ) < 7 || strlen( $wa_digits ) > 15 || preg_match( '/[^\d\s+()\-.]/', $data['whatsapp'] ) ) ) {
+		if ( '' !== $data['whatsapp'] && ( '+' !== $data['whatsapp'][0] || strlen( $wa_digits ) < 8 || strlen( $wa_digits ) > 15 || preg_match( '/[^\d\s+()\-.]/', $data['whatsapp'] ) ) ) {
 			$errs['whatsapp'] = true;
 		}
 		if ( '' !== $data['email'] && ! is_email( $data['email'] ) ) {
 			$errs['email'] = true;
 		}
-		if ( '' === $data['whatsapp'] && '' === $data['email'] ) {
-			$errs['whatsapp'] = true;
-			$errs['email']    = true;
+		if ( '' === $data['email'] ) {
+			$errs['email'] = true;
 		}
 		if ( ! $consent ) {
 			$errs['consent'] = true;

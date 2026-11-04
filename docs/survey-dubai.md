@@ -46,7 +46,8 @@ export CSV con etichette leggibili, BOM UTF-8 e protezione dall'iniezione di for
   `nocache_headers()`, `DONOTCACHEPAGE` e `litespeed_control_set_nocache`.
 - Tempo minimo di 12 secondi dal caricamento (anti-bot), origine uguale al sito, honeypot (`website`: successo finto, nulla salvato).
 - Rate limit: 10 salvataggi per ora e per IP (hash), contati solo sui salvataggi riusciti.
-- Validazione lato server su tutte le risposte (opzioni dalla stessa definizione del client), consenso obbligatorio quando c'e' un contatto, almeno WhatsApp o email nei rami A/B/C. Nel ramo D il contatto e' facoltativo, ma se c'e' valgono le stesse regole.
+- Validazione lato server su tutte le risposte (opzioni dalla stessa definizione del client), consenso obbligatorio quando c'e' un contatto, email obbligatoria e WhatsApp facoltativo nei rami A/B/C (decisione Guido 04/11; prima bastava uno dei due). Nel ramo D il contatto e' facoltativo, ma se c'e' valgono le stesse regole.
+- WhatsApp con selettore del prefisso (default `+971`, elenco in `tp_survey_definition()['contact']['prefixes']`, voce "Other" per scriverlo a mano col `+`): il client invia il numero completo (`+971 501234567`, lo 0 iniziale tolto) e il server rifiuta un numero che non inizia con `+`.
 
 [ATTENZIONE] L'IP viene da `REMOTE_ADDR`; solo se e' privato o riservato (proxy) vale il primo `X-Forwarded-For`. Dopo il
 primo deploy verificare che due visitatori diversi non finiscano nello stesso hash (colonna `ip_hash`), altrimenti il

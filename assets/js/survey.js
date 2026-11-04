@@ -31,7 +31,7 @@
 	def.steps.forEach(function (s) { stepById[s.id] = s; });
 
 	var ans = {};          // risposte per campo (single: stringa, multi: array)
-	var contact = { name: '', whatsapp: '', email: '', company: '', consent: false };
+	var contact = { name: '', whatsapp: '', cc: null, email: '', company: '', consent: false };
 	var hist = [];         // pila delle schermate visitate
 	var saved = null;      // {id,key} dopo il salvataggio
 	var fbSent = false;
@@ -45,6 +45,17 @@
 	}
 	function branch() { return def.branches[ans.interest] || ''; }
 	function hasContact() { return !!(contact.name.trim() || contact.whatsapp.trim() || contact.email.trim()); }
+	function prefix() { return contact.cc === null ? def.contact.prefixes[0][0] : contact.cc; }
+	// Numero completo da inviare: prefisso del selettore + numero senza lo 0 iniziale; se l'utente scrive gia' "+" o "00"
+	// vale il suo. Vuoto se il campo e' vuoto.
+	function fullWhatsapp() {
+		var n = contact.whatsapp.trim();
+		if (!n) return '';
+		if (n.charAt(0) === '+') return n;
+		if (n.slice(0, 2) === '00') return '+' + n.slice(2);
+		var cc = prefix();
+		return cc ? cc + ' ' + n.replace(/^0+/, '') : n;
+	}
 
 	/* ---- Navigazione ---- */
 	function nextAfter(key) {
@@ -206,6 +217,29 @@
 		return wrap;
 	}
 
+	// Campo WhatsApp con selettore del prefisso a sinistra del numero.
+	function phoneField(label, placeholder) {
+		var c = def.contact;
+		var wrap = field('whatsapp', label, { placeholder: placeholder, autocomplete: 'tel-national', inputmode: 'tel', max: 30, type: 'tel' });
+		var inp = wrap.querySelector('input');
+		var row = el('div', 'sv__phone');
+		var sel = el('select', 'sv__input sv__select');
+		sel.name = 'cc';
+		sel.setAttribute('aria-label', c.prefix_label);
+		c.prefixes.forEach(function (o) {
+			var opt = el('option', '', o[1]); opt.value = o[0];
+			sel.appendChild(opt);
+		});
+		sel.value = prefix();
+		// Con "Other" il numero si scrive completo: il segnaposto lo ricorda.
+		function hint() { inp.placeholder = sel.value ? placeholder : '+code ' + placeholder; }
+		sel.addEventListener('change', function () { contact.cc = sel.value; inp.removeAttribute('aria-invalid'); hint(); });
+		hint();
+		inp.parentNode.insertBefore(row, inp);
+		row.appendChild(sel); row.appendChild(inp);
+		return wrap;
+	}
+
 	function contactScreen() {
 		var c = def.contact;
 		var b = branch();
@@ -215,8 +249,8 @@
 		form.noValidate = true;
 		var f = c.fields;
 		form.appendChild(field('name', f.name[0], { placeholder: f.name[1], autocomplete: 'name', max: 120 }));
-		form.appendChild(field('whatsapp', f.whatsapp[0], { placeholder: f.whatsapp[1], autocomplete: 'tel', inputmode: 'tel', max: 40, type: 'tel' }));
 		form.appendChild(field('email', f.email[0], { placeholder: f.email[1], autocomplete: 'email', inputmode: 'email', max: 190, type: 'email' }));
+		form.appendChild(phoneField(f.whatsapp[0], f.whatsapp[1]));
 		form.appendChild(el('p', 'sv__helper sv__helper--pair', c.helper));
 		form.appendChild(field('company', f.company[0], { placeholder: f.company[1], autocomplete: 'organization', max: 160 }));
 
@@ -246,11 +280,10 @@
 			if (busy) return;
 			var bad = [];
 			if (!contact.name.trim()) bad.push('name');
-			var wa = contact.whatsapp.trim(), em = contact.email.trim();
+			var wa = fullWhatsapp(), em = contact.email.trim();
 			var digits = wa.replace(/\D+/g, '');
-			if (wa && (digits.length < 7 || digits.length > 15 || /[^\d\s+()\-.]/.test(wa))) bad.push('whatsapp');
-			if (em && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) bad.push('email');
-			if (!wa && !em) { bad.push('whatsapp'); bad.push('email'); }
+			if (wa && (wa.charAt(0) !== '+' || digits.length < 8 || digits.length > 15 || /[^\d\s+()\-.]/.test(wa))) bad.push('whatsapp');
+			if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) bad.push('email');
 			if (!contact.consent) bad.push('consent');
 			mark(form, bad);
 			if (bad.length) { msg.textContent = def.ui.invalid; msg.hidden = false; focusFirst(form, bad); return; }
@@ -318,7 +351,7 @@
 			software_names: ans.software_names || [], software_other: ans.software_other || '',
 			challenge: ans.challenge, challenge_other: ans.challenge_other || '',
 			software_spend: ans.software_spend, price_expectation: ans.price_expectation, interest: ans.interest,
-			name: contact.name, whatsapp: contact.whatsapp, email: contact.email, company: contact.company,
+			name: contact.name, whatsapp: fullWhatsapp(), email: contact.email, company: contact.company,
 			consent: !!contact.consent, feedback: ans.feedback || ''
 		};
 		for (var k in extra) p[k] = extra[k];

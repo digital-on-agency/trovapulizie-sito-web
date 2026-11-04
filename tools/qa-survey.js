@@ -145,20 +145,29 @@ async function submitContact(c, label) {
 			ok(!(await c.ev(JS.topVisible)), `${c.label}: nessuna barra nella schermata finale`);
 			await c.shot(`${outDir}/${c.label}-s12-thanks.png`);
 		});
-		// ---- Ramo B: solo WhatsApp, senza software, commento saltato
+		// ---- Ramo B: WhatsApp locale col prefisso scelto, email obbligatoria, senza software, commento saltato
 		await scenario('B', width, async (c) => {
 			await startAndFirstQuestions(c, { sizeText: 'More than 150', tools: ['Paper or whiteboard'], software: null, challenge: 'x' });
 			await pick(c, 'Show me a demo first');
 			await expectTitle(c, /set up the demo/, '10 / 10');
 			ok(await c.ev(JS.has('Book my demo →')), `${c.label}: CTA del ramo B`);
+			ok(await c.ev(`document.querySelector('[name="cc"]').value==='+971'`), `${c.label}: prefisso di default +971`);
 			await fillContact(c, { name: 'QA Tester B', wa: '0501234567' });
 			await c.ev(JS.check('[name="consent"]'));
+			await c.ev(`document.querySelector('.sv__form').requestSubmit()`); await sleep(300);
+			ok(await c.ev(`document.querySelector('[name="email"]').getAttribute('aria-invalid')==='true' && document.querySelector('[name="whatsapp"]').getAttribute('aria-invalid')!=='true'`), `${c.label}: solo WhatsApp rifiutato, email obbligatoria`);
+			await c.ev(`(function(){var s=document.querySelector('[name="cc"]');s.value='+44';s.dispatchEvent(new Event('change'))})()`);
+			await fillContact(c, { email: 'qa-b@example.com' });
+			await c.shot(`${outDir}/${c.label}-s10-contact-prefix.png`);
+			await c.ev(`(function(){var f=window.fetch;window.fetch=function(u,o){if(o&&o.body)window.__svLast=o.body;return f.apply(this,arguments)}})()`);
 			await submitContact(c);
+			const sent = JSON.parse(await c.ev(`window.__svLast||'{}'`));
+			ok(sent.whatsapp === '+44 501234567', `${c.label}: numero inviato col prefisso scelto, senza lo 0 (${sent.whatsapp})`);
 			await expectTitle(c, /Anything else/);
 			await c.ev(JS.btn('Skip')); await sleep(600);
 			ok(/pick a time for the demo/.test(await c.ev(`document.querySelector('.sv__body').textContent`)), `${c.label}: testo grazie del ramo B`);
 		});
-		// ---- Ramo C: solo email, indietro dal contatto, commento
+		// ---- Ramo C: solo email (WhatsApp facoltativo), indietro dal contatto, commento
 		await scenario('C', width, async (c) => {
 			await startAndFirstQuestions(c, { tools: ['Spreadsheets (Excel, Google Sheets)'], software: null, challenge: 'x' });
 			await pick(c, 'Maybe later');
@@ -197,7 +206,7 @@ async function submitContact(c, label) {
 			await pick(c, 'Not for me');
 			await c.ev(JS.btn('Leave your contact anyway')); await sleep(300);
 			await expectTitle(c, /keep you posted/, '10 / 10');
-			await fillContact(c, { name: 'QA Tester D', wa: '+971 55 765 4321' });
+			await fillContact(c, { name: 'QA Tester D', wa: '+971 55 765 4321', email: 'qa-d@example.com' });
 			await c.ev(`document.querySelector('.sv__form').requestSubmit()`); await sleep(300);
 			ok(await c.ev(`document.querySelector('.sv__consent').classList.contains('is-error')`), `${c.label}: se lascia il contatto il consenso e' obbligatorio anche nel ramo D`);
 			await c.ev(JS.check('[name="consent"]'));
@@ -221,8 +230,10 @@ async function submitContact(c, label) {
 		await sleep(Math.max(0, 12500 - (Date.now() - t0)));
 		r = await call('', Object.assign({}, good, { consent: false }));
 		ok(r.s === 400 && r.j.data.fields.indexOf('consent') !== -1, `API: senza consenso 400 (${r.s})`);
-		r = await call('', Object.assign({}, good, { email: '', whatsapp: '' }));
-		ok(r.s === 400 && r.j.data.fields.indexOf('email') !== -1 && r.j.data.fields.indexOf('whatsapp') !== -1, `API: ne' WhatsApp ne' email 400 (${r.s})`);
+		r = await call('', Object.assign({}, good, { email: '', whatsapp: '+971 50 123 4567' }));
+		ok(r.s === 400 && r.j.data.fields.indexOf('email') !== -1, `API: senza email 400 anche con WhatsApp (${r.s})`);
+		r = await call('', Object.assign({}, good, { whatsapp: '0501234567' }));
+		ok(r.s === 400 && r.j.data.fields.indexOf('whatsapp') !== -1, `API: WhatsApp senza prefisso internazionale 400 (${r.s})`);
 		r = await call('', Object.assign({}, good, { role: 'hacker' }));
 		ok(r.s === 400 && r.j.data.fields.indexOf('role') !== -1, `API: opzione fuori elenco 400 (${r.s})`);
 		r = await call('', Object.assign({}, good, { nonce: 'deadbeef' }));
