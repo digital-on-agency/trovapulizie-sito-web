@@ -11,27 +11,27 @@ BASE = (sys.argv[1] if len(sys.argv) > 1 else 'https://lightgoldenrodyellow-duck
 
 PAGES = {
     '/roma/sgrosso-casa/': {
-        'title': 'Sgrosso casa Roma — Pulizia straordinaria una tantum, sopralluogo gratuito | Trovapulizie',
+        'title': 'Sgrosso casa Roma, sopralluogo gratuito | Trovapulizie',
         'desc': 'Sgrosso casa a Roma: pulizia straordinaria post-cantiere o trasloco con imprese verificate. Sopralluogo gratuito, prezzo fisso, nessuna sorpresa.',
         'h1': 'Sgrosso casa: la tua casa torna come nuova',
     },
     '/roma/sgrosso-post-ristrutturazione/': {
-        'title': 'Pulizia post-ristrutturazione Roma — Sopralluogo gratuito | Trovapulizie',
+        'title': 'Pulizie post ristrutturazione Roma | Trovapulizie',
         'desc': 'Pulizia post-ristrutturazione a Roma: via polvere e residui di cantiere con imprese verificate. Sopralluogo gratuito e preventivo a prezzo fisso.',
         'h1': 'Dopo il cantiere, la casa pronta da abitare in un giorno',
     },
     '/roma/sgrosso-trasloco/': {
-        'title': 'Pulizia post trasloco Roma — Sopralluogo gratuito | Trovapulizie',
+        'title': 'Pulizie post trasloco Roma | Trovapulizie',
         'desc': 'Pulizia post trasloco a Roma, prima di entrare o dopo aver lasciato casa. Imprese verificate, sopralluogo gratuito, preventivo a prezzo fisso.',
         'h1': 'Prima di entrare o dopo aver lasciato: la casa pulita per il trasloco',
     },
     '/roma/sgrosso-fine-affitto/': {
-        'title': 'Pulizia fine affitto Roma — Sopralluogo gratuito | Trovapulizie',
+        'title': 'Pulizia fine affitto Roma, sopralluogo gratis | Trovapulizie',
         'desc': "Pulizia fine affitto a Roma per la riconsegna dell'immobile senza contestazioni. Imprese verificate, sopralluogo gratuito, prezzo fisso garantito.",
         'h1': 'Pulizia fine affitto: pronta per la riconsegna',
     },
     '/roma/sgrosso-prima-pulizia/': {
-        'title': 'Pulizia straordinaria casa Roma — Sopralluogo gratuito | Trovapulizie',
+        'title': 'Pulizia straordinaria casa Roma | Trovapulizie',
         'desc': 'Pulizia straordinaria a Roma per case trascurate da tempo: via lo sporco accumulato con imprese verificate. Sopralluogo gratuito, prezzo fisso.',
         'h1': 'Pulizia straordinaria: via lo sporco accumulato nel tempo',
     },
@@ -58,6 +58,7 @@ for path, exp in PAGES.items():
     check('200', status == 200, status)
     title = attr(s, r'<title>(.*?)</title>')
     check('title', title == exp['title'], title)
+    check('title <= 60 caratteri', title is not None and len(title) <= 60, len(title or ''))
     desc = attr(s, r'<meta name="description" content="(.*?)"')
     check('description', desc == exp['desc'], desc)
     canon = attr(s, r'<link rel="canonical" href="(.*?)"')

@@ -63,7 +63,7 @@ withChrome(BIN, URL, { port: 9391, width: width, height: 900, mobile: mobile, pr
 		});
 	})()`));
 	check('main.zz con data-landing', s.landing === 'zanzare-disinfestazione', s.landing);
-	check('title e description del live', s.title === 'Disinfestazione zanzare Roma — Sopralluogo gratuito | Trovapulizie' && /^Disinfestazione zanzare a Roma per privati e aziende/.test(s.desc), s.title);
+	check('title (TICKET-88) e description del live', s.title === 'Disinfestazione zanzare Roma | Trovapulizie' && /^Disinfestazione zanzare a Roma per privati e aziende/.test(s.desc), s.title);
 	check('un H1 del live', s.h1.length === 1 && s.h1[0] === 'Riprenditi il giardino. Zanzare fuori, in sicurezza.', s.h1);
 	check('sezioni nell\'ordine del Figma', ['hero', 'perche-noi', 'zanzara-tigre', 'per-chi', 'cosa-facciamo', 'come-funziona'].every((id, i, a) => s.ids.indexOf(id) !== -1 && (i === 0 || s.ids.indexOf(id) > s.ids.indexOf(a[i - 1]))) && s.ids.indexOf('prezzi') > s.ids.indexOf('come-funziona') && s.ids.indexOf('faq') > s.ids.indexOf('prezzi'), s.ids);
 	check('trust a 5, autorita\' a 4, 6 focolai', s.trust === 5 && s.auth === 4 && s.chips === 6, [s.trust, s.auth, s.chips]);

@@ -69,7 +69,7 @@ withChrome(BIN, URL, { port: 9363, width: width, height: 900, mobile: mobile }, 
 	})()`));
 	check('main.b2b con data-landing', s.main === 'sgrosso-commerciale', s.main);
 	check('un solo H1 del ridisegno', s.h1 === 1 && /^Pulizie per uffici, negozi e locali\. Anche quando sei chiuso\.$/.test(s.h1Text), s.h1Text);
-	check('title e description del live', s.title === 'Pulizie commerciali Roma — Uffici, negozi e locali | Trovapulizie' && /^Pulizie commerciali a Roma per uffici/.test(s.desc || ''), [s.title, s.desc]);
+	check('title (TICKET-88) e description del live', s.title === 'Pulizie commerciali Roma: uffici e negozi | Trovapulizie' && /^Pulizie commerciali a Roma per uffici/.test(s.desc || ''), [s.title, s.desc]);
 	check('tutte le sezioni presenti', s.sezioni.length === 0, s.sezioni);
 	check('trust strip a quattro voci', s.trust === 4, s.trust);
 	check('quattro tab dei settori', JSON.stringify(s.tabs) === JSON.stringify(['Uffici', 'Negozi & retail', 'Supermercati', 'Palestre & centri']), s.tabs);

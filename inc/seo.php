@@ -82,6 +82,11 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-thank-you.php' ) ) {
 		return 'Richiesta ricevuta | Trovapulizie';
 	}
+	// Home (TICKET-88): senza questo ramo passava il default di WordPress ("nome sito - tagline", 70 caratteri). Nome sito
+	// e tagline restano invariati; un seo_title compilato nel campo vince (primo ramo della funzione).
+	if ( is_singular() && is_front_page() ) {
+		return 'Trovapulizie: pulizie professionali a Roma';
+	}
 	// Hub /roma/ (TICKET-81): senza campo SEO compilato il title era il solo titolo della pagina ("Roma").
 	if ( is_singular() && is_page_template( 'page-hub-roma.php' ) ) {
 		return 'Pulizie casa a Roma, prenoti in 2 minuti | Trovapulizie';
@@ -90,13 +95,13 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-cleaner-landing.php' ) ) {
 		return 'Diventa cleaner Trovapulizie — Lavora con clienti verificati a Roma';
 	}
-	// Landing B2B (TICKET-58): stesso title del live React.
+	// Landing B2B (TICKET-58, accorciato a 56 caratteri in TICKET-88: Google tronca oltre i 60).
 	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {
-		return 'Pulizie commerciali Roma — Uffici, negozi e locali | Trovapulizie';
+		return 'Pulizie commerciali Roma: uffici e negozi | Trovapulizie';
 	}
-	// Landing zanzare (TICKET-73): stesso title del live React.
+	// Landing zanzare (TICKET-73, accorciato a 43 caratteri in TICKET-88).
 	if ( is_singular() && is_page_template( 'page-landing-zanzare.php' ) ) {
-		return 'Disinfestazione zanzare Roma — Sopralluogo gratuito | Trovapulizie';
+		return 'Disinfestazione zanzare Roma | Trovapulizie';
 	}
 	// Contatti (TICKET-63): pagina nuova, non esiste sul live.
 	if ( is_singular() && is_page_template( 'page-contact.php' ) ) {
