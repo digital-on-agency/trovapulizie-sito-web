@@ -277,19 +277,39 @@ add_action( 'wp_head', function () {
    title = titolo del documento, description = meta description, url = canonical della pagina. Niente sulle pagine
    noindex di servizio (thank-you, survey) e su 404 e ricerca. */
 
-/** URL canonico della pagina corrente (lo stesso che WordPress stampa in rel=canonical per le pagine singole). */
+/**
+ * URL canonico della pagina corrente (lo stesso che WordPress stampa in rel=canonical per le pagine singole).
+ * Su indice del blog e categorie vale anche per la paginazione (TICKET-89): la pagina 2 punta a se stessa, non
+ * alla pagina 1. get_pagenum_link() riporta la query string della richiesta (utm, fbclid): si tiene solo il percorso.
+ */
 function tp_seo_canonical_url() {
 	if ( is_singular() ) {
 		return (string) wp_get_canonical_url();
 	}
-	if ( is_home() ) {
-		return tp_blog_url();
-	}
-	if ( is_category() ) {
-		return (string) get_category_link( get_queried_object_id() );
+	if ( is_home() || is_category() ) {
+		$pagina = max( 1, (int) get_query_var( 'paged' ) );
+		if ( $pagina > 1 ) {
+			return (string) strtok( get_pagenum_link( $pagina ), '?' );
+		}
+		return is_home() ? tp_blog_url() : (string) get_category_link( get_queried_object_id() );
 	}
 	return home_url( '/' );
 }
+
+/**
+ * rel=canonical su indice del blog e categorie (TICKET-89). WordPress lo stampa solo sulle pagine singole
+ * (rel_canonical() esce se !is_singular()), quindi qui non c'e' duplicazione: su queste viste non lo emette nessun altro.
+ * Stesso hook dei meta SEO, subito prima del blocco Open Graph (priorita' 3).
+ */
+add_action( 'wp_head', function () {
+	if ( is_singular() || ! ( is_home() || is_category() ) ) {
+		return;
+	}
+	$url = tp_seo_canonical_url();
+	if ( $url ) {
+		echo '<link rel="canonical" href="' . esc_url( $url ) . '">' . "\n";
+	}
+}, 2 );
 
 /**
  * Immagine Open Graph della pagina: array( url, width, height ) con width/height a 0 se non note.
