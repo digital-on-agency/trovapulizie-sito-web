@@ -28,13 +28,16 @@ function tp_survey_at_branch_label( $branch ) {
 	return $map[ $branch ] ?? '';
 }
 
-/** Chiave -> etichetta per ogni domanda, dalla definizione della survey (unica fonte delle opzioni). */
+/** Chiave -> etichetta per ogni domanda, dalla definizione della survey (unica fonte delle opzioni) piu' le opzioni tolte. */
 function tp_survey_at_labels() {
 	$out = array();
 	foreach ( tp_survey_definition()['steps'] as $step ) {
 		foreach ( $step['options'] as $o ) {
 			$out[ $step['id'] ][ $o['v'] ] = $o['l'];
 		}
+	}
+	foreach ( tp_survey_legacy_labels() as $field => $labels ) {
+		$out[ $field ] = ( $out[ $field ] ?? array() ) + $labels;
 	}
 	return $out;
 }

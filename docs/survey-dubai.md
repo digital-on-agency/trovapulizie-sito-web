@@ -1,7 +1,8 @@
 # Survey Dubai v2 (OnField), `/survey-dubai/`
 
-Pagina autonoma del tema che raccoglie le risposte del survey per le imprese di pulizia di Dubai. Sorgente di testi,
-domande e diramazioni: vault `clients/trovapulizie/projects/gestionale-saas/survey-dubai-v2.md` (approvata il 30/10/2026).
+Pagina autonoma del tema che raccoglie le risposte del survey per le imprese con squadre sul campo di Dubai (pulizie,
+manutenzione, pest control, AC e altro; fino alla v2 solo pulizie). Sorgente di testi, domande e diramazioni: vault
+`clients/trovapulizie/projects/gestionale-saas/survey-dubai-v2.md` (approvata il 30/10/2026, sezione v3 dell'11/11/2026).
 Marchio OnField, titolare del trattamento Trovapulizie S.R.L. (consenso con link a `/privacy/`). Lingua: inglese.
 
 ## File
@@ -30,10 +31,12 @@ non ha il tasto indietro: tornare al contatto duplicherebbe la risposta.
 ## Dati
 
 Tabella `{prefix}tp_survey_response`, creata da `tp_survey_install()` (dbDelta) all'attivazione del tema e, dopo un
-deploy senza riattivazione, al primo `init` (versione schema in `tp_survey_db_version`). Ogni riga ha `survey_version` (2),
+deploy senza riattivazione, al primo `init` (versione schema in `tp_survey_db_version`). Ogni riga ha `survey_version` (2 fino al 10/11/2026, 3 dall'11/11),
 il ramo, i codici delle risposte, i testi liberi "other", contatto, commento, consenso con data e riferimento al testo
 (`onfield-survey-v2`), hash dell'IP (HMAC, mai l'IP in chiaro) e user agent. Le risposte della v1 (portale) restano
 separate: valori diversi su `business_type`, `team_size` e prezzo.
+La v3 cambia le opzioni di `business_type`: le etichette di quelle tolte restano in `tp_survey_legacy_labels()`, cosi'
+admin, CSV e risincronizzazione su Airtable mostrano ancora le risposte v2.
 
 Admin (`manage_options`): elenco filtrabile per versione, ramo e testo, dettaglio, cancellazione singola e multipla,
 export CSV con etichette leggibili, BOM UTF-8 e protezione dall'iniezione di formule (apice davanti a `= + - @`).

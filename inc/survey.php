@@ -7,7 +7,7 @@
  * - tp_survey_definition(): unica fonte di domande e testi. Va in JSON alla pagina (assets/js/survey.js costruisce le
  *   schermate) e alla validazione lato server. Un cambio di testo o di domanda e' una nuova versione (TP_SURVEY_VERSION):
  *   per questo i testi non stanno in Carbon Fields.
- * - Salvataggio nel database di WordPress (tabella {prefix}tp_survey_response, survey_version = 2), nessun webhook.
+ * - Salvataggio nel database di WordPress (tabella {prefix}tp_survey_response, survey_version = TP_SURVEY_VERSION), nessun webhook.
  *   Copia di ogni risposta nel gestionale interno (Airtable): inc/survey-airtable.php.
  *   Admin: inc/survey-admin.php (elenco, dettaglio, cancellazione, export CSV).
  * - Endpoint POST /wp-json/tp/v1/survey (+ /survey/feedback): nonce, tempo minimo dal caricamento firmato (anti-bot),
@@ -19,7 +19,7 @@
  * vedi cutover-checklist N2. Questo file non la rimanda all'app (sarebbe un ciclo, vedi inc/redirects.php).
  */
 
-const TP_SURVEY_VERSION     = 2;
+const TP_SURVEY_VERSION     = 3; // 3 (11/11/2026): pubblico allargato dalle imprese di pulizia a tutte quelle con squadre sul campo
 const TP_SURVEY_DB_VERSION  = '2'; // 2: colonne at_* della copia nel gestionale interno (inc/survey-airtable.php)
 const TP_SURVEY_BRAND       = 'OnField';
 const TP_SURVEY_MIN_SECONDS = 12;
@@ -47,8 +47,8 @@ function tp_survey_definition() {
 		'version' => TP_SURVEY_VERSION,
 		'brand'   => $brand,
 		'welcome' => array(
-			'title' => 'Running a cleaning business in Dubai?',
-			'body'  => "We're building a tool for cleaning companies in the UAE. Before we launch, we want to understand how you work today, and what slows you down.",
+			'title' => 'Running a service business in Dubai?',
+			'body'  => "We're building a tool for companies with teams on site in the UAE: cleaning, maintenance, pest control, AC and more. Before we launch, we want to understand how you work today, and what slows you down.",
 			'cta'   => 'Start →',
 			'note'  => 'About 2 minutes · Your answers stay private',
 		),
@@ -57,13 +57,13 @@ function tp_survey_definition() {
 				array( 'owner', 'Owner / co-founder' ), array( 'manager', 'Operations or general manager' ),
 				array( 'supervisor', 'Supervisor / team leader' ), array( 'other', 'Other' ),
 			) ) ),
-			array( 'id' => 'business_type', 'type' => 'single', 'count' => 2, 'title' => 'What kind of cleaning do you mainly do?', 'hint' => 'Choose the one that brings most of your revenue.', 'options' => tp_survey_opts( array(
-				array( 'maid_hourly', 'Hourly maid service (homes)' ), array( 'deep_cleaning', 'Residential deep cleaning / move-in, move-out' ),
-				array( 'short_term_rental', 'Short-term rental / holiday home turnover' ), array( 'commercial', 'Offices and commercial spaces' ),
-				array( 'facility_management', 'Facility management / building maintenance' ), array( 'hospitality', 'Hotels and hospitality' ),
+			array( 'id' => 'business_type', 'type' => 'single', 'count' => 2, 'title' => 'What does your business mainly do?', 'hint' => 'Choose the one that brings most of your revenue.', 'options' => tp_survey_opts( array(
+				array( 'home_cleaning', 'Home cleaning / maid service' ), array( 'commercial', 'Office and commercial cleaning' ),
+				array( 'facility_management', 'Facility management / building maintenance' ), array( 'mep', 'AC, plumbing and electrical (MEP)' ),
+				array( 'pest_control', 'Pest control' ), array( 'landscaping_pools', 'Landscaping and pool care' ),
 				array( 'other', 'Other' ),
 			) ) ),
-			array( 'id' => 'team_size', 'type' => 'single', 'count' => 3, 'title' => 'How many cleaners work for you?', 'hint' => "Including part-time and freelancers. Don't count office staff.", 'options' => tp_survey_opts( array(
+			array( 'id' => 'team_size', 'type' => 'single', 'count' => 3, 'title' => 'How many people work on site for you?', 'hint' => "Including part-time and freelancers. Don't count office staff.", 'options' => tp_survey_opts( array(
 				array( '1-5', '1–5' ), array( '6-15', '6–15' ), array( '16-50', '16–50' ), array( '51-150', '51–150' ), array( '150+', 'More than 150' ),
 			) ) ),
 			array( 'id' => 'weekly_jobs', 'type' => 'single', 'count' => 4, 'title' => 'About how many jobs do you complete per week?', 'options' => tp_survey_opts( array(
@@ -79,7 +79,7 @@ function tp_survey_definition() {
 				array( 'connecteam', 'Connecteam' ), array( 'in_house', 'Built in-house' ), array( 'other', 'Other', true ),
 			) ) ),
 			array( 'id' => 'challenge', 'type' => 'single', 'count' => 6, 'title' => "What's your biggest headache right now?", 'hint' => 'Pick the one that costs you the most time or money.', 'other_field' => 'challenge_other', 'options' => tp_survey_opts( array(
-				array( 'new_clients', 'Finding new clients' ), array( 'hiring', 'Hiring and keeping good cleaners' ),
+				array( 'new_clients', 'Finding new clients' ), array( 'hiring', 'Hiring and keeping good staff' ),
 				array( 'scheduling', 'Scheduling and last-minute changes' ), array( 'quality', 'Checking work quality on site' ),
 				array( 'attendance', 'Tracking hours and attendance' ), array( 'invoicing', 'Invoicing and getting paid on time' ),
 				array( 'supplies', 'Supplies and inventory' ), array( 'other', 'Something else', true ),
@@ -92,7 +92,7 @@ function tp_survey_definition() {
 				array( '<100', 'Under AED 100' ), array( '100-250', 'AED 100–250' ), array( '250-500', 'AED 250–500' ), array( '500-1000', 'AED 500–1,000' ),
 				array( '1000+', 'More than AED 1,000' ), array( 'free_only', "I'd only use a free tool" ),
 			) ) ),
-			array( 'id' => 'interest', 'type' => 'single', 'count' => 9, 'title' => "We're opening {$brand} to cleaning companies in Dubai.", 'hint' => 'There\'s a free plan with no time limit, and paid plans for bigger teams. Would you like to try it?', 'options' => tp_survey_opts( array(
+			array( 'id' => 'interest', 'type' => 'single', 'count' => 9, 'title' => "We're opening {$brand} to service companies in Dubai.", 'hint' => 'There\'s a free plan with no time limit, and paid plans for bigger teams. Would you like to try it?', 'options' => tp_survey_opts( array(
 				array( 'yes', "Yes, I'd like to try it" ), array( 'demo', 'Show me a demo first' ), array( 'later', 'Maybe later' ), array( 'no', 'Not for me' ),
 			) ) ),
 		),
@@ -136,7 +136,7 @@ function tp_survey_definition() {
 			'A' => array( 'Thank you!', "We'll send your access within 2 working days, on WhatsApp or email." ),
 			'B' => array( 'Thank you!', "We'll contact you within 2 working days to pick a time for the demo." ),
 			'C' => array( 'Thank you!', "We'll let you know when {$brand} is live in Dubai. No spam." ),
-			'D' => array( 'Thanks for your time.', 'Your answers help us build something useful for cleaning businesses in the UAE.' ),
+			'D' => array( 'Thanks for your time.', 'Your answers help us build something useful for service businesses in the UAE.' ),
 		),
 		'ui'       => array(
 			'next'    => 'Next →',
@@ -147,6 +147,21 @@ function tp_survey_definition() {
 			'expired' => 'This page has expired. Please reload it and try again.',
 			'limit'   => 'Too many attempts. Please try again later.',
 			'invalid' => 'Please check the highlighted fields.',
+		),
+	);
+}
+
+/**
+ * Etichette delle opzioni tolte nelle versioni precedenti: servono all'admin e alla copia nel gestionale per le risposte
+ * gia' salvate (senza, una risincronizzazione svuoterebbe il campo su Airtable). Non entrano nel form ne' nella validazione.
+ */
+function tp_survey_legacy_labels() {
+	return array(
+		'business_type' => array( // v2 (pubblico solo pulizie)
+			'maid_hourly'       => 'Hourly maid service (homes)',
+			'deep_cleaning'     => 'Residential deep cleaning / move-in, move-out',
+			'short_term_rental' => 'Short-term rental / holiday home turnover',
+			'hospitality'       => 'Hotels and hospitality',
 		),
 	);
 }
@@ -254,7 +269,7 @@ add_action( 'template_redirect', function () {
 } );
 
 add_filter( 'pre_get_document_title', function ( $title ) {
-	return tp_is_survey_page() ? TP_SURVEY_BRAND . ' · Quick survey for cleaning companies' : $title;
+	return tp_is_survey_page() ? TP_SURVEY_BRAND . ' · Quick survey for service companies' : $title;
 }, 30 );
 
 add_filter( 'language_attributes', function ( $out ) {

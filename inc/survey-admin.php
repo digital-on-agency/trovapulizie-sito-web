@@ -23,6 +23,9 @@ function tp_survey_label( $field, $value ) {
 				$map[ $s['id'] ][ $o['v'] ] = $o['l'];
 			}
 		}
+		foreach ( tp_survey_legacy_labels() as $field => $labels ) {
+			$map[ $field ] = ( $map[ $field ] ?? array() ) + $labels;
+		}
 	}
 	if ( '' === (string) $value || ! isset( $map[ $field ] ) ) {
 		return (string) $value;

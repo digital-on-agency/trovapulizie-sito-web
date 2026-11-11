@@ -1,4 +1,4 @@
-// QA della survey OnField v2 (page-survey.php): tutte le diramazioni A/B/C/D a 390 e 1280 px, misure delle opzioni,
+// QA della survey OnField v3 (page-survey.php): tutte le diramazioni A/B/C/D a 390 e 1280 px, misure delle opzioni,
 // validazioni del contatto, salvataggio e prove dell'endpoint (honeypot, consenso, nonce, tempo minimo, rate limit).
 // Uso: node tools/qa-survey.js <chrome-bin> <base-url> <out-dir> [admin]
 //   admin = apre anche l'elenco admin e l'export CSV (serve una sessione di amministratore nel browser: WordPress
@@ -67,8 +67,8 @@ async function startAndFirstQuestions(c, { sizeText, tools, software, challenge 
 	ok(!(await c.ev(JS.backVisible)) === false, `${c.label}: tasto indietro visibile dalla seconda schermata`);
 	await c.shot(`${outDir}/${c.label}-s1-role.png`);
 	await pick(c, 'Owner / co-founder');
-	await expectTitle(c, /kind of cleaning/, '2 / 10'); await pick(c, 'Hourly maid service (homes)');
-	await expectTitle(c, /How many cleaners/, '3 / 10'); await pick(c, sizeText || '6–15');
+	await expectTitle(c, /business mainly do/, '2 / 10'); await pick(c, 'Home cleaning / maid service');
+	await expectTitle(c, /work on site for you/, '3 / 10'); await pick(c, sizeText || '6–15');
 	await expectTitle(c, /jobs do you complete/, '4 / 10'); await pick(c, '20–100');
 	await expectTitle(c, /schedule jobs/, '5 / 10');
 	ok((await c.ev(JS.btn('Next →'))) === 'disabled', `${c.label}: Next disabilitato senza selezione (multipla)`);
