@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.66.4
+Version: 0.67.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -10358,4 +10358,91 @@ main.dc--motion .dc-rv.is-in {
 	.related-services__link:hover .related-services__arrow {
 		transform: none;
 	}
+}
+
+/* Banner del consenso ai cookie (inc/tracking.php + assets/js/tp-consent.js, 11/11/2026). In basso, non blocca
+   la pagina; Rifiuta e Accetta tutto con lo stesso peso. Sopra la barra fissa mobile delle landing. */
+.tp-consent {
+	position: fixed;
+	left: 16px;
+	right: 16px;
+	bottom: 16px;
+	z-index: 10000;
+	display: flex;
+	justify-content: center;
+	pointer-events: none;
+}
+.tp-consent[hidden] { display: none; }
+.tp-consent__box {
+	pointer-events: auto;
+	width: 100%;
+	max-width: 760px;
+	max-height: calc(100vh - 32px);
+	overflow-y: auto;
+	background: var(--tp-white);
+	border: 1px solid var(--tp-border-card);
+	border-radius: var(--tp-radius-lg);
+	box-shadow: 0 16px 40px -8px rgba(15, 23, 41, 0.22);
+	padding: 20px 22px;
+	font-family: var(--tp-font);
+	color: var(--tp-text);
+}
+.tp-consent__title {
+	margin: 0 0 6px;
+	font-size: 16px;
+	font-weight: 700;
+	color: var(--tp-text-heading);
+}
+.tp-consent__text {
+	margin: 0;
+	font-size: 13px;
+	line-height: 1.55;
+	color: var(--tp-text-muted);
+}
+.tp-consent__text a {
+	color: var(--tp-focus);
+	text-decoration: underline;
+}
+.tp-consent__prefs {
+	margin-top: 14px;
+	display: grid;
+	gap: 10px;
+}
+.tp-consent__prefs[hidden] { display: none; }
+.tp-consent__opt {
+	display: flex;
+	gap: 10px;
+	align-items: flex-start;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--tp-text-muted);
+	cursor: pointer;
+}
+.tp-consent__opt input {
+	margin-top: 3px;
+	width: 18px;
+	height: 18px;
+	flex: none;
+	accent-color: var(--tp-focus);
+}
+.tp-consent__opt strong {
+	display: block;
+	color: var(--tp-text-heading);
+	font-weight: 600;
+}
+.tp-consent__actions {
+	margin-top: 16px;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	justify-content: flex-end;
+}
+.tp-consent__actions [hidden] { display: none; }
+.tp-consent__actions .tp-btn { min-height: 44px; }
+@media (max-width: 600px) {
+	.tp-consent { left: 8px; right: 8px; bottom: 8px; }
+	.tp-consent__box { padding: 16px; }
+	.tp-consent__actions .tp-btn { flex: 1 1 calc(50% - 4px); }
+	.tp-consent__actions [data-consent-action="customize"],
+	.tp-consent__actions [data-consent-action="save"] { order: 1; flex-basis: 100%; }
 }

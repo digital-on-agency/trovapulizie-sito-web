@@ -807,7 +807,7 @@ add_action( 'carbon_fields_register_fields', function () {
 	Container::make( 'post_meta', __( 'Pagina legale' ) )
 		->where( 'post_template', '=', 'page-legal.php' )
 		->add_fields( array(
-			Field::make( 'text', 'lg_iubenda_url', __( 'Policy iubenda (URL)' ) )->set_help_text( __( 'Compilato = la policy viene incorporata sopra il testo della pagina. Privacy: https://www.iubenda.com/privacy-policy/55307359' ) ),
+			Field::make( 'text', 'lg_iubenda_url', __( 'Policy iubenda (URL)' ) )->set_help_text( __( 'Compilato = la policy viene incorporata sopra il testo della pagina. Dall\'11/11/2026 privacy e cookie policy sono testo della pagina: lasciare vuoto.' ) ),
 		) );
 
 	// Chi siamo — pagina col template page-about.php (SPEC-pagina-chi-siamo, TICKET-66..69).
@@ -927,15 +927,10 @@ add_action( 'carbon_fields_register_fields', function () {
 		->set_page_file( 'tp-tracking' )
 		->add_fields( array(
 			Field::make( 'html', 'tp_tracking_intro' )
-				->set_html( '<p>Un solo contenitore GTM per pagina: non aggiungere snippet altrove. Gli ID del live al 25/10/2026: GTM <code>GTM-WKN46NRS</code>, iubenda sito <code>3635239</code> e cookie policy <code>55307359</code>, Clarity <code>xtz09sh904</code>.</p>' ),
+				->set_html( '<p>Un solo contenitore GTM per pagina: non aggiungere snippet altrove. Gli ID del live: GTM <code>GTM-WKN46NRS</code>, Clarity <code>xtz09sh904</code>. Dall&#39;11/11/2026 il consenso ai cookie lo gestisce il banner del tema (assets/js/tp-consent.js), non piu&#39; iubenda.</p>' ),
 			Field::make( 'text', 'tp_gtm_id', __( 'ID contenitore Google Tag Manager' ) )
 				->set_default_value( 'GTM-WKN46NRS' )
 				->set_help_text( __( 'Formato GTM-XXXXXXX. Vuoto = nessun GTM.' ) ),
-			Field::make( 'text', 'tp_iub_site_id', __( 'iubenda: siteId' ) )
-				->set_default_value( '3635239' ),
-			Field::make( 'text', 'tp_iub_policy_id', __( 'iubenda: cookiePolicyId' ) )
-				->set_default_value( '55307359' )
-				->set_help_text( __( 'Servono entrambi gli ID iubenda per il banner e il consent mode.' ) ),
 			Field::make( 'text', 'tp_clarity_id', __( 'ID progetto Microsoft Clarity' ) )
 				->set_default_value( 'xtz09sh904' )
 				->set_help_text( __( 'Vuoto = niente Clarity.' ) ),

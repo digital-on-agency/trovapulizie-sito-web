@@ -1,8 +1,8 @@
 // QA del tracking di base (TICKET-38): node tools/qa-tracking.js <chrome-bin> <url>
 // Apre l'URL con ?gclid=QA123&utm_source=qa&utm_medium=cpc&utm_campaign=sgrosso e verifica:
-// una sola richiesta a gtm.js, consent default negato nel dataLayer, tp_gclid assente senza consenso marketing e
-// salvato dopo il consenso (cookie iubenda con finalita' 5 simulato), tpGetUtm(),
-// iubenda e Clarity caricati, e gli eventi marketing_* emessi dai click su tel: e sulle ancore verso il form
+// una sola richiesta a gtm.js, banner del consenso visibile, niente iubenda ne' Clarity prima della scelta, consent default negato nel dataLayer, tp_gclid assente senza consenso marketing e
+// salvato dopo il consenso (cookie tp_consent con ads simulato), tpGetUtm(),
+// e gli eventi marketing_* emessi dai click su tel: e sulle ancore verso il form
 // (click intercettati con preventDefault: nessuna navigazione). Esce con 1 se un controllo fallisce.
 const { withChrome } = require('./lib/cdp');
 const [BIN, URL0] = process.argv.slice(2, 4);
@@ -14,17 +14,17 @@ withChrome(BIN, URL, { port: 9343 }, async ({ ev, sleep }) => {
 		var res = performance.getEntriesByType('resource').map(function(e){ return e.name; });
 		var gtm = res.filter(function(n){ return n.indexOf('googletagmanager.com/gtm.js') !== -1; }).length;
 		var iub = res.filter(function(n){ return n.indexOf('iubenda') !== -1; }).length;
-		// Clarity e' bloccata dall'autoblocking iubenda finche' non c'e' consenso: si verifica lo snippet, non la richiesta.
-		var clarity = Array.prototype.filter.call(document.scripts, function(s){ return !s.src && s.textContent.indexOf('clarity.ms/tag') !== -1; }).length;
+		// Clarity parte solo dopo il consenso alle statistiche (tp-consent.js): senza scelta nessuna richiesta.
+		var clarity = res.filter(function(n){ return n.indexOf('clarity.ms') !== -1; }).length;
+		var banner = document.getElementById('tp-consent');
 		var dl = window.dataLayer || [];
 		var consent = null;
 		for (var i = 0; i < dl.length; i++) { var x = dl[i]; if (x && x[0] === 'consent' && x[1] === 'default') { consent = x[2]; break; } }
 		var gclidNo = window.tpGetGclid && window.tpGetGclid();
 		var storedNo = localStorage.getItem('tp_gclid');
-		var pid = window._iub && window._iub.csConfiguration && window._iub.csConfiguration.cookiePolicyId;
-		document.cookie = '_iub_cs-' + pid + '=' + encodeURIComponent(JSON.stringify({ purposes: { '1': true, '4': true, '5': true } })) + '; path=/';
+		document.cookie = 'tp_consent=' + encodeURIComponent(JSON.stringify({ v: 1, ts: Date.now(), stats: true, ads: true })) + '; path=/';
 		var gclid = window.tpGetGclid && window.tpGetGclid();
-		document.cookie = '_iub_cs-' + pid + '=; path=/; max-age=0';
+		document.cookie = 'tp_consent=; path=/; max-age=0';
 		localStorage.removeItem('tp_gclid');
 		var utm = window.tpGetUtm && window.tpGetUtm();
 		var before = dl.length;
@@ -32,12 +32,13 @@ withChrome(BIN, URL, { port: 9343 }, async ({ ev, sleep }) => {
 		var tel = document.querySelector('a[href^="tel:"]'); if (tel) tel.click();
 		var form = document.querySelector('a[href="#form"]'); if (form) form.click();
 		var after = dl.slice(before).filter(function(x){ return x && x.event; }).map(function(x){ return x.event + ':' + (x.landing || '') + (x.target ? ':' + x.target : ''); });
-		return JSON.stringify({ gtm: gtm, iub: iub, clarity: clarity, consent: consent, gclid: gclid, gclidNo: gclidNo, storedNo: storedNo, utm: utm, events: after, landing: window.tpLanding && window.tpLanding() });
+		return JSON.stringify({ gtm: gtm, iub: iub, clarity: clarity, banner: !!(banner && !banner.hidden), consent: consent, gclid: gclid, gclidNo: gclidNo, storedNo: storedNo, utm: utm, events: after, landing: window.tpLanding && window.tpLanding() });
 	})()`));
 	const checks = [
 		['gtm.js richiesto una volta', r.gtm === 1, r.gtm],
-		['iubenda caricata', r.iub >= 1, r.iub],
-		['snippet Clarity presente (parte dopo il consenso)', r.clarity >= 1, r.clarity],
+		['iubenda assente', r.iub === 0, r.iub],
+		['banner del consenso visibile', r.banner === true, r.banner],
+		['Clarity non caricata senza consenso', r.clarity === 0, r.clarity],
 		['consent default negato', !!r.consent && r.consent.analytics_storage === 'denied' && r.consent.ad_storage === 'denied', JSON.stringify(r.consent)],
 		['senza consenso marketing: tp_gclid non salvato', r.gclidNo === undefined && r.storedNo === null, r.gclidNo + ' / ' + r.storedNo],
 		['con consenso marketing: tp_gclid salvato', r.gclid === 'QA123', r.gclid],
