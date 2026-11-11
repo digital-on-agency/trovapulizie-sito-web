@@ -42,6 +42,7 @@ add_action( 'wp_head', function () {
 			'siteId'                          => $iub_site,
 			'whitelabel'                      => false,
 			'cookiePolicyId'                  => $iub_policy,
+			'privacyPolicyUrl'                => home_url( '/privacy/' ),
 			'googleConsentMode'               => true,
 			'banner'                          => array(
 				'acceptButtonColor'          => '#00C896',
@@ -68,33 +69,22 @@ add_action( 'wp_head', function () {
 	if ( $ids['gtm'] ) {
 		$gtm        = esc_js( $ids['gtm'] );
 		$iub_policy = $ids['iub_policy'] ? (int) $ids['iub_policy'] : 0;
-		// Consent mode come sul live: negato finche' iubenda non concede analytics; al grant analytics
-		// vengono concessi anche i tipi ad (non dichiarati nella cookie policy, iubenda da solo non li tocca).
+		// Consent mode per finalita' (11/11/2026, privacy policy v1.0): default dalle scelte gia' espresse nel cookie
+		// iubenda, finalita' 4 (misurazione) -> analytics_storage, finalita' 5 (marketing) -> tipi ad; poi gli
+		// aggiornamenti li manda iubenda (googleConsentMode). Prima ogni preferenza registrata, anche un rifiuto,
+		// concedeva tutto, e il consenso alle statistiche concedeva anche la pubblicita'.
 		?>
 <script>
 window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
 (function(){
-	var granted = false;
+	var p = {};
 	try {
 		var c = document.cookie.split(';').filter(function(s){ return s.trim().indexOf('_iub_cs-<?php echo $iub_policy; ?>=') === 0; })[0];
-		if (c) { var val = JSON.parse(decodeURIComponent(c.trim().split('=').slice(1).join('='))); granted = !!(val && val.cons); }
+		if (c) { var val = JSON.parse(decodeURIComponent(c.trim().split('=').slice(1).join('='))); p = (val && val.purposes) || {}; }
 	} catch (e) {}
-	if (granted) {
-		gtag('consent','default',{'analytics_storage':'granted','ad_storage':'granted','ad_user_data':'granted','ad_personalization':'granted'});
-	} else {
-		gtag('consent','default',{'analytics_storage':'denied','ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','wait_for_update':500});
-		(function(){
-			var _g = gtag;
-			gtag = function(){
-				_g.apply(this, arguments);
-				if (arguments[0]==='consent' && arguments[1]==='update' && arguments[2] && arguments[2].analytics_storage==='granted') {
-					_g('consent','update',{'ad_storage':'granted','ad_user_data':'granted','ad_personalization':'granted'});
-					gtag = _g;
-				}
-			};
-		})();
-	}
+	var a = p['4'] === true ? 'granted' : 'denied', m = p['5'] === true ? 'granted' : 'denied';
+	gtag('consent','default',{'analytics_storage':a,'ad_storage':m,'ad_user_data':m,'ad_personalization':m,'wait_for_update':500});
 })();
 </script>
 <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','<?php echo $gtm; ?>');</script>
