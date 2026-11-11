@@ -2,7 +2,7 @@
 /**
  * Template Name: Survey OnField
  *
- * Survey Dubai v2 (vault: clients/trovapulizie/projects/gestionale-saas/survey-dubai-v2.md), pagina /survey-dubai/.
+ * Survey Dubai v3 (vault: clients/trovapulizie/projects/gestionale-saas/survey-dubai-v2.md, sezione v3), pagina /survey-dubai/.
  * Pagina autonoma: senza navbar ne' footer del sito, noindex, fuori dalla sitemap, senza tracking (inc/survey.php).
  * Le schermate le costruisce assets/js/survey.js dalla definizione passata in data-config; senza JavaScript resta
  * l'avviso del noscript. Pelle del Figma della v1 (UiW4TPgvqCODW5bhyFV5eK, pagina 2781:9): Inter, verde #00C896.

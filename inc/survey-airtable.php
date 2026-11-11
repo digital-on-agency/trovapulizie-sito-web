@@ -253,11 +253,13 @@ function tp_survey_at_sync_row( $id ) {
 		'Opportunità'          => '' !== $opp_id ? array( $opp_id ) : array(),
 	);
 	$record = array( 'fields' => $fields );
+	// typecast: un'etichetta nuova della survey crea l'opzione nel campo a scelta invece di far fallire la copia
+	// (v3 dell'11/11: le opzioni nuove di Tipo attivita' venivano rifiutate).
 	if ( '' !== (string) $r['at_record_id'] ) {
 		$record['id'] = $r['at_record_id'];
-		list( $res, $err ) = tp_survey_at_request( 'PATCH', TP_SURVEY_AT_SURVEY, array( 'records' => array( $record ) ) );
+		list( $res, $err ) = tp_survey_at_request( 'PATCH', TP_SURVEY_AT_SURVEY, array( 'records' => array( $record ), 'typecast' => true ) );
 	} else {
-		list( $res, $err ) = tp_survey_at_request( 'POST', TP_SURVEY_AT_SURVEY, array( 'records' => array( $record ) ) );
+		list( $res, $err ) = tp_survey_at_request( 'POST', TP_SURVEY_AT_SURVEY, array( 'records' => array( $record ), 'typecast' => true ) );
 	}
 	if ( $err ) {
 		return $fail( 'risposta: ' . $err );
