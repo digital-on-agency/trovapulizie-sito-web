@@ -113,9 +113,8 @@ $cta_args         = array(
 			<?php
 			// Ricerca vera (era un segnaposto): GET verso l'app con address e service, come la Home React
 			// (MarketingHome.handleSearch); i servizi solo aziende vanno al preventivo B2B (assets/js/search-form.js).
-			// [ATTENZIONE] Destinazione dei privati da Theme Options > Integrazioni (tp_search_target). Default /home:
-			// al 25/10/2026 in produzione /results non legge address dall'URL (ripiego solo su staging, 947de5d8) e resta
-			// bloccata, mentre /home precompila l'indirizzo (il servizio si riconferma nell'app).
+			// Destinazione dei privati da Theme Options > Integrazioni (tp_search_target): "results" dal 12/11/2026
+			// (l'app legge address e service dall'URL dal 06/11, ce08472f); senza valore salvato resta /home.
 			$servizi = tp_service_types();
 			$default = 0;
 			foreach ( $servizi as $i => $svc ) {
