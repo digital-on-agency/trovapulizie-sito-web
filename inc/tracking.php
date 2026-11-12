@@ -82,8 +82,8 @@ add_action( 'wp_footer', function () {
 	?>
 <div class="tp-consent" id="tp-consent" role="dialog" aria-modal="false" aria-labelledby="tp-consent-title" hidden>
 	<div class="tp-consent__box">
-		<p class="tp-consent__title" id="tp-consent-title">Cookie e strumenti di misurazione</p>
-		<p class="tp-consent__text">Usiamo cookie tecnici necessari al sito. Con il tuo consenso usiamo anche strumenti di statistica (Google Analytics, Microsoft Clarity) e di misurazione pubblicitaria (Google Ads, Meta). Puoi cambiare scelta in ogni momento da «Preferenze cookie» in fondo alla pagina. Dettagli nella <a href="<?php echo esc_url( $cookie ); ?>">cookie policy</a> e nella <a href="<?php echo esc_url( $privacy ); ?>">privacy policy</a>.</p>
+		<p class="tp-consent__title" id="tp-consent-title">Cookie e privacy</p>
+		<p class="tp-consent__text">Usiamo cookie tecnici e, con il tuo consenso, strumenti di statistica e pubblicità. Cambi idea da «Preferenze cookie». <a href="<?php echo esc_url( $cookie ); ?>">Cookie policy</a> · <a href="<?php echo esc_url( $privacy ); ?>">Privacy policy</a></p>
 		<div class="tp-consent__prefs" id="tp-consent-prefs" hidden>
 			<label class="tp-consent__opt"><input type="checkbox" checked disabled> <span><strong>Necessari</strong> Funzionamento del sito e memorizzazione della scelta. Sempre attivi.</span></label>
 			<label class="tp-consent__opt"><input type="checkbox" data-consent="stats"> <span><strong>Statistiche</strong> Google Analytics e Microsoft Clarity: come viene usato il sito.</span></label>

@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.67.1
+Version: 0.67.2
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -10440,9 +10440,28 @@ main.dc--motion .dc-rv.is-in {
 .tp-consent__actions [hidden] { display: none; }
 .tp-consent__actions .tp-btn { min-height: 44px; }
 @media (max-width: 600px) {
+	/* Compatto: testo a 3 righe, Rifiuta e Accetta tutto affiancati e uguali, Personalizza come link testuale. */
 	.tp-consent { left: 8px; right: 8px; bottom: 8px; }
-	.tp-consent__box { padding: 16px; }
-	.tp-consent__actions .tp-btn { flex: 1 1 calc(50% - 4px); }
-	.tp-consent__actions [data-consent-action="customize"],
+	.tp-consent__box { padding: 12px 14px; }
+	.tp-consent__title { margin-bottom: 3px; font-size: 14px; line-height: 1.3; }
+	.tp-consent__text { font-size: 12px; line-height: 1.45; }
+	.tp-consent__prefs { margin-top: 10px; gap: 8px; }
+	.tp-consent__actions { margin-top: 10px; gap: 8px; justify-content: center; }
+	.tp-consent__actions .tp-btn { min-height: 40px; padding-top: 8px; padding-bottom: 8px; font-size: 14px; }
+	.tp-consent__actions [data-consent-action="reject"],
+	.tp-consent__actions [data-consent-action="accept"] { flex: 1 1 calc(50% - 4px); }
+	.tp-consent__actions [data-consent-action="customize"] {
+		order: 1;
+		flex: 0 0 auto;
+		min-height: 32px;
+		padding: 4px 8px;
+		border: 0;
+		background: none;
+		box-shadow: none;
+		color: var(--tp-focus);
+		font-size: 13px;
+		font-weight: 600;
+		text-decoration: underline;
+	}
 	.tp-consent__actions [data-consent-action="save"] { order: 1; flex-basis: 100%; }
 }
