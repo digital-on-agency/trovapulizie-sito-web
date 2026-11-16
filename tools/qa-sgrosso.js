@@ -11,6 +11,10 @@ const { withChrome } = require('./lib/cdp');
 const fs = require('fs');
 const [BIN, BASE_URL, WIDTH_ARG, SHOTS] = process.argv.slice(2, 6);
 const WIDTH = parseInt(WIDTH_ARG, 10) || 390;
+// Identificatore della landing negli eventi e percorso della pagina: default sgrosso-casa. La guida prezzi
+// (TICKET-96) li cambia con EXPECT_LANDING=prezzi-pulizie EXPECT_PATH=/roma/prezzi-pulizie/.
+const EXPECT_LANDING = process.env.EXPECT_LANDING || 'sgrosso-casa';
+const EXPECT_PATH = process.env.EXPECT_PATH || '/roma/sgrosso-casa/';
 const sep = BASE_URL.indexOf('?') === -1 ? '?' : '&';
 const URL = BASE_URL + sep + 'utm_source=google&utm_medium=cpc&utm_campaign=sgrosso&gclid=TESTGCLID';
 
@@ -106,7 +110,7 @@ withChrome(BIN, URL, { port: 9347, width: WIDTH, mobile: WIDTH < 800, height: WI
 	await fillStep1('80'); await submit(); await sleep(600);
 	let evs = await events();
 	check('passo 1 valido: nessuna chiamata a /api/leads, passo 2 visibile', real().length === 0 && (await stepN()) === '2', real().length);
-	check('evento preventivo_sgrosso_step {step:1, step_name:casa}', evs.length === 1 && evs[0].event === 'preventivo_sgrosso_step' && evs[0].step === 1 && evs[0].step_name === 'casa' && evs[0].landing === 'sgrosso-casa' && evs[0].cta_position === 'hero' && evs[0].tipoPulizia === 'post-ristrutturazione', JSON.stringify(evs));
+	check('evento preventivo_sgrosso_step {step:1, step_name:casa}', evs.length === 1 && evs[0].event === 'preventivo_sgrosso_step' && evs[0].step === 1 && evs[0].step_name === 'casa' && evs[0].landing === EXPECT_LANDING && evs[0].cta_position === 'hero' && evs[0].tipoPulizia === 'post-ristrutturazione', JSON.stringify(evs));
 	const sec2 = JSON.parse(await ev(`(function(){ var f=${F}; var st=f.querySelector('[data-step="2"]'); return JSON.stringify({ n: f.querySelector('[data-step-n]').textContent, name: f.querySelector('[data-step-name]').textContent, btn: f.querySelector('[data-submit]').textContent.trim(), emailReq: f.querySelector('[name=email]').required, back: !f.querySelector('[data-back]').hidden }); })()`));
 	check('passo 2 "Contatto": bottone di invio, email non obbligatoria, Indietro presente', sec2.n === '2' && sec2.name === 'Contatto' && sec2.btn === 'Prenota il sopralluogo gratuito' && !sec2.emailReq && sec2.back, JSON.stringify(sec2));
 
@@ -149,9 +153,9 @@ withChrome(BIN, URL, { port: 9347, width: WIDTH, mobile: WIDTH < 800, height: WI
 	evs = await events();
 	const names = evs.map(e => e.event + (e.step ? ':' + e.step : ''));
 	const sub = evs.find(e => e.event === 'preventivo_sgrosso_submitted');
-	check('eventi: step 2 contatto e submitted {fase:contatto}, in questo ordine', names.join() === 'preventivo_sgrosso_step:1,preventivo_sgrosso_step:2,preventivo_sgrosso_submitted' && evs[1].step_name === 'contatto' && !!sub && sub.fase === 'contatto' && sub.landing === 'sgrosso-casa' && sub.cta_position === 'hero' && sub.tipoPulizia === 'post-ristrutturazione', JSON.stringify(names));
+	check('eventi: step 2 contatto e submitted {fase:contatto}, in questo ordine', names.join() === 'preventivo_sgrosso_step:1,preventivo_sgrosso_step:2,preventivo_sgrosso_submitted' && evs[1].step_name === 'contatto' && !!sub && sub.fase === 'contatto' && sub.landing === EXPECT_LANDING && sub.cta_position === 'hero' && sub.tipoPulizia === 'post-ristrutturazione', JSON.stringify(names));
 	const s3 = JSON.parse(await ev(`(function(){ var f=${F}; return JSON.stringify({ step: f.querySelector('[data-step]:not([hidden])').getAttribute('data-step'), title: f.querySelector('[data-step="3"] legend').textContent, btn: f.querySelector('[data-submit]').textContent.trim(), skip: !f.querySelector('[data-skip]').hidden, back: !f.querySelector('[data-back]').hidden, path: location.pathname }); })()`));
-	check('passo 3 "Richiesta ricevuta" con Invia i dettagli e Salta, senza Indietro, ancora sulla landing', s3.step === '3' && s3.title === 'Richiesta ricevuta' && s3.btn === 'Invia i dettagli' && s3.skip && !s3.back && s3.path === '/roma/sgrosso-casa/', JSON.stringify(s3));
+	check('passo 3 "Richiesta ricevuta" con Invia i dettagli e Salta, senza Indietro, ancora sulla landing', s3.step === '3' && s3.title === 'Richiesta ricevuta' && s3.btn === 'Invia i dettagli' && s3.skip && !s3.back && s3.path === EXPECT_PATH, JSON.stringify(s3));
 	await shotForm('form-passo-3');
 
 	// ---- Passo 3: dettagli e foto -> PATCH finale ---------------------------------------------------------------------
@@ -177,7 +181,7 @@ withChrome(BIN, URL, { port: 9347, width: WIDTH, mobile: WIDTH < 800, height: WI
 	await fillStep1('80'); await submit(); await sleep(400); await fillStep2(); await submit(); await sleep(1500);
 	await submit(); await sleep(1500);
 	const fe = (await events()).filter(e => e.event === 'marketing_form_submit');
-	check('evento marketing_form_submit {landing, form:dettagli}', fe.length === 1 && fe[0].landing === 'sgrosso-casa' && fe[0].form === 'dettagli', JSON.stringify(fe));
+	check('evento marketing_form_submit {landing, form:dettagli}', fe.length === 1 && fe[0].landing === EXPECT_LANDING && fe[0].form === 'dettagli', JSON.stringify(fe));
 
 	// ---- Errori del primo POST ---------------------------------------------------------------------------------------------------
 	await load('fail1');
@@ -214,7 +218,7 @@ withChrome(BIN, URL, { port: 9347, width: WIDTH, mobile: WIDTH < 800, height: WI
 	await fillStep1('80'); await submit(); await sleep(400); await fillStep2(); await submit(); await sleep(1500);
 	await submit(); await sleep(1200);
 	ae = await apiErr();
-	check('PATCH in errore: messaggio, resto al passo 3, Salta disponibile', !ae.hidden && /Invio non riuscito/.test(ae.text) && (await stepN()) === '3' && (await ev(`!${F}.querySelector('[data-skip]').hidden`)) && (await ev('location.pathname')) === '/roma/sgrosso-casa/', JSON.stringify(ae));
+	check('PATCH in errore: messaggio, resto al passo 3, Salta disponibile', !ae.hidden && /Invio non riuscito/.test(ae.text) && (await stepN()) === '3' && (await ev(`!${F}.querySelector('[data-skip]').hidden`)) && (await ev('location.pathname')) === EXPECT_PATH, JSON.stringify(ae));
 	await ev(`${F}.querySelector('[data-skip]').click()`); await sleep(600);
 	check('dopo il PATCH in errore, Salta porta a /thank-you/', (await ev('location.pathname')) === '/thank-you/', await ev('location.pathname'));
 

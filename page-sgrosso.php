@@ -259,6 +259,7 @@ get_header( 'landing', array(
 		return is_numeric( $v ) ? (float) $v : $fallback;
 	};
 	$coupon_amount = carbon_get_the_post_meta( 'sg_calc_coupon_amount' );
+	$coef_def      = tp_sgrosso_coef(); // coefficienti di default: inc/prezzi.php, la stessa formula della guida prezzi
 	get_template_part( 'template-parts/sgrosso-estimator', null, array(
 		'eyebrow'       => tp_sg_text( 'sg_calc_eyebrow', $defaults, null, 'CALCOLA LA STIMA' ),
 		'title'         => tp_sg_text( 'sg_calc_title', $defaults, 'calc_h2' ),
@@ -268,11 +269,11 @@ get_header( 'landing', array(
 		'extras'        => $calc_extras,
 		'mq_default'    => (int) $calc_num( 'sg_calc_mq_default', 100 ),
 		'coef'          => array(
-			'base'      => $calc_num( 'sg_calc_base', 200 ),
-			'per_mq'    => $calc_num( 'sg_calc_per_mq', 2.2 ),
-			'extra_min' => $calc_num( 'sg_calc_extra_min', 25 ),
-			'extra_max' => $calc_num( 'sg_calc_extra_max', 40 ),
-			'max_mult'  => $calc_num( 'sg_calc_max_mult', 1.35 ),
+			'base'      => $calc_num( 'sg_calc_base', $coef_def['base'] ),
+			'per_mq'    => $calc_num( 'sg_calc_per_mq', $coef_def['per_mq'] ),
+			'extra_min' => $calc_num( 'sg_calc_extra_min', $coef_def['extra_min'] ),
+			'extra_max' => $calc_num( 'sg_calc_extra_max', $coef_def['extra_max'] ),
+			'max_mult'  => $calc_num( 'sg_calc_max_mult', $coef_def['max_mult'] ),
 		),
 		'result_label'  => tp_sg_text( 'sg_calc_result_label', $defaults, null, 'STIMA INDICATIVA' ),
 		'cta_title'     => tp_sg_text( 'sg_calc_cta_title', $defaults, null, 'Ricevi il preventivo esatto' ),

@@ -63,6 +63,12 @@ tipoPulizia}`, `preventivo_sgrosso_submitted` (con `fase:'contatto'`), `marketin
 di posizione e' `cta_position`, mai `source`. I pulsanti "Calcola" non puntano piu' a `#form`: non emettono piu'
 `marketing_click_to_form`.
 
+## Formula lato PHP
+
+La stessa formula del calcolatore e' in `inc/prezzi.php` (`tp_sgrosso_stima()`, coefficienti di default in `tp_sgrosso_coef()`):
+`template-parts/sgrosso-estimator.php` e `page-sgrosso.php` la usano per i default e per la stima iniziale, la guida prezzi
+(`docs/guida-prezzi.md`) per la tabella. Cambiare la formula in `sgrosso-estimator.js` richiede di cambiarla anche li.
+
 ## QA
 
 `tools/qa-mobile.js` (6 larghezze, riconosce le landing), `tools/qa-sgrosso.js` (form in tre passi con API simulata via Fetch), `tools/qa-sgrosso-cta.js` (collegamenti interni, calcolatore -> form, ancore),

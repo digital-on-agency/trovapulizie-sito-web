@@ -43,12 +43,12 @@ if ( ! $types ) {
 }
 $default_type = in_array( $args['default_type'], $types, true ) ? $args['default_type'] : $types[0];
 $extras       = array_values( array_filter( array_map( 'trim', (array) $args['extras'] ) ) );
-$coef         = wp_parse_args( (array) $args['coef'], array( 'base' => 200, 'per_mq' => 2.2, 'extra_min' => 25, 'extra_max' => 40, 'max_mult' => 1.35 ) );
+$coef         = wp_parse_args( (array) $args['coef'], tp_sgrosso_coef() ); // default in inc/prezzi.php, unica fonte lato PHP
 $mq           = max( 30, min( 300, (int) $args['mq_default'] ) );
 // Stima iniziale calcolata lato server: la card non parte vuota se il JS tarda.
-$base    = (float) $coef['base'] + $mq * (float) $coef['per_mq'];
-$min_ini = (int) ( round( $base / 10 ) * 10 );
-$max_ini = (int) ( round( $base * (float) $coef['max_mult'] / 10 ) * 10 );
+$ini     = tp_sgrosso_stima( $mq, 0, $coef );
+$min_ini = $ini['min'];
+$max_ini = $ini['max'];
 $uid     = 'calc-' . wp_unique_id();
 ?>
 <section class="sg-calc" id="quanto-costa" data-estimator

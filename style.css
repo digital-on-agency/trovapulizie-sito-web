@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.67.5
+Version: 0.68.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -10479,4 +10479,173 @@ main.dc--motion .dc-rv.is-in {
 		text-decoration: underline;
 	}
 	.tp-consent__actions [data-consent-action="save"] { order: 1; flex-basis: 100%; }
+}
+
+/* =========================
+   Guida prezzi — page-guida-prezzi.php, /roma/prezzi-pulizie/ (TICKET-96, SPEC-crescita-organica-fase-b US-01)
+   Classi pg-*; riusa .sg-hero, .sg-section-head, .b2b-why (value-props.php), .sg-calc, .faq, .sg-final e
+   .related-services. Mobile first: base a una colonna, da 1024px la tabella entra senza scorrimento.
+   La tabella e' HTML puro generato lato server (inc/prezzi.php): leggibile anche senza JavaScript.
+   ========================= */
+.pg-intro {
+	padding: 44px 20px 8px;
+	background: var(--tp-white);
+}
+.pg-intro__inner {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	max-width: 820px;
+	margin: 0 auto;
+}
+.pg-intro__title {
+	margin: 0;
+	font-size: 24px;
+	line-height: 1.2;
+	letter-spacing: -0.48px;
+	font-weight: 800;
+	color: var(--tp-ink);
+}
+.pg-intro p {
+	margin: 0;
+	font-size: 16px;
+	line-height: 1.6;
+	color: #4B5563;
+}
+
+.pg-table {
+	padding: 40px 20px 52px;
+	background: var(--tp-white);
+}
+.pg-table__inner {
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+	max-width: 1080px;
+	margin: 0 auto;
+}
+/* Contenitore a scorrimento orizzontale sotto 1024px: la prima colonna resta ferma e le cifre scorrono. */
+.pg-table__scroll {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	border: 1px solid var(--tp-border-card);
+	border-radius: 16px;
+	background: var(--tp-white);
+	box-shadow: 0 10px 30px 0 rgba(15, 33, 26, 0.04);
+}
+.pg-table__scroll:focus-visible {
+	outline: 2px solid var(--tp-focus);
+	outline-offset: 2px;
+}
+.pg-table__table {
+	width: 100%;
+	min-width: 520px;
+	border-collapse: separate;
+	border-spacing: 0;
+	font-size: 14px;
+	color: var(--tp-ink);
+}
+.pg-table__table th,
+.pg-table__table td {
+	padding: 14px 12px;
+	border-bottom: 1px solid var(--tp-border);
+	text-align: right;
+	white-space: nowrap;
+	background: var(--tp-white);
+}
+.pg-table__table thead th {
+	background: #F7F8FA;
+	font-size: 13px;
+	font-weight: 600;
+	color: #4B5563;
+}
+.pg-table__table tbody tr:last-child th,
+.pg-table__table tbody tr:last-child td {
+	border-bottom: 0;
+}
+.pg-table__table th:first-child {
+	position: sticky;
+	left: 0;
+	z-index: 1;
+	min-width: 138px;
+	max-width: 168px;
+	text-align: left;
+	white-space: normal;
+	border-right: 1px solid var(--tp-border);
+}
+.pg-table__table tbody th {
+	font-weight: 600;
+	line-height: 1.3;
+}
+.pg-table__table tbody th {
+	padding-top: 4px;
+	padding-bottom: 4px;
+}
+.pg-table__table tbody th a {
+	display: inline-flex;
+	align-items: center;
+	min-height: 44px; /* bersaglio di tocco da 44px anche con il testo su due righe */
+	color: var(--tp-ink);
+	text-decoration: underline;
+	text-decoration-color: var(--tp-primary);
+	text-decoration-thickness: 2px;
+	text-underline-offset: 3px;
+}
+.pg-table__table tbody th a:hover {
+	color: #067A55;
+}
+.pg-table__table td {
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+.pg-table__note {
+	margin: 0;
+	font-size: 14px;
+	line-height: 1.55;
+	color: #4B5563;
+}
+.pg-table__note--same {
+	padding: 14px 16px;
+	border-radius: 12px;
+	background: var(--tp-mint);
+	color: var(--tp-text-heading);
+}
+
+@media (min-width: 1024px) {
+	.pg-intro {
+		padding: 72px 80px 12px;
+	}
+	.pg-intro__inner {
+		gap: 16px;
+	}
+	.pg-intro__title {
+		font-size: 30px;
+		letter-spacing: -0.6px;
+	}
+	.pg-intro p {
+		font-size: 17px;
+	}
+	.pg-table {
+		padding: 64px 80px 88px;
+	}
+	.pg-table__inner {
+		gap: 32px;
+	}
+	.pg-table__table {
+		min-width: 0;
+		font-size: 16px;
+	}
+	.pg-table__table th,
+	.pg-table__table td {
+		padding: 18px 22px;
+	}
+	.pg-table__table thead th {
+		font-size: 14px;
+	}
+	.pg-table__table th:first-child {
+		max-width: none;
+	}
+	.pg-table__note {
+		font-size: 15px;
+	}
 }

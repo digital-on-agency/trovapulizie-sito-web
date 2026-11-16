@@ -133,9 +133,11 @@ const PROBE = `(() => {
 			? ['.sg-hero', '.sg-trust', '.b2b-why', '.zz-tiger', '.sg-when', '.zz-services', '.sg-steps', '.reviews', '.zz-price', '.faq', '.sg-final', '[data-lead-b2b]#lead-hero', '[data-lead-b2b]#lead-bottom']
 			: b2b
 			? ['.sg-hero', '.sg-trust', '.sg-when', '.b2b-works', '.dc-who', '.b2b-why', '.sg-steps', '.reviews', '.faq', '.sg-final', '[data-lead-b2b]#lead-hero', '[data-lead-b2b]#lead-bottom']
+			: (landingMain && landingMain.classList.contains('pg')
+			? ['.sg-hero', '.pg-intro', '.pg-table', '.b2b-why', '.sg-calc', '.faq', '.sg-final', '.related-services']
 			: (landingMain && landingMain.classList.contains('sgrosso')
 			? ['.sg-hero', '.sg-trust', '.sg-compare', '.sg-when', '.sg-steps', '.sg-calc', '.reviews', '.sg-coupon', '.faq', '.sg-final']
-			: (landingMain ? ['.ty__grid'] : []))).filter(sel => !document.querySelector(sel)),
+			: (landingMain ? ['.ty__grid'] : [])))).filter(sel => !document.querySelector(sel)),
 		stickyCta: (() => {
 			const b = document.querySelector('[data-sticky-cta]');
 			return b ? { c: true, hidden: b.hidden } : { c: false };

@@ -195,6 +195,8 @@ add_action( 'wp_enqueue_scripts', function () {
 	$moduli_hub       = array( 'sticky-cta', 'price-estimator' );
 	// Landing Sgrosso (ADR-004): barra fissa doppia; lead-form.js arriva con TICKET-40.
 	$moduli_sgrosso   = array( 'sticky-cta', 'scenario-tabs', 'sgrosso-estimator', 'lead-form' );
+	// Guida prezzi (TICKET-96): barra fissa, calcolatore (prima del form: il passo Contatto usa tpSgrossoStima) e form lead.
+	$moduli_guida     = array( 'sticky-cta', 'sgrosso-estimator', 'lead-form' );
 	// Coreografia della sola Home (ADR-002): telefono pinnato, sequenza schermate, video hero.
 	$moduli_home      = array( 'home-motion', 'hiw-carousel', 'hero-video', 'search-form' );
 	// Pagina Diventa cleaner (TICKET-51/54): barra fissa e calcolatore dei guadagni.
@@ -222,6 +224,10 @@ add_action( 'wp_enqueue_scripts', function () {
 	if ( is_page_template( 'page-cleaner-landing.php' ) ) {
 		// Dei moduli condivisi usa solo reveal e FAQ: niente mappa, servizi, recensioni.
 		$handles = array_merge( array( 'reveal', 'faq-accordion' ), $moduli_cleaner );
+	}
+	if ( is_page_template( 'page-guida-prezzi.php' ) ) {
+		// Guida prezzi (TICKET-96): ingressi, FAQ, barra fissa, calcolatore e form; niente tab, mappa, recensioni.
+		$handles = array_merge( array( 'reveal', 'faq-accordion' ), $moduli_guida );
 	}
 	if ( is_page_template( 'page-landing-zanzare.php' ) ) {
 		// Landing zanzare (TICKET-73..75): stessi moduli della B2B (barra fissa, tab, form a un passo).
@@ -296,5 +302,6 @@ require_once __DIR__ . "/inc/carbon-fields.php";
 require_once __DIR__ . '/inc/tracking.php';
 require_once __DIR__ . '/inc/blog.php';
 require_once __DIR__ . '/inc/redirects.php';
+require_once __DIR__ . '/inc/prezzi.php';
 require_once __DIR__ . '/inc/seo.php';
 require_once __DIR__ . '/inc/survey.php';

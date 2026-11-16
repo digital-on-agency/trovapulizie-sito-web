@@ -26,6 +26,7 @@ function tp_service_pages() {
 		'/roma/sgrosso-trasloco/'              => 'Pulizia post trasloco Roma',
 		'/roma/sgrosso-fine-affitto/'          => 'Pulizia fine affitto Roma',
 		'/roma/sgrosso-prima-pulizia/'         => 'Pulizia straordinaria casa Roma',
+		'/roma/prezzi-pulizie/'                => 'Prezzi pulizie straordinarie Roma',
 		'/roma/sgrosso-commerciale/'           => 'Pulizie commerciali Roma',
 		'/roma/zanzare-disinfestazione/'       => 'Disinfestazione zanzare Roma',
 	);
@@ -95,6 +96,10 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-cleaner-landing.php' ) ) {
 		return 'Diventa cleaner a Roma: lavora con noi | Trovapulizie';
 	}
+	// Guida prezzi (TICKET-96): 57 caratteri.
+	if ( is_singular() && is_page_template( 'page-guida-prezzi.php' ) ) {
+		return 'Prezzi pulizie straordinarie a Roma: fasce | Trovapulizie';
+	}
 	// Landing B2B (TICKET-58, accorciato a 56 caratteri in TICKET-88: Google tronca oltre i 60).
 	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {
 		return 'Pulizie commerciali Roma: uffici e negozi | Trovapulizie';
@@ -136,6 +141,9 @@ function tp_seo_description() {
 	}
 	if ( is_singular() && is_page_template( 'page-cleaner-landing.php' ) ) {
 		return 'Lavora come cleaner a Roma con Trovapulizie: clienti verificati, pagamenti puntuali via app, zero commissioni nascoste. Iscriviti gratis in 5 minuti.';
+	}
+	if ( is_singular() && is_page_template( 'page-guida-prezzi.php' ) ) {
+		return 'Quanto costa una pulizia straordinaria a Roma: fasce di prezzo per ' . tp_guida_prezzi_metrature_testo() . ' mq, cosa cambia il costo e stima sul tuo caso. Sopralluogo gratuito.';
 	}
 	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {
 		return 'Pulizie commerciali a Roma per uffici, negozi e locali: preventivo su misura, fattura, personale verificato. Sopralluogo gratuito, risposta in 1 ora.';
@@ -230,7 +238,9 @@ add_action( 'wp_head', function () {
 	$b2b = is_singular() && is_page_template( 'page-landing-b2b.php' );
 	// Landing zanzare (TICKET-73): stesso Service della B2B, senza offerta.
 	$zz  = is_singular() && is_page_template( 'page-landing-zanzare.php' );
-	if ( ! $d && ! $b2b && ! $zz ) {
+	// Guida prezzi (TICKET-96): stesso Service delle landing Sgrosso, con la stessa offerta 200-700 EUR.
+	$gp  = is_singular() && is_page_template( 'page-guida-prezzi.php' );
+	if ( ! $d && ! $b2b && ! $zz && ! $gp ) {
 		return;
 	}
 	$dati = array(
