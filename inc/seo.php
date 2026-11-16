@@ -13,6 +13,7 @@
  */
 require_once __DIR__ . '/sgrosso-variants.php';
 require_once __DIR__ . '/b2b-variants.php';
+require_once __DIR__ . '/hub-roma.php';
 
 /**
  * Pagine di servizio e hub di Roma con l'anchor text fisso della SPEC-seo-post-cutover (TICKET-78).
@@ -21,7 +22,7 @@ require_once __DIR__ . '/b2b-variants.php';
  */
 function tp_service_pages() {
 	return array(
-		'/roma/'                               => 'Pulizie casa a Roma',
+		'/roma/'                               => 'Impresa di pulizie a Roma',
 		'/roma/sgrosso-casa/'                  => 'Sgrosso casa Roma',
 		'/roma/sgrosso-post-ristrutturazione/' => 'Pulizia post-ristrutturazione Roma',
 		'/roma/sgrosso-trasloco/'              => 'Pulizia post trasloco Roma',
@@ -91,9 +92,11 @@ function tp_seo_title() {
 	if ( is_singular() && is_front_page() ) {
 		return 'Trovapulizie: pulizie professionali a Roma';
 	}
-	// Hub /roma/ (TICKET-81): senza campo SEO compilato il title era il solo titolo della pagina ("Roma").
+	// Hub /roma/ (TICKET-81, riscritto in TICKET-98 su "impresa di pulizie a Roma"): senza campo SEO compilato il title
+	// era il solo titolo della pagina ("Roma"). Il default sta in inc/hub-roma.php.
 	if ( is_singular() && is_page_template( 'page-hub-roma.php' ) ) {
-		return 'Pulizie casa a Roma, prenoti in 2 minuti | Trovapulizie';
+		$hub = tp_hub_roma_defaults();
+		return $hub['seo_title'];
 	}
 	// Diventa cleaner (TICKET-51, accorciato da 67 a 52 caratteri in TICKET-95).
 	if ( is_singular() && is_page_template( 'page-cleaner-landing.php' ) ) {
@@ -143,6 +146,10 @@ function tp_seo_description() {
 	}
 	if ( is_singular() && is_page_template( 'page-thank-you.php' ) ) {
 		return 'Richiesta ricevuta: il team Trovapulizie ti ricontatta entro 1 ora per confermare il tuo preventivo gratuito.';
+	}
+	if ( is_singular() && is_page_template( 'page-hub-roma.php' ) ) {
+		$hub = tp_hub_roma_defaults();
+		return $hub['seo_description'];
 	}
 	if ( is_singular() && is_page_template( 'page-cleaner-landing.php' ) ) {
 		return 'Lavora come cleaner a Roma con Trovapulizie: clienti verificati, pagamenti puntuali via app, zero commissioni nascoste. Iscriviti gratis in 5 minuti.';

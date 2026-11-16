@@ -24,6 +24,7 @@ ATTESI = {
     'sgrosso-commerciale': 'Pulizie commerciali Roma: uffici e negozi | Trovapulizie',
     'pulizie-uffici': 'Pulizie uffici Roma: preventivo gratuito | Trovapulizie',
     'pulizie-condomini': 'Pulizie condomini Roma: preventivo gratuito | Trovapulizie',
+    'hub-roma': 'Impresa di pulizie a Roma: privati e aziende | Trovapulizie',
 }
 
 def leggi(rel):
@@ -67,12 +68,23 @@ trovati['home'] = php_literal(m.group(1)) if m else None
 for m in re.finditer(r"'landing'\s*=>\s*'([a-z-]+)',.*?'page_title'\s*=>\s*'((?:[^'\\]|\\.)*)'", b2b, re.S):
     trovati[m.group(1)] = php_literal(m.group(2))
 trovati['zanzare'] = blocco_template('page-landing-zanzare.php')
+# Hub /roma/ (TICKET-98): il default sta in inc/hub-roma.php, chiave 'seo_title' (e 'seo_description'); inc/seo.php lo legge.
+hub = leggi('inc/hub-roma.php')
+m = re.search(r"'seo_title'\s*=>\s*'((?:[^'\\]|\\.)*)'", hub)
+trovati['hub-roma'] = php_literal(m.group(1)) if m else None
 
 print('--- TICKET-88: title')
 for chiave, atteso in ATTESI.items():
     t = trovati.get(chiave)
     check(chiave + ': valore', t == atteso, t)
     check(chiave + ': lunghezza <= ' + str(LIMITE), t is not None and len(t) <= LIMITE, None if t is None else len(t))
+
+print('--- TICKET-98: hub /roma/')
+m = re.search(r"'seo_description'\s*=>\s*\"((?:[^\"\\]|\\.)*)\"", hub)
+desc = php_literal(m.group(1)) if m else None
+check('hub-roma: title con "impresa di pulizie" e "Roma"', bool(trovati['hub-roma']) and 'impresa di pulizie' in trovati['hub-roma'].lower() and 'Roma' in trovati['hub-roma'], trovati['hub-roma'])
+check('hub-roma: description entro 160 con "impresa di pulizie" e "Roma"', desc is not None and 70 <= len(desc) <= 160 and 'impresa di pulizie' in desc.lower() and 'Roma' in desc, None if desc is None else str(len(desc)) + ': ' + desc)
+check('hub-roma: inc/seo.php usa i default di tp_hub_roma_defaults() per title e description', "$hub['seo_title']" in seo and "$hub['seo_description']" in seo)
 
 print('--- TICKET-89: canonical')
 check('tp_seo_canonical_url gestisce la paginazione con get_pagenum_link', 'get_pagenum_link' in seo)

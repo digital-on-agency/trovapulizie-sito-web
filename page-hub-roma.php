@@ -6,8 +6,14 @@
  * vault `clients/trovapulizie/projects/sito-web/spec/SPEC-pagina-hub-roma.md`.
  *
  * Legge i campi della scheda "Hub Roma — Sezioni" (inc/carbon-fields.php, prefisso roma_) e
- * renderizza nell'ordine: hero con ricerca, zone per CAP, servizi, verificati, come funziona,
- * recensioni (se compilate), FAQ, CTA finale, intro SEO, barra fissa mobile.
+ * renderizza nell'ordine: hero con ricerca, introduzione (cosa fa Trovapulizie), elenco "Servizi a Roma" con un
+ * link per ogni pagina pubblicata, zone per CAP, servizi a tab, verificati, come funziona, recensioni (se
+ * compilate), FAQ, CTA finale, barra fissa mobile.
+ *
+ * TICKET-98: l'hub risponde a "impresa di pulizie a Roma". H1, sottotitolo, introduzione e titoli di sezione hanno il
+ * default in inc/hub-roma.php; un campo roma_* compilato sulla pagina vince. L'introduzione, prima in fondo come testo
+ * SEO, sta ora sotto la hero (stesso campo roma_intro_text); l'elenco dei servizi sostituisce il blocco "Altri servizi
+ * a Roma", che sull'hub linkava le stesse pagine senza controllare che fossero pubblicate.
  *
  * Le sezioni sono tutte template-part riusabili pilotati da $args: nessun accesso diretto ai
  * campi dentro le parti, nessuna copia divergente dei componenti della Home.
@@ -23,22 +29,17 @@
  */
 get_header();
 
-$hero_eyebrow  = carbon_get_the_post_meta( 'roma_hero_eyebrow' );
-$hero_title    = carbon_get_the_post_meta( 'roma_hero_title' );
-$hero_subtitle = carbon_get_the_post_meta( 'roma_hero_subtitle' );
+$hub           = tp_hub_roma_testi();
+$hero_eyebrow  = $hub['eyebrow'];
+$hero_title    = $hub['title'];
+$hero_subtitle = $hub['subtitle'];
 
 $services      = carbon_get_the_post_meta( 'roma_services' );
 $faq_items     = carbon_get_the_post_meta( 'roma_faq_items' );
 $reviews       = carbon_get_the_post_meta( 'reviews' );
-$intro_text    = carbon_get_the_post_meta( 'roma_intro_text' );
+$servizi_roma  = tp_hub_roma_servizi();
 ?>
 <main class="hub-roma" id="contenuto">
-
-	<?php if ( current_user_can( 'edit_posts' ) && ! $hero_title ) : ?>
-		<div style="background:#fff3cd;border:1px solid #ffe69c;padding:12px 20px;margin:20px;border-radius:8px;">
-			Contenuti non ancora inseriti &mdash; vai su <strong>Pagine &rarr; Roma &rarr; Modifica</strong> e compila la scheda <strong>Hub Roma &mdash; Sezioni</strong>. Questo avviso lo vedi solo da loggato.
-		</div>
-	<?php endif; ?>
 
 	<section class="hub-hero" id="cerca">
 		<div class="hub-hero__content">
@@ -70,6 +71,49 @@ $intro_text    = carbon_get_the_post_meta( 'roma_intro_text' );
 			?>
 		</div>
 	</section>
+
+	<section class="hub-intro" id="cosa-facciamo" aria-labelledby="hub-intro-title">
+		<div class="hub-intro__inner">
+			<?php if ( $hub['intro_eyebrow'] ) : ?>
+				<p class="hub-intro__eyebrow"><?php echo esc_html( $hub['intro_eyebrow'] ); ?></p>
+			<?php endif; ?>
+			<h2 class="hub-intro__title" id="hub-intro-title"><?php echo esc_html( $hub['intro_title'] ); ?></h2>
+			<?php foreach ( preg_split( '/\R{2,}/', $hub['intro_text'] ) as $paragrafo ) : ?>
+				<?php if ( '' !== trim( $paragrafo ) ) : ?>
+					<p class="hub-intro__text"><?php echo nl2br( esc_html( trim( $paragrafo ) ) ); ?></p>
+				<?php endif; ?>
+			<?php endforeach; ?>
+		</div>
+	</section>
+
+	<?php if ( $servizi_roma ) : ?>
+		<section class="hub-services" id="servizi-roma" aria-labelledby="hub-services-title">
+			<div class="hub-services__inner">
+				<h2 class="hub-services__title" id="hub-services-title"><?php echo esc_html( $hub['services_title'] ); ?></h2>
+				<?php if ( $hub['services_text'] ) : ?>
+					<p class="hub-services__text"><?php echo esc_html( $hub['services_text'] ); ?></p>
+				<?php endif; ?>
+				<?php foreach ( $servizi_roma as $gruppo ) : ?>
+					<div class="hub-services__group">
+						<h3 class="hub-services__group-title"><?php echo esc_html( $gruppo['title'] ); ?></h3>
+						<ul class="hub-services__list">
+							<?php foreach ( $gruppo['voci'] as $voce ) : ?>
+								<li>
+									<a class="hub-services__link" href="<?php echo esc_url( home_url( $voce['path'] ) ); ?>" data-hub-service="<?php echo esc_attr( $voce['path'] ); ?>">
+										<span class="hub-services__label"><?php echo esc_html( $voce['label'] ); ?></span>
+										<?php if ( $voce['text'] ) : ?>
+											<span class="hub-services__desc"><?php echo esc_html( $voce['text'] ); ?></span>
+										<?php endif; ?>
+										<span class="hub-services__arrow" aria-hidden="true">&rarr;</span>
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</div>
+				<?php endforeach; ?>
+			</div>
+		</section>
+	<?php endif; ?>
 
 	<?php
 	// Zone: mappa per CAP (ADR-003 rev. 2), non la raster a 4 macro-zone del Figma, che e'
@@ -172,20 +216,6 @@ $intro_text    = carbon_get_the_post_meta( 'roma_intro_text' );
 		'image'       => carbon_get_the_post_meta( 'roma_cta_image' ),
 	) );
 	?>
-
-	<?php if ( $intro_text ) : ?>
-		<section class="hub-intro">
-			<div class="hub-intro__inner">
-				<?php $intro_eyebrow = carbon_get_the_post_meta( 'roma_intro_eyebrow' ); ?>
-				<?php if ( $intro_eyebrow ) : ?>
-					<p class="hub-intro__eyebrow"><?php echo esc_html( $intro_eyebrow ); ?></p>
-				<?php endif; ?>
-				<p class="hub-intro__text"><?php echo nl2br( esc_html( $intro_text ) ); ?></p>
-			</div>
-		</section>
-	<?php endif; ?>
-
-	<?php get_template_part( 'template-parts/related-services' ); ?>
 
 	<?php get_template_part( 'template-parts/sticky-cta', null, array(
 		'label'  => 'Trova pulizie nella tua zona',
