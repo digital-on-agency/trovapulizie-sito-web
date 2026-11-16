@@ -57,6 +57,12 @@ function tp_sg_variants() {
 			'cta_final_h2'     => 'Pronta per il trasloco?',
 			'faq_first_q'      => 'Quanto costa una pulizia post-trasloco?',
 			'faq_first_a'      => 'Dipende da dimensione e stato della casa — quella che lasci o quella dove entri: per questo il sopralluogo è gratuito. Vedi il prezzo fisso prima di decidere, senza sorprese.',
+			// FAQ in piu' dopo la prima (TICKET-99, testi approvati da Guido il 16/11).
+			'faq_extra'        => array(
+				array( 'question' => 'Pulite sia la casa che lascio sia quella nuova?', 'answer' => 'Sì, anche nello stesso giorno, con due squadre o su due mezze giornate. Indicalo nella richiesta, così il sopralluogo copre entrambe le case.' ),
+				array( 'question' => 'Lavorate anche con i mobili già in casa?', 'answer' => 'Sì: si spostano i mobili leggeri e si pulisce intorno e sopra a quelli pieni.' ),
+				array( 'question' => 'Devo essere presente?', 'answer' => 'Al sopralluogo e alla consegna sì; durante il lavoro basta lasciare le chiavi.' ),
+			),
 			'calc_h2'          => 'Quanto costa la pulizia post-trasloco?',
 			'hero_image'       => 'sgrosso-hero-trasloco',
 			'hero_alt'         => "Stanza vuota a Roma con scatole di cartone vicino alla finestra, pronta per la pulizia post trasloco",
@@ -89,6 +95,11 @@ function tp_sg_variants() {
 			'cta_final_h2'     => 'Pronta a ripartire da zero?',
 			'faq_first_q'      => 'Quanto costa una pulizia straordinaria?',
 			'faq_first_a'      => 'Dipende da dimensione e livello di sporco accumulato: per questo il sopralluogo è gratuito. Vedi il prezzo fisso prima di decidere, senza sorprese.',
+			// FAQ in piu' dopo la prima (TICKET-99, testi approvati da Guido il 16/11).
+			'faq_extra'        => array(
+				array( 'question' => 'Fate la pulizia approfondita anche in una casa arredata e abitata?', 'answer' => 'Sì: la pulizia approfondita non richiede una casa vuota. Si spostano i mobili leggeri e si pulisce intorno a quelli pieni.' ),
+				array( 'question' => 'Il prezzo cambia con il tipo di pavimento?', 'answer' => 'Il pavimento cambia i prodotti, poco il prezzo: pesano soprattutto metri quadri e condizioni della casa.' ),
+			),
 			'calc_h2'          => 'Quanto costa la tua pulizia straordinaria?',
 			'hero_image'       => 'sgrosso-hero-prima-pulizia',
 			'hero_alt'         => "Salotto con poltrona e libreria e polvere sulle superfici, da pulire a fondo con una pulizia straordinaria a Roma",

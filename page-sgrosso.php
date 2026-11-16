@@ -309,12 +309,18 @@ get_header( 'landing', array(
 	if ( ! $faq_items ) {
 		$faq_items = array(
 			array( 'question' => $defaults['faq_first_q'], 'answer' => $defaults['faq_first_a'] ),
+		);
+		// Domande in piu' della variante (TICKET-99), subito dopo la prima.
+		if ( ! empty( $defaults['faq_extra'] ) ) {
+			$faq_items = array_merge( $faq_items, $defaults['faq_extra'] );
+		}
+		$faq_items = array_merge( $faq_items, array(
 			array( 'question' => 'Quanto dura?', 'answer' => 'In genere da mezza giornata a una giornata, secondo la casa. Te lo diciamo con precisione al sopralluogo.' ),
 			array( 'question' => 'Il sopralluogo è davvero gratuito?', 'answer' => 'Sì, gratuito e senza impegno. Se il preventivo non ti convince, non paghi nulla.' ),
 			array( 'question' => 'Cosa devo preparare?', 'answer' => 'Nulla: prodotti e attrezzatura professionale sono inclusi nel servizio.' ),
 			array( 'question' => 'Le ditte sono affidabili?', 'answer' => 'Sì. Ogni ditta passa una verifica di identità e documenti prima di poter lavorare.' ),
 			array( 'question' => 'In che zone operate?', 'answer' => 'Roma città e provincia. Indica la tua zona nel form e ti confermiamo la disponibilità.' ),
-		);
+		) );
 	}
 	$founders = tp_founders_contact();
 	get_template_part( 'template-parts/faq-accordion', null, array(
