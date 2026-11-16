@@ -31,9 +31,9 @@ PAGES = {
         'h1': 'Pulizia fine affitto: pronta per la riconsegna',
     },
     '/roma/sgrosso-prima-pulizia/': {
-        'title': 'Pulizia straordinaria casa Roma | Trovapulizie',
-        'desc': 'Pulizia straordinaria a Roma per case trascurate da tempo: via lo sporco accumulato con imprese verificate. Sopralluogo gratuito, prezzo fisso.',
-        'h1': 'Pulizia straordinaria: via lo sporco accumulato nel tempo',
+        'title': 'Pulizia approfondita casa Roma | Trovapulizie',
+        'desc': 'Pulizia approfondita a Roma per case trascurate da tempo: via lo sporco accumulato con imprese verificate. Sopralluogo gratuito, prezzo fisso.',
+        'h1': 'Pulizia approfondita della casa: via lo sporco accumulato nel tempo',
     },
 }
 

@@ -17,7 +17,7 @@ ATTESI = {
     'home': 'Trovapulizie: pulizie professionali a Roma',
     'sgrosso-casa': 'Sgrosso casa Roma, sopralluogo gratuito | Trovapulizie',
     'sgrosso-post-ristrutturazione': 'Pulizie post ristrutturazione Roma | Trovapulizie',
-    'sgrosso-prima-pulizia': 'Pulizia straordinaria casa Roma | Trovapulizie',
+    'sgrosso-prima-pulizia': 'Pulizia approfondita casa Roma | Trovapulizie',
     'sgrosso-trasloco': 'Pulizie post trasloco Roma | Trovapulizie',
     'sgrosso-fine-affitto': 'Pulizia fine affitto Roma, sopralluogo gratis | Trovapulizie',
     'zanzare': 'Disinfestazione zanzare Roma | Trovapulizie',
