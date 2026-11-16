@@ -60,6 +60,9 @@ withChrome(BIN, URL, { port: 9347, width: WIDTH, mobile: WIDTH < 800, height: WI
 		calls.length = 0;
 		await send('Page.navigate', { url: URL });
 		await sleep(2800);
+		// Dal tema 0.67 il gclid parte solo con il consenso marketing: il test lo concede dal banner (resta nel profilo).
+		await ev("(function(){ var b = document.querySelector('#tp-consent [data-consent-action=\"accept\"]'); if (b && !document.getElementById('tp-consent').hidden) b.click(); })()");
+		await sleep(400);
 		await ev("localStorage.removeItem('__dl')");
 	}
 	// set(form, name, valore) imposta un campo; click su radio/checkbox con checked.
@@ -130,7 +133,7 @@ withChrome(BIN, URL, { port: 9347, width: WIDTH, mobile: WIDTH < 800, height: WI
 	await submit(); await sleep(300);
 	check('passo 2 vuoto: nessuna chiamata, errori su nome, cellulare, privacy, focus su nome', real().length === 0 && (await err('nome')) !== '' && (await err('cellulare')) !== '' && (await err('consentPrivacy')) !== '' && (await focused()) === 'nome', JSON.stringify([await err('nome'), await err('cellulare'), await err('consentPrivacy'), await focused()]));
 	await setf('nome', 'TEST QA'); await setf('cellulare', '333 333 3333'); await submit(); await sleep(300);
-	check('numero ripetuto bloccato lato client', real().length === 0 && (await err('cellulare')) === 'Numero non valido' && (await focused()) === 'cellulare', await err('cellulare'));
+	check('numero ripetuto bloccato lato client', real().length === 0 && /^Inserisci un cellulare italiano \(inizia con 3\)/.test(await err('cellulare')) && (await focused()) === 'cellulare', await err('cellulare'));
 	await setf('cellulare', '347 123 4568'); await setf('email', 'non-una-email'); await ev(`${F}.querySelector('input[name=consentPrivacy]').checked = true`); await submit(); await sleep(300);
 	check('email compilata ma non valida: errore, nessuna chiamata', real().length === 0 && (await err('email')) === 'Email non valida', await err('email'));
 	await setf('email', ''); await ev(`${F}.querySelector('input[name=consentPrivacy]').checked = false`); await submit(); await sleep(300);
