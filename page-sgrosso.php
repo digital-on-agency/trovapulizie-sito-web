@@ -132,6 +132,7 @@ get_header( 'landing', array(
 						'step1_label'  => 'Vedi la stima',
 						'cta_label'    => tp_sg_text( 'sg_form_cta', $defaults, null, 'Prenota il sopralluogo gratuito' ),
 						'note'         => tp_sg_text( 'sg_form_note', $defaults, null, 'Gratis · nessun impegno · risposta in 1h' ),
+						'phone_label'  => $phone_label,
 					) ); ?>
 				</div>
 			</div>
@@ -353,6 +354,7 @@ get_header( 'landing', array(
 			'step1_label'  => 'Vedi la stima',
 			'cta_label'    => tp_sg_text( 'sg_form_cta', $defaults, null, 'Prenota il sopralluogo gratuito' ),
 			'note'         => tp_sg_text( 'sg_form_note', $defaults, null, 'Gratis · nessun impegno · risposta in 1h' ),
+			'phone_label'  => $phone_label,
 		),
 	) );
 	?>

@@ -13,7 +13,8 @@
  *
  * Args: id (prefisso degli id interni, obbligatorio e unico in pagina), cta_position (hero|bottom),
  * landing, default_tipo (chiave preselezionata del tipo di pulizia), title e subtitle (passo 1), step1_label
- * (bottone del passo 1), cta_label (bottone del passo 2, quello che crea il lead), note, privacy_url.
+ * (bottone del passo 1), cta_label (bottone del passo 2, quello che crea il lead), note, privacy_url, phone_label
+ * (fisso del team citato nell'errore del cellulare; il link tel: si ricava dalle cifre, prefisso +39).
  */
 $args = wp_parse_args( $args ?? array(), array(
 	'id'           => 'lead',
@@ -26,6 +27,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'cta_label'    => 'Prenota il sopralluogo gratuito',
 	'note'         => 'Gratis · nessun impegno · risposta in 1h',
 	'privacy_url'  => home_url( '/privacy/' ),
+	'phone_label'  => '06 9151 6075',
 ) );
 $p = $args['id'];
 
@@ -48,7 +50,7 @@ $tipi_pulizia = array(
 );
 $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '1 settimana', 'Entro 48h' => '48h', 'Entro 24h' => '24h' );
 ?>
-<form class="lead-form" id="<?php echo esc_attr( $p ); ?>" data-lead-form data-api="<?php echo esc_attr( tp_api_base() ); ?>" data-cta-position="<?php echo esc_attr( $args['cta_position'] ); ?>" data-landing="<?php echo esc_attr( $args['landing'] ); ?>" novalidate>
+<form class="lead-form" id="<?php echo esc_attr( $p ); ?>" data-lead-form data-api="<?php echo esc_attr( tp_api_base() ); ?>" data-cta-position="<?php echo esc_attr( $args['cta_position'] ); ?>" data-landing="<?php echo esc_attr( $args['landing'] ); ?>" data-phone-label="<?php echo esc_attr( $args['phone_label'] ); ?>" data-phone-href="<?php echo esc_attr( 'tel:+39' . preg_replace( '/\D+/', '', $args['phone_label'] ) ); ?>" novalidate>
 	<input class="lead-form__hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true">
 
 	<div class="lead-form__progress">
@@ -122,10 +124,11 @@ $urgenze = array( 'Nessuna fretta' => 'Senza fretta', 'Entro una settimana' => '
 				</span>
 				<span class="tp-field__sep" aria-hidden="true"></span>
 				<span class="tp-field__num">
-					<input id="<?php echo esc_attr( $p ); ?>-cellulare" name="cellulare" type="tel" inputmode="tel" placeholder=" " autocomplete="tel-national" required>
+					<input id="<?php echo esc_attr( $p ); ?>-cellulare" name="cellulare" type="tel" inputmode="tel" placeholder=" " autocomplete="tel-national" aria-describedby="<?php echo esc_attr( $p ); ?>-cellulare-hint" required>
 					<label for="<?php echo esc_attr( $p ); ?>-cellulare">Cellulare *</label>
 				</span>
 			</div>
+			<p class="tp-field__hint" id="<?php echo esc_attr( $p ); ?>-cellulare-hint">Cellulare italiano: ti scriviamo su WhatsApp</p>
 			<p class="tp-field__error" data-error-for="cellulare" aria-live="polite"></p>
 		</div>
 

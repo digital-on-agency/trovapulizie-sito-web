@@ -75,8 +75,15 @@
 		}
 		return asc || desc;
 	}
+	// Numero locale normalizzato: via spazi, trattini, punti, parentesi e, con prefisso +39, anche "+39" e "0039"
+	// scritti o incollati nel campo. Il valore inviato al backend resta prefisso + sole cifre, come prima.
+	function localPhone(prefix, raw) {
+		var s = (raw || '').replace(/[\s.\-()\u00a0]/g, '');
+		if (prefix === '+39') s = s.replace(/^(\+39|0039)/, '');
+		return digits(s);
+	}
 	function phoneOk(prefix, local) {
-		var d = digits(local);
+		var d = localPhone(prefix, local);
 		if (prefix === '+39') {
 			if (!/^3\d{8,9}$/.test(d)) return false; // solo mobile: il canale e' WhatsApp
 			return !(isRepeated(d) || isSequential(d) || KNOWN_FAKE[d]);
@@ -287,7 +294,7 @@
 
 		function tipoPulizia() { return checked(form, 'tipoPulizia'); }
 		function tipoPuliziaLabel() { var el = form.querySelector('input[name="tipoPulizia"]:checked'); return el ? (el.getAttribute('data-label') || el.value) : ''; }
-		function telefono() { return val(form, 'prefisso') + digits(val(form, 'cellulare')); }
+		function telefono() { var pf = val(form, 'prefisso'); return pf + localPhone(pf, val(form, 'cellulare')); }
 		function mqValue() { var v = val(form, 'mq'); return /^\d+$/.test(v) ? parseInt(v, 10) : NaN; }
 
 		function datiPulizia(step, completo) {
@@ -363,11 +370,49 @@
 			if (!val(form, 'indirizzo')) { setError(form, 'indirizzo', 'Indirizzo obbligatorio'); ok = false; }
 			return ok;
 		}
+		// Cellulare: errore specifico per i numeri italiani (con il fisso del team come link), generico per gli altri prefissi.
+		function setPhoneError() {
+			var box = form.querySelector('[data-error-for="cellulare"]');
+			var field = form.querySelector('[data-field="cellulare"]');
+			if (!box) return;
+			box.textContent = '';
+			if (val(form, 'prefisso') !== '+39') { box.textContent = 'Numero non valido'; }
+			else {
+				var label = form.getAttribute('data-phone-label') || '06 9151 6075';
+				var href = form.getAttribute('data-phone-href') || 'tel:+390691516075';
+				box.appendChild(document.createTextNode('Inserisci un cellulare italiano (inizia con 3): ti scriviamo su WhatsApp. Se hai solo un fisso, chiamaci al '));
+				var a = document.createElement('a'); a.href = href; a.textContent = label;
+				box.appendChild(a);
+			}
+			if (field) field.classList.add('is-invalid');
+		}
+		// showEmpty: all'uscita dal campo vuoto non si segnala nulla (si attraversa il form con il Tab), all'invio si.
+		function validatePhone(showEmpty) {
+			var raw = val(form, 'cellulare');
+			if (!raw) {
+				if (!showEmpty) { setError(form, 'cellulare', ''); return true; }
+				setError(form, 'cellulare', 'Numero obbligatorio'); return false;
+			}
+			if (!phoneOk(val(form, 'prefisso'), raw)) { setPhoneError(); return false; }
+			setError(form, 'cellulare', '');
+			return true;
+		}
+		(function () {
+			var inp = form.querySelector('input[name="cellulare"]');
+			var pre = form.querySelector('select[name="prefisso"]');
+			if (inp) {
+				inp.addEventListener('blur', function () { validatePhone(false); });
+				// L'errore sparisce appena il valore diventa valido; mentre si digita non ne compare uno nuovo.
+				inp.addEventListener('input', function () {
+					if (inp.closest('[data-field]').classList.contains('is-invalid') && phoneOk(val(form, 'prefisso'), inp.value)) setError(form, 'cellulare', '');
+				});
+			}
+			if (pre) pre.addEventListener('change', function () { if (val(form, 'cellulare')) validatePhone(false); });
+		})();
 		function validateStep2() {
 			var ok = true;
 			if (!val(form, 'nome')) { setError(form, 'nome', 'Nome obbligatorio'); ok = false; }
-			if (!val(form, 'cellulare')) { setError(form, 'cellulare', 'Numero obbligatorio'); ok = false; }
-			else if (!phoneOk(val(form, 'prefisso'), val(form, 'cellulare'))) { setError(form, 'cellulare', 'Numero non valido'); ok = false; }
+			if (!validatePhone(true)) ok = false;
 			if (val(form, 'email') && !EMAIL_RE.test(val(form, 'email'))) { setError(form, 'email', 'Email non valida'); ok = false; }
 			if (!isChecked(form, 'consentPrivacy')) { setError(form, 'consentPrivacy', 'Devi accettare la Privacy Policy per continuare'); ok = false; }
 			return ok;
