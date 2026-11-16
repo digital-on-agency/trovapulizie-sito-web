@@ -98,8 +98,9 @@ const PROBE = `(() => {
 	const landingNav = document.querySelector('.landing-nav') ? {
 		linksVisibili: vis(document.querySelector('.landing-nav__links')),
 		phoneVisibile: vis(document.querySelector('.landing-nav__phone')),
-		ctaVisibile: vis(document.querySelector('.landing-nav__cta')),
-		ctaBox: box(document.querySelector('.landing-nav__cta'))
+		// Due CTA per larghezza (--short sotto soglia, --full sopra): conta quella visibile, non la prima nel DOM.
+		ctaVisibile: Array.prototype.some.call(document.querySelectorAll('.landing-nav__cta'), vis),
+		ctaBox: box(Array.prototype.find.call(document.querySelectorAll('.landing-nav__cta'), vis) || document.querySelector('.landing-nav__cta'))
 	} : null;
 	const forms = [].map.call(document.querySelectorAll('[data-lead-form], [data-lead-atomic]'), f => box(f));
 	// Bersagli interattivi sotto i 44px di altezza (solo avviso): link e bottoni visibili fuori dalla navbar.
