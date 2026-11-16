@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.70.0
+Version: 0.70.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -1419,12 +1419,6 @@ a {
 .services__visual.is-live .services__video {
 	display: block;
 }
-.services__visual::after {
-	content: '';
-	position: absolute;
-	inset: 0;
-	background: rgba(0, 200, 150, 0.5);
-}
 /* Etichetta bianca sopra la foto: l'unico testo del sito il cui contrasto non si puo' calcolare,
    perche' dipende dal pixel sotto. Una velatura scura dal basso lo rende indipendente dalla foto. */
 .services__visual-label {
@@ -1437,7 +1431,9 @@ a {
 	color: var(--tp-white);
 	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
 }
-.services__visual::after {
+/* Velatura solo con l'etichetta: la regola precedente con inset: 0 la agganciava in alto (rettangolo scuro sulla
+   parte alta della foto, corretto il 16/11). */
+.services__visual.has-label::after {
 	content: '';
 	position: absolute;
 	left: 0;

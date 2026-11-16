@@ -98,7 +98,7 @@ add_action( 'carbon_fields_register_fields', function () {
 					Field::make( 'textarea', 'includes', __( 'Cosa include (una voce per riga)' ) ),
 					Field::make( 'text', 'card_title', __( 'Titolo card' ) ),
 					Field::make( 'textarea', 'card_description', __( 'Descrizione card' ) ),
-					Field::make( 'text', 'highlight', __( 'Riga in evidenza (verde)' ) )
+					Field::make( 'text', 'highlight', __( 'Come si prenota (riga in evidenza)' ) )
 						->set_help_text( __( 'Es. "Più richiesto: pulizia settimanale ricorrente".' ) ),
 					Field::make( 'image', 'card_image', __( 'Foto' ) )
 						->set_value_type( 'url' )
