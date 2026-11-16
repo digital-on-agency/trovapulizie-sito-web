@@ -1,0 +1,42 @@
+<svg width="380" height="380" viewBox="0 0 380 380" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Icona Trovapulizie">
+<path id="quadrato" d="M304 0H76C34.0264 0 0 34.0264 0 76V304C0 345.974 34.0264 380 76 380H304C345.974 380 380 345.974 380 304V76C380 34.0264 345.974 0 304 0Z" fill="#37B299"/>
+<g id="flacone" filter="url(#ombra_flacone)">
+<path id="testa" d="M136 48H226C231.333 48 234 50.6667 234 56V68C234 73.3333 231.333 76.6667 226 78C207.333 80.6667 192.667 86 182 94V122H130V94H112C106.667 94 104 91.3333 104 86C104 82 106 78 110 74L130 54C131.333 50 133.333 48 136 48Z" fill="#F2FBF8"/>
+<path id="corpo" d="M130 132H178V164C178 169.333 180.667 174 186 178C212.667 196.667 226 221.333 226 252V306C226 316.667 220.667 322 210 322H108C97.3333 322 92 316.667 92 306V228C92 214.667 98 202.667 110 192C123.333 180 130 168 130 156V132Z" fill="#F2FBF8"/>
+<path id="liquido" d="M92 250C108 246 125.333 242 144 238H226V306C226 316.667 220.667 322 210 322H108C97.3333 322 92 316.667 92 306V250Z" fill="url(#liquido_sfumato)"/>
+</g>
+<path id="stacco" d="M205 305C241.451 305 271 275.451 271 239C271 202.549 241.451 173 205 173C168.549 173 139 202.549 139 239C139 275.451 168.549 305 205 305Z" fill="#37B299"/>
+<g id="segni" filter="url(#ombra_segni)">
+<path id="goccia" d="M198 91.0003C204.667 88.3337 210.333 89.667 215 95.0003C221.667 104.334 225.333 115.667 226 129C222 121 216.333 114 209 108C203 103.334 199.333 97.667 198 91.0003Z" fill="#F2FBF8"/>
+<path id="stella" d="M279 47C281 61 289 69 303 71C289 73 281 81 279 95C277 81 269 73 255 71C269 69 277 61 279 47Z" fill="#F2FBF8"/>
+<path id="stellina" d="M259 103C259.8 108.867 263.133 112.2 269 113C263.133 113.8 259.8 117.133 259 123C258.2 117.133 254.867 113.8 249 113C254.867 112.2 258.2 108.867 259 103Z" fill="#F2FBF8"/>
+<path id="lente" fill-rule="evenodd" clip-rule="evenodd" d="M205.002 182C220.119 182.003 234.615 188.01 245.303 198.7C255.99 209.391 261.993 223.889 261.992 239.005C261.991 254.121 255.985 268.618 245.296 279.307C234.606 289.995 220.109 296 204.992 296C189.876 296 175.378 289.995 164.689 279.307C153.999 268.618 147.994 254.121 147.992 239.005C147.991 223.889 153.994 209.391 164.682 198.7C175.369 188.01 189.866 182.003 204.982 182H205.002ZM205.002 200C194.66 200.003 184.742 204.113 177.43 211.428C170.118 218.743 166.011 228.662 166.012 239.005C166.014 249.348 170.123 259.266 177.437 266.579C184.751 273.892 194.67 278 205.012 278C215.355 278 225.274 273.892 232.588 266.579C239.901 259.266 244.011 249.348 244.012 239.005C244.014 228.662 239.907 218.743 232.595 211.428C225.283 204.113 215.365 200.003 205.022 200H205.002Z" fill="#F2FBF8"/>
+<path id="manico" d="M242.616 281.426L254.906 265.904L298.377 302.13C303.628 306.889 304.205 311.856 300.108 317.03C296.011 322.204 291.337 322.411 286.086 317.652L242.616 281.426Z" fill="#F2FBF8"/>
+</g>
+</g>
+<defs>
+<filter id="ombra_flacone" x="83" y="43" width="160" height="292" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="4"/>
+<feGaussianBlur stdDeviation="4.5"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.0431373 0 0 0 0 0.372549 0 0 0 0 0.301961 0 0 0 0.35 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="ombra"/>
+<feBlend mode="normal" in="SourceGraphic" in2="ombra" result="shape"/>
+</filter>
+<filter id="ombra_segni" x="138.992" y="42" width="173.008" height="292.072" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="4"/>
+<feGaussianBlur stdDeviation="4.5"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0.0431373 0 0 0 0 0.372549 0 0 0 0 0.301961 0 0 0 0.35 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="ombra"/>
+<feBlend mode="normal" in="SourceGraphic" in2="ombra" result="shape"/>
+</filter>
+<linearGradient id="liquido_sfumato" x1="92" y1="238" x2="167.604" y2="358.606" gradientUnits="userSpaceOnUse">
+<stop stop-color="#E9F7F2"/>
+<stop offset="1" stop-color="#B9E4D8"/>
+</linearGradient>
+</defs>
+</svg>

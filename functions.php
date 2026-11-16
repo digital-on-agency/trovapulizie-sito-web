@@ -274,6 +274,18 @@ add_action( 'wp_head', function () {
 	echo '<link rel="preload" as="image" fetchpriority="high" href="' . esc_url( $img . 'hero-box-720.jpg' ) . '" media="(max-width: 1023px)">' . "\n";
 }, 2 );
 
+// Favicon: icona del marchio approvata il 09/11 (vault brand-identity/marchio/icona-trovapulizie.svg).
+// Google vuole un formato multiplo di 48 px: c'e' il PNG 48. /favicon.ico alla radice e' un file statico copiato
+// a parte nel docroot (il server risponde 404 sulle estensioni statiche prima di arrivare a WordPress).
+add_action( 'wp_head', function () {
+	$dir = 'assets/img/favicon/';
+	echo '<link rel="icon" href="' . esc_url( tp_theme_asset( $dir . 'favicon.ico' ) ) . '" sizes="any">' . "\n";
+	echo '<link rel="icon" type="image/svg+xml" href="' . esc_url( tp_theme_asset( $dir . 'favicon.svg' ) ) . '">' . "\n";
+	echo '<link rel="icon" type="image/png" sizes="48x48" href="' . esc_url( tp_theme_asset( $dir . 'favicon-48.png' ) ) . '">' . "\n";
+	echo '<link rel="apple-touch-icon" href="' . esc_url( tp_theme_asset( $dir . 'apple-touch-icon.png' ) ) . '">' . "\n";
+	echo '<link rel="manifest" href="' . esc_url( tp_theme_asset( $dir . 'site.webmanifest' ) ) . '">' . "\n";
+}, 3 );
+
 add_action( 'init', function () {
 	remove_action( 'wp_head', 'wp_generator' );
 	// Script delle emoji di WordPress: 22 KB per sostituire emoji che il tema non usa (TICKET-20).
