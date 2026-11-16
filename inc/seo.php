@@ -91,9 +91,9 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-hub-roma.php' ) ) {
 		return 'Pulizie casa a Roma, prenoti in 2 minuti | Trovapulizie';
 	}
-	// Diventa cleaner (TICKET-51): stesso title del live React.
+	// Diventa cleaner (TICKET-51, accorciato da 67 a 52 caratteri in TICKET-95).
 	if ( is_singular() && is_page_template( 'page-cleaner-landing.php' ) ) {
-		return 'Diventa cleaner Trovapulizie — Lavora con clienti verificati a Roma';
+		return 'Diventa cleaner a Roma: lavora con noi | Trovapulizie';
 	}
 	// Landing B2B (TICKET-58, accorciato a 56 caratteri in TICKET-88: Google tronca oltre i 60).
 	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {

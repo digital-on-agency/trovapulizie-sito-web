@@ -123,6 +123,10 @@ add_action( 'template_redirect', function () {
 		exit;
 	}
 } );
+// ...e niente sitemap degli autori: elencava /blog/author/admin/, un URL che risponde 301 (TICKET-95).
+add_filter( 'wp_sitemaps_add_provider', function ( $provider, $name ) {
+	return 'users' === $name ? false : $provider;
+}, 10, 2 );
 
 // Niente commenti sugli articoli.
 add_filter( 'comments_open', '__return_false' );
@@ -137,9 +141,26 @@ function tp_blog_seo_title() {
 		return single_cat_title( '', false ) . ' — Blog Trovapulizie';
 	}
 	if ( is_singular( 'post' ) ) {
-		return get_the_title() . ' — Trovapulizie';
+		return tp_blog_post_title( get_the_title() );
 	}
 	return '';
+}
+/**
+ * Title di un articolo entro 60 caratteri (TICKET-95): titolo + " — Trovapulizie"; se e' troppo lungo si tiene
+ * solo la parte prima dei due punti ("Pulizia di fine affitto: la checklist..." -> "Pulizia di fine affitto"),
+ * e se ancora non basta il titolo da solo. Un seo_title compilato vince comunque (tp_seo_title()).
+ */
+function tp_blog_post_title( $titolo ) {
+	$titolo   = html_entity_decode( wp_strip_all_tags( (string) $titolo ), ENT_QUOTES, 'UTF-8' );
+	$suffisso = ' — Trovapulizie';
+	if ( mb_strlen( $titolo . $suffisso ) <= 60 ) {
+		return $titolo . $suffisso;
+	}
+	$prima = trim( (string) strtok( $titolo, ':' ) );
+	if ( $prima !== $titolo && mb_strlen( $prima . $suffisso ) <= 60 ) {
+		return $prima . $suffisso;
+	}
+	return $titolo;
 }
 function tp_blog_seo_description() {
 	if ( is_home() ) {
