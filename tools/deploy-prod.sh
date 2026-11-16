@@ -23,3 +23,7 @@ cp -r ~/tp-stage/. ~/$D/ && echo 'copiato'
 cd ~/domains/trovapulizie.it/public_html && wp litespeed-purge all 2>&1 | tail -1
 grep -m1 '^Version' ~/$D/style.css
 rm -rf ~/tp-stage ~/tp-deploy.tgz"
+
+# prova del form sul sito vivo dopo il deploy (honeypot, nessun lead creato), attesa per il purge della cache
+sleep 25
+node /opt/vault-digitalon/claude/scripts/ads-giornaliero/prova-form.js --out /tmp/prova-form-deploy.json || echo "[ATTENZIONE] prova del form fallita dopo il deploy"
