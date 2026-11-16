@@ -581,6 +581,15 @@ add_action( 'carbon_fields_register_fields', function () {
 	$b2b_vuoto = __( 'Vuoto = testo di default del template.' );
 	Container::make( 'post_meta', __( 'Landing B2B — Sezioni' ) )
 		->where( 'post_template', '=', 'page-landing-b2b.php' )
+		->add_tab( __( 'Variante' ), array(
+			Field::make( 'select', 'b2b_variant', __( 'Variante della pagina' ) )
+				->set_options( array(
+					'sgrosso-commerciale' => 'Pulizie commerciali (/roma/sgrosso-commerciale, di partenza)',
+					'pulizie-uffici'      => 'Pulizie uffici (/roma/pulizie-uffici)',
+					'pulizie-condomini'   => 'Pulizie condomini (/roma/pulizie-condomini)',
+				) )
+				->set_help_text( __( 'Decide i testi di default di tutta la pagina, le sezioni presenti, il title e la description SEO e il nome della landing negli eventi di tracking. Un campo compilato nelle altre tab vince sempre sul default; sulle pagine uffici e condomini "vuoto" vuol dire il testo della variante (inc/b2b-variants.php), non quello delle pulizie commerciali indicato negli aiuti.' ) ),
+		) )
 		->add_tab( __( 'Testata' ), array(
 			Field::make( 'text', 'b2b_promo_desktop', __( 'Promo bar, testo desktop' ) )->set_help_text( $b2b_vuoto ),
 			Field::make( 'text', 'b2b_promo_mobile', __( 'Promo bar, testo mobile' ) )->set_help_text( $b2b_vuoto ),
@@ -621,6 +630,16 @@ add_action( 'carbon_fields_register_fields', function () {
 					Field::make( 'image', 'image', __( 'Foto' ) )->set_value_type( 'url' ),
 					Field::make( 'text', 'image_alt', __( 'Testo alternativo della foto' ) ),
 					Field::make( 'textarea', 'chips', __( 'Cosa puliamo (una voce per riga)' ) ),
+				) ),
+		) )
+		->add_tab( __( 'Servizi' ), array(
+			Field::make( 'text', 'b2b_services_eyebrow', __( 'Pillola sopra il titolo' ) )->set_help_text( __( 'Solo pagine uffici e condomini. Vuoto = testo della variante.' ) ),
+			Field::make( 'text', 'b2b_services_title', __( 'Titolo (H2)' ) )->set_help_text( __( 'Vuoto = testo della variante.' ) ),
+			Field::make( 'textarea', 'b2b_services_subtitle', __( 'Sottotitolo' ) )->set_help_text( __( 'Vuoto = testo della variante.' ) ),
+			Field::make( 'complex', 'b2b_services', __( 'Servizi del settore (vuoto = l\'elenco della variante)' ) )
+				->add_fields( array(
+					Field::make( 'text', 'title', __( 'Titolo' ) ),
+					Field::make( 'textarea', 'text', __( 'Testo' ) ),
 				) ),
 		) )
 		->add_tab( __( 'Lavori' ), array(

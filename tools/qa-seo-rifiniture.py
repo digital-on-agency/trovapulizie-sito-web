@@ -3,8 +3,8 @@
 
 Uso: python3 tools/qa-seo-rifiniture.py   (dalla radice del tema). Esce con 1 se un controllo fallisce.
 
-Legge i literal in inc/sgrosso-variants.php (page_title delle cinque varianti) e in inc/seo.php (Home, B2B,
-zanzare), li confronta con i valori della SPEC-seo-rifiniture-2026-11-07 e verifica la lunghezza dopo la
+Legge i literal in inc/sgrosso-variants.php (page_title delle cinque varianti), in inc/b2b-variants.php (le tre
+varianti B2B: commerciale, uffici e condomini, TICKET-97) e in inc/seo.php (Home, zanzare), li confronta con i valori della SPEC-seo-rifiniture-2026-11-07 e verifica la lunghezza dopo la
 decodifica delle entita HTML (limite 60). Verifica anche che il canonical venga stampato su indice del blog e
 categorie con tp_seo_canonical_url().
 """
@@ -22,6 +22,8 @@ ATTESI = {
     'sgrosso-fine-affitto': 'Pulizia fine affitto Roma, sopralluogo gratis | Trovapulizie',
     'zanzare': 'Disinfestazione zanzare Roma | Trovapulizie',
     'sgrosso-commerciale': 'Pulizie commerciali Roma: uffici e negozi | Trovapulizie',
+    'pulizie-uffici': 'Pulizie uffici Roma: preventivo gratuito | Trovapulizie',
+    'pulizie-condomini': 'Pulizie condomini Roma: preventivo gratuito | Trovapulizie',
 }
 
 def leggi(rel):
@@ -40,6 +42,7 @@ def check(nome, ok, dettaglio=''):
 
 varianti = leggi('inc/sgrosso-variants.php')
 seo = leggi('inc/seo.php')
+b2b = leggi('inc/b2b-variants.php')
 
 trovati = {}
 # Cinque varianti: la chiave del blocco in VARIANT_CONFIG non coincide sempre con lo slug (es. prima-pulizia-a-fondo).
@@ -60,7 +63,9 @@ def blocco_template(template):
 
 m = re.search(r"is_front_page\(\)\s*\)\s*\{\s*return\s+'((?:[^'\\]|\\.)*)'", seo)
 trovati['home'] = php_literal(m.group(1)) if m else None
-trovati['sgrosso-commerciale'] = blocco_template('page-landing-b2b.php')
+# Le tre varianti B2B: ogni blocco comincia con 'landing' => <chiave> e porta il suo page_title.
+for m in re.finditer(r"'landing'\s*=>\s*'([a-z-]+)',.*?'page_title'\s*=>\s*'((?:[^'\\]|\\.)*)'", b2b, re.S):
+    trovati[m.group(1)] = php_literal(m.group(2))
 trovati['zanzare'] = blocco_template('page-landing-zanzare.php')
 
 print('--- TICKET-88: title')

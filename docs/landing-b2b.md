@@ -1,7 +1,8 @@
 # Landing Pulizie commerciali B2B (page-landing-b2b.php)
 
 URL `/roma/sgrosso-commerciale/` (post 12, figlia di `/roma/`). Template `page-landing-b2b.php` ("Landing B2B"),
-assegnato a mano. Design: ridisegno Figma `6780:895` nella pagina "Sito Web" del file `UiW4TPgvqCODW5bhyFV5eK`
+assegnato a mano. Dal TICKET-97 lo stesso template serve anche `/roma/pulizie-uffici/` e `/roma/pulizie-condomini/`
+(sezione "Varianti" in fondo). Design: ridisegno Figma `6780:895` nella pagina "Sito Web" del file `UiW4TPgvqCODW5bhyFV5eK`
 (nota `6783:895`, stati dei tab dei settori `6784:901/951/1001`); testi e claim dal live React
 (`front-end/src/pages/marketing/SgrossoCommercialeB2BPage.tsx` su `master`). PRD e ticket nel vault:
 `clients/trovapulizie/projects/sito-web/spec/SPEC-landing-sgrosso-commerciale.md` (TICKET-58..62). Mobile senza
@@ -67,6 +68,34 @@ barra fissa.
 - `tools/qa-mobile.js <chrome> <url>`: riconosce `main.b2b` (sezioni attese e i due form).
 - `tools/qa-lead-contract.js [apiBase]`: payload b2b con honeypot verso l'API (`201 skipped`, nessun record).
 - `tools/qa-fullpage.js <chrome> <url> 1440 out.png 12000`: confronto col frame Figma `6780:895`.
+
+## Varianti (TICKET-97)
+
+Il campo `b2b_variant` (scheda "Landing B2B — Sezioni", tab Variante; meta `_b2b_variant`) sceglie la variante:
+`sgrosso-commerciale` (default, anche a campo vuoto: la pagina in produzione non cambia, HTML verificato identico),
+`pulizie-uffici`, `pulizie-condomini`. I testi di default di ogni variante stanno in `inc/b2b-variants.php`
+(`tp_b2b_variants()`, `tp_b2b_defaults()`); un campo `b2b_*` compilato vince sempre, come prima. `inc/seo.php` legge da li'
+title, description, tipo di `Service` e immagine Open Graph (`tp_seo_b2b_defaults()`). La chiave `landing` della variante e'
+l'identificatore negli eventi dataLayer e in `data-landing` del form (`pulizie-uffici`, `pulizie-condomini`).
+
+Cosa cambia fra le varianti (`show` in `inc/b2b-variants.php`):
+
+| Sezione | sgrosso-commerciale | uffici e condomini |
+|---|---|---|
+| Hero | foto con rendition mobile, riga con le stelle | immagine del tema (`services-visual-*.jpg`, decorativa generata), nessuna riga con le stelle |
+| Settori a tab, Lavori prima/dopo, Formule, Perche' noi, Recensioni | si | no |
+| Servizi del settore (`#servizi`, `value-props.php` con `class: b2b-why--services`) | no | si, elenco della SPEC US-02 (7 uffici, 8 condomini) |
+| Come funziona, FAQ, CTA finale con secondo form | si | si, testi propri |
+| Link alle altre pagine (`#altri-spazi`, `audience-cards.php`) | no | si: l'altra pagina di settore e `/roma/sgrosso-commerciale/` |
+| Form | chip Ufficio / Negozio / Supermercato / Palestra / Altro, superficie | uffici: Ufficio / Studio professionale / Sede aziendale / Altro, superficie; condomini: Condominio / Amministratore di condominio / Complesso residenziale, senza superficie |
+
+[ATTENZIONE] Sulle due pagine nuove valgono i vincoli della SPEC-crescita-organica-fase-b §2: nessun prezzo, nessun tempo
+o frequenza garantiti (la conferma del form dice "Ti ricontattiamo", non "entro 1 ora"), nessuna certificazione, nessun
+numero di ditte o clienti, nessuna recensione. `tools/qa-b2b.js` con `VARIANT=pulizie-uffici|pulizie-condomini` li controlla
+sul testo visibile della pagina.
+
+Pagine in WordPress: figlie di `/roma/`, template assegnato a mano, `_b2b_variant` impostato; vanno in `tp_service_pages()`
+(blocco Altri servizi, footer, BreadcrumbList) e la sitemap nativa le include da sola quando sono pubblicate.
 
 ## Limiti noti
 

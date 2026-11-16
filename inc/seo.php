@@ -12,6 +12,7 @@
  * portale. Il FAQPage lo emette gia' template-parts/faq-accordion.php: non aggiungerne un secondo qui.
  */
 require_once __DIR__ . '/sgrosso-variants.php';
+require_once __DIR__ . '/b2b-variants.php';
 
 /**
  * Pagine di servizio e hub di Roma con l'anchor text fisso della SPEC-seo-post-cutover (TICKET-78).
@@ -28,6 +29,8 @@ function tp_service_pages() {
 		'/roma/sgrosso-prima-pulizia/'         => 'Pulizia straordinaria casa Roma',
 		'/roma/prezzi-pulizie/'                => 'Prezzi pulizie straordinarie Roma',
 		'/roma/sgrosso-commerciale/'           => 'Pulizie commerciali Roma',
+		'/roma/pulizie-uffici/'                => 'Pulizie uffici Roma',
+		'/roma/pulizie-condomini/'             => 'Pulizie condomini Roma',
 		'/roma/zanzare-disinfestazione/'       => 'Disinfestazione zanzare Roma',
 	);
 }
@@ -100,9 +103,11 @@ function tp_seo_title() {
 	if ( is_singular() && is_page_template( 'page-guida-prezzi.php' ) ) {
 		return 'Prezzi pulizie straordinarie a Roma: fasce | Trovapulizie';
 	}
-	// Landing B2B (TICKET-58, accorciato a 56 caratteri in TICKET-88: Google tronca oltre i 60).
-	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {
-		return 'Pulizie commerciali Roma: uffici e negozi | Trovapulizie';
+	// Landing B2B (TICKET-58, accorciato a 56 caratteri in TICKET-88: Google tronca oltre i 60) e pagine di settore
+	// uffici e condomini (TICKET-97): il default sta nella variante, inc/b2b-variants.php.
+	$b2b = tp_seo_b2b_defaults();
+	if ( $b2b ) {
+		return $b2b['page_title'];
 	}
 	// Landing zanzare (TICKET-73, accorciato a 43 caratteri in TICKET-88).
 	if ( is_singular() && is_page_template( 'page-landing-zanzare.php' ) ) {
@@ -145,8 +150,9 @@ function tp_seo_description() {
 	if ( is_singular() && is_page_template( 'page-guida-prezzi.php' ) ) {
 		return 'Quanto costa una pulizia straordinaria a Roma: fasce di prezzo per ' . tp_guida_prezzi_metrature_testo() . ' mq, cosa cambia il costo e stima sul tuo caso. Sopralluogo gratuito.';
 	}
-	if ( is_singular() && is_page_template( 'page-landing-b2b.php' ) ) {
-		return 'Pulizie commerciali a Roma per uffici, negozi e locali: preventivo su misura, fattura, personale verificato. Sopralluogo gratuito, risposta in 1 ora.';
+	$b2b = tp_seo_b2b_defaults();
+	if ( $b2b ) {
+		return $b2b['page_description'];
 	}
 	if ( is_singular() && is_page_template( 'page-landing-zanzare.php' ) ) {
 		return 'Disinfestazione zanzare a Roma per privati e aziende: sopralluogo gratuito, trattamento professionale e garanzia sui risultati. Preventivo in giornata.';
@@ -235,7 +241,7 @@ add_action( 'wp_head', function () {
 add_action( 'wp_head', function () {
 	$d   = tp_seo_sgrosso_defaults();
 	// Landing B2B (TICKET-58): stesso Service, senza offerta: il live non pubblica prezzi per le aziende.
-	$b2b = is_singular() && is_page_template( 'page-landing-b2b.php' );
+	$b2b = tp_seo_b2b_defaults();
 	// Landing zanzare (TICKET-73): stesso Service della B2B, senza offerta.
 	$zz  = is_singular() && is_page_template( 'page-landing-zanzare.php' );
 	// Guida prezzi (TICKET-96): stesso Service delle landing Sgrosso, con la stessa offerta 200-700 EUR.
@@ -246,7 +252,7 @@ add_action( 'wp_head', function () {
 	$dati = array(
 		'@context'    => 'https://schema.org',
 		'@type'       => 'Service',
-		'serviceType' => $zz ? 'Disinfestazione zanzare' : ( $b2b ? 'Pulizie commerciali per uffici, negozi e locali' : 'Pulizia straordinaria (sgrosso)' ),
+		'serviceType' => $zz ? 'Disinfestazione zanzare' : ( $b2b ? $b2b['service_type'] : 'Pulizia straordinaria (sgrosso)' ),
 		'description' => wp_strip_all_tags( tp_seo_description() ),
 		'url'         => get_permalink(),
 		'areaServed'  => array(
@@ -350,6 +356,11 @@ function tp_seo_og_image() {
 			$campo = trim( (string) carbon_get_the_post_meta( 'b2b_hero_image' ) );
 			if ( $campo ) {
 				return array( 'url' => $campo, 'width' => 0, 'height' => 0 );
+			}
+			// Uffici e condomini (TICKET-97): l'immagine della hero e' un file del tema, qui la rendition larga.
+			$d = tp_seo_b2b_defaults();
+			if ( $d && empty( $d['hero']['image']['mobile'] ) ) {
+				return array( 'url' => $d['hero']['image']['src'], 'width' => (int) $d['hero']['image']['width'], 'height' => (int) $d['hero']['image']['height'] );
 			}
 		}
 	}

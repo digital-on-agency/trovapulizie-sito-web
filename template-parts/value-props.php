@@ -4,14 +4,17 @@
  * ridisegno). Quattro card in griglia 2x2 su fondo grigio chiaro: icona monocroma (tp_icon_span, maschera CSS),
  * titolo, testo. Riutilizzabile: nessun testo fisso qui.
  *
- * Args: eyebrow, title, subtitle, id, items[] {icon (percorso relativo al tema, es. assets/icons/ic-clock.svg),
- * title, text}. Senza voci non esce.
+ * Args: eyebrow, title, subtitle, id, class (modificatori sulla sezione, es. b2b-why--services), items[] {icon
+ * (percorso relativo al tema, es. assets/icons/ic-clock.svg), title, text}. Senza voci non esce.
+ * Elenco servizi delle pagine uffici e condomini (TICKET-97): stesso componente con `class: b2b-why--services`, che
+ * porta a tutta larghezza l'ultima card quando il numero di voci e' dispari.
  */
 $args = wp_parse_args( $args ?? array(), array(
 	'eyebrow'  => '',
 	'title'    => '',
 	'subtitle' => '',
 	'id'       => 'perche-noi',
+	'class'    => '',
 	'items'    => array(),
 ) );
 $items = array_values( array_filter( (array) $args['items'], function ( $v ) {
@@ -21,7 +24,7 @@ if ( ! $items ) {
 	return;
 }
 ?>
-<section class="b2b-why" id="<?php echo esc_attr( $args['id'] ); ?>" data-reveal>
+<section class="<?php echo esc_attr( trim( 'b2b-why ' . $args['class'] ) ); ?>" id="<?php echo esc_attr( $args['id'] ); ?>" data-reveal>
 	<div class="b2b-why__inner">
 		<div class="sg-section-head">
 			<?php if ( $args['eyebrow'] ) : ?><p class="sg-eyebrow"><?php echo esc_html( $args['eyebrow'] ); ?></p><?php endif; ?>

@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.68.0
+Version: 0.69.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -10648,4 +10648,13 @@ main.dc--motion .dc-rv.is-in {
 	.pg-table__note {
 		font-size: 15px;
 	}
+}
+
+/* =========================
+   Pagine uffici e condomini (TICKET-97) — page-landing-b2b.php, varianti in inc/b2b-variants.php
+   Riusano la landing B2B; qui solo l'elenco dei servizi (value-props.php con class b2b-why--services): con un numero
+   dispari di voci l'ultima card occupa tutta la riga, invece di restare sola a sinistra.
+   ========================= */
+.b2b-why--services .b2b-why__grid > li:last-child:nth-child(odd) {
+	grid-column: 1 / -1;
 }

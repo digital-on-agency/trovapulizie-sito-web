@@ -131,6 +131,9 @@ const PROBE = `(() => {
 		// Landing zanzare (SPEC-landing-zanzare): main.sgrosso.b2b.zz, sezioni proprie al posto di lavori e formule.
 		sezioniLanding: (landingMain && landingMain.classList.contains('zz')
 			? ['.sg-hero', '.sg-trust', '.b2b-why', '.zz-tiger', '.sg-when', '.zz-services', '.sg-steps', '.reviews', '.zz-price', '.faq', '.sg-final', '[data-lead-b2b]#lead-hero', '[data-lead-b2b]#lead-bottom']
+			: b2b && document.querySelector('.b2b-why--services')
+			// Pagine uffici e condomini (TICKET-97): elenco servizi e link incrociati al posto di settori, lavori e recensioni.
+			? ['.sg-hero', '.sg-trust', '.b2b-why--services', '.sg-steps', '.dc-who', '.faq', '.sg-final', '[data-lead-b2b]#lead-hero', '[data-lead-b2b]#lead-bottom']
 			: b2b
 			? ['.sg-hero', '.sg-trust', '.sg-when', '.b2b-works', '.dc-who', '.b2b-why', '.sg-steps', '.reviews', '.faq', '.sg-final', '[data-lead-b2b]#lead-hero', '[data-lead-b2b]#lead-bottom']
 			: (landingMain && landingMain.classList.contains('pg')
