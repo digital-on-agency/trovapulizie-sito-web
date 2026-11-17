@@ -12,7 +12,8 @@
  * contenitore GTM chiedono ad_storage (impostazione di consenso aggiuntiva dei tag).
  *
  * Ordine nel <head> (priorita' 0, prima di ogni altro script): consent default + funzione gtag, snippet GTM.
- * assets/js/tp-track.js (caricato in testa, non deferred) espone tpTrack/tpGetGclid/tpGetUtm/tpConsent ai moduli.
+ * assets/js/tp-track.js (caricato in testa, non deferred) espone tpTrack/tpGetGclid/tpGetUtm/tpConsent/tpAppUrl ai
+ * moduli. Prima del file esce window.tpTrackConfig (interruttore degli UTM verso l'app, Theme Options > Integrazioni).
  * Niente noscript di GTM: senza JavaScript il consenso non si puo' raccogliere.
  *
  * [ATTENZIONE] Un solo GTM per pagina: la lezione del 24/09 sul portale era un contenitore caricato due volte.
@@ -64,6 +65,8 @@ function gtag(){dataLayer.push(arguments);}
 /* Helper dataLayer e banner del consenso. tp-track in testa e senza defer, cosi' esiste prima di lead-form.js. */
 add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_script( 'trovapulizie-tp-track', get_stylesheet_directory_uri() . '/assets/js/tp-track.js', array(), tp_theme_version(), false );
+	$utm_to_app = ! tp_tracking_off() && function_exists( 'carbon_get_theme_option' ) && carbon_get_theme_option( 'tp_utm_to_app' );
+	wp_add_inline_script( 'trovapulizie-tp-track', 'window.tpTrackConfig = ' . wp_json_encode( array( 'utmToApp' => (bool) $utm_to_app ) ) . ';', 'before' );
 	if ( tp_tracking_off() ) {
 		return;
 	}

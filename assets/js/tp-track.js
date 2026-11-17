@@ -8,6 +8,11 @@
  *   consenso arriva dopo l'atterraggio si salva in quel momento, se manca o e' revocato la copia salvata si cancella.
  * - tpConsent(): la scelta salvata {v, ts, stats, ads} o null se l'utente non ha ancora scelto.
  * - tpGetUtm(): utm_source/medium/campaign dalla query string (prima visita salvata in sessionStorage).
+ *   Forma invariata: la usa lead-form.js verso /api/leads. In `tp_utm` si salvano anche utm_content e utm_term.
+ * - tpAppUrl(url) e click verso https://app.trovapulizie.com/ (SPEC-utm-verso-app): con l'interruttore acceso
+ *   (window.tpTrackConfig.utmToApp, da Theme Options > Integrazioni, inc/tracking.php) e il consenso statistiche,
+ *   aggiunge all'URL dell'app i cinque utm_* della visita. Un URL che ha gia' un utm_* non si tocca. La decisione si
+ *   prende al click: un consenso dato a meta' visita vale subito. L'href del link torna com'era subito dopo.
  * - Click su tel:, wa.me e ancore verso il form nelle pagine con [data-landing]: marketing_click_to_call,
  *   marketing_click_whatsapp, marketing_click_to_form con {landing} (useLandingClickTracking della SPA).
  * [ATTENZIONE] Il parametro di posizione della CTA si chiama cta_position: `source` e' riservato a GA4.
@@ -19,6 +24,9 @@
 	var GCLID_TTL = 90 * 24 * 60 * 60 * 1000;
 	var CLICK_ID_PARAMS = ['gclid', 'gbraid', 'wbraid'];
 	var UTM_KEY = 'tp_utm';
+	var APP_ORIGIN = 'https://app.trovapulizie.com';
+	// Parametro della query -> chiave in tp_utm. I primi tre sono anche la forma di tpGetUtm().
+	var UTM_PARAMS = { utm_source: 'utmSource', utm_medium: 'utmMedium', utm_campaign: 'utmCampaign', utm_content: 'utmContent', utm_term: 'utmTerm' };
 
 	window.dataLayer = window.dataLayer || [];
 
@@ -64,12 +72,45 @@
 		} catch (e) { return undefined; }
 	};
 
+	// UTM dalla query string, o null se non ce n'e' nessuno.
+	function utmFromQuery() {
+		var p = new URLSearchParams(window.location.search), utm = {}, found = false;
+		for (var k in UTM_PARAMS) { var v = p.get(k); if (v) { utm[UTM_PARAMS[k]] = v; found = true; } }
+		return found ? utm : null;
+	}
+
+	// UTM della visita: quelli della pagina, altrimenti gli ultimi salvati in tp_utm. Oggetto vuoto se nessuno.
+	function visitUtm() {
+		var q = utmFromQuery();
+		if (q) return q;
+		try { var o = JSON.parse(read('sessionStorage', UTM_KEY)); if (o && typeof o === 'object') return o; } catch (e) {}
+		return {};
+	}
+
 	window.tpGetUtm = function () {
-		var p = new URLSearchParams(window.location.search);
-		var utm = { utmSource: p.get('utm_source') || undefined, utmMedium: p.get('utm_medium') || undefined, utmCampaign: p.get('utm_campaign') || undefined };
-		if (utm.utmSource || utm.utmMedium || utm.utmCampaign) return utm;
-		try { var saved = read('sessionStorage', UTM_KEY); if (saved) return JSON.parse(saved); } catch (e) {}
-		return utm;
+		var u = visitUtm();
+		return { utmSource: u.utmSource, utmMedium: u.utmMedium, utmCampaign: u.utmCampaign };
+	};
+
+	function utmToAppOn() {
+		var cfg = window.tpTrackConfig;
+		return !!(cfg && cfg.utmToApp === true);
+	}
+
+	// URL verso l'app con gli UTM della visita, se ammesso; altrimenti l'URL invariato.
+	window.tpAppUrl = function (url) {
+		if (!utmToAppOn()) return url;
+		var c = window.tpConsent();
+		if (!c || c.stats !== true) return url;
+		var u;
+		try { u = new URL(url, window.location.href); } catch (e) { return url; }
+		if (u.origin !== APP_ORIGIN) return url;
+		var has = false;
+		u.searchParams.forEach(function (v, k) { if (k.indexOf('utm_') === 0) has = true; });
+		if (has) return url;
+		var utm = visitUtm(), added = false;
+		for (var k in UTM_PARAMS) { var v = utm[UTM_PARAMS[k]]; if (typeof v === 'string' && v) { u.searchParams.set(k, v); added = true; } }
+		return added ? u.href : url;
 	};
 
 	window.tpLanding = function () {
@@ -91,10 +132,23 @@
 			if (ok) persistClick();
 			else { try { localStorage.removeItem(GCLID_KEY); } catch (err) {} }
 		});
-		if (p.get('utm_source') || p.get('utm_medium') || p.get('utm_campaign')) {
-			store('sessionStorage', UTM_KEY, JSON.stringify({ utmSource: p.get('utm_source') || undefined, utmMedium: p.get('utm_medium') || undefined, utmCampaign: p.get('utm_campaign') || undefined }));
-		}
+		var utm = utmFromQuery();
+		if (utm) store('sessionStorage', UTM_KEY, JSON.stringify(utm));
 	})();
+
+	// Link verso l'app: UTM aggiunti al click (anche rotella e ctrl/cmd, che aprono una nuova scheda) e href
+	// ripristinato subito dopo, cosi' una revoca del consenso vale per il click successivo. Un solo listener.
+	function decorateAppLink(e) {
+		var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+		if (!a || !a.href || a.href.indexOf(APP_ORIGIN + '/') !== 0) return;
+		var original = a.getAttribute('href');
+		var next = window.tpAppUrl(a.href);
+		if (next === a.href) return;
+		a.setAttribute('href', next);
+		setTimeout(function () { a.setAttribute('href', original); }, 0);
+	}
+	document.addEventListener('click', decorateAppLink, true);
+	document.addEventListener('auxclick', decorateAppLink, true);
 
 	// Click sulle landing: un solo listener, event delegation.
 	document.addEventListener('click', function (e) {

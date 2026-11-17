@@ -1,14 +1,23 @@
-// QA del tracking di base (TICKET-38): node tools/qa-tracking.js <chrome-bin> <url>
+// QA del tracking di base (TICKET-38): node tools/qa-tracking.js <chrome-bin> <url> [--js <tp-track.js locale>]
+// --js serve il file indicato al posto di assets/js/tp-track.js della pagina (prova prima del deploy).
 // Apre l'URL con ?gclid=QA123&utm_source=qa&utm_medium=cpc&utm_campaign=sgrosso e verifica:
 // una sola richiesta a gtm.js, banner del consenso visibile, niente iubenda ne' Clarity prima della scelta, consent default negato nel dataLayer, tp_gclid assente senza consenso marketing e
 // salvato dopo il consenso (cookie tp_consent con ads simulato), tpGetUtm(),
 // e gli eventi marketing_* emessi dai click su tel: e sulle ancore verso il form
 // (click intercettati con preventDefault: nessuna navigazione). Esce con 1 se un controllo fallisce.
+const fs = require('fs');
 const { withChrome } = require('./lib/cdp');
 const [BIN, URL0] = process.argv.slice(2, 4);
+const JS_AT = process.argv.indexOf('--js');
+const LOCAL_JS = JS_AT === -1 ? null : process.argv[JS_AT + 1];
 const URL = URL0 + (URL0.indexOf('?') === -1 ? '?' : '&') + 'gclid=QA123&utm_source=qa&utm_medium=cpc&utm_campaign=sgrosso';
 
-withChrome(BIN, URL, { port: 9343 }, async ({ ev, sleep }) => {
+withChrome(BIN, LOCAL_JS ? 'about:blank' : URL, { port: 9343 }, async ({ ev, sleep, send, on }) => {
+	if (LOCAL_JS) {
+		on('Fetch.requestPaused', p => send('Fetch.fulfillRequest', { requestId: p.requestId, responseCode: 200, responseHeaders: [{ name: 'Content-Type', value: 'application/javascript' }], body: fs.readFileSync(LOCAL_JS).toString('base64') }));
+		await send('Fetch.enable', { patterns: [{ urlPattern: '*assets/js/tp-track.js*', requestStage: 'Request' }] });
+		await send('Page.navigate', { url: URL });
+	}
 	await sleep(4000);
 	const r = JSON.parse(await ev(`(function(){
 		var res = performance.getEntriesByType('resource').map(function(e){ return e.name; });
