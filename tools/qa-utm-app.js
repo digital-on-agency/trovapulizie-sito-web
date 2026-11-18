@@ -51,7 +51,6 @@ async function scenario(url, { consent, before, act }) {
 		if (before) await ev(before);
 		const out = await act(ev, sleep);
 		await sleep(1200);
-		navigated = navigated.slice();
 		Object.assign(out, { navigated });
 		scenario.last = out;
 	});
@@ -118,6 +117,34 @@ const parse = s => { try { return JSON.parse(s); } catch (e) { return { raw: s }
 			return parse(await ev(clickApp()));
 		} });
 		check('UTM della pagina d\'arrivo validi sulle pagine successive', params(r.navigated[0]).utm_term === 'pulizia a fondo', JSON.stringify(r));
+
+		// 10. marketing_cta_click (CTA con data-cta-position in una landing) riceve l'href originale, non quello con gli UTM.
+		r = await scenario(withQuery(PAGE, UTM), { consent: { stats: true }, before: `(function(){
+			var w = document.createElement('div'); w.setAttribute('data-landing', 'qa'); w.innerHTML = '<a id="qa-cta" data-cta-position="qa" href="https://app.trovapulizie.com/cleaner-signup">qa</a>';
+			document.body.insertBefore(w, document.body.firstChild);
+		})()`, act: async ev => {
+			const out = parse(await ev(clickApp('#qa-cta')));
+			out.ev = parse(await ev(`JSON.stringify((window.dataLayer || []).filter(function(x){ return x && x.event === 'marketing_cta_click'; }).pop() || null)`));
+			return out;
+		} });
+		check('marketing_cta_click con l\'href originale', r.ev && r.ev.target === 'https://app.trovapulizie.com/cleaner-signup' && params(r.navigated[0]).utm_source === 'google', JSON.stringify(r));
+
+		// 11. Rotella del mouse (auxclick, nuova scheda): link decorato. Si controlla l'href al momento dell'evento.
+		r = await scenario(withQuery(PAGE, UTM), { consent: { stats: true }, before: inject('https://app.trovapulizie.com/home'), act: async ev => parse(await ev(`(function(){
+			var a = document.getElementById('qa-app'), seen = null;
+			a.addEventListener('auxclick', function (e) { seen = a.getAttribute('href'); e.preventDefault(); });
+			a.dispatchEvent(new MouseEvent('auxclick', { bubbles: true, cancelable: true, button: 1 }));
+			return JSON.stringify({ seen: seen });
+		})()`)) });
+		check('auxclick: href decorato durante l\'evento', params(r.seen).utm_source === 'google', JSON.stringify(r));
+
+		// 12. Pagina con solo utm_content: non sostituisce gli UTM salvati dalla pagina d'arrivo.
+		r = await scenario(withQuery(PAGE, UTM), { consent: { stats: true }, act: async (ev, sleep) => {
+			await ev(`location.href = ${JSON.stringify(withQuery(PAGE, 'utm_content=interno'))}`);
+			await sleep(3500);
+			return parse(await ev(`JSON.stringify({ u: window.tpGetUtm(), s: sessionStorage.getItem('tp_utm') })`));
+		} });
+		check('solo utm_content: tp_utm e tpGetUtm restano quelli della visita', r.u && r.u.utmSource === 'google' && JSON.parse(r.s || '{}').utmContent === '198071219439', JSON.stringify(r));
 
 		// 9. tpGetUtm invariato (lead-form.js), anche con content e term nella visita.
 		r = await scenario(withQuery(PAGE, UTM), { act: async ev => parse(await ev(`JSON.stringify({ u: window.tpGetUtm && window.tpGetUtm() })`)) });

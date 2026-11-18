@@ -940,7 +940,7 @@ add_action( 'carbon_fields_register_fields', function () {
 				->set_help_text( __( 'Chiave dedicata al sito, limitata ai referrer staging.trovapulizie.it e www.trovapulizie.it, solo servizio Autosuggest. Vuota = campo indirizzo a testo libero.' ) ),
 			Field::make( 'checkbox', 'tp_utm_to_app', __( 'Passa gli UTM della visita all\'app' ) )
 				->set_option_value( 'yes' )
-				->set_help_text( __( 'Acceso: con il consenso alle statistiche, i link e le ricerche verso app.trovapulizie.com portano utm_source, utm_medium, utm_campaign, utm_content e utm_term della visita (SPEC-utm-verso-app nel vault). [ATTENZIONE] Accendere solo con cookie policy 1.1 e privacy aggiornata pubblicate e con l\'app che salva gli UTM sul profilo (TICKET-103). Spento = link invariati, senza deploy.' ) ),
+				->set_help_text( __( 'Acceso: con il consenso alle statistiche, i link e le ricerche verso app.trovapulizie.com portano utm_source, utm_medium, utm_campaign, utm_content e utm_term della visita (SPEC-utm-verso-app nel vault). [ATTENZIONE] Accendere solo con cookie policy 1.1 e privacy aggiornata pubblicate e con l\'app che salva gli UTM sul profilo (TICKET-103). Spento = link invariati, senza deploy. [ATTENZIONE] L\'impostazione esce nell\'HTML delle pagine: dopo ogni cambio svuotare la cache (barra LiteSpeed > Purge All dall\'admin), altrimenti le pagine in cache tengono il valore vecchio.' ) ),
 		) );
 
 	// Tracking — Theme Options > Tracking (inc/tracking.php). ID pubblici (stanno nel sorgente di ogni pagina),

@@ -72,11 +72,12 @@
 		} catch (e) { return undefined; }
 	};
 
-	// UTM dalla query string, o null se non ce n'e' nessuno.
+	// UTM dalla query string, o null se non c'e' source, medium o campaign: content e term da soli non bastano
+	// e non sostituiscono gli UTM gia' salvati nella visita (stessa regola di prima di content e term).
 	function utmFromQuery() {
-		var p = new URLSearchParams(window.location.search), utm = {}, found = false;
-		for (var k in UTM_PARAMS) { var v = p.get(k); if (v) { utm[UTM_PARAMS[k]] = v; found = true; } }
-		return found ? utm : null;
+		var p = new URLSearchParams(window.location.search), utm = {};
+		for (var k in UTM_PARAMS) { var v = p.get(k); if (v) utm[UTM_PARAMS[k]] = v; }
+		return utm.utmSource || utm.utmMedium || utm.utmCampaign ? utm : null;
 	}
 
 	// UTM della visita: quelli della pagina, altrimenti gli ultimi salvati in tp_utm. Oggetto vuoto se nessuno.
@@ -136,20 +137,6 @@
 		if (utm) store('sessionStorage', UTM_KEY, JSON.stringify(utm));
 	})();
 
-	// Link verso l'app: UTM aggiunti al click (anche rotella e ctrl/cmd, che aprono una nuova scheda) e href
-	// ripristinato subito dopo, cosi' una revoca del consenso vale per il click successivo. Un solo listener.
-	function decorateAppLink(e) {
-		var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
-		if (!a || !a.href || a.href.indexOf(APP_ORIGIN + '/') !== 0) return;
-		var original = a.getAttribute('href');
-		var next = window.tpAppUrl(a.href);
-		if (next === a.href) return;
-		a.setAttribute('href', next);
-		setTimeout(function () { a.setAttribute('href', original); }, 0);
-	}
-	document.addEventListener('click', decorateAppLink, true);
-	document.addEventListener('auxclick', decorateAppLink, true);
-
 	// Click sulle landing: un solo listener, event delegation.
 	document.addEventListener('click', function (e) {
 		var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
@@ -167,4 +154,20 @@
 		else if (/#form(-bottom)?$/.test(href)) window.tpTrack('marketing_click_to_form', p({ landing: landing, target: href.slice(href.indexOf('#')) }));
 		else if (pos) window.tpTrack('marketing_cta_click', { landing: landing, cta_position: pos, target: href });
 	}, true);
+
+	// Link verso l'app: UTM aggiunti al click (anche rotella e ctrl/cmd, che aprono una nuova scheda) e href
+	// ripristinato subito dopo, cosi' una revoca del consenso vale per il click successivo.
+	// [ATTENZIONE] Registrato dopo il listener delle landing: i due sono in cattura sullo stesso nodo e girano
+	// nell'ordine di registrazione, cosi' marketing_cta_click riceve l'href originale e non quello con gli UTM.
+	function decorateAppLink(e) {
+		var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+		if (!a || !a.href || a.href.indexOf(APP_ORIGIN + '/') !== 0) return;
+		var original = a.getAttribute('href');
+		var next = window.tpAppUrl(a.href);
+		if (next === a.href) return;
+		a.setAttribute('href', next);
+		setTimeout(function () { a.setAttribute('href', original); }, 0);
+	}
+	document.addEventListener('click', decorateAppLink, true);
+	document.addEventListener('auxclick', decorateAppLink, true);
 })();
