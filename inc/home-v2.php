@@ -56,6 +56,26 @@ function tp_home_v2_preview_ids() {
 	return array_values( array_diff( array_map( 'intval', $ids ), array( (int) get_option( 'page_on_front' ) ) ) );
 }
 
+/**
+ * True se la richiesta usa la barra in alto chiara (header.php, variante v2): pagina col template page-home-v2.php
+ * (anteprima e, dopo il rilascio, pagina iniziale) oppure interruttore tp_site_v2 acceso. Con interruttore spento e
+ * qualunque altra pagina e' false e header.php stampa il markup di sempre. E' l'unico punto che decide la barra:
+ * lo usano header.php e il filtro body_class qui sotto.
+ *
+ * @return bool
+ */
+function tp_header_v2_on() {
+	return tp_site_v2_on() || is_page_template( 'page-home-v2.php' );
+}
+
+/* Classe di body per il ramo v2: porta --tp-navbar-h alla misura della barra chiara (style.css, blocco Home v2). */
+add_filter( 'body_class', function ( $classes ) {
+	if ( tp_header_v2_on() ) {
+		$classes[] = 'tp-v2-header';
+	}
+	return $classes;
+} );
+
 /* ---- noindex ----------------------------------------------------------------------------------------------- */
 
 add_filter( 'wp_robots', function ( $robots ) {
@@ -95,6 +115,13 @@ add_action( 'wp_enqueue_scripts', function () {
 	}
 	foreach ( array( 'reveal', 'faq-accordion' ) as $handle ) {
 		wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
+	}
+} );
+
+/* Barra chiara: trasparente in cima alla pagina (assets/js/navbar-v2.js). Caricato ovunque la barra v2 e' attiva. */
+add_action( 'wp_enqueue_scripts', function () {
+	if ( tp_header_v2_on() ) {
+		wp_enqueue_script( 'trovapulizie-navbar-v2', get_stylesheet_directory_uri() . '/assets/js/navbar-v2.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 	}
 } );
 

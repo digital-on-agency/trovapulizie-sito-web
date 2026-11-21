@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.72.0
+Version: 0.73.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -10863,9 +10863,572 @@ html.tp-reveal .hv2 [data-reveal].is-in {
 
 /* prefers-reduced-motion della v2: un blocco unico. Solo dissolvenze brevi, niente spostamenti ne' loop. */
 @media (prefers-reduced-motion: reduce) {
+	header.navbar.navbar--v2 {
+		transition: none;
+	}
 	html.tp-reveal .hv2 [data-reveal] {
 		transform: none;
 		transition: opacity var(--tp-dur-reduced) linear;
 		transition-delay: 0s;
+	}
+}
+
+/* =========================
+   Header chiaro e hero della Home v2 (TICKET-120). Figma 7903:5256 desktop, 7946:2 mobile.
+   Solo selettori nuovi: .navbar--v2, .tp-orbit-text, .hv2-hero e body.tp-v2-header. Il tema e' desktop-first:
+   i valori mobile stanno in @media (max-width: 1023px), soglia --tp-bp-desktop (var() non vale dentro @media).
+   Parte DOPO il blocco Home v2 di TICKET-119 per vincere a parita' di specificita' su .navbar e .hv2-section.
+   ========================= */
+
+/* ---- Barra in alto chiara (Figma 7903:5261 / 7946:6) ---- */
+body.tp-v2-header {
+	--tp-navbar-h: 103px;
+}
+.navbar--v2 {
+	padding: 0 96px;
+	gap: 24px;
+	/* La hero sale sotto la barra (margine negativo sul template-part): la barra e' appena velata, cosi' la sfumatura
+	   della hero continua dietro di lei e, scorrendo, i contenuti non si leggono attraverso. */
+	background: rgba(243, 250, 247, 0.9);
+	-webkit-backdrop-filter: blur(14px);
+	backdrop-filter: blur(14px);
+	transition: background-color var(--tp-dur) var(--tp-ease-stage);
+}
+/* In cima alla pagina (classe messa da navbar-v2.js) la barra e' trasparente: la sfumatura della hero continua dietro */
+.navbar--v2.is-top {
+	background-color: transparent;
+	-webkit-backdrop-filter: none;
+	backdrop-filter: none;
+}
+.navbar--v2 .navbar__brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	min-height: 44px;
+	color: var(--tp-v2-text);
+}
+.navbar--v2 .navbar__brand-icon {
+	width: 40px;
+	height: auto;
+}
+.navbar--v2 .navbar__brand-name {
+	font-size: 22px;
+	font-weight: 700;
+	line-height: normal;
+	white-space: nowrap;
+}
+.navbar--v2 .navbar__links {
+	gap: 36px;
+}
+.navbar--v2 .navbar__links a {
+	font-size: 15px;
+	font-weight: 500;
+	color: #4B5A56;
+}
+.navbar--v2 .navbar__links a:hover {
+	color: var(--tp-v2-text);
+}
+.navbar--v2 .navbar__cta {
+	gap: 20px;
+}
+.navbar--v2 .navbar__login {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--tp-v2-text);
+}
+.navbar--v2 .navbar__app {
+	display: inline-flex;
+	align-items: center;
+	padding: 12px 22px;
+	border-radius: 999px;
+	background: var(--tp-v2-green);
+	color: #fff; /* eccezione di brand dichiarata: testo bianco nei bottoni verdi pieni (SPEC §2) */
+	font-size: 15px;
+	font-weight: 600;
+	white-space: nowrap;
+	transition: transform var(--tp-dur-fast) var(--tp-ease-stage);
+}
+.navbar--v2 .navbar__app:hover {
+	transform: translateY(-1px);
+}
+.navbar--v2 a:focus-visible,
+.navbar__panel--v2 a:focus-visible,
+.navbar--v2 .navbar__burger:focus-visible {
+	outline: 2px solid var(--tp-focus);
+	outline-offset: 3px;
+}
+.navbar__panel--v2 a {
+	color: var(--tp-v2-text);
+}
+.navbar__panel--v2 .navbar__panel-login {
+	font-weight: 600;
+}
+
+/* ---- Testo circolare (componente generico, Figma 7903:5506) ---- */
+.tp-orbit-text {
+	display: block;
+	overflow: visible;
+	pointer-events: none;
+}
+.tp-orbit-text text {
+	fill: rgba(0, 136, 102, 0.7);
+	font-family: var(--tp-font);
+	font-weight: 800;
+	white-space: pre; /* conserva lo spazio finale della frase */
+}
+
+/* ---- Hero (Figma 7903:5257, 1440 x 923) ---- */
+.hv2-hero {
+	position: relative;
+	overflow: hidden;
+	isolation: isolate;
+	background: #F3FAF7;
+	/* Sale sotto la barra sticky e le restituisce il suo spazio: le luci e la sfumatura sono quelle del Figma, che
+	   disegna la barra dentro la hero. */
+	margin-top: calc(var(--tp-navbar-h) * -1);
+	padding: calc(var(--tp-navbar-h) + 96.5px) 0 56px;
+	--hv2-k: 1;
+	--hv2-light-a: 0.22;
+	--hv2-light-b: 0.22;
+	--hv2-light-c: 0.22;
+}
+.hv2-hero__light {
+	position: absolute;
+	z-index: -1;
+	border-radius: 50%;
+	pointer-events: none;
+}
+.hv2-hero__light--a {
+	left: -200px;
+	top: -240px;
+	width: 760px;
+	height: 620px;
+	background: radial-gradient(closest-side, rgba(55, 178, 153, var(--hv2-light-a)), rgba(55, 178, 153, 0));
+}
+.hv2-hero__light--b {
+	left: 820px;
+	top: 120px;
+	width: 700px;
+	height: 640px;
+	background: radial-gradient(closest-side, rgba(55, 178, 153, var(--hv2-light-b)), rgba(55, 178, 153, 0));
+}
+.hv2-hero__light--c {
+	left: 300px;
+	top: 640px;
+	width: 620px;
+	height: 420px;
+	background: radial-gradient(closest-side, rgba(55, 178, 153, var(--hv2-light-c)), rgba(55, 178, 153, 0));
+}
+.hv2-hero__inner {
+	display: grid;
+	grid-template-columns: 716px calc(540px * var(--hv2-k));
+	column-gap: 40px;
+	align-items: start;
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: 0 48px 0 96px;
+}
+.hv2-hero__text {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 32px;
+	padding: 0 24px;
+}
+.hv2-hero__label {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	padding: 7px 14px;
+	border: 1px solid rgba(15, 31, 27, 0.15);
+	border-radius: 999px;
+	background: rgba(15, 31, 27, 0.05);
+	font-size: 13px;
+	font-weight: 600;
+	line-height: normal;
+	color: #4B5A56;
+}
+.hv2-hero__dot {
+	flex: 0 0 8px;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--tp-v2-green);
+}
+.hv2-hero__title {
+	margin: 0;
+	font-size: 64px;
+	font-weight: 700;
+	line-height: 72px;
+	letter-spacing: -1.28px;
+	color: var(--tp-v2-text);
+}
+.hv2-hero__title-line {
+	display: block;
+}
+.hv2-hero__accent {
+	color: var(--tp-v2-niente);
+}
+.hv2-hero__subtitle {
+	max-width: 668px;
+	margin: 0;
+	font-size: 20px;
+	font-weight: 400;
+	line-height: 32px;
+	color: #4B5A56;
+}
+.hv2-hero__actions {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+}
+.hv2-hero__cta,
+.hv2-hero__ghost {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 999px;
+	font-size: 18px;
+	font-weight: 600;
+	line-height: normal;
+	white-space: nowrap;
+}
+.hv2-hero__cta {
+	gap: 10px;
+	padding: 18px 32px;
+	background: var(--tp-v2-green);
+	color: #fff; /* eccezione di brand dichiarata: testo bianco nei bottoni verdi pieni (SPEC §2) */
+	box-shadow: 0 12px 32px rgba(55, 178, 153, 0.45);
+	transition: transform var(--tp-dur-fast) var(--tp-ease-stage);
+}
+.hv2-hero__cta:hover {
+	transform: translateY(-2px);
+}
+.hv2-hero__ghost {
+	padding: 18px 28px;
+	border: 1px solid rgba(15, 31, 27, 0.15);
+	color: var(--tp-v2-text);
+}
+.hv2-hero__cta:focus-visible,
+.hv2-hero__ghost:focus-visible {
+	outline: 2px solid var(--tp-focus);
+	outline-offset: 3px;
+}
+.hv2-hero__google {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 0;
+	font-size: 15px;
+	color: #4B5A56;
+}
+.hv2-hero__google img {
+	flex: 0 0 22px;
+}
+.hv2-hero__google strong {
+	font-size: 16px;
+	font-weight: 600;
+	color: var(--tp-v2-text);
+}
+.hv2-hero__google-stars {
+	font-size: 16px;
+	color: #FBBC04;
+}
+.hv2-hero__qr {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+	padding: 12px 24px 12px 12px;
+	border: 1px solid rgba(15, 31, 27, 0.14);
+	border-radius: 20px;
+	background: rgba(15, 31, 27, 0.05);
+}
+.hv2-hero__qr img {
+	flex: 0 0 76px;
+	width: 76px;
+	height: 76px;
+	border-radius: 6px;
+	background: #fff;
+}
+.hv2-hero__qr p {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	margin: 0;
+}
+.hv2-hero__qr strong {
+	font-size: 15px;
+	font-weight: 600;
+	color: var(--tp-v2-text);
+}
+.hv2-hero__qr span {
+	font-size: 14px;
+	line-height: 21px;
+	color: #4B5A56;
+}
+
+/* Composizione: telefoni e testo circolare. Scatola di 540 x 780 (Figma 7903:5505) che sale di 56 px: la hero e'
+   alta quanto il disegno. --hv2-k la riduce fra 1024 e 1279 px senza ricalcolare ogni misura. */
+.hv2-hero__stage {
+	position: relative;
+	width: calc(540px * var(--hv2-k));
+	height: calc(780px * var(--hv2-k));
+	margin-top: -56px;
+}
+.hv2-hero__stage-in {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 540px;
+	height: 780px;
+	transform: scale(var(--hv2-k));
+	transform-origin: 0 0;
+}
+.hv2-hero__orbit {
+	position: absolute;
+	left: -20px;
+	top: -20px;
+	width: 820px;
+	height: 820px;
+	font-size: 28px;
+}
+.hv2-hero__disc {
+	position: absolute;
+	left: 140px;
+	top: 140px;
+	width: 500px;
+	height: 500px;
+	border-radius: 50%;
+	background: var(--tp-v2-green);
+}
+.hv2-hero .tp-phone__screen picture {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+/* Cornice sottile come nel Figma: bordo 3,2% e isola 30% x 8,4% della larghezza (il tema ha 4,1% e 31% x 8,8%) */
+.hv2-hero .tp-phone__face {
+	padding: calc(var(--tp-phone-w) * 0.032);
+}
+.hv2-hero .tp-phone__face::before {
+	top: calc(var(--tp-phone-w) * 0.056);
+	width: calc(var(--tp-phone-w) * 0.30);
+	height: calc(var(--tp-phone-w) * 0.084);
+	border-radius: calc(var(--tp-phone-w) * 0.042);
+}
+.hv2-hero__phone {
+	position: absolute;
+}
+.hv2-hero__phone--profilo {
+	--tp-phone-w: 227px;
+	--tp-phone-h: 477px;
+	--tp-phone-radius: 40px;
+	--tp-phone-screen-radius: 33px;
+	left: 140px;
+	top: 160px;
+}
+.hv2-hero__phone--home {
+	--tp-phone-w: 258px;
+	--tp-phone-h: 539px;
+	--tp-phone-radius: 44px;
+	--tp-phone-screen-radius: 36px;
+	left: 261px;
+	top: 121px;
+}
+
+@media (max-width: 1279px) {
+	/* Fra 1024 e 1279 la barra stringe margini e distanze: a 1024 px le quattro voci, Accedi e il bottone stanno in riga */
+	.navbar--v2 {
+		padding: 0 32px;
+		gap: 16px;
+	}
+	.navbar--v2 .navbar__links {
+		gap: 24px;
+	}
+	.hv2-hero {
+		--hv2-k: 0.8;
+	}
+	.hv2-hero__inner {
+		grid-template-columns: minmax(0, 1fr) calc(540px * var(--hv2-k));
+		column-gap: 16px;
+		padding: 0 24px 0 48px;
+	}
+	.hv2-hero__text {
+		padding: 0;
+	}
+	.hv2-hero__title {
+		font-size: 50px;
+		line-height: 58px;
+		letter-spacing: -1px;
+	}
+	.hv2-hero__subtitle {
+		font-size: 18px;
+		line-height: 29px;
+	}
+}
+
+@media (max-width: 1023px) {
+	body.tp-v2-header {
+		--tp-navbar-h: 64px;
+	}
+	/* Barra mobile (Figma 7946:6): marchio, "Apri l'app" e hamburger da 44 px */
+	.navbar--v2 {
+		padding: 0 16px;
+		gap: 10px;
+	}
+	.navbar--v2 .navbar__brand {
+		gap: 8px;
+	}
+	.navbar--v2 .navbar__brand-icon {
+		width: 32px;
+	}
+	.navbar--v2 .navbar__brand-name {
+		font-size: 18px;
+	}
+	.navbar--v2 .navbar__links,
+	.navbar--v2 .navbar__login {
+		display: none;
+	}
+	.navbar--v2 .navbar__cta {
+		margin-left: auto;
+	}
+	.navbar--v2 .navbar__app {
+		min-height: 44px;
+		padding: 12px 14px;
+		font-size: 14px;
+	}
+	.navbar--v2 .navbar__burger {
+		gap: 5px;
+		align-items: center;
+		width: 44px;
+		height: 44px;
+		border: 1px solid rgba(15, 31, 27, 0.15);
+		border-radius: 22px;
+	}
+	.navbar--v2 .navbar__burger::before {
+		display: none;
+	}
+	.navbar--v2 .navbar__burger span {
+		width: 18px;
+		background: var(--tp-v2-text);
+	}
+	.navbar--v2 .navbar__burger span:last-child {
+		width: 12px;
+	}
+
+	/* Hero mobile (Figma 7946:3, 390 x 1006): colonna unica, un telefono, testo circolare piu' piccolo. La scena e'
+	   larga quanto lo schermo fino a 430 px e le misure del telefono ne derivano (390 px = disegno). */
+	.hv2-hero {
+		--hv2-stage: min(100vw, 430px);
+		--hv2-light-a: 0.5;
+		--hv2-light-b: 0.4;
+		--hv2-light-c: 0;
+		padding: calc(var(--tp-navbar-h) + 32px) 0 20px;
+	}
+	.hv2-hero__light--a {
+		left: -200px;
+		top: -160px;
+		width: 520px;
+		height: 420px;
+	}
+	.hv2-hero__light--b {
+		left: 120px;
+		top: 620px;
+		width: 480px;
+		height: 420px;
+	}
+	.hv2-hero__inner {
+		display: block;
+		padding: 0;
+	}
+	.hv2-hero__text {
+		align-items: stretch;
+		gap: 18px;
+		max-width: 430px;
+		margin: 0 auto;
+		padding: 0 16px;
+	}
+	.hv2-hero__label {
+		align-self: flex-start;
+		padding: 6px 12px;
+		font-size: 12px;
+		color: var(--tp-v2-text);
+	}
+	.hv2-hero__dot {
+		flex-basis: 7px;
+		width: 7px;
+		height: 7px;
+	}
+	.hv2-hero__title {
+		font-size: 38px;
+		line-height: 44px;
+		letter-spacing: -0.57px;
+	}
+	.hv2-hero__subtitle {
+		font-size: 16px;
+		line-height: 25px;
+	}
+	.hv2-hero__actions {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 18px;
+	}
+	.hv2-hero__cta {
+		padding: 16px 24px;
+		font-size: 16px;
+		box-shadow: none;
+	}
+	/* Testo semplice come nel Figma (altezza 23 px), area toccabile da 43 px con margini negativi */
+	.hv2-hero__ghost {
+		padding: 10px 8px;
+		margin: -10px 0;
+		border: 0;
+		font-size: 15px;
+	}
+	.hv2-hero__google {
+		justify-content: center;
+		flex-wrap: wrap;
+	}
+	.hv2-hero__qr {
+		display: none;
+	}
+	.hv2-hero__stage {
+		--tp-phone-w: calc(var(--hv2-stage) * 0.349);
+		--tp-phone-h: calc(var(--hv2-stage) * 0.7287);
+		width: var(--hv2-stage);
+		height: calc(var(--hv2-stage) * 1.2051);
+		margin: 30px auto 0;
+	}
+	.hv2-hero__stage-in {
+		width: 100%;
+		height: 100%;
+		transform: none;
+	}
+	/* Stessa SVG della desktop (viewBox 820, raggio 339) ingrandita per portare la linea di base a 183 px su 390 e il
+	   corpo a circa 15 px: centro del cerchio (195, 240) nel disegno 390 x 470 (Figma 7946:40). */
+	.hv2-hero__orbit {
+		left: calc(var(--hv2-stage) * -0.0675);
+		top: calc(var(--hv2-stage) * 0.0478);
+		width: calc(var(--hv2-stage) * 1.135);
+		height: calc(var(--hv2-stage) * 1.135);
+	}
+	.hv2-hero__disc {
+		left: 11.54%;
+		top: 18.09%;
+		width: 76.92%;
+		height: auto;
+		aspect-ratio: 1;
+	}
+	.hv2-hero__phone--profilo {
+		display: none;
+	}
+	.hv2-hero__phone--home {
+		--tp-phone-w: calc(var(--hv2-stage) * 0.349);
+		--tp-phone-h: calc(var(--hv2-stage) * 0.7287);
+		--tp-phone-radius: calc(var(--hv2-stage) * 0.0615);
+		--tp-phone-screen-radius: calc(var(--hv2-stage) * 0.0513);
+		left: 32.56%;
+		top: 19.77%;
 	}
 }

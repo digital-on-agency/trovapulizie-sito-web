@@ -8,6 +8,15 @@
  * Sotto --tp-bp-desktop la barra mostra logo, Registrati e l'hamburger (Figma 4018:971): le voci di menu e
  * Accedi stanno nel pannello, aperto da assets/js/nav-mobile.js. Le voci hanno un'unica sorgente
  * ($tp_nav_links) e vengono rese sia nella barra desktop sia nel pannello.
+ *
+ * Variante chiara della Home v2 (TICKET-120, Figma 7903:5261 desktop e 7946:6 mobile): argomento `variant` di
+ * get_header( '', $args ), default '' = markup di sempre, invariato byte per byte. Con variant 'v2' (o, senza
+ * argomento, quando tp_header_v2_on() e' vero: pagina col template page-home-v2.php oppure interruttore tp_site_v2
+ * acceso) esce la barra .navbar--v2: marchio (icona + scritta), voci Servizi / Come funziona / Per le aziende /
+ * Diventa professionista, Accedi e "Apri l'app" (tp_app_url(), data-cta-position="navbar", stessa scheda). Anche con
+ * la variante restano validi `links`, `cta_label` e `cta_href` passati da chi chiama (es. Diventa cleaner). Il menu
+ * mobile e' lo stesso di sempre (#nav-burger, #nav-panel, nav-mobile.js). Esempio:
+ *   get_header( '', array( 'variant' => 'v2' ) );
  */
 ?>
 <?php get_template_part( 'template-parts/head' ); ?>
@@ -19,7 +28,12 @@ $args = wp_parse_args( $args ?? array(), array(
 	'links'     => array(),
 	'cta_label' => 'Registrati',
 	'cta_href'  => '',
+	'variant'   => '',
 ) );
+if ( 'v2' === $args['variant'] || ( '' === $args['variant'] && function_exists( 'tp_header_v2_on' ) && tp_header_v2_on() ) ) {
+	get_template_part( 'template-parts/navbar-v2', null, $args );
+	return;
+}
 // Voci assolute: da qualunque pagina portano alla sezione giusta (prima erano ancore relative, vuote fuori dalla
 // Home). Prezzi va al calcolatore dell'hub, l'unico posto del sito con i prezzi (cutover-checklist A6).
 $tp_nav_links = $args['links'] ?: array(

@@ -995,7 +995,7 @@ add_action( 'carbon_fields_register_fields', function () {
 	// return). Con TICKET-119 ogni tab ha solo il titolo; i campi di contenuto li aggiungono i ticket di sezione.
 	//
 	// | Tab (data-section)  | Campi oggi          | Ticket che aggiunge i campi |
-	// | 01-hero             | h2_hero_title       | 120 |
+	// | 01-hero             | h2_hero_title, h2_hero_title_accent, h2_hero_label, h2_hero_subtitle, h2_hero_orbit, h2_google_badge, h2_google_rating | 120 (fatto) |
 	// | 02-frasi            | h2_frasi_title      | 121 |
 	// | 03-servizi          | h2_servizi_title    | 121 |
 	// | 04-come-funziona    | h2_come_funziona_title | 122 |
@@ -1021,9 +1021,24 @@ add_action( 'carbon_fields_register_fields', function () {
 	$h2_container = Container::make( 'post_meta', __( 'Home v2 — Sezioni' ) )
 		->where( 'post_template', '=', 'page-home-v2.php' );
 	foreach ( $h2_tabs as $chiave => $etichetta ) {
-		$h2_container->add_tab( __( $etichetta ), array(
+		$h2_campi = array(
 			Field::make( 'text', 'h2_' . $chiave . '_title', __( 'Titolo' ) )->set_help_text( $h2_aiuto ),
-		) );
+		);
+		if ( 'hero' === $chiave ) {
+			// TICKET-120: testi della hero e riquadro Google. Vuoto = default del template (template-parts/home-hero-v2.php).
+			$h2_campi[0]->set_help_text( __( 'Prima riga del titolo (H1, colore scuro). Vuoto = "La pulizia cambia."' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_hero_title_accent', __( 'Titolo, seconda riga (verde)' ) )->set_help_text( __( 'Vuoto = "Il modo di sceglierla, anche."' ) ),
+				Field::make( 'text', 'h2_hero_label', __( 'Etichetta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "La nuova app di Trovapulizie, a Roma"' ) ),
+				Field::make( 'textarea', 'h2_hero_subtitle', __( 'Sottotitolo' ) )->set_rows( 3 )->set_help_text( __( 'Vuoto = "Professionisti verificati vicino a te e il prezzo prima di prenotare. Scegli, prenota e segui tutto dal telefono."' ) ),
+				Field::make( 'text', 'h2_hero_orbit', __( 'Testo circolare' ) )->set_help_text( __( 'Frase che gira attorno ai telefoni, in maiuscolo. Se e\' troppo lunga il corpo si riduce da solo. Vuoto = "PROFESSIONISTI VERIFICATI · PREZZO CHIARO · PAGAMENTO SICURO · TUTTO IN UN\'APP ·"' ) ),
+				Field::make( 'checkbox', 'h2_google_badge', __( 'Mostra il riquadro "Recensioni su Google"' ) )
+					->set_option_value( 'yes' )
+					->set_help_text( __( 'Spento di default. Accenderlo solo quando il profilo Google ha almeno 5 recensioni vere (decisione del 21/11). Senza il voto qui sotto il riquadro non esce comunque; al suo posto sale il riquadro del QR.' ) ),
+				Field::make( 'text', 'h2_google_rating', __( 'Voto Google (es. 4,9)' ) )->set_help_text( __( 'Il voto mostrato nel riquadro. Nessun dato strutturato (AggregateRating) viene mai emesso.' ) ),
+			) );
+		}
+		$h2_container->add_tab( __( $etichetta ), $h2_campi );
 	}
 
 	// Fondatori: fonte stabile della card di contatto nelle FAQ di tutte le landing (tp_founders_contact()). Valori

@@ -12,7 +12,7 @@
  * 7883:2776 con i colori del desktop per le altre sezioni, note di animazione 7882:4118.
  *
  * | data-section     | Template-part (ticket)                      | Nodo Figma desktop |
- * | 01-hero          | home-hero-v2 (TICKET-120)                   | 7903:5257 |
+ * | 01-hero          | home-hero-v2 (TICKET-120, fatto)            | 7903:5257, mobile 7946:3 |
  * | 02-frasi         | home-services-v2, fascia (TICKET-121)       | 7903:6209 |
  * | 03-servizi       | home-services-v2 (TICKET-121)               | 7903:6228 |
  * | 04-come-funziona | home-steps-v2 (TICKET-122)                  | 7903:6508 |
@@ -30,7 +30,7 @@
  */
 get_header();
 
-// data-section => [ chiave Carbon, titolo di default ]. Il primo titolo e' l'unico h1 della pagina.
+// data-section => [ chiave Carbon, titolo di default ]. L'unico h1 della pagina e' nella hero (home-hero-v2); le altre sezioni hanno un h2.
 $hv2_sections = array(
 	'01-hero'          => array( 'hero', 'Trovapulizie' ),
 	'02-frasi'         => array( 'frasi', 'Fascia frasi' ),
@@ -48,11 +48,25 @@ $hv2_sections = array(
 	<?php
 	$hv2_i = 0;
 	foreach ( $hv2_sections as $hv2_slug => $hv2_def ) :
+		if ( 0 === $hv2_i ) :
+			// Hero (TICKET-120): template-part dedicato, con il proprio H1 e senza data-reveal (contiene l'LCP).
+			get_template_part( 'template-parts/home-hero-v2', null, array(
+				'title'         => carbon_get_the_post_meta( 'h2_hero_title' ),
+				'accent'        => carbon_get_the_post_meta( 'h2_hero_title_accent' ),
+				'label'         => carbon_get_the_post_meta( 'h2_hero_label' ),
+				'subtitle'      => carbon_get_the_post_meta( 'h2_hero_subtitle' ),
+				'orbit'         => carbon_get_the_post_meta( 'h2_hero_orbit' ),
+				'google_badge'  => (bool) carbon_get_the_post_meta( 'h2_google_badge' ),
+				'google_rating' => carbon_get_the_post_meta( 'h2_google_rating' ),
+			) );
+			++$hv2_i;
+			continue;
+		endif;
 		$hv2_title = trim( (string) carbon_get_the_post_meta( 'h2_' . $hv2_def[0] . '_title' ) );
 		$hv2_title = '' !== $hv2_title ? $hv2_title : $hv2_def[1];
-		$hv2_tag   = 0 === $hv2_i ? 'h1' : 'h2';
+		$hv2_tag   = 'h2'; // l'unico h1 e' nella hero
 		?>
-	<section class="hv2-section hv2-section--<?php echo esc_attr( $hv2_def[0] ); ?>" data-section="<?php echo esc_attr( $hv2_slug ); ?>" data-reveal>
+	<section class="hv2-section hv2-section--<?php echo esc_attr( $hv2_def[0] ); ?>"<?php if ( 'come_funziona' === $hv2_def[0] ) : ?> id="come-funziona"<?php endif; ?> data-section="<?php echo esc_attr( $hv2_slug ); ?>" data-reveal>
 		<<?php echo $hv2_tag; ?> class="hv2-section__title"><?php echo esc_html( $hv2_title ); ?></<?php echo $hv2_tag; ?>>
 	</section>
 		<?php
