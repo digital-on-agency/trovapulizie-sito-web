@@ -10893,7 +10893,7 @@ html.tp-reveal .hv2 [data-reveal].is-in {
 
 /* ---- Barra in alto chiara (Figma 7903:5261 / 7946:6) ---- */
 body.tp-v2-header {
-	--tp-navbar-h: 103px;
+	--tp-navbar-h: 76px; /* 103 nel Figma, stretta su richiesta di Guido 21/11 */
 }
 .navbar--v2 {
 	padding: 0 96px;
@@ -10919,11 +10919,11 @@ body.tp-v2-header {
 	color: var(--tp-v2-text);
 }
 .navbar--v2 .navbar__brand-icon {
-	width: 40px;
+	width: 34px;
 	height: auto;
 }
 .navbar--v2 .navbar__brand-name {
-	font-size: 22px;
+	font-size: 20px;
 	font-weight: 700;
 	line-height: normal;
 	white-space: nowrap;
@@ -10950,7 +10950,7 @@ body.tp-v2-header {
 .navbar--v2 .navbar__app {
 	display: inline-flex;
 	align-items: center;
-	padding: 12px 22px;
+	padding: 10px 20px;
 	border-radius: 999px;
 	background: var(--tp-v2-green);
 	color: #fff; /* eccezione di brand dichiarata: testo bianco nei bottoni verdi pieni (SPEC §2) */
@@ -10997,7 +10997,15 @@ body.tp-v2-header {
 	/* Sale sotto la barra sticky e le restituisce il suo spazio: le luci e la sfumatura sono quelle del Figma, che
 	   disegna la barra dentro la hero. */
 	margin-top: calc(var(--tp-navbar-h) * -1);
-	padding: calc(var(--tp-navbar-h) + 96.5px) 0 56px;
+	/* La hero entra nel primo schermo (Guido 21/11): alta quanto la finestra, contenuto centrato, spazi e scena che
+	   si riducono con l'altezza della finestra (vedi le @media (max-height) in fondo al blocco). */
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	min-height: 100vh;
+	min-height: 100svh;
+	padding: calc(var(--tp-navbar-h) + clamp(16px, 5vh, 72px)) 0 clamp(24px, 4vh, 56px);
 	--hv2-k: 1;
 	--hv2-light-a: 0.22;
 	--hv2-light-b: 0.22;
@@ -11031,6 +11039,8 @@ body.tp-v2-header {
 	background: radial-gradient(closest-side, rgba(55, 178, 153, var(--hv2-light-c)), rgba(55, 178, 153, 0));
 }
 .hv2-hero__inner {
+	width: 100%; /* figlio della hero in colonna flex: senza larghezza si stringe sul contenuto e si centra */
+	box-sizing: border-box;
 	display: grid;
 	grid-template-columns: 716px calc(540px * var(--hv2-k));
 	column-gap: 40px;
@@ -11043,7 +11053,7 @@ body.tp-v2-header {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
-	gap: 32px;
+	gap: clamp(16px, 3.2vh, 32px);
 	padding: 0 24px;
 }
 .hv2-hero__label {
@@ -11069,9 +11079,9 @@ body.tp-v2-header {
 }
 .hv2-hero__title {
 	margin: 0;
-	font-size: 64px;
+	font-size: clamp(46px, 7vh, 64px);
 	font-weight: 700;
-	line-height: 72px;
+	line-height: 1.125;
 	letter-spacing: -1.28px;
 	color: var(--tp-v2-text);
 }
@@ -11277,6 +11287,26 @@ body.tp-v2-header {
 		font-size: 18px;
 		line-height: 29px;
 	}
+}
+
+/* Scena dei telefoni proporzionata all'altezza della finestra, perche' la hero entri senza scorrere */
+@media (min-width: 1280px) and (max-height: 940px) {
+	.hv2-hero { --hv2-k: 0.88; }
+}
+@media (min-width: 1280px) and (max-height: 860px) {
+	.hv2-hero { --hv2-k: 0.8; }
+	.hv2-hero__qr { padding: 8px 20px 8px 8px; }
+	.hv2-hero__qr img { flex-basis: 64px; width: 64px; height: 64px; }
+}
+@media (min-width: 1024px) and (max-height: 780px) {
+	.hv2-hero { --hv2-k: 0.72; }
+	.hv2-hero__cta { padding: 15px 28px; }
+	.hv2-hero__ghost { padding: 15px 24px; }
+}
+@media (min-width: 1024px) and (max-height: 700px) {
+	.hv2-hero { --hv2-k: 0.64; }
+	.hv2-hero__title { font-size: 44px; }
+	.hv2-hero__subtitle { font-size: 17px; line-height: 27px; }
 }
 
 @media (max-width: 1023px) {
