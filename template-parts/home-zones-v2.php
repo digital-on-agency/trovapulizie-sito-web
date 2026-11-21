@@ -92,7 +92,7 @@ $hz_img   = static function ( $f ) {
 
 			<?php if ( $hz_chips ) : ?>
 				<div class="hv2-zones__list">
-					<p class="hv2-zones__list-label" id="hv2-zones-lista">Le zone attive</p>
+					<p class="hv2-zones__list-label" id="hv2-zones-lista">Alcune delle zone servite</p>
 					<ul class="hv2-zones__chips" aria-labelledby="hv2-zones-lista">
 						<?php foreach ( $hz_first as $cap => $nome ) : ?>
 							<li class="hv2-zones__chip" data-cap="<?php echo esc_attr( $cap ); ?>"><?php echo esc_html( $nome ); ?></li>
@@ -100,7 +100,7 @@ $hz_img   = static function ( $f ) {
 					</ul>
 					<?php if ( $hz_rest ) : ?>
 						<details class="hv2-zones__more">
-							<summary>Tutti i quartieri (<?php echo (int) count( $hz_chips ); ?>)</summary>
+							<summary>Vedi tutti i quartieri serviti (<?php echo (int) count( $hz_chips ); ?>)</summary>
 							<ul class="hv2-zones__chips hv2-zones__chips--all">
 								<?php foreach ( $hz_rest as $cap => $nome ) : ?>
 									<li class="hv2-zones__chip" data-cap="<?php echo esc_attr( $cap ); ?>"><?php echo esc_html( $nome ); ?></li>

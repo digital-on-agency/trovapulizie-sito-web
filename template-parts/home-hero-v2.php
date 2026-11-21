@@ -95,7 +95,7 @@ $hv2_img      = static function ( $file ) {
 					'screen'  => $hv2_img( 'hero-screen-profilo.webp' ),
 					'width'   => 430,
 					'height'  => 930,
-					'loading' => 'lazy',
+					'loading' => 'eager', /* sopra la piega da desktop; su mobile e' display:none (revisione giro 1, voce 19) */
 					'alt'     => 'Schermata del profilo di una professionista nell’app: valutazione, prezzo orario e disponibilità',
 				) );
 				get_template_part( 'template-parts/phone-mockup', null, array(

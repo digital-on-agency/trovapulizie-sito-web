@@ -57,7 +57,7 @@ function tp_home_v2_faq_defaults() {
 		),
 		array(
 			'question' => 'E se il professionista non può più venire?',
-			'answer'   => 'Te ne proponiamo un altro, alle stesse condizioni. Non resti mai senza pulizie per un imprevisto.',
+			'answer'   => 'Te ne proponiamo un altro, alle stesse condizioni.',
 		),
 		array(
 			'question' => 'Fate anche uffici e condomini?',

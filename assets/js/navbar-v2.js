@@ -22,4 +22,17 @@
 		}
 	}, { passive: true });
 	update();
+
+	/* Menu mobile aperto: la pagina sotto non scorre (revisione giro 1, voce 21). nav-mobile.js e' condiviso con l'header
+	   vecchio e non si tocca: qui si osserva aria-expanded dell'hamburger e si mette una classe su <html>, che solo il
+	   CSS della v2 (html.tp-nav-lock) usa. */
+	var burger = document.getElementById('nav-burger');
+	if (burger && window.MutationObserver) {
+		var root = document.documentElement;
+		var sync = function () {
+			root.classList.toggle('tp-nav-lock', burger.getAttribute('aria-expanded') === 'true');
+		};
+		new MutationObserver(sync).observe(burger, { attributes: true, attributeFilter: ['aria-expanded'] });
+		sync();
+	}
 })();

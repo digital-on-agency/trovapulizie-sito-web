@@ -6,8 +6,8 @@
  * precompilato nel pannello) e il template-part template-parts/home-manifesto.php. Cosi' i testi si cambiano da
  * WordPress senza deploy e il codice non ne tiene una seconda copia.
  *
- * [ATTENZIONE] Le quattro prove sono esempi del Figma (Laura B., 76 euro e 4 ore, Marco): decisione di Guido prima del
- * rilascio (SPEC §6). Regola di contenuto: nelle prove vanno dati reali dell'app, mai numeri o nomi inventati.
+ * [ATTENZIONE] Le prove di default non portano nomi propri (revisione UI/UX giro 1, 21/11): l'esempio del prezzo e' dichiarato
+ * come tale. Regola di contenuto: nelle prove vanno dati reali dell'app, mai numeri o nomi inventati.
  */
 
 /**
@@ -28,15 +28,15 @@ function tp_home_v2_manifesto_icons() {
 }
 
 /**
- * Le quattro promesse del Figma (nodo 7903:7379). Ogni riga: lead (parte verde #008866), keyword (parola chiave
+ * Le quattro promesse del Figma (nodo 7903:7379). Ogni riga: lead (parte verde #007A5C), keyword (parola chiave
  * #0F1F1B), text, proof (testo della prova), icon (chiave di tp_home_v2_manifesto_icons()). Il numero d'ordine
  * (01, 02...) lo calcola il template dalla posizione, non e' un campo.
  */
 function tp_home_v2_manifesto_defaults() {
 	return array(
-		array( 'lead' => 'Niente', 'keyword' => 'sconosciuti.', 'text' => 'Controlliamo documenti e identità di ognuno.', 'proof' => 'Documento verificato · Laura B.', 'icon' => 'spunta' ),
-		array( 'lead' => 'Niente', 'keyword' => 'sorprese.', 'text' => 'Il prezzo lo vedi prima di inviare la richiesta.', 'proof' => 'Totale 76 € · 4 ore', 'icon' => 'etichetta' ),
+		array( 'lead' => 'Niente', 'keyword' => 'sconosciuti.', 'text' => 'Controlliamo documenti e identità di ognuno.', 'proof' => 'Documento verificato', 'icon' => 'spunta' ),
+		array( 'lead' => 'Niente', 'keyword' => 'sorprese.', 'text' => 'Il prezzo lo vedi prima di inviare la richiesta.', 'proof' => 'Esempio: totale 76 € · 4 ore', 'icon' => 'etichetta' ),
 		array( 'lead' => 'Niente', 'keyword' => 'anticipi a vuoto.', 'text' => 'L’addebito parte solo quando il professionista accetta.', 'proof' => 'Addebito dopo l’accettazione', 'icon' => 'carta' ),
-		array( 'lead' => 'Niente', 'keyword' => 'buchi.', 'text' => 'Se chi hai scelto non può, te ne proponiamo un altro.', 'proof' => 'Ti proponiamo Marco, stesse condizioni', 'icon' => 'scambio' ),
+		array( 'lead' => 'Niente', 'keyword' => 'buchi.', 'text' => 'Se chi hai scelto non può, te ne proponiamo un altro.', 'proof' => 'Ti proponiamo un altro professionista, stesse condizioni', 'icon' => 'scambio' ),
 	);
 }

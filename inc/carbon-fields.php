@@ -1240,7 +1240,7 @@ add_action( 'carbon_fields_register_fields', function () {
 			$h2_campi[0]->set_help_text( __( 'Titolo della sezione (H2, maiuscolo da CSS). Vuoto = "Spoiler: due minuti."' ) );
 			$h2_campi = array_merge( $h2_campi, array(
 				Field::make( 'text', 'h2_come_funziona_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Come funziona"' ) ),
-				Field::make( 'text', 'h2_come_funziona_subtitle', __( 'Sottotitolo (desktop)' ) )->set_help_text( __( 'Vuoto = "Quattro passi. Dal tuo divano."' ) ),
+				Field::make( 'text', 'h2_come_funziona_subtitle', __( 'Sottotitolo (desktop)' ) )->set_help_text( __( 'Vuoto = "Quattro passi. L\'ultimo lo fai sul divano."' ) ),
 				Field::make( 'text', 'h2_come_funziona_subtitle_mobile', __( 'Sottotitolo (mobile)' ) )->set_help_text( __( 'Sotto 1024 px. Vuoto = "Quattro passi. L\'ultimo lo fai sul divano."' ) ),
 				Field::make( 'text', 'h2_come_funziona_link_label', __( 'Testo del link in fondo' ) )->set_help_text( __( 'Vuoto = "Vedi come funziona nel dettaglio". Il link esce solo se l\'URL qui sotto e\' compilato.' ) ),
 				Field::make( 'text', 'h2_come_funziona_link_url', __( 'URL del link in fondo' ) )->set_help_text( __( 'Percorso interno (es. /roma/) o URL. Vuoto = il link non esce. Un percorso interno esce solo se la pagina e\' pubblicata.' ) ),

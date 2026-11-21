@@ -16,7 +16,7 @@
  * Argomenti (le letture Carbon stanno in page-home-v2.php; tutti con default):
  * - title (string): titolo H2, in maiuscolo da CSS. Default "SPOILER: DUE MINUTI."
  * - eyebrow (string): scritta sopra il titolo. Default "Come funziona".
- * - subtitle (string): sottotitolo desktop. Default "Quattro passi. Dal tuo divano."
+ * - subtitle (string): sottotitolo desktop. Default "Quattro passi. L’ultimo lo fai sul divano." (uguale al mobile)
  * - subtitle_mobile (string): sottotitolo sotto 1024 px (il frame mobile dice un'altra frase). Default "Quattro passi. L'ultimo lo fai sul divano."
  * - link_label (string) e link_url (string): link in fondo. Default etichetta "Vedi come funziona nel dettaglio"; senza URL il link
  *   non esce (nessuna destinazione e' decisa: SPEC §6) e, se l'URL e' una pagina interna, solo se pubblicata (tp_home_v2_service_href()).
@@ -135,7 +135,7 @@ $hv2c_title = $hv2c_pick( $args['title'], 'Spoiler: due minuti.' );
 		<div class="hv2-steps__head" data-reveal>
 			<p class="hv2-steps__eyebrow"><?php echo esc_html( $hv2c_pick( $args['eyebrow'], 'Come funziona' ) ); ?></p>
 			<h2 class="hv2-steps__title"><?php echo esc_html( $hv2c_title ); ?></h2>
-			<p class="hv2-steps__subtitle hv2-steps__subtitle--desktop"><?php echo esc_html( $hv2c_pick( $args['subtitle'], 'Quattro passi. Dal tuo divano.' ) ); ?></p>
+			<p class="hv2-steps__subtitle hv2-steps__subtitle--desktop"><?php echo esc_html( $hv2c_pick( $args['subtitle'], 'Quattro passi. L’ultimo lo fai sul divano.' ) ); ?></p>
 			<p class="hv2-steps__subtitle hv2-steps__subtitle--mobile"><?php echo esc_html( $hv2c_pick( $args['subtitle_mobile'], 'Quattro passi. L’ultimo lo fai sul divano.' ) ); ?></p>
 		</div>
 		<?php

@@ -34,7 +34,7 @@ $tp_v2_links  = $args['links'] ?: array(
 	home_url( '/roma/pulizie-uffici/' )   => 'Per le aziende',
 	home_url( '/diventa-cleaner/' )       => 'Diventa professionista',
 );
-$tp_v2_cta_label = 'Registrati' === $args['cta_label'] ? 'Apri l\'app' : $args['cta_label'];
+$tp_v2_cta_label = 'Registrati' === $args['cta_label'] ? 'Apri l’app' : $args['cta_label'];
 $tp_v2_cta_href  = $args['cta_href'] ?: tp_app_url();
 ?>
 <header class="navbar navbar--v2">
