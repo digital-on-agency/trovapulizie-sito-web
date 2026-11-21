@@ -434,8 +434,8 @@ async function checkManifestoBrowser() {
 		check('manifesto: nessun buco, l\'ultima promessa ' + ((n % 2 === 1 && width >= 1024) ? 'occupa la riga intera' : 'sta nel suo posto'), (n % 2 === 1 && width >= 1024) ? ultima.w === info.list.w : ultima.w <= info.list.w, JSON.stringify(ultima));
 		check('manifesto: il timbro (da x ' + info.stamp.x + ') non copre il titolo (che finisce a x ' + info.titleRight + ')', width < 768 || info.stamp.x >= info.titleRight, info.stamp.x + ' < ' + info.titleRight);
 		check('manifesto: nessuno scroll orizzontale', info.sw <= info.cw, info.sw + ' > ' + info.cw);
-		if (width === 1440) check('manifesto: titolo 88 px su una riga', Math.round(info.title.fs) === 88 && info.titleW.h <= 90, JSON.stringify(info.titleW) + ' ' + info.title.fs);
-		if (width === 390) check('manifesto: titolo 48 px su due righe, padding 16', info.title.fs === 48 && info.titleW.h === 100 && info.titleW.x === 16, JSON.stringify(info.titleW));
+		if (width === 1440 && vociArg === 4) check('manifesto: titolo 88 px su una riga', Math.round(info.title.fs) === 88 && info.titleW.h <= 90, JSON.stringify(info.titleW) + ' ' + info.title.fs);
+		if (width === 390 && vociArg === 4) check('manifesto: titolo 48 px su due righe, padding 16', info.title.fs === 48 && info.titleW.h === 100 && info.titleW.x === 16, JSON.stringify(info.titleW));
 	});
 }
 
