@@ -82,7 +82,8 @@ const sub = (ev, v) => ev(`(async()=>{const i=document.querySelector('.hv2-zones
 	// riduci movimento
 	await run(url, null, async ({ ev, send, sleep }) => {
 		await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
-		await ev('location.reload()'); await sleep(2500);
+		await ev('location.reload()'); await sleep(1500);
+		for (let i = 0; i < 40; i++) { if (await ev('document.readyState === "complete" && !!document.querySelector(".hv2-zones")') === true) break; await sleep(500); }
 		await ev('document.querySelector(".hv2-zones").scrollIntoView({block:"start"})'); await sleep(800);
 		const s = JSON.parse(await ev(`JSON.stringify({sweep:getComputedStyle(document.querySelector('.hv2-zones__sweep')).display,pulse:[...document.querySelectorAll('.hv2-zones__pulse > i')].map(e=>getComputedStyle(e).animationName+'/'+getComputedStyle(e).display)})`));
 		check('riduci movimento: raggio assente e impulsi fermi', s.sweep === 'none' && s.pulse.every(p => p.startsWith('none/')), J(s));
