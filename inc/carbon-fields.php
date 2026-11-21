@@ -1037,7 +1037,7 @@ add_action( 'carbon_fields_register_fields', function () {
 	// | 07-zone             | h2_zone_title, h2_zones_caps | 125 (fatto) |
 	// | 08-aziende          | h2_aziende_title    | 126 |
 	// | 09-faq              | h2_faq_title        | 126 |
-	// | 10-chiusura         | h2_chiusura_title   | 127 |
+	// | 10-chiusura         | h2_chiusura_title, _eyebrow, _subtitle, _cta_label, _qr_title, _qr_text, _note, _note_hide | 127 (fatto) |
 	$h2_aiuto = __( 'Vuoto = testo di default del template. I campi di contenuto di questa sezione arrivano col ticket indicato nel docblock di inc/carbon-fields.php.' );
 	$h2_tabs  = array(
 		'hero'          => 'Hero',
@@ -1173,6 +1173,21 @@ add_action( 'carbon_fields_register_fields', function () {
 						Field::make( 'image', 'screen', __( 'Schermata dell\'app' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuoto = la schermata di default del passo. Stretta e alta, circa 376 x 710.' ) ),
 					) )
 					->set_header_template( '<%- title %>' ),
+			) );
+		}
+		if ( 'chiusura' === $chiave ) {
+			// TICKET-127: testi della chiusura "Apri l'app". Vuoto = default del template (template-parts/home-cta-v2.php).
+			$h2_campi[0]->set_help_text( __( 'Titolo della chiusura (H2, maiuscolo da CSS). Vuoto = "Apri l\'app."' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_chiusura_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Ultima cosa"' ) ),
+				Field::make( 'textarea', 'h2_chiusura_subtitle', __( 'Sottotitolo' ) )->set_rows( 2 )->set_help_text( __( 'Vuoto = "La prima pulizia la prenoti in due minuti. Il resto lo fa chi sa farlo."' ) ),
+				Field::make( 'text', 'h2_chiusura_cta_label', __( 'Testo del bottone' ) )->set_help_text( __( 'Il bottone porta sempre all\'app (stessa scheda). Vuoto = "Apri l\'app"' ) ),
+				Field::make( 'text', 'h2_chiusura_qr_title', __( 'Riquadro QR, riga in grassetto' ) )->set_help_text( __( 'Il QR si vede solo da 1024 px. Vuoto = "Sei al computer?"' ) ),
+				Field::make( 'text', 'h2_chiusura_qr_text', __( 'Riquadro QR, seconda riga' ) )->set_help_text( __( 'Vuoto = "Inquadra e aprila sul telefono."' ) ),
+				Field::make( 'textarea', 'h2_chiusura_note', __( 'Nota sotto i bottoni' ) )->set_rows( 2 )->set_help_text( __( 'Vuoto = "Si apre dal browser e la aggiungi alla Home in un tocco. Non serve passare dallo store." Vale finche\' l\'app non e\' sugli store: poi spuntare la casella qui sotto.' ) ),
+				Field::make( 'checkbox', 'h2_chiusura_note_hide', __( 'Nascondi la nota sotto i bottoni' ) )
+					->set_option_value( 'yes' )
+					->set_help_text( __( 'Da spuntare quando l\'app e\' sugli store e la frase "Non serve passare dallo store" non e\' piu vera.' ) ),
 			) );
 		}
 		$h2_container->add_tab( __( $etichetta ), $h2_campi );

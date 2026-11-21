@@ -1,5 +1,5 @@
 /* QA della Home v2 (SPEC-homepage-v2, TICKET-119 e seguenti).
-   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero|frasi|servizi|manifesto|come-funziona] [--google on|off] [--servizi base|rotto]
+   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero|frasi|servizi|manifesto|come-funziona|chiusura] [--google on|off] [--servizi base|rotto]
    <url-anteprima> e' la pagina d'anteprima (es. https://trovapulizie.it/anteprima-pagina-iniziale/).
 
    Ogni ticket aggiunge la propria funzione di controllo in CHECKS e il proprio nome in SEZIONI. Con --sezioni <nome>
@@ -60,7 +60,14 @@
    "riduci movimento" nessuna scheda scala; con JavaScript spento le schede restano sticky. A 390: scroll-snap-type x
    mandatory, indicatore visibile con quattro puntini e bottoni alti almeno 44 px, "1 di 4" in aria-live="polite" che
    avanza dopo uno scroll, un clic su "avanti" e il tasto freccia destra sulla pista (evento tp:carousel-change a ogni
-   cambio), pagina senza scroll orizzontale; con JavaScript spento la pista scorre ancora a scatti e l'indicatore non c'e'. */
+   cambio), pagina senza scroll orizzontale; con JavaScript spento la pista scorre ancora a scatti e l'indicatore non c'e'.
+   Gruppo "chiusura" (TICKET-127), anche a 390 e 1440: la <section data-section="10-chiusura"> ha un h2 e nessun h1; "Apri l'app" e' un <a>
+   verso https://app.trovapulizie.com/ (nessun parametro, nessun target) con data-cta-position="cta_final"; bottone BIANCO con testo
+   #062A22 (eccezione di brand); contrasto dei testi piccoli sul verde #37B299 (blend con l'alfa) >= 4,5 (#062A22 atteso 5,8); il QR e'
+   lo stesso SVG della hero (<title> = https://app.trovapulizie.com/). A 1440: QR 72 px visibile, immagini del tentacolo caricate
+   (naturalWidth > 0), fascia alta 630. A 390: bottone a tutta larghezza (358), QR e tentacolo non visibili e NESSUNA richiesta di
+   qr-app.svg ne' cta-tentacolo*.webp (performance.getEntriesByType('resource') dopo uno scroll completo), fascia alta 754; con "riduci
+   movimento" nessuna transizione sul bottone. Nessuno scroll orizzontale. */
 const { withChrome } = require('./lib/cdp.js');
 
 const SECTIONS = ['01-hero', '02-frasi', '03-servizi', '04-come-funziona', '05-manifesto', '06-recensioni', '07-zone', '08-aziende', '09-faq', '10-chiusura'];
@@ -549,14 +556,91 @@ async function checkManifestoBrowser() {
 	});
 }
 
+
+/* Gruppo chiusura (TICKET-127) */
+async function checkChiusura() {
+	const res = await fetch(url, { redirect: 'manual' });
+	check('chiusura: risposta 200', res.status === 200, 'stato ' + res.status);
+	if (res.status !== 200) return;
+	const html = await res.text();
+	const sec = (html.match(/<section class="hv2-cta"[\s\S]*?<\/section>/) || [''])[0];
+	check('chiusura: sezione 10-chiusura presente', /data-section="10-chiusura"/.test(sec), sec.slice(0, 100));
+	check('chiusura: un solo h2 e nessun h1', (sec.match(/<h2[ >]/g) || []).length === 1 && !/<h1/.test(sec));
+	const btn = (sec.match(/<a class="hv2-cta__btn"[^>]*>/) || [''])[0];
+	check('chiusura: bottone verso l\'app, senza parametri e senza target, cta_final', /href="https:\/\/app\.trovapulizie\.com\/"/.test(btn) && /data-cta-position="cta_final"/.test(btn) && !/target=/.test(btn), btn);
+	const qr = (sec.match(/<div class="hv2-cta__qr">\s*<img src="([^"]+)"/) || [0, ''])[1];
+	check('chiusura: QR = qr-app.svg della hero', /home-v2\/qr-app\.svg/.test(qr), qr);
+	const svg = qr ? await fetch(qr.replace(/&#038;/g, '&')).then(r => r.text()) : '';
+	check('chiusura: <title> dell\'SVG del QR = https://app.trovapulizie.com/', /<title>https:\/\/app\.trovapulizie\.com\/<\/title>/.test(svg));
+	const pics = [...sec.matchAll(/<picture class="hv2-cta__tent[^"]*"[\s\S]*?<\/picture>/g)].map(m => m[0]);
+	check('chiusura: tentacolo in <picture> con source min-width 1024 e GIF 1x1 di ripiego, alt vuoto', pics.length === 2 && pics.every(p => /<source media="\(min-width: 1024px\)"/.test(p) && /<img src="data:image\/gif/.test(p) && /alt=""/.test(p)), pics.length + ' picture');
+}
+async function checkChiusuraBrowser() {
+	await withChrome(bin, 'about:blank', { port: 9519, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-cta' }, async ({ send, ev, sleep }) => {
+		await send('Page.navigate', { url });
+		await sleep(3500);
+		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
+		if (!(await ev('!!document.querySelector(".hv2-cta")'))) { check('chiusura: la sezione esiste nel browser', false, 'assente'); return; }
+		// scroll completo: le immagini lazy che dovrebbero partire partono
+		await ev('(async()=>{for(let y=0;y<=document.scrollingElement.scrollHeight;y+=500){scrollTo(0,y);await new Promise(r=>setTimeout(r,90));}})()');
+		await ev('document.querySelector(".hv2-cta").scrollIntoView({block:"start"})');
+		await sleep(2500);
+		const info = JSON.parse(await ev(`(() => {
+			const q = s => document.querySelector(s), cs = e => getComputedStyle(e);
+			const rect = e => { const r = e.getBoundingClientRect(); return { w: Math.round(r.width), h: Math.round(r.height) }; };
+			const vis = e => { const r = e.getBoundingClientRect(); return cs(e).display !== 'none' && r.width > 0 && r.height > 0; };
+			const sec = q('.hv2-cta'), btn = q('.hv2-cta__btn'), qr = q('.hv2-cta__qr img'), tents = [...document.querySelectorAll('.hv2-cta__tent img')];
+			const res = performance.getEntriesByType('resource').map(r => r.name);
+			return JSON.stringify({
+				secBg: cs(sec).backgroundColor, sec: rect(sec), btnBg: cs(btn).backgroundColor, btnC: cs(btn).color, btn: rect(btn), in: rect(q('.hv2-cta__text')),
+				ink: { eyebrow: cs(q('.hv2-cta__eyebrow')).color, sub: cs(q('.hv2-cta__sub')).color, note: cs(q('.hv2-cta__note')).color, qrs: q('.hv2-cta__qr strong') ? cs(q('.hv2-cta__qr strong')).color : '', qrx: q('.hv2-cta__qr span') ? cs(q('.hv2-cta__qr span')).color : '' },
+				qrVis: vis(qr), qrSize: rect(qr), tentVis: tents.map(vis), tentOk: tents.map(t => t.currentSrc.indexOf('cta-tentacolo') > -1 && t.naturalWidth > 100),
+				reqQr: res.filter(u => /qr-app\.svg/.test(u)).length, reqTent: res.filter(u => /cta-tentacolo/.test(u)).length, reqScreen: res.filter(u => /cta-screen\.svg/.test(u)).length,
+				phoneVis: vis(q('.hv2-cta__phone')), notifVis: vis(q('.hv2-cta__notif')),
+				sw: document.scrollingElement.scrollWidth, cw: document.scrollingElement.clientWidth, dock: cs(q('.hv2-cta__btn')).transitionDuration
+			});
+		})()`));
+		const rgb = c => c.match(/[\d.]+/g).map(Number);
+		const lum = ([r, g, b]) => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+		const over = (c, bg) => { const [r, g, b, a = 1] = rgb(c), B = rgb(bg); return [r * a + B[0] * (1 - a), g * a + B[1] * (1 - a), b * a + B[2] * (1 - a)]; };
+		const ratio = (c, bg) => { const l1 = lum(over(c, bg)), l2 = lum(rgb(bg)); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); };
+		check('chiusura: fondo verde #37B299', info.secBg === 'rgb(55, 178, 153)', info.secBg);
+		check('chiusura: bottone bianco con testo #062A22 (eccezione di brand)', info.btnBg === 'rgb(255, 255, 255)' && info.btnC === 'rgb(6, 42, 34)', info.btnBg + ' / ' + info.btnC);
+		for (const [nome, c] of Object.entries({ 'scritta sopra': info.ink.eyebrow, sottotitolo: info.ink.sub, nota: info.ink.note })) {
+			const r = ratio(c, info.secBg);
+			check('chiusura: contrasto ' + nome + ' ' + r.toFixed(2) + ':1 >= 4,5', r >= 4.5, c + ' su ' + info.secBg);
+		}
+		const solid = ratio('rgb(6, 42, 34)', info.secBg);
+		check('chiusura: #062A22 su #37B299 ' + solid.toFixed(2) + ':1 (atteso 5,8)', solid >= 5.7 && solid <= 5.9);
+		check('chiusura: nessuno scroll orizzontale', info.sw <= info.cw, info.sw + ' > ' + info.cw);
+		check('chiusura: il telefono e l\'avviso ci sono a ogni larghezza', info.phoneVis && info.notifVis);
+		check('chiusura: schermo del telefono richiesto', info.reqScreen === 1, info.reqScreen + ' richieste');
+		if (width >= 1024) {
+			check('chiusura: QR visibile da 1024 px, 72 x 72 a 1440', info.qrVis && (width !== 1440 || (info.qrSize.w === 72 && info.qrSize.h === 72)), JSON.stringify(info.qrSize));
+			const rq = Math.min(ratio('rgb(6, 42, 34)', info.secBg), 99);
+			check('chiusura: tentacolo visibile e immagini caricate (due)', info.tentVis.every(Boolean) && info.tentOk.every(Boolean) && info.reqTent === 2, JSON.stringify({ v: info.tentVis, ok: info.tentOk, req: info.reqTent }));
+			if (width === 1440) check('chiusura: fascia alta 630 px, testo e bottone a larghezza propria', info.sec.h === 630 && info.btn.w < 260, JSON.stringify(info.sec) + ' btn ' + info.btn.w);
+		} else {
+			check('chiusura: QR non visibile sotto 1024 px', !info.qrVis, JSON.stringify(info.qrSize));
+			check('chiusura: tentacolo non visibile sotto 1024 px', info.tentVis.every(v => !v) || info.tentVis.every(v => v === false), JSON.stringify(info.tentVis));
+			check('chiusura: nessuna richiesta di qr-app.svg ne\' del tentacolo (Network)', info.reqQr === 0 && info.reqTent === 0, 'qr ' + info.reqQr + ', tentacolo ' + info.reqTent);
+			if (width === 390) check('chiusura: bottone a tutta larghezza (358) e fascia alta 754', info.btn.w === 358 && info.sec.h === 754, 'btn ' + info.btn.w + ', fascia ' + info.sec.h);
+			else check('chiusura: bottone a tutta larghezza del testo', info.btn.w === info.in.w, info.btn.w + ' vs ' + info.in.w);
+		}
+	});
+}
+
 (async () => {
-	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
+	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona', 'chiusura'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
 	if (gruppo === 'hero') {
 		const h = await checkHero();
 		if (h) await checkHeroBrowser(h.pre);
 	} else if (gruppo === 'frasi') {
 		await checkFrasi();
 		await checkFrasiBrowser();
+	} else if (gruppo === 'chiusura') {
+		await checkChiusura();
+		await checkChiusuraBrowser();
 	} else if (gruppo === 'manifesto') {
 		await checkManifesto();
 		await checkManifestoBrowser();
