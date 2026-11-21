@@ -10896,7 +10896,9 @@ body.tp-v2-header {
 	--tp-navbar-h: 76px; /* 103 nel Figma, stretta su richiesta di Guido 21/11 */
 }
 .navbar--v2 {
-	padding: 0 96px;
+	/* Margine sinistro uguale a quello della hero (Guido 21/11): la barra e' a tutta larghezza, il contenuto della hero
+	   e' largo al massimo 1440 e centrato, quindi oltre 1440 px il margine cresce allo stesso modo. */
+	padding: 0 max(96px, calc((100% - 1440px) / 2 + 96px));
 	gap: 24px;
 	/* La hero sale sotto la barra (margine negativo sul template-part): la barra e' appena velata, cosi' la sfumatura
 	   della hero continua dietro di lei e, scorrendo, i contenuti non si leggono attraverso. */
@@ -11006,7 +11008,7 @@ body.tp-v2-header {
 	min-height: 100vh;
 	min-height: 100svh;
 	padding: calc(var(--tp-navbar-h) + clamp(16px, 5vh, 72px)) 0 clamp(24px, 4vh, 56px);
-	--hv2-k: 1;
+	--hv2-k: 1.1; /* scena +10% sul Figma (Guido 21/11) */
 	--hv2-light-a: 0.22;
 	--hv2-light-b: 0.22;
 	--hv2-light-c: 0.22;
@@ -11043,18 +11045,18 @@ body.tp-v2-header {
 	box-sizing: border-box;
 	display: grid;
 	grid-template-columns: 716px calc(540px * var(--hv2-k));
-	column-gap: 40px;
-	align-items: start;
+	column-gap: 24px;
+	align-items: center; /* scena centrata in verticale sul testo (Guido 21/11) */
 	max-width: 1440px;
 	margin: 0 auto;
-	padding: 0 48px 0 96px;
+	padding: 0 0 0 96px;
 }
 .hv2-hero__text {
 	display: flex;
 	flex-direction: column;
 	align-items: flex-start;
 	gap: clamp(16px, 3.2vh, 32px);
-	padding: 0 24px;
+	padding: 0; /* bordo sinistro allineato al logo della barra; tutta la colonna per il titolo piu' grande */
 }
 .hv2-hero__label {
 	display: inline-flex;
@@ -11079,7 +11081,7 @@ body.tp-v2-header {
 }
 .hv2-hero__title {
 	margin: 0;
-	font-size: clamp(46px, 7vh, 64px);
+	font-size: clamp(50px, 7.6vh, 68px); /* +6% sul Figma, Guido 21/11 */
 	font-weight: 700;
 	line-height: 1.125;
 	letter-spacing: -1.28px;
@@ -11166,9 +11168,9 @@ body.tp-v2-header {
 	background: rgba(15, 31, 27, 0.05);
 }
 .hv2-hero__qr img {
-	flex: 0 0 76px;
-	width: 76px;
-	height: 76px;
+	flex: 0 0 96px; /* 76 nel Figma, ingrandito su richiesta di Guido 21/11 */
+	width: 96px;
+	height: 96px;
 	border-radius: 6px;
 	background: #fff;
 }
@@ -11195,7 +11197,6 @@ body.tp-v2-header {
 	position: relative;
 	width: calc(540px * var(--hv2-k));
 	height: calc(780px * var(--hv2-k));
-	margin-top: -56px;
 }
 .hv2-hero__stage-in {
 	position: absolute;
@@ -11273,14 +11274,14 @@ body.tp-v2-header {
 	.hv2-hero__inner {
 		grid-template-columns: minmax(0, 1fr) calc(540px * var(--hv2-k));
 		column-gap: 16px;
-		padding: 0 24px 0 48px;
+		padding: 0 24px 0 32px; /* come il margine della barra fra 1024 e 1279 */
 	}
 	.hv2-hero__text {
 		padding: 0;
 	}
 	.hv2-hero__title {
-		font-size: 50px;
-		line-height: 58px;
+		font-size: 54px;
+		line-height: 1.125;
 		letter-spacing: -1px;
 	}
 	.hv2-hero__subtitle {
@@ -11289,23 +11290,137 @@ body.tp-v2-header {
 	}
 }
 
+/* ---- Movimento della hero (note Figma 7882:4118, Guido 21/11) ----
+   Ingresso al caricamento in CSS puro (nessuna dipendenza da JavaScript: senza script l'animazione parte lo stesso e
+   finisce visibile). Testo: sale di 24 px in 450 ms, stagger 80 ms, totale sotto 500 ms. Telefoni e disco: 800 ms con
+   la curva "in scena". I telefoni si muovono senza dissolvenza e il titolo parte da opacita' 0,01: l'LCP non aspetta
+   l'animazione. Loop unico: il testo circolare ruota piano (60 s, lineare), fermo fuori schermo (classe .is-paused da
+   home-v2-motion.js). Sotto 1024 px durate x0,8. Con "riduci movimento" solo dissolvenze da 200 ms e nessun loop. */
+.hv2-hero {
+	--hv2-m: 1;
+}
+@keyframes hv2-rise {
+	from { opacity: 0; transform: translateY(24px); }
+}
+@keyframes hv2-rise-lcp {
+	from { opacity: 0.01; transform: translateY(24px); }
+}
+@keyframes hv2-phone-in {
+	from { transform: translateY(48px) scale(0.96); }
+}
+@keyframes hv2-disc-in {
+	from { opacity: 0; transform: scale(0.86); }
+}
+@keyframes hv2-fade {
+	from { opacity: 0; }
+}
+@keyframes hv2-spin {
+	to { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: no-preference) {
+	.hv2-hero__label,
+	.hv2-hero__subtitle,
+	.hv2-hero__actions,
+	.hv2-hero__google,
+	.hv2-hero__qr {
+		animation: hv2-rise calc(var(--tp-dur) * var(--hv2-m)) var(--tp-ease-in) both;
+		animation-delay: calc(var(--hv2-i, 0) * 80ms * var(--hv2-m));
+	}
+	.hv2-hero__title-line {
+		animation: hv2-rise-lcp calc(var(--tp-dur) * var(--hv2-m)) var(--tp-ease-in) both;
+		animation-delay: calc(var(--hv2-i, 0) * 80ms * var(--hv2-m));
+	}
+	.hv2-hero__title-line { --hv2-i: 1; }
+	.hv2-hero__title-line + .hv2-hero__title-line { --hv2-i: 2; }
+	.hv2-hero__subtitle { --hv2-i: 3; }
+	.hv2-hero__actions { --hv2-i: 4; }
+	.hv2-hero__google,
+	.hv2-hero__qr { --hv2-i: 5; }
+	.hv2-hero__disc {
+		animation: hv2-disc-in calc(var(--tp-dur-slow) * var(--hv2-m)) var(--tp-ease-stage) both;
+	}
+	.hv2-hero__phone--home {
+		animation: hv2-phone-in calc(var(--tp-dur-slow) * var(--hv2-m)) var(--tp-ease-stage) 80ms both;
+	}
+	.hv2-hero__phone--profilo {
+		animation: hv2-phone-in calc(var(--tp-dur-slow) * var(--hv2-m)) var(--tp-ease-stage) 200ms both;
+	}
+	.hv2-hero__orbit {
+		transform-origin: 50% 50%;
+		animation:
+			hv2-fade calc(var(--tp-dur-slow) * var(--hv2-m)) var(--tp-ease-in) 240ms both,
+			hv2-spin 60s linear infinite;
+	}
+	.hv2-hero__orbit.is-paused {
+		animation-play-state: running, paused;
+	}
+	/* Bottoni (tutti, note 7882:4118): verde premuto e freccia avanti di 4 px al passaggio, scala 0,97 alla pressione */
+	.hv2-hero__cta,
+	.navbar--v2 .navbar__app {
+		transition: background-color var(--tp-dur-fast) var(--tp-ease-stage), transform 100ms var(--tp-ease-stage);
+	}
+	.hv2-hero__cta:hover,
+	.navbar--v2 .navbar__app:hover {
+		background: #2A9580;
+		transform: none;
+	}
+	.hv2-hero__cta-arrow {
+		display: inline-block;
+		transition: transform var(--tp-dur-fast) var(--tp-ease-stage);
+	}
+	.hv2-hero__cta:hover .hv2-hero__cta-arrow {
+		transform: translateX(4px);
+	}
+	.hv2-hero__cta:active,
+	.navbar--v2 .navbar__app:active {
+		transform: scale(0.97);
+	}
+	.hv2-hero__ghost {
+		transition: border-color var(--tp-dur-fast) var(--tp-ease-stage), transform 100ms var(--tp-ease-stage);
+	}
+	.hv2-hero__ghost:hover {
+		border-color: rgba(15, 31, 27, 0.4);
+	}
+	.hv2-hero__ghost:active {
+		transform: scale(0.97);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.hv2-hero__label,
+	.hv2-hero__title-line,
+	.hv2-hero__subtitle,
+	.hv2-hero__actions,
+	.hv2-hero__google,
+	.hv2-hero__qr,
+	.hv2-hero__disc,
+	.hv2-hero__phone,
+	.hv2-hero__orbit {
+		animation: hv2-fade var(--tp-dur-reduced, 200ms) linear both;
+	}
+}
+@media (max-width: 1023px) {
+	.hv2-hero {
+		--hv2-m: 0.8;
+	}
+}
+
 /* Scena dei telefoni proporzionata all'altezza della finestra, perche' la hero entri senza scorrere */
 @media (min-width: 1280px) and (max-height: 940px) {
-	.hv2-hero { --hv2-k: 0.88; }
+	.hv2-hero { --hv2-k: 0.98; }
 }
 @media (min-width: 1280px) and (max-height: 860px) {
-	.hv2-hero { --hv2-k: 0.8; }
+	.hv2-hero { --hv2-k: 0.86; }
 	.hv2-hero__qr { padding: 8px 20px 8px 8px; }
-	.hv2-hero__qr img { flex-basis: 64px; width: 64px; height: 64px; }
+	.hv2-hero__qr img { flex-basis: 84px; width: 84px; height: 84px; }
 }
 @media (min-width: 1024px) and (max-height: 780px) {
-	.hv2-hero { --hv2-k: 0.72; }
+	.hv2-hero { --hv2-k: 0.74; }
 	.hv2-hero__cta { padding: 15px 28px; }
 	.hv2-hero__ghost { padding: 15px 24px; }
 }
 @media (min-width: 1024px) and (max-height: 700px) {
-	.hv2-hero { --hv2-k: 0.64; }
-	.hv2-hero__title { font-size: 44px; }
+	.hv2-hero { --hv2-k: 0.66; }
+	.hv2-hero__title { font-size: 48px; }
 	.hv2-hero__subtitle { font-size: 17px; line-height: 27px; }
 }
 
@@ -11402,8 +11517,8 @@ body.tp-v2-header {
 		height: 7px;
 	}
 	.hv2-hero__title {
-		font-size: 38px;
-		line-height: 44px;
+		font-size: min(10vw, 40px); /* "La pulizia cambia." su una riga fino a 360 px */
+		line-height: 1.15;
 		letter-spacing: -0.57px;
 	}
 	.hv2-hero__subtitle {
