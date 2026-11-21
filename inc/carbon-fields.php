@@ -989,4 +989,61 @@ add_action( 'carbon_fields_register_fields', function () {
 				->set_help_text( __( 'Vuota = anno corrente + Trovapulizie S.R.L.' ) ),
 			Field::make( 'textarea', 'footer_legal', __( 'Link legali (una riga per link: Etichetta | URL)' ) ),
 		) );
+
+	// Home v2 (SPEC-homepage-v2, ADR-005). Container "Home v2 - Sezioni": solo sulle pagine col template
+	// page-home-v2.php, un tab per sezione, prefisso h2_. Un campo vuoto = default del template (o la parte esce con
+	// return). Con TICKET-119 ogni tab ha solo il titolo; i campi di contenuto li aggiungono i ticket di sezione.
+	//
+	// | Tab (data-section)  | Campi oggi          | Ticket che aggiunge i campi |
+	// | 01-hero             | h2_hero_title       | 120 |
+	// | 02-frasi            | h2_frasi_title      | 121 |
+	// | 03-servizi          | h2_servizi_title    | 121 |
+	// | 04-come-funziona    | h2_come_funziona_title | 122 |
+	// | 05-manifesto        | h2_manifesto_title  | 123 |
+	// | 06-recensioni       | h2_recensioni_title | 124 |
+	// | 07-zone             | h2_zone_title       | 125 |
+	// | 08-aziende          | h2_aziende_title    | 126 |
+	// | 09-faq              | h2_faq_title        | 126 |
+	// | 10-chiusura         | h2_chiusura_title   | 127 |
+	$h2_aiuto = __( 'Vuoto = testo di default del template. I campi di contenuto di questa sezione arrivano col ticket indicato nel docblock di inc/carbon-fields.php.' );
+	$h2_tabs  = array(
+		'hero'          => 'Hero',
+		'frasi'         => 'Fascia frasi',
+		'servizi'       => 'Servizi',
+		'come_funziona' => 'Come funziona',
+		'manifesto'     => 'Manifesto',
+		'recensioni'    => 'Recensioni',
+		'zone'          => 'Zone',
+		'aziende'       => 'Aziende',
+		'faq'           => 'FAQ',
+		'chiusura'      => 'Chiusura',
+	);
+	$h2_container = Container::make( 'post_meta', __( 'Home v2 — Sezioni' ) )
+		->where( 'post_template', '=', 'page-home-v2.php' );
+	foreach ( $h2_tabs as $chiave => $etichetta ) {
+		$h2_container->add_tab( __( $etichetta ), array(
+			Field::make( 'text', 'h2_' . $chiave . '_title', __( 'Titolo' ) )->set_help_text( $h2_aiuto ),
+		) );
+	}
+
+	// Fondatori: fonte stabile della card di contatto nelle FAQ di tutte le landing (tp_founders_contact()). Valori
+	// copiati dalla pagina iniziale prima del rilascio (comandi in TICKET-119). Vuoto = ripiego sui campi faq_contact_*
+	// della pagina iniziale, poi "Guido & Christian" e "Fondatori".
+	Container::make( 'theme_options', __( 'Fondatori' ) )
+		->set_page_file( 'tp-fondatori' )
+		->add_fields( array(
+			Field::make( 'text', 'tp_founders_people', __( 'Nomi (es. Guido & Christian)' ) ),
+			Field::make( 'text', 'tp_founders_role', __( 'Ruolo (es. Fondatori)' ) ),
+			Field::make( 'image', 'tp_founders_avatar_1', __( 'Foto 1' ) )->set_value_type( 'url' ),
+			Field::make( 'image', 'tp_founders_avatar_2', __( 'Foto 2' ) )->set_value_type( 'url' ),
+		) );
+
+	// Interruttore del sito v2 (tp_site_v2_on()). Spento di default.
+	Container::make( 'theme_options', __( 'Sito v2' ) )
+		->set_page_file( 'tp-sito-v2' )
+		->add_fields( array(
+			Field::make( 'checkbox', 'tp_site_v2', __( 'Header chiaro e footer nuovo su tutto il sito' ) )
+				->set_option_value( 'yes' )
+				->set_help_text( __( 'Spento (default): header e footer sono quelli di sempre su ogni pagina; la pagina d\'anteprima della Home v2 mostra comunque la versione nuova. Acceso: header e footer nuovi ovunque. [ATTENZIONE] L\'impostazione esce nell\'HTML delle pagine: dopo ogni cambio svuotare la cache (barra LiteSpeed > Purge All dall\'admin), altrimenti le pagine in cache tengono il valore vecchio.' ) ),
+		) );
 } );

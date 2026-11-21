@@ -69,18 +69,24 @@ function tp_pipe_lines( $text ) {
 	}
 	return $out;
 }
-// Card di contatto dei fondatori nelle FAQ: foto, nomi e ruolo vengono dalla scheda della Home (campi faq_contact_*),
-// unica fonte per tutte le pagine. Prima le landing ripiegavano sui file del tema, che non sono le foto in uso.
+// Card di contatto dei fondatori nelle FAQ: nomi, ruolo e foto. Fonte stabile: Theme Options > Fondatori (campi
+// tp_founders_*), indipendente dalla pagina iniziale, cosi' il cambio di pagina iniziale (Home v2) non svuota le card
+// delle landing. Campo per campo, vuoto = ripiego di prima: campi faq_contact_* della pagina iniziale, poi
+// "Guido & Christian" e "Fondatori".
 function tp_founders_contact() {
 	$home = (int) get_option( 'page_on_front' );
-	$get  = function ( $k ) use ( $home ) {
-		return $home ? (string) carbon_get_post_meta( $home, $k ) : '';
+	$get  = function ( $opzione, $campo ) use ( $home ) {
+		$v = function_exists( 'carbon_get_theme_option' ) ? trim( (string) carbon_get_theme_option( $opzione ) ) : '';
+		if ( '' !== $v ) {
+			return $v;
+		}
+		return $home ? (string) carbon_get_post_meta( $home, $campo ) : '';
 	};
 	return array(
-		'people'   => $get( 'faq_contact_people' ) ?: 'Guido & Christian',
-		'role'     => $get( 'faq_contact_role' ) ?: 'Fondatori',
-		'avatar_1' => $get( 'faq_contact_avatar_1' ),
-		'avatar_2' => $get( 'faq_contact_avatar_2' ),
+		'people'   => $get( 'tp_founders_people', 'faq_contact_people' ) ?: 'Guido & Christian',
+		'role'     => $get( 'tp_founders_role', 'faq_contact_role' ) ?: 'Fondatori',
+		'avatar_1' => $get( 'tp_founders_avatar_1', 'faq_contact_avatar_1' ),
+		'avatar_2' => $get( 'tp_founders_avatar_2', 'faq_contact_avatar_2' ),
 	);
 }
 // Icona SVG monocromatica resa come maschera in currentColor (classe .tp-icon-mask); '' se il file non esiste
@@ -305,3 +311,4 @@ require_once __DIR__ . '/inc/redirects.php';
 require_once __DIR__ . '/inc/prezzi.php';
 require_once __DIR__ . '/inc/seo.php';
 require_once __DIR__ . '/inc/survey.php';
+require_once __DIR__ . '/inc/home-v2.php';

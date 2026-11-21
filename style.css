@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.71.0
+Version: 0.72.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -10787,4 +10787,85 @@ main.dc--motion .dc-rv.is-in {
    ========================= */
 .b2b-why--services .b2b-why__grid > li:last-child:nth-child(odd) {
 	grid-column: 1 / -1;
+}
+
+/* =========================
+   Home v2 app-first (SPEC-homepage-v2, ADR-005, TICKET-119) - page-home-v2.php
+   Solo blocchi nuovi (.hv2*): nessun selettore esistente viene modificato. Token dal Figma 7903:5256 (colori) e
+   dalla scheda delle animazioni 7882:4118 (durate e curve). Il tema e' desktop-first: sotto 1024px (soglia
+   --tp-bp-desktop) durate x0,8.
+   ========================= */
+:root {
+	/* Colori v2. Il verde #37B299 e' solo della Home v2; le altre pagine restano su --tp-primary #00C896.
+	   [ATTENZIONE] Testo sul verde #062A22 (5,8:1). Eccezione di brand dichiarata: bottoni verdi pieni con testo
+	   bianco (decisione di Guido 20-21/11, regola della scheda 7882:4118). */
+	--tp-v2-green: #37B299;
+	--tp-v2-ink: #062A22;
+	--tp-v2-mint: #F3FAF7;
+	--tp-v2-niente: #008866;
+	--tp-v2-text: #0F1F1B;
+	/* Durate (scheda 7882:4118): rapida = hover e pressione, standard = ingressi, lenta = telefoni e foto */
+	--tp-dur-fast: 150ms;
+	--tp-dur: 450ms;
+	--tp-dur-slow: 800ms;
+	--tp-dur-reduced: 200ms;
+	/* Curve: ingresso, in scena, uscita, rimbalzo (solo timbro, foglietti e icone). Lineare mai per gli spostamenti. */
+	--tp-ease-in: cubic-bezier(0.05, 0.7, 0.1, 1);
+	--tp-ease-stage: cubic-bezier(0.2, 0, 0, 1);
+	--tp-ease-out: cubic-bezier(0.3, 0, 1, 1);
+	--tp-ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	--tp-reveal-distance: 24px;
+}
+
+.hv2 {
+	color: var(--tp-v2-text);
+	background: #fff;
+}
+.hv2-section {
+	padding: 96px max(24px, calc((100% - var(--tp-max-width)) / 2));
+}
+.hv2-section__title {
+	margin: 0;
+	font-size: 40px;
+	line-height: 1.15;
+	font-weight: 800;
+	color: var(--tp-v2-ink);
+}
+.hv2-section--frasi,
+.hv2-section--manifesto,
+.hv2-section--zone {
+	background: var(--tp-v2-mint);
+}
+
+/* Ingressi: opacita' 0 solo con la classe che reveal.js mette su <html>; senza JavaScript il contenuto e' visibile */
+html.tp-reveal .hv2 [data-reveal] {
+	opacity: 0;
+	transform: translateY(var(--tp-reveal-distance));
+	transition: opacity var(--tp-dur) var(--tp-ease-in), transform var(--tp-dur) var(--tp-ease-in);
+	transition-delay: calc(var(--i, 0) * 80ms);
+}
+html.tp-reveal .hv2 [data-reveal].is-in {
+	opacity: 1;
+	transform: none;
+}
+
+@media (max-width: 1023px) {
+	.hv2-section {
+		padding: 56px 20px;
+	}
+	.hv2-section__title {
+		font-size: 30px;
+	}
+	html.tp-reveal .hv2 [data-reveal] {
+		transition-duration: calc(var(--tp-dur) * 0.8);
+	}
+}
+
+/* prefers-reduced-motion della v2: un blocco unico. Solo dissolvenze brevi, niente spostamenti ne' loop. */
+@media (prefers-reduced-motion: reduce) {
+	html.tp-reveal .hv2 [data-reveal] {
+		transform: none;
+		transition: opacity var(--tp-dur-reduced) linear;
+		transition-delay: 0s;
+	}
 }
