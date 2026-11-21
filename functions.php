@@ -312,3 +312,4 @@ require_once __DIR__ . '/inc/prezzi.php';
 require_once __DIR__ . '/inc/seo.php';
 require_once __DIR__ . '/inc/survey.php';
 require_once __DIR__ . '/inc/home-v2.php';
+require_once __DIR__ . '/inc/home-v2-zones.php';
