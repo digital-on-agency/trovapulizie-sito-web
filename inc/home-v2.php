@@ -132,12 +132,53 @@ add_action( 'wp_enqueue_scripts', function () {
 	}
 } );
 
-/* Poppins Black (900) solo per il titolo della hero v2 (Figma 7903:5292): il resto del sito carica 400-800 e non cambia. */
-add_action( 'wp_enqueue_scripts', function () {
-	if ( is_page_template( 'page-home-v2.php' ) ) {
-		wp_enqueue_style( 'trovapulizie-fonts-black', 'https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap', array(), null );
+/* Poppins self-hosted sulla sola pagina col template page-home-v2.php (revisione giro 1, voce 4). Prima: due CSS di
+   Google (400-800 e 900) e nessun preload, quindi la sostituzione del font spostava testo e barra (CLS 0,112 a 1440).
+   Ora: sei file woff2 latin nel tema (assets/fonts/poppins-latin-*.woff2, stesso unicode-range di Google), preload dei soli
+   800 e 900 (titolo della hero e voci piu' grandi), font-display swap e un fallback ("Poppins Fallback", Arial con
+   size-adjust e override delle metriche calibrati sul rapporto di larghezza misurato) che occupa lo stesso spazio.
+   Le altre pagine restano su Google Fonts, invariate (qa-site-v2.js compare). */
+function tp_home_v2_fonts_css() {
+	$ur   = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
+	$css  = '';
+	foreach ( array( 400, 500, 600, 700, 800, 900 ) as $w ) {
+		$css .= "@font-face{font-family:'Poppins';font-style:normal;font-weight:{$w};font-display:swap;src:url('" . esc_url_raw( tp_theme_asset( "assets/fonts/poppins-latin-{$w}.woff2" ) ) . "') format('woff2');unicode-range:{$ur}}\n";
 	}
-} );
+	// Fallback: ascent/descent/lineGap di Poppins (1050/350/100 su 1000) divisi per size-adjust, come fa next/font.
+	$reg  = "local('Arial'),local('ArialMT'),local('Liberation Sans'),local('Helvetica')";
+	$bold = "local('Arial Bold'),local('Arial-BoldMT'),local('Liberation Sans Bold'),local('Helvetica Bold')";
+	foreach ( array( array( '400 500', $reg, 1.13 ), array( '600 700', $bold, 1.065 ), array( '800 900', $bold, 1.083 ) ) as $fb ) {
+		$css .= sprintf(
+			"@font-face{font-family:'Poppins Fallback';font-style:normal;font-weight:%s;src:%s;size-adjust:%s%%;ascent-override:%s%%;descent-override:%s%%;line-gap-override:%s%%}\n",
+			$fb[0],
+			$fb[1],
+			round( $fb[2] * 100, 1 ),
+			round( 105 / $fb[2], 2 ),
+			round( 35 / $fb[2], 2 ),
+			round( 10 / $fb[2], 2 )
+		);
+	}
+	return $css . ":root{--tp-font:'Poppins','Poppins Fallback',system-ui,-apple-system,sans-serif}\n";
+}
+add_action( 'wp_enqueue_scripts', function () {
+	if ( ! is_page_template( 'page-home-v2.php' ) ) {
+		return;
+	}
+	// Il foglio principale dipende da 'trovapulizie-fonts': il handle resta, ma senza file (non stampa il link a Google) e con il CSS locale.
+	wp_dequeue_style( 'trovapulizie-fonts' );
+	wp_deregister_style( 'trovapulizie-fonts' );
+	wp_register_style( 'trovapulizie-fonts', false, array(), null );
+	wp_enqueue_style( 'trovapulizie-fonts' );
+	wp_add_inline_style( 'trovapulizie-fonts', tp_home_v2_fonts_css() );
+}, 20 );
+add_action( 'wp_head', function () {
+	if ( ! is_page_template( 'page-home-v2.php' ) ) {
+		return;
+	}
+	foreach ( array( 800, 900 ) as $w ) {
+		echo '<link rel="preload" as="font" type="font/woff2" crossorigin href="' . esc_url( tp_theme_asset( "assets/fonts/poppins-latin-{$w}.woff2" ) ) . '">' . "\n";
+	}
+}, 1 );
 
 /* Barra chiara: trasparente in cima alla pagina (assets/js/navbar-v2.js). Caricato ovunque la barra v2 e' attiva. */
 add_action( 'wp_enqueue_scripts', function () {

@@ -65,7 +65,7 @@ if ( ! $tpf_cols ) {
 }
 
 // Riquadro aziende e condomini.
-$tpf_b2b_title = trim( (string) carbon_get_theme_option( 'footer_v2_b2b_title' ) ) ?: "Hai un’azienda\no un condominio?";
+$tpf_b2b_title = trim( (string) carbon_get_theme_option( 'footer_v2_b2b_title' ) ) ?: 'Hai un ufficio, un condominio o un B&B?';
 $tpf_b2b_text  = trim( (string) carbon_get_theme_option( 'footer_v2_b2b_text' ) ) ?: 'Preventivi da imprese verificate.';
 $tpf_b2b_label = trim( (string) carbon_get_theme_option( 'footer_v2_b2b_label' ) ) ?: 'Richiedi un preventivo';
 $tpf_b2b_link  = trim( (string) carbon_get_theme_option( 'footer_v2_b2b_link' ) ) ?: home_url( '/roma/pulizie-uffici/' );
@@ -81,9 +81,12 @@ if ( ! $tpf_legal_links ) {
 	);
 }
 
-// Poppins Black per la scritta grande (stessa voce della hero v2: sull'anteprima e' gia' in coda) e script della
+// Poppins Black per la scritta grande (sulle altre pagine con il footer v2) e script della
 // fisarmonica. Accodati qui perche' footer.php chiama questo file prima di wp_footer().
-wp_enqueue_style( 'trovapulizie-fonts-black', 'https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap', array(), null );
+// Sulla Home v2 il 900 e' gia' self-hosted (inc/home-v2.php, tp_home_v2_fonts_css()): niente richiesta a Google.
+if ( ! is_page_template( 'page-home-v2.php' ) ) {
+	wp_enqueue_style( 'trovapulizie-fonts-black', 'https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap', array(), null );
+}
 wp_enqueue_script( 'trovapulizie-site-footer-v2', get_stylesheet_directory_uri() . '/assets/js/site-footer-v2.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 $tpf_chevron = '<span class="site-footer-v2__chevron" aria-hidden="true"></span>';
 ?>
