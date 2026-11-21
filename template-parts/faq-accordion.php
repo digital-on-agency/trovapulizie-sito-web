@@ -2,7 +2,12 @@
 /**
  * Sezione "FAQ" — Figma 6375:1291 (layout B2B adottato per la Home il 15/10; versione precedente 3564:134).
  * Args: eyebrow, title, subtitle, items (campo complex `faq_items`: question, answer), contact (array: people, role,
- * avatar_1, avatar_2, title, text, cta_label, cta_link), theme_uri.
+ * avatar_1, avatar_2, title, text, cta_label, cta_link, cta_position), theme_uri, variant.
+ * Argomenti opzionali (TICKET-126), stampati SOLO se passati: `variant` ("v2" -> classe `faq--v2` sulla sezione, stile della
+ * Home v2) e `contact.cta_position` (-> data-cta-position sul bottone della card). Senza, il markup e' quello di sempre.
+ * Pagine che usano il componente (9 con la Home v2): page-home.php, page-hub-roma.php, page-guida-prezzi.php,
+ * page-contact.php, page-sgrosso.php, page-landing-b2b.php, page-landing-zanzare.php, page-cleaner-landing.php e
+ * page-home-v2.php (unica con variant e cta_position, via tp_home_v2_faq_args() in inc/home-v2-b2b.php).
  * Colonna sinistra: pillola, titolo, testo, card di contatto con i fondatori. Colonna destra: accordion, una domanda
  * aperta per volta (la prima all'avvio), apertura con grid-template-rows 0fr -> 1fr, segno + / - (faq-accordion.js);
  * reveal in stagger da 60 ms. JSON-LD FAQPage. Riutilizzabile nelle landing.
@@ -13,6 +18,7 @@ $args = wp_parse_args( $args ?? array(), array(
 	'subtitle'  => '',
 	'items'     => array(),
 	'contact'   => array(),
+	'variant'   => '',
 ) );
 $items = array_values( array_filter( (array) $args['items'], function ( $f ) {
 	return ! empty( $f['question'] ) && ! empty( $f['answer'] );
@@ -29,6 +35,7 @@ $contact   = wp_parse_args( (array) $args['contact'], array(
 	'text'      => '',
 	'cta_label' => '',
 	'cta_link'  => '',
+	'cta_position' => '',
 ) );
 $has_contact = $contact['title'] || $contact['text'] || $contact['cta_label'];
 $uid    = 'faq-' . wp_unique_id();
@@ -44,7 +51,7 @@ $schema = array(
 	}, $items ),
 );
 ?>
-<section class="faq" id="faq" data-reveal>
+<section class="faq<?php echo $args['variant'] ? ' faq--' . esc_attr( sanitize_html_class( $args['variant'] ) ) : ''; ?>" id="faq" data-reveal>
 	<div class="faq__inner">
 		<div class="faq__aside">
 			<?php if ( $args['eyebrow'] ) : ?><span class="faq__eyebrow"><?php echo esc_html( $args['eyebrow'] ); ?></span><?php endif; ?>
@@ -81,7 +88,7 @@ $schema = array(
 			<?php endif; ?>
 			<?php if ( $contact['title'] ) : ?><p class="faq__contact-title"><?php echo esc_html( $contact['title'] ); ?></p><?php endif; ?>
 			<?php if ( $contact['text'] ) : ?><p class="faq__contact-text"><?php echo esc_html( $contact['text'] ); ?></p><?php endif; ?>
-			<?php if ( $contact['cta_label'] && $contact['cta_link'] ) : ?><a class="faq__contact-cta" href="<?php echo esc_url( $contact['cta_link'] ); ?>"><span><?php echo esc_html( $contact['cta_label'] ); ?></span><span aria-hidden="true">&rarr;</span></a><?php endif; ?>
+			<?php if ( $contact['cta_label'] && $contact['cta_link'] ) : ?><a class="faq__contact-cta" href="<?php echo esc_url( $contact['cta_link'] ); ?>"<?php echo $contact['cta_position'] ? ' data-cta-position="' . esc_attr( $contact['cta_position'] ) . '"' : ''; ?>><span><?php echo esc_html( $contact['cta_label'] ); ?></span><span aria-hidden="true">&rarr;</span></a><?php endif; ?>
 		</aside>
 		<?php endif; ?>
 	</div>
