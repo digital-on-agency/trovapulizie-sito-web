@@ -121,6 +121,8 @@ const PROBE = `(() => {
 		contact: !!document.querySelector('main.ct'),
 		// Pagina Chi siamo (SPEC-pagina-chi-siamo): navbar del sito, nessuna coreografia della Home.
 		about: !!document.querySelector('main.ab'),
+		// Home v2 (SPEC-homepage-v2, TICKET-119): ramo proprio, niente coreografia della Home attuale.
+		v2: !!document.querySelector('main.hv2'),
 		sezioniCleaner: ['.dc-hero', '.sg-trust', '.sg-steps--screens', '.dc-bento', '.dc-earn', '.dc-who', '.dc-req', '.faq', '.cta-final']
 			.filter(sel => !document.querySelector(sel)),
 		floatVisibili: [].filter.call(document.querySelectorAll('.dc-float'), el => el.getBoundingClientRect().width > 0).length,
@@ -177,7 +179,7 @@ const PROBE = `(() => {
 			const errors = [];
 			if (r.scrollWidth > r.vw) errors.push('scroll orizzontale: scrollWidth ' + r.scrollWidth + ' > ' + r.vw);
 			const landing = !!r.landing;
-			const altraPagina = r.hub || landing || r.cleaner || r.contact || r.about;
+			const altraPagina = r.hub || landing || r.cleaner || r.contact || r.about || r.v2;
 			const attesoMotion = altraPagina ? false : desktop;
 			if (r.motionOk !== attesoMotion) errors.push('motion-ok ' + r.motionOk + ', atteso ' + attesoMotion);
 			if (!desktop && r.cdn.length) errors.push('risorse CDN richieste sotto soglia: ' + r.cdn.join(', '));
@@ -236,6 +238,11 @@ const PROBE = `(() => {
 				if (!desktop && r.floatVisibili) errors.push('card flottanti visibili sotto soglia');
 				if (r.calcPronto !== true) errors.push('calcolatore dei guadagni non attivato dal JS');
 			}
+			// Home v2 (TICKET-119): salta i controlli della coreografia della Home attuale (hero da 270 px, carosello
+			// di Come funziona, motion-ok); restano scroll orizzontale, navbar, peso e CDN. Sotto 1024 non si chiedono
+			// GSAP ne' Three.js (regola generale sopra); Three.js non si chiede a nessuna larghezza. Le sezioni v2 e il
+			// movimento li controllano qa-home-v2.js e i ticket 129 e seguenti.
+			if (r.v2 && r.cdn.some(f => /three/i.test(f))) errors.push('Three.js richiesto sull\'anteprima della Home v2: ' + r.cdn.filter(f => /three/i.test(f)).join(', '));
 			// Peso dei media (TICKET-20): budget, rendition per mobile, nessun doppione fra URL diversi.
 			if (r.dup.length) errors.push('stesso file con URL diversi: ' + r.dup.join(', '));
 			if (!desktop) {
