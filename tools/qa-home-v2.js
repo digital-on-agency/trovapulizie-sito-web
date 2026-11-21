@@ -1,5 +1,5 @@
 /* QA della Home v2 (SPEC-homepage-v2, TICKET-119 e seguenti).
-   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero|frasi|servizi] [--google on|off] [--servizi base|rotto]
+   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero|frasi|servizi|come-funziona] [--google on|off] [--servizi base|rotto]
    <url-anteprima> e' la pagina d'anteprima (es. https://trovapulizie.it/anteprima-pagina-iniziale/).
 
    Ogni ticket aggiunge la propria funzione di controllo in CHECKS e il proprio nome in SEZIONI. Con --sezioni <nome>
@@ -41,7 +41,18 @@
    con gli anchor di tp_service_pages() (letti da inc/seo.php) e href coerenti; ogni href della sezione risponde 200 (richiesta
    HTTP diretta); un solo h2, nessun h1; riquadro largo 668,8 px a 1440 e 358 px a 390; hover sulle icone che sono
    link: +4 px verso l'alto (hover reale); nessuna icona-span con hover. "rotto" (pagina con Carbon: Casa senza URL,
-   Aziende verso una pagina in bozza): Casa e Aziende sono <span> senza href, le altre restano link e nessun link porta a una 404. */
+   Aziende verso una pagina in bozza): Casa e Aziende sono <span> senza href, le altre restano link e nessun link porta a una 404.
+
+   Gruppo "come-funziona" (TICKET-122), a 1440 (pila) e a 390 (carosello): la <section id="come-funziona" data-section="04-come-funziona">
+   ha un h2 e nessun h1, quattro schede (<li class="tp-carousel__slide">) nel componente con role="region",
+   aria-roledescription="carosello" e aria-label, indicatore con l'attributo hidden nell'HTML del server e aria-live="polite";
+   ogni immagine ha width, height e loading="lazy"; nessun !important nel CSS del blocco. A 1440, dopo uno scroll programmato:
+   le schede sono sticky con top crescente (--tp-navbar-h + 24 + 16 x indice), la precedente scala a 0,96 e l'ultima no,
+   l'ancora #come-funziona porta la sezione sotto la barra (top uguale a --tp-navbar-h), l'indicatore non si vede; con
+   "riduci movimento" nessuna scheda scala; con JavaScript spento le schede restano sticky. A 390: scroll-snap-type x
+   mandatory, indicatore visibile con quattro puntini e bottoni alti almeno 44 px, "1 di 4" in aria-live="polite" che
+   avanza dopo uno scroll, un clic su "avanti" e il tasto freccia destra sulla pista (evento tp:carousel-change a ogni
+   cambio), pagina senza scroll orizzontale; con JavaScript spento la pista scorre ancora a scatti e l'indicatore non c'e'. */
 const { withChrome } = require('./lib/cdp.js');
 
 const SECTIONS = ['01-hero', '02-frasi', '03-servizi', '04-come-funziona', '05-manifesto', '06-recensioni', '07-zone', '08-aziende', '09-faq', '10-chiusura'];
@@ -346,8 +357,107 @@ async function checkServiziBrowser() {
 	});
 }
 
+
+/* Gruppo come-funziona (TICKET-122) */
+async function checkSteps() {
+	const res = await fetch(url, { redirect: 'manual' });
+	check('come-funziona: risposta 200', res.status === 200, 'stato ' + res.status);
+	if (res.status !== 200) return null;
+	const html = await res.text();
+	const sec = (html.match(/<section class="hv2-section hv2-steps"[\s\S]*?<\/section>/) || [''])[0];
+	check('come-funziona: <section id="come-funziona" data-section="04-come-funziona"> con un h2 e nessun h1', /id="come-funziona"/.test(sec) && /data-section="04-come-funziona"/.test(sec) && (sec.match(/<h2 /g) || []).length === 1 && !/<h1/.test(sec), sec.slice(0, 120));
+	check('come-funziona: un solo id="come-funziona" nella pagina', (html.match(/id="come-funziona"/g) || []).length === 1, (html.match(/id="come-funziona"/g) || []).length + ' id');
+	const slides = [...sec.matchAll(/<li class="tp-carousel__slide"[^>]*>/g)].map(m => m[0]);
+	check('come-funziona: quattro schede <li class="tp-carousel__slide"> con role="group" e "N di 4"', slides.length === 4 && slides.every((t, i) => /role="group"/.test(t) && t.includes('aria-label="' + (i + 1) + ' di 4"')), slides.join(' '));
+	const car = (sec.match(/<div class="tp-carousel[^"]*"[^>]*>/) || [''])[0];
+	check('come-funziona: componente con role="region", aria-roledescription="carosello", aria-label e data-tp-carousel', /role="region"/.test(car) && /aria-roledescription="carosello"/.test(car) && /aria-label="[^"]+"/.test(car) && /data-tp-carousel/.test(car), car);
+	check('come-funziona: indicatore con hidden nell\'HTML del server e "N di M" in aria-live="polite"', /data-tp-carousel-nav hidden/.test(sec) && /aria-live="polite"[^>]*data-tp-carousel-count/.test(sec) && /data-tp-carousel-count[^>]*>1 di 4</.test(sec), 'nav/count');
+	const imgs = [...sec.matchAll(/<img [^>]*>/g)].map(m => m[0]);
+	check('come-funziona: ' + imgs.length + ' immagini WebP con width, height, loading="lazy"', imgs.length === 8 && imgs.every(t => /\.webp/.test(t) && /width="\d+"/.test(t) && /height="\d+"/.test(t) && /loading="lazy"/.test(t)), imgs.filter(t => !(/width="\d+"/.test(t) && /height="\d+"/.test(t) && /loading="lazy"/.test(t))).join(' ').slice(0, 200));
+	check('come-funziona: foto con srcset 720w e sizes esplicito (senza auto)', imgs.filter(t => /hv2-steps__photo/.test(t)).every(t => /srcset="[^"]*720w/.test(t) && /sizes="\(max-width: 1023px\)/.test(t) && !/sizes="auto/.test(t)));
+	const css = require('fs').readFileSync(require('path').join(__dirname, '..', 'style.css'), 'utf8');
+	const i0 = css.indexOf('Carosello generico (TICKET-122)');
+	check('come-funziona: nessun !important nei blocchi CSS nuovi (tp-carousel e hv2-steps)', i0 > 0 && !/!important/.test(css.slice(i0)), 'blocco da ' + i0);
+	const stepsJs = require('fs').readFileSync(require('path').join(__dirname, '..', 'assets', 'js', 'home-steps-stack.js'), 'utf8');
+	check('come-funziona: la pila non usa GSAP ne\' Three.js', !/gsap|three/i.test(stepsJs.replace(/\/\*[\s\S]*?\*\//, '')));
+	return html;
+}
+async function checkStepsBrowser() {
+	await withChrome(bin, 'about:blank', { port: 9515, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-steps' }, async ({ send, ev, sleep }) => {
+		const errors = [];
+		await send('Page.navigate', { url });
+		await sleep(3500);
+		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
+		const J = async e => JSON.parse(await ev('JSON.stringify(' + e + ')'));
+		const info = await J('({navh: parseFloat(getComputedStyle(document.body).getPropertyValue("--tp-navbar-h")), nav: (()=>{const n=document.querySelector("[data-tp-carousel-nav]");const cs=getComputedStyle(n);return {hidden:n.hidden,display:cs.display}})(), role: document.querySelector("[data-tp-carousel]").getAttribute("aria-roledescription"), sc: document.scrollingElement.scrollWidth <= document.scrollingElement.clientWidth})');
+		check('come-funziona: nessuno scroll orizzontale della pagina', info.sc);
+		if (width >= 1024) {
+			check('come-funziona: l\'indicatore non si vede su desktop (display none)', info.nav.display === 'none', JSON.stringify(info.nav));
+			await ev('window.scrollTo(0, document.querySelector("#come-funziona").getBoundingClientRect().top + scrollY + 1400)');
+			await sleep(900);
+			const st = await J('[...document.querySelectorAll(".tp-carousel__slide")].map(l=>({pos:getComputedStyle(l).position, top:Math.round(l.getBoundingClientRect().top*10)/10, topcss:getComputedStyle(l).top, m:new DOMMatrix(getComputedStyle(l.firstElementChild).transform).a}))');
+			check('come-funziona: le quattro schede sono position sticky', st.length === 4 && st.every(s => s.pos === 'sticky'), JSON.stringify(st));
+			const tops = st.map(s => s.top);
+			check('come-funziona: top crescente di 16 px da scheda a scheda, ' + tops.slice(0, 3).join(' < '), tops[0] < tops[1] && tops[1] < tops[2] && Math.abs(tops[1] - tops[0] - 16) <= 1.5 && Math.abs(tops[2] - tops[1] - 16) <= 1.5 && Math.abs(tops[0] - (info.navh + 24)) <= 1.5, JSON.stringify(st));
+			check('come-funziona: la scheda precedente scala a 0,96 (' + st.slice(0, 3).map(s => s.m.toFixed(3)).join(', ') + ') e l\'ultima resta a 1', st.slice(0, 3).every(s => Math.abs(s.m - 0.96) <= 0.006) && st[3].m === 1, JSON.stringify(st.map(s => s.m)));
+			await ev('window.scrollTo(0, document.querySelector("#come-funziona").getBoundingClientRect().top + scrollY + 400)');
+			await sleep(500);
+			const mid = await J('[...document.querySelectorAll(".tp-carousel__slide")].map(l=>new DOMMatrix(getComputedStyle(l.firstElementChild).transform).a)');
+			check('come-funziona: durante l\'arrivo della seconda scheda la prima e\' fra 0,96 e 1 (' + mid[0].toFixed(3) + ')', mid[0] > 0.96 && mid[0] < 1 && mid[3] === 1, JSON.stringify(mid));
+			// Ancora: la sezione sta sotto la barra
+			await send('Page.navigate', { url: url.split('#')[0] + '#come-funziona' });
+			await sleep(2500);
+			await ev('location.hash = ""; location.hash = "#come-funziona"');
+			await sleep(1200);
+			const anc = await J('({top: document.querySelector("#come-funziona").getBoundingClientRect().top, navh: document.querySelector("header.navbar") ? document.querySelector("header.navbar").getBoundingClientRect().height : 0})');
+			check('come-funziona: l\'ancora #come-funziona porta l\'inizio sotto la barra (top ' + anc.top.toFixed(1) + ', barra ' + anc.navh + ', --tp-navbar-h ' + info.navh + ')', Math.abs(anc.top - info.navh) <= 2 && Math.abs(anc.top - anc.navh) <= 4, JSON.stringify(anc));
+			// Riduci movimento: nessuna scheda scala
+			await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+			await ev('window.scrollTo(0, document.querySelector("#come-funziona").getBoundingClientRect().top + scrollY + 1400)');
+			await sleep(700);
+			const rm = await J('[...document.querySelectorAll(".tp-carousel__slide")].map(l=>new DOMMatrix(getComputedStyle(l.firstElementChild).transform).a)');
+			check('come-funziona: con "riduci movimento" nessuna scheda scala', rm.every(a => a === 1), JSON.stringify(rm));
+			await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] });
+		} else {
+			const car = await J('(()=>{const t=document.querySelector(".tp-carousel__track"), cs=getComputedStyle(t); const sl=[...t.children].map(l=>Math.round(l.getBoundingClientRect().width)); const d=[...document.querySelectorAll("[data-tp-carousel-dot]")].map(b=>Math.round(b.getBoundingClientRect().height)); const a=[...document.querySelectorAll(".tp-carousel__arrow")].map(b=>[Math.round(b.getBoundingClientRect().width),Math.round(b.getBoundingClientRect().height)]); const n=document.querySelector("[data-tp-carousel-nav]"); return {snap:cs.scrollSnapType, ox:cs.overflowX, sw:t.scrollWidth, cw:t.clientWidth, slides:sl, dots:d, arrows:a, navHidden:n.hidden, navDisplay:getComputedStyle(n).display, count:document.querySelector("[data-tp-carousel-count]").textContent, live:document.querySelector("[data-tp-carousel-count]").getAttribute("aria-live"), tab:t.tabIndex, pos:getComputedStyle(t.children[0]).position}})()');
+			check('come-funziona: carosello con scroll-snap x mandatory e pista che scorre (' + car.snap + ', ' + car.sw + ' > ' + car.cw + ')', /x mandatory/.test(car.snap) && car.ox === 'auto' && car.sw > car.cw && car.pos === 'static', JSON.stringify(car));
+			check('come-funziona: schede da 300 px (o la larghezza meno 56)', car.slides.every(w => Math.abs(w - Math.min(300, width - 56)) <= 1), JSON.stringify(car.slides));
+			check('come-funziona: indicatore visibile, "1 di 4" in aria-live="polite", pista raggiungibile da tastiera (tabindex 0)', !car.navHidden && car.navDisplay !== 'none' && car.count === '1 di 4' && car.live === 'polite' && car.tab === 0, JSON.stringify(car));
+			check('come-funziona: quattro puntini e frecce alti e larghi almeno 44 px (' + car.dots.join(',') + ' / ' + car.arrows.map(a => a.join('x')).join(',') + ')', car.dots.length === 4 && car.dots.every(h => h >= 44) && car.arrows.length === 2 && car.arrows.every(a => a[0] >= 44 && a[1] >= 44), JSON.stringify(car));
+			check('come-funziona: componente ancora con aria-roledescription="carosello" (la pista scorre)', (await ev('document.querySelector("[data-tp-carousel]").getAttribute("aria-roledescription")')) === 'carosello');
+			await ev('window.__ev = 0; document.querySelector("[data-tp-carousel]").addEventListener("tp:carousel-change", function(e){ window.__ev++; window.__last = e.detail; })');
+			await ev('document.querySelector("#come-funziona").scrollIntoView()');
+			await sleep(400);
+			const w = await J('document.querySelector(".tp-carousel__slide").getBoundingClientRect().width + 12');
+			await ev('document.querySelector(".tp-carousel__track").scrollBy(' + w + ', 0)');
+			await sleep(1500);
+			const s1 = await J('({count: document.querySelector("[data-tp-carousel-count]").textContent, act: [...document.querySelectorAll("[data-tp-carousel-dot]")].map(b=>b.classList.contains("is-active")&&b.getAttribute("aria-current")==="true"), ev: window.__ev, last: window.__last})');
+			check('come-funziona: dopo uno scroll di una scheda l\'indicatore dice "2 di 4" e il secondo puntino e\' attivo (aria-current)', s1.count === '2 di 4' && JSON.stringify(s1.act) === '[false,true,false,false]' && s1.ev >= 1 && s1.last.index === 1, JSON.stringify(s1));
+			await ev('document.querySelector("[data-tp-carousel-next]").click()');
+			await sleep(2000);
+			const s2 = await J('({count: document.querySelector("[data-tp-carousel-count]").textContent, pr: document.querySelector("[data-tp-carousel-prev]").disabled})');
+			check('come-funziona: il clic su "avanti" porta a "3 di 4"', s2.count === '3 di 4' && s2.pr === false, JSON.stringify(s2));
+			await ev('document.querySelector(".tp-carousel__track").focus()');
+			await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39 });
+			await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'ArrowRight', code: 'ArrowRight', windowsVirtualKeyCode: 39 });
+			await sleep(2000);
+			const s3 = await J('({count: document.querySelector("[data-tp-carousel-count]").textContent, nx: document.querySelector("[data-tp-carousel-next]").disabled})');
+			check('come-funziona: il tasto freccia destra sulla pista porta a "4 di 4" e disabilita "avanti"', s3.count === '4 di 4' && s3.nx === true, JSON.stringify(s3));
+			await ev('document.querySelector("[data-tp-carousel-dot=\\"0\\"]").click()');
+			await sleep(2000);
+			check('come-funziona: il clic sul primo puntino torna a "1 di 4"', (await ev('document.querySelector("[data-tp-carousel-count]").textContent')) === '1 di 4');
+		}
+		// JavaScript spento
+		await send('Emulation.setScriptExecutionDisabled', { value: true });
+		await send('Page.navigate', { url });
+		await sleep(2500);
+		const nj = await J('(()=>{const t=document.querySelector(".tp-carousel__track"), n=document.querySelector("[data-tp-carousel-nav]"); const l=document.querySelector(".tp-carousel__slide"); return {snap:getComputedStyle(t).scrollSnapType, ox:getComputedStyle(t).overflowX, navHidden:n.hidden, navDisplay:getComputedStyle(n).display, pos:getComputedStyle(l).position, op:getComputedStyle(document.querySelector(".hv2-steps__card")).opacity}})()');
+		if (width >= 1024) check('come-funziona: senza JavaScript le schede restano sticky e visibili, indicatore assente', nj.pos === 'sticky' && nj.navDisplay === 'none' && nj.op === '1', JSON.stringify(nj));
+		else check('come-funziona: senza JavaScript la pista scorre a scatti (scroll-snap CSS) e l\'indicatore non c\'e\'', /x mandatory/.test(nj.snap) && nj.ox === 'auto' && nj.navHidden === true && nj.navDisplay === 'none', JSON.stringify(nj));
+	});
+}
 (async () => {
-	if (!['base', 'hero', 'frasi', 'servizi'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
+	if (!['base', 'hero', 'frasi', 'servizi', 'come-funziona'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
 	if (gruppo === 'hero') {
 		const h = await checkHero();
 		if (h) await checkHeroBrowser(h.pre);
@@ -357,6 +467,9 @@ async function checkServiziBrowser() {
 	} else if (gruppo === 'servizi') {
 		await checkServizi();
 		await checkServiziBrowser();
+	} else if (gruppo === 'come-funziona') {
+		await checkSteps();
+		await checkStepsBrowser();
 	} else {
 		const html = await checkHttp();
 		if (html) await checkBrowser();
