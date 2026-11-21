@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.75.0
+Version: 0.75.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -12202,6 +12202,29 @@ html.tp-reveal .hv2 .hv2-zones__map[data-reveal].is-in {
 	.hv2-zones__tag { padding: 5px 10px; font-size: 12px; }
 	.hv2-zones__mon-label { font-size: 10px; }
 	.hv2-zones__mon--pantheon { display: none; }
+}
+
+/* ---- Sfondo continuo della Home v2 (Guido 21/11): niente stacchi fra le sezioni chiare ----
+   Il fondo menta lo da' la pagina, non le singole sezioni; le luci (radial-gradient) non vengono piu' tagliate al
+   bordo della sezione e sfumano in quella vicina. Il taglio orizzontale lo fa main (overflow-x: clip, nessuna barra
+   di scorrimento e nessun contesto di scroll: lo sticky di Come funziona continua a funzionare). Le sezioni con un
+   fondo proprio (fascia frasi, fasce scure, chiusura verde, footer) non sono in questo elenco. */
+body.page-template-page-home-v2-php,
+main.hv2 {
+	background: var(--tp-v2-mint);
+}
+main.hv2 {
+	overflow-x: clip;
+}
+main.hv2 > .hv2-hero,
+main.hv2 > .hv2-services,
+main.hv2 > .hv2-steps,
+main.hv2 > .hv2-man,
+main.hv2 > .hv2-zones,
+main.hv2 > .hv2-section--recensioni,
+main.hv2 > .hv2-section--faq {
+	background: transparent;
+	overflow: visible;
 }
 
 /* Scena dei telefoni proporzionata all'altezza della finestra, perche' la hero entri senza scorrere */
