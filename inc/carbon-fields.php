@@ -995,13 +995,13 @@ add_action( 'carbon_fields_register_fields', function () {
 	// return). Con TICKET-119 ogni tab ha solo il titolo; i campi di contenuto li aggiungono i ticket di sezione.
 	//
 	// | Tab (data-section)  | Campi oggi          | Ticket che aggiunge i campi |
-	// | 01-hero             | h2_hero_title, h2_hero_title_accent, h2_hero_label, h2_hero_subtitle, h2_hero_orbit, h2_google_badge, h2_google_rating | 120 (fatto) |
+	// | 01-hero             | h2_hero_title, h2_hero_title_accent, h2_hero_title_end, h2_hero_label, h2_hero_subtitle, h2_hero_orbit, h2_google_badge, h2_google_rating | 120 (fatto) |
 	// | 02-frasi            | h2_frasi_title (titolo nascosto, per gli screen reader), h2_frasi_items, h2_frasi_speed | 121 (fatto) |
 	// | 03-servizi          | h2_servizi_title, h2_servizi_eyebrow, h2_servizi_subtitle, h2_servizi_more_label, h2_servizi_cta, h2_servizi_items | 121 (fatto) |
 	// | 04-come-funziona    | h2_come_funziona_title, _eyebrow, _subtitle, _subtitle_mobile, _link_label, _link_url, _steps | 122 (fatto) |
-	// | 05-manifesto        | h2_manifesto_title  | 123 |
+	// | 05-manifesto        | h2_manifesto_title, h2_manifesto_eyebrow, h2_manifesto_subtitle, h2_manifesto_stamp, h2_manifesto_items, h2_manifesto_hide | 123 (fatto) |
 	// | 06-recensioni       | h2_recensioni_title | 124 |
-	// | 07-zone             | h2_zone_title       | 125 |
+	// | 07-zone             | h2_zone_title, h2_zones_caps | 125 (fatto) |
 	// | 08-aziende          | h2_aziende_title    | 126 |
 	// | 09-faq              | h2_faq_title        | 126 |
 	// | 10-chiusura         | h2_chiusura_title   | 127 |
@@ -1026,9 +1026,10 @@ add_action( 'carbon_fields_register_fields', function () {
 		);
 		if ( 'hero' === $chiave ) {
 			// TICKET-120: testi della hero e riquadro Google. Vuoto = default del template (template-parts/home-hero-v2.php).
-			$h2_campi[0]->set_help_text( __( 'Prima riga del titolo (H1, colore scuro). Vuoto = "La pulizia cambia."' ) );
+			$h2_campi[0]->set_help_text( __( 'Inizio del titolo (H1, scuro). Vuoto = "Prenota"' ) );
 			$h2_campi = array_merge( $h2_campi, array(
-				Field::make( 'text', 'h2_hero_title_accent', __( 'Titolo, seconda riga (verde)' ) )->set_help_text( __( 'Vuoto = "Il modo di sceglierla, anche."' ) ),
+				Field::make( 'text', 'h2_hero_title_accent', __( 'Titolo, parte in verde' ) )->set_help_text( __( 'Segue l\'inizio sulla stessa riga. Vuoto = "pulizie professionali"' ) ),
+				Field::make( 'text', 'h2_hero_title_end', __( 'Titolo, ultima riga (scura)' ) )->set_help_text( __( 'Sempre su una riga propria. Vuoto = "in due minuti"' ) ),
 				Field::make( 'text', 'h2_hero_label', __( 'Etichetta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "La nuova app di Trovapulizie, a Roma"' ) ),
 				Field::make( 'textarea', 'h2_hero_subtitle', __( 'Sottotitolo' ) )->set_rows( 3 )->set_help_text( __( 'Vuoto = "Professionisti verificati vicino a te e il prezzo prima di prenotare. Scegli, prenota e segui tutto dal telefono."' ) ),
 				Field::make( 'text', 'h2_hero_orbit', __( 'Testo circolare' ) )->set_help_text( __( 'Frase che gira attorno ai telefoni, in maiuscolo. Se e\' troppo lunga il corpo si riduce da solo. Vuoto = "PROFESSIONISTI VERIFICATI · PREZZO CHIARO · PAGAMENTO SICURO · TUTTO IN UN\'APP ·"' ) ),
@@ -1076,6 +1077,47 @@ add_action( 'carbon_fields_register_fields', function () {
 						Field::make( 'checkbox', 'soon', __( 'Presto' ) )->set_option_value( 'yes' )->set_help_text( __( 'Mostra l\'etichetta "presto" e toglie il link.' ) ),
 					) )
 					->set_header_template( '<%- name %>' ),
+			) );
+		}
+		if ( 'manifesto' === $chiave ) {
+			// TICKET-123: testi, timbro e promesse del manifesto. I default sono quelli del Figma (inc/home-v2-manifesto.php).
+			$h2_icone = array();
+			foreach ( tp_home_v2_manifesto_icons() as $h2_k => $h2_i ) {
+				$h2_icone[ $h2_k ] = $h2_i[1];
+			}
+			$h2_righe_def = array();
+			foreach ( tp_home_v2_manifesto_defaults() as $h2_r ) {
+				$h2_righe_def[] = array_merge( array( '_type' => '_' ), $h2_r );
+			}
+			$h2_campi[0]->set_help_text( __( 'Titolo (H2, maiuscolo da CSS). Vuoto = "Quattro «niente»."' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_manifesto_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Perché fidarti"' ) ),
+				Field::make( 'textarea', 'h2_manifesto_subtitle', __( 'Sottotitolo' ) )->set_rows( 2 )->set_help_text( __( 'Vuoto = "Le regole che valgono per ogni pulizia. Senza asterischi."' ) ),
+				Field::make( 'text', 'h2_manifesto_stamp', __( 'Testo del timbro' ) )->set_help_text( __( 'La frase che gira attorno al timbro (decorativa, in maiuscolo; il separatore finale lo mette il tema). Vuoto = "PROFESSIONISTI VERIFICATI · TROVAPULIZIE · ROMA".' ) ),
+				Field::make( 'complex', 'h2_manifesto_items', __( 'Promesse' ) )
+					->set_layout( 'tabbed-vertical' )
+					->setup_labels( array( 'plural_name' => __( 'Promesse' ), 'singular_name' => __( 'Promessa' ) ) )
+					->set_help_text( __( 'Le promesse in ordine (di solito quattro, numerate dal tema). Nessuna riga = le quattro di default, come una pagina mai salvata (per nascondere la sezione usa "Nascondi il manifesto" qui sotto). Le prove sono esempi del design in attesa di conferma: nelle prove vanno dati reali dell\'app, mai numeri o nomi inventati.' ) )
+					->add_fields( array(
+						Field::make( 'text', 'lead', __( 'Parola iniziale (verde)' ) )->set_help_text( __( 'Di solito "Niente".' ) ),
+						Field::make( 'text', 'keyword', __( 'Parola chiave (scura)' ) )->set_help_text( __( 'Es. "sconosciuti." Il maiuscolo lo fa il tema.' ) ),
+						Field::make( 'text', 'text', __( 'Frase' ) ),
+						Field::make( 'text', 'proof', __( 'Prova (pillola)' ) )->set_help_text( __( 'Vuoto = nessuna pillola.' ) ),
+						Field::make( 'select', 'icon', __( 'Icona della prova' ) )->add_options( $h2_icone ),
+					) )
+					->set_default_value( $h2_righe_def )
+					->set_header_template( '<%- lead %> <%- keyword %>' ),
+				Field::make( 'checkbox', 'h2_manifesto_hide', __( 'Nascondi il manifesto' ) )->set_option_value( 'yes' )->set_help_text( __( 'Acceso: la sezione non compare. Spento (default): compare con le promesse sopra, o con le quattro di default se non ce n\'e\' nessuna.' ) ),
+			) );
+		}
+		if ( 'zone' === $chiave ) {
+			// TICKET-125: titolo e lista dei CAP attivi. Il testo del campo e' la lista del tema finche' non lo si salva.
+			$h2_campi[0]->set_help_text( __( 'Titolo della sezione (H2, maiuscolo da CSS). Vuoto = "Arriviamo anche da te?"' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'textarea', 'h2_zones_caps', __( 'CAP attivi (controllo del CAP)' ) )
+					->set_rows( 12 )
+					->set_default_value( function_exists( 'tp_home_v2_zones_default_lines' ) ? tp_home_v2_zones_default_lines() : '' )
+					->set_help_text( __( 'Una riga per CAP: "00186 | Centro Storico". Sono i CAP per cui il controllo risponde "Ci siamo" e che la mappa colora di verde; sono validi solo CAP di Roma (00118-00199). [ATTENZIONE] Campo mai salvato = lista del tema (44 CAP). Campo svuotato e salvato = il controllo sparisce dalla pagina (restano titolo, mappa e chip). Il CAP 00194 non ha un poligono sulla mappa: il controllo risponde si ma la mappa non lo evidenzia.' ) ),
 			) );
 		}
 		if ( 'come_funziona' === $chiave ) {

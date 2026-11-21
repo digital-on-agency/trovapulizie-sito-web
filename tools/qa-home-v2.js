@@ -1,9 +1,9 @@
 /* QA della Home v2 (SPEC-homepage-v2, TICKET-119 e seguenti).
-   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero|frasi|servizi|come-funziona] [--google on|off] [--servizi base|rotto]
+   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero|frasi|servizi|manifesto|come-funziona] [--google on|off] [--servizi base|rotto]
    <url-anteprima> e' la pagina d'anteprima (es. https://trovapulizie.it/anteprima-pagina-iniziale/).
 
    Ogni ticket aggiunge la propria funzione di controllo in CHECKS e il proprio nome in SEZIONI. Con --sezioni <nome>
-   si esegue solo quel gruppo (oggi: base, hero, frasi, servizi). Esce con 1 se un controllo fallisce.
+   si esegue solo quel gruppo (oggi: base, hero, frasi, servizi, manifesto). Esce con 1 se un controllo fallisce.
 
    Gruppo "base" (TICKET-119):
    - la pagina risponde 200 senza redirect (nessun rimando ad app.trovapulizie.com), con meta robots noindex e header
@@ -34,6 +34,14 @@
    viewport riceve .is-paused e al ritorno la perde; col mouse sopra e' in pausa (animation-play-state paused);
    nessuno scroll orizzontale; un solo h2 (nascosto agli occhi) e nessun h1 nuovo.
 
+   Gruppo "manifesto" (TICKET-123), anche a 390 e 1440; --voci N dice quante promesse ha la pagina provata (default 4 =
+   le quattro del Figma e dei campi Carbon precompilati; 0 = sezione assente). Un solo h2 e nessun h1 nella sezione;
+   le promesse sono N <li> di una <ol>; timbro (testo circolare con textPath) aria-hidden; con 4 promesse i testi sono
+   quelli del Figma (lead "Niente", parola chiave, frase, prova); colori calcolati: "NIENTE" #008866, parola chiave
+   #0F1F1B, fondo #F3FAF7; contrasto AA su ogni coppia testo/fondo (3:1 per testo grande, 4,5:1 negli altri casi);
+   disposizione: due colonne a 1440, una a 390, con meno di quattro (o dispari) l'ultima promessa occupa la riga
+   intera; nessuno scroll orizzontale; una pillola di prova con icona per promessa (28 px, tondo #E6FFF5).
+
    Gruppo "servizi" (TICKET-121), --servizi base|rotto dice quale pagina si prova. "base": Casa, Aziende, Condomini,
    Disinfestazione sono <a> verso /roma/, /roma/pulizie-uffici/, /roma/pulizie-condomini/, /roma/zanzare-disinfestazione/;
    Affitti brevi e Manutenzione sono <span> (non link) con la parola "presto" visibile e non nascosta agli screen reader;
@@ -56,7 +64,7 @@
 const { withChrome } = require('./lib/cdp.js');
 
 const SECTIONS = ['01-hero', '02-frasi', '03-servizi', '04-come-funziona', '05-manifesto', '06-recensioni', '07-zone', '08-aziende', '09-faq', '10-chiusura'];
-const args = process.argv.slice(2).filter((a, i, all) => !a.startsWith('--') && !(i > 0 && ['--sezioni', '--google', '--servizi', '--frasi'].includes(all[i - 1])));
+const args = process.argv.slice(2).filter((a, i, all) => !a.startsWith('--') && !(i > 0 && ['--sezioni', '--google', '--servizi', '--frasi', '--voci'].includes(all[i - 1])));
 const [bin, url, widthArg] = args;
 const width = Number(widthArg) || 1440;
 const gruppo = (process.argv.includes('--sezioni') ? process.argv[process.argv.indexOf('--sezioni') + 1] : 'base');
@@ -456,14 +464,102 @@ async function checkStepsBrowser() {
 		else check('come-funziona: senza JavaScript la pista scorre a scatti (scroll-snap CSS) e l\'indicatore non c\'e\'', /x mandatory/.test(nj.snap) && nj.ox === 'auto' && nj.navHidden === true && nj.navDisplay === 'none', JSON.stringify(nj));
 	});
 }
+/* Gruppo manifesto (TICKET-123) */
+const vociArg = process.argv.includes('--voci') ? Number(process.argv[process.argv.indexOf('--voci') + 1]) : 4;
+const MANIFESTO = [
+	['Niente', 'sconosciuti.', 'Controlliamo documenti e identità di ognuno.', 'Documento verificato · Laura B.'],
+	['Niente', 'sorprese.', 'Il prezzo lo vedi prima di inviare la richiesta.', 'Totale 76 € · 4 ore'],
+	['Niente', 'anticipi a vuoto.', 'L’addebito parte solo quando il professionista accetta.', 'Addebito dopo l’accettazione'],
+	['Niente', 'buchi.', 'Se chi hai scelto non può, te ne proponiamo un altro.', 'Ti proponiamo Marco, stesse condizioni'],
+];
+const dec = t => t.replace(/&#0?39;|&#8217;|&rsquo;/g, '’').replace(/&amp;/g, '&').replace(/&#8364;/g, '€').replace(/&euro;/g, '€').replace(/&middot;|&#183;/g, '·').replace(/&nbsp;/g, ' ');
+async function checkManifesto() {
+	const res = await fetch(url, { redirect: 'manual' });
+	check('manifesto: risposta 200', res.status === 200, 'stato ' + res.status);
+	if (res.status !== 200) return;
+	const html = await res.text();
+	const sec = (html.match(/<section class="hv2-man"[\s\S]*?<\/section>/) || [''])[0];
+	if (vociArg === 0) { check('manifesto: con zero promesse la sezione non e\' stampata', sec === '' && !/data-section="05-manifesto"/.test(html), sec.slice(0, 80)); return; }
+	check('manifesto: sezione 05-manifesto presente', /data-section="05-manifesto"/.test(sec), sec.slice(0, 120));
+	check('manifesto: un solo h2 e nessun h1 nella sezione', (sec.match(/<h2[ >]/g) || []).length === 1 && !/<h1/.test(sec));
+	const items = [...sec.matchAll(/<li class="hv2-man__item"[\s\S]*?<\/li>/g)].map(m => m[0]);
+	check('manifesto: le promesse sono ' + vociArg + ' <li> di una <ol>', /<ol class="hv2-man__list">/.test(sec) && items.length === vociArg, items.length + ' li');
+	const stamp = (sec.match(/<div class="hv2-man__stamp"[^>]*>/) || [''])[0];
+	check('manifesto: timbro aria-hidden con testo circolare (textPath)', /aria-hidden="true"/.test(stamp) && /<textPath/.test(sec), stamp);
+	check('manifesto: numeri aria-hidden', (sec.match(/class="hv2-man__num" aria-hidden="true"/g) || []).length === vociArg);
+	if (vociArg === 4) {
+		const got = items.map(h => {
+			const t = c => dec((h.match(new RegExp('class="hv2-man__' + c + '">([^<]*)<')) || [0, ''])[1]);
+			return [t('lead'), t('key'), t('text'), t('proof-text')];
+		});
+		check('manifesto: lead, parola chiave, frase e prova del Figma, in ordine', JSON.stringify(got) === JSON.stringify(MANIFESTO), JSON.stringify(got));
+	}
+	check('manifesto: una pillola di prova con icona per promessa', (sec.match(/class="hv2-man__ico"/g) || []).length === (sec.match(/class="hv2-man__proof"/g) || []).length && (sec.match(/class="hv2-man__proof"/g) || []).length >= 1);
+}
+async function checkManifestoBrowser() {
+	if (vociArg === 0) return;
+	await withChrome(bin, 'about:blank', { port: 9517, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-man' }, async ({ send, ev, sleep }) => {
+		await send('Page.navigate', { url });
+		await sleep(3500);
+		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
+		if (!(await ev('!!document.querySelector(".hv2-man__list")'))) { check('manifesto: la sezione esiste nel browser', false, 'assente'); return; }
+		await ev('document.querySelector(".hv2-man").scrollIntoView({block:"start"})');
+		await sleep(1500);
+		const info = JSON.parse(await ev(`(() => {
+			const q = s => document.querySelector(s), cs = e => getComputedStyle(e);
+			const sec = q('.hv2-man'), items = [...document.querySelectorAll('.hv2-man__item')], list = q('.hv2-man__list').getBoundingClientRect();
+			const rect = e => { const r = e.getBoundingClientRect(); return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) }; };
+			const pair = (e, bg) => ({ c: cs(e).color, bg: bg || cs(sec).backgroundColor, fs: parseFloat(cs(e).fontSize), fw: +cs(e).fontWeight });
+			return JSON.stringify({
+				bg: cs(sec).backgroundColor, lead: pair(q('.hv2-man__lead')), key: pair(q('.hv2-man__key')), title: pair(q('.hv2-man__title')), eyebrow: pair(q('.hv2-man__eyebrow')),
+				sub: pair(q('.hv2-man__subtitle')), num: pair(q('.hv2-man__num')), text: pair(q('.hv2-man__text')), proof: pair(q('.hv2-man__proof-text'), cs(q('.hv2-man__proof')).backgroundColor),
+				ico: { bg: cs(q('.hv2-man__ico')).backgroundColor, w: rect(q('.hv2-man__ico')).w, h: rect(q('.hv2-man__ico')).h, c: cs(q('.hv2-man__ico')).color },
+				items: items.map(rect), list: { x: Math.round(list.x), w: Math.round(list.width) },
+				titleW: rect(q('.hv2-man__title')), titleRight: (() => { const r = document.createRange(); r.selectNodeContents(q('.hv2-man__title')); return Math.round(r.getBoundingClientRect().right); })(), stamp: rect(q('.hv2-man__stamp')), secRect: rect(sec),
+				sw: document.scrollingElement.scrollWidth, cw: document.scrollingElement.clientWidth,
+				up: [...document.querySelectorAll('.hv2-man__lead, .hv2-man__key, .hv2-man__title')].every(e => cs(e).textTransform === 'uppercase')
+			});
+		})()`));
+		const rgb = c => c.match(/\d+/g).slice(0, 3).map(Number);
+		const lum = c => { const [r, g, b] = rgb(c).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+		const ratio = (a, b) => { const l1 = lum(a), l2 = lum(b); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); };
+		check('manifesto: fondo #F3FAF7', info.bg === 'rgb(243, 250, 247)', info.bg);
+		check('manifesto: "NIENTE" #008866', info.lead.c === 'rgb(0, 136, 102)', info.lead.c);
+		check('manifesto: parola chiave #0F1F1B', info.key.c === 'rgb(15, 31, 27)', info.key.c);
+		check('manifesto: lead e parola chiave in maiuscolo', info.up);
+		const grande = p => p.fs >= 24 || (p.fs >= 18.66 && p.fw >= 700);
+		for (const [nome, p] of Object.entries({ lead: info.lead, key: info.key, titolo: info.title, eyebrow: info.eyebrow, sottotitolo: info.sub, numero: info.num, frase: info.text, prova: info.proof })) {
+			const r = ratio(p.c, p.bg), soglia = grande(p) ? 3 : 4.5;
+			check('manifesto: contrasto ' + nome + ' ' + r.toFixed(2) + ':1 >= ' + soglia + ' (' + p.fs + ' px, peso ' + p.fw + ')', r >= soglia, p.c + ' su ' + p.bg);
+		}
+		check('manifesto: icona prova 28 px, tondo #E6FFF5, glifo #008866', info.ico.w === 28 && info.ico.h === 28 && info.ico.bg === 'rgb(230, 255, 245)' && info.ico.c === 'rgb(0, 136, 102)', JSON.stringify(info.ico));
+		const n = info.items.length, xs = [...new Set(info.items.map(i => i.x))];
+		if (width >= 1024) {
+			check('manifesto: due colonne a ' + width + ' (' + xs.length + ' x diverse)', xs.length === 2 || n === 1, JSON.stringify(xs));
+			if (width === 1440) check('manifesto: lista di 1248 px da x 96, colonne da 600 px', info.list.w === 1248 && info.list.x === 96 && info.items[0].w === 600, JSON.stringify(info.list) + ' ' + info.items[0].w);
+		} else {
+			check('manifesto: una colonna a ' + width, xs.length === 1, JSON.stringify(xs));
+		}
+		const ultima = info.items[n - 1];
+		check('manifesto: nessun buco, l\'ultima promessa ' + ((n % 2 === 1 && width >= 1024) ? 'occupa la riga intera' : 'sta nel suo posto'), (n % 2 === 1 && width >= 1024) ? ultima.w === info.list.w : ultima.w <= info.list.w, JSON.stringify(ultima));
+		check('manifesto: il timbro (da x ' + info.stamp.x + ') non copre il titolo (che finisce a x ' + info.titleRight + ')', width < 768 || info.stamp.x >= info.titleRight, info.stamp.x + ' < ' + info.titleRight);
+		check('manifesto: nessuno scroll orizzontale', info.sw <= info.cw, info.sw + ' > ' + info.cw);
+		if (width === 1440 && vociArg === 4) check('manifesto: titolo 88 px su una riga', Math.round(info.title.fs) === 88 && info.titleW.h <= 90, JSON.stringify(info.titleW) + ' ' + info.title.fs);
+		if (width === 390 && vociArg === 4) check('manifesto: titolo 48 px su due righe, padding 16', info.title.fs === 48 && info.titleW.h === 100 && info.titleW.x === 16, JSON.stringify(info.titleW));
+	});
+}
+
 (async () => {
-	if (!['base', 'hero', 'frasi', 'servizi', 'come-funziona'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
+	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
 	if (gruppo === 'hero') {
 		const h = await checkHero();
 		if (h) await checkHeroBrowser(h.pre);
 	} else if (gruppo === 'frasi') {
 		await checkFrasi();
 		await checkFrasiBrowser();
+	} else if (gruppo === 'manifesto') {
+		await checkManifesto();
+		await checkManifestoBrowser();
 	} else if (gruppo === 'servizi') {
 		await checkServizi();
 		await checkServiziBrowser();

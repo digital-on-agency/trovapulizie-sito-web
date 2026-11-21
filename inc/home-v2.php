@@ -120,6 +120,13 @@ add_action( 'wp_enqueue_scripts', function () {
 	}
 } );
 
+/* Poppins Black (900) solo per il titolo della hero v2 (Figma 7903:5292): il resto del sito carica 400-800 e non cambia. */
+add_action( 'wp_enqueue_scripts', function () {
+	if ( is_page_template( 'page-home-v2.php' ) ) {
+		wp_enqueue_style( 'trovapulizie-fonts-black', 'https://fonts.googleapis.com/css2?family=Poppins:wght@900&display=swap', array(), null );
+	}
+} );
+
 /* Barra chiara: trasparente in cima alla pagina (assets/js/navbar-v2.js). Caricato ovunque la barra v2 e' attiva. */
 add_action( 'wp_enqueue_scripts', function () {
 	if ( tp_header_v2_on() ) {
@@ -216,3 +223,4 @@ add_action( 'wp_head', function () {
 		echo '<link rel="preload" as="image" type="image/webp" fetchpriority="high" href="' . esc_url( tp_theme_asset( 'assets/img/home-v2/' . basename( $file ) ) ) . '"' . $media . '>' . "\n";
 	}
 }, 2 );
+require_once __DIR__ . '/home-v2-manifesto.php'; // TICKET-123: default e icone del manifesto

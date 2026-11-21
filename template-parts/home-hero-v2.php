@@ -31,6 +31,7 @@
 $args = wp_parse_args( $args ?? array(), array(
 	'title'         => '',
 	'accent'        => '',
+	'title_end'     => '',
 	'label'         => '',
 	'subtitle'      => '',
 	'orbit'         => '',
@@ -41,8 +42,10 @@ $hv2_pick = static function ( $valore, $default ) {
 	$valore = trim( (string) $valore );
 	return '' !== $valore ? $valore : $default;
 };
-$hv2_title    = $hv2_pick( $args['title'], 'La pulizia cambia.' );
-$hv2_accent   = $hv2_pick( $args['accent'], 'Il modo di sceglierla, anche.' );
+// Titolo in tre parti (Figma 7903:5292, 21/11): scuro, verde, scuro su una riga propria. Il maiuscolo lo fa il CSS.
+$hv2_title    = $hv2_pick( $args['title'], 'Prenota' );
+$hv2_accent   = $hv2_pick( $args['accent'], 'pulizie professionali' );
+$hv2_end      = $hv2_pick( $args['title_end'], 'in due minuti' );
 $hv2_label    = $hv2_pick( $args['label'], 'La nuova app di Trovapulizie, a Roma' );
 $hv2_subtitle = $hv2_pick( $args['subtitle'], 'Professionisti verificati vicino a te e il prezzo prima di prenotare. Scegli, prenota e segui tutto dal telefono.' );
 $hv2_orbit    = trim( (string) $args['orbit'] ) !== '' ? (string) $args['orbit'] : 'PROFESSIONISTI VERIFICATI · PREZZO CHIARO · PAGAMENTO SICURO · TUTTO IN UN’APP · ';
@@ -59,7 +62,7 @@ $hv2_img      = static function ( $file ) {
 	<div class="hv2-hero__inner">
 		<div class="hv2-hero__text">
 			<p class="hv2-hero__label"><span class="hv2-hero__dot" aria-hidden="true"></span><?php echo esc_html( $hv2_label ); ?></p>
-			<h1 class="hv2-hero__title"><span class="hv2-hero__title-line"><?php echo esc_html( $hv2_title ); ?></span> <span class="hv2-hero__title-line hv2-hero__accent"><?php echo esc_html( $hv2_accent ); ?></span></h1>
+			<h1 class="hv2-hero__title"><span class="hv2-hero__title-line"><?php echo esc_html( $hv2_title ); ?> <span class="hv2-hero__accent"><?php echo esc_html( $hv2_accent ); ?></span></span> <span class="hv2-hero__title-line hv2-hero__title-end"><?php echo esc_html( $hv2_end ); ?></span></h1>
 			<p class="hv2-hero__subtitle"><?php echo esc_html( $hv2_subtitle ); ?></p>
 			<div class="hv2-hero__actions">
 				<a class="hv2-hero__cta" href="<?php echo esc_url( tp_app_url() ); ?>" data-cta-position="hero"><span>Apri l’app</span><span class="hv2-hero__cta-arrow" aria-hidden="true">→</span></a>
