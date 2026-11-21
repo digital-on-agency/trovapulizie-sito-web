@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.81.2
+Version: 0.81.3
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -15241,6 +15241,13 @@ html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__tent {
 .hv2-steps__carousel .tp-carousel__nav {
 	position: relative;
 	z-index: 2;
+}
+@media (max-width: 1023px) {
+	/* la sezione dei passi crea un proprio contesto di sovrapposizione: va alzata lei, non solo i controlli */
+	main.hv2 > .hv2-steps {
+		position: relative;
+		z-index: 2;
+	}
 }
 /* D2 - Titolo e sottotitolo del manifesto non entrano nella colonna del timbro, a tutte le larghezze (768-860 px li copriva). */
 .hv2-man__title,
