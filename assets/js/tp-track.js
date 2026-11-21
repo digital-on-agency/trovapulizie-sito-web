@@ -15,6 +15,10 @@
  *   prende al click: un consenso dato a meta' visita vale subito. L'href del link torna com'era subito dopo.
  * - Click su tel:, wa.me e ancore verso il form nelle pagine con [data-landing]: marketing_click_to_call,
  *   marketing_click_whatsapp, marketing_click_to_form con {landing} (useLandingClickTracking della SPA).
+ * - marketing_cta_click {landing, cta_position, target} per ogni link con data-cta-position: nelle landing, nella
+ *   Home v2 (main.hv2, dove anche i link verso l'app o WhatsApp senza attributo prendono la posizione dalla sezione)
+ *   e, con tpTrackConfig.ctaAnywhere (header chiaro e footer nuovo, SPEC-homepage-v2 TICKET-130), su ogni pagina:
+ *   senza [data-landing] landing e' "" e le altre categorie di click non partono.
  * [ATTENZIONE] Il parametro di posizione della CTA si chiama cta_position: `source` e' riservato a GA4.
  */
 (function () {
@@ -137,22 +141,47 @@
 		if (utm) store('sessionStorage', UTM_KEY, JSON.stringify(utm));
 	})();
 
-	// Click sulle landing: un solo listener, event delegation.
+	// Posizione di riserva per i link verso l'app o WhatsApp dentro main.hv2 che non portano data-cta-position
+	// (TICKET-130): si ricava dalla sezione che li contiene, cosi' le sezioni nuove sono coperte senza modifiche al
+	// markup. Il markup esplicito vince sempre. Sezione sconosciuta: lo slug senza il numero ("08-aziende" -> "aziende").
+	var SECTION_POSITIONS = {
+		'01-hero': 'hero', '03-servizi': 'services', '04-come-funziona': 'steps', '07-zone': 'zones',
+		'08-aziende': 'home_b2b', '09-faq': 'faq_whatsapp', '10-chiusura': 'cta_final'
+	};
+	function fallbackPosition(a, href) {
+		if (href.indexOf(APP_ORIGIN + '/') !== 0 && href.indexOf('wa.me') === -1 && href.indexOf('whatsapp') === -1) return '';
+		var sec = a.closest('[data-section]');
+		var name = sec ? sec.getAttribute('data-section') : '';
+		return SECTION_POSITIONS[name] || name.replace(/^\d+-/, '').replace(/-/g, '_');
+	}
+
+	// Click: un solo listener, event delegation.
+	// - Pagine con [data-landing]: tel:, WhatsApp e ancore verso il form (marketing_click_*) e, con data-cta-position,
+	//   marketing_cta_click. Eventi invariati, tranne WhatsApp dentro main.hv2 (Home v2): li' un link con posizione
+	//   emette marketing_cta_click (SPEC-homepage-v2, zones_whatsapp e faq_whatsapp) e non marketing_click_whatsapp.
+	// - Pagine senza [data-landing] (barra e footer v2 su tutto il sito): solo marketing_cta_click con landing "",
+	//   e solo se tpTrackConfig.ctaAnywhere e' vero (interruttore tp_site_v2 o pagina v2, inc/tracking.php): a
+	//   interruttore spento il tracciamento di quelle pagine e' quello di prima.
 	document.addEventListener('click', function (e) {
 		var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
 		if (!a) return;
 		var landing = window.tpLanding();
-		if (!landing) return;
+		var cfg = window.tpTrackConfig;
+		if (!landing && !(cfg && cfg.ctaAnywhere === true)) return;
 		var href = a.getAttribute('href') || '';
 		// data-cta-position (pagina Diventa cleaner, TICKET-51): posizione della CTA negli eventi. Le landing
 		// Sgrosso non lo usano, i loro eventi restano identici.
-		var pos = a.getAttribute('data-cta-position');
+		var inV2 = !!a.closest('main.hv2');
+		var pos = a.getAttribute('data-cta-position') || (inV2 ? fallbackPosition(a, href) : '');
 		var extra = pos ? { cta_position: pos } : {};
 		function p(base) { for (var k in extra) base[k] = extra[k]; return base; }
-		if (href.indexOf('tel:') === 0) window.tpTrack('marketing_click_to_call', p({ landing: landing }));
-		else if (href.indexOf('wa.me') !== -1 || href.indexOf('whatsapp') !== -1) window.tpTrack('marketing_click_whatsapp', p({ landing: landing }));
-		else if (/#form(-bottom)?$/.test(href)) window.tpTrack('marketing_click_to_form', p({ landing: landing, target: href.slice(href.indexOf('#')) }));
-		else if (pos) window.tpTrack('marketing_cta_click', { landing: landing, cta_position: pos, target: href });
+		var isWa = href.indexOf('wa.me') !== -1 || href.indexOf('whatsapp') !== -1;
+		if (landing) {
+			if (href.indexOf('tel:') === 0) { window.tpTrack('marketing_click_to_call', p({ landing: landing })); return; }
+			if (isWa && !(inV2 && pos)) { window.tpTrack('marketing_click_whatsapp', p({ landing: landing })); return; }
+			if (/#form(-bottom)?$/.test(href)) { window.tpTrack('marketing_click_to_form', p({ landing: landing, target: href.slice(href.indexOf('#')) })); return; }
+		}
+		if (pos) window.tpTrack('marketing_cta_click', { landing: landing, cta_position: pos, target: href });
 	}, true);
 
 	// Link verso l'app: UTM aggiunti al click (anche rotella e ctrl/cmd, che aprono una nuova scheda) e href
