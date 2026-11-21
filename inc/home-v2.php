@@ -121,14 +121,24 @@ add_filter( 'wp_sitemaps_posts_query_args', function ( $args, $post_type ) {
 
 /* Ingressi (reveal), fisarmonica delle FAQ, pausa dei loop fuori schermo (tp-loops, TICKET-121), carosello (tp-carousel) e
    pila delle schede di Come funziona (home-steps-stack, TICKET-122) e movimento della hero (home-v2-motion: pausa del testo
-   circolare, parallasse da desktop con GSAP pigro). Il controllo CAP e il resto del movimento li aggiungono i ticket
-   delle rispettive sezioni. Niente Three.js (nessun importmap) e niente GSAP a questo livello. */
+   circolare, parallasse, ken burns della foto aziende e scritta del footer da desktop con GSAP pigro, TICKET-129). Niente
+   Three.js (nessun importmap); GSAP lo carica home-v2-motion.js da cdnjs, solo da 1024 px e con movimento consentito. */
 add_action( 'wp_enqueue_scripts', function () {
 	if ( ! is_page_template( 'page-home-v2.php' ) ) {
 		return;
 	}
 	foreach ( array( 'reveal', 'faq-accordion', 'tp-loops', 'tp-carousel', 'home-steps-stack', 'home-v2-motion' ) as $handle ) {
 		wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
+	}
+} );
+
+/* Scritta grande del footer nuovo (TICKET-129): lo script del movimento serve anche fuori dall'anteprima, ovunque esca il
+   footer nuovo (interruttore tp_site_v2 acceso). Sulla pagina col template lo carica gia' l'elenco qui sopra; con
+   l'interruttore spento e su ogni altra pagina questa regola non fa nulla, quindi il resto del sito resta identico. Fuori
+   dall'anteprima lo script trova solo il footer: nessuna parallasse ne' ken burns. */
+add_action( 'wp_enqueue_scripts', function () {
+	if ( tp_footer_v2_on() && ! is_page_template( 'page-home-v2.php' ) ) {
+		wp_enqueue_script( 'trovapulizie-home-v2-motion', get_stylesheet_directory_uri() . '/assets/js/home-v2-motion.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 	}
 } );
 

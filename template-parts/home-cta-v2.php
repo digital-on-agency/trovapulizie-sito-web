@@ -28,14 +28,14 @@
  * aggiunge l'inoltro di SPEC-utm-verso-app, non il sito). Il QR e' lo stesso SVG della hero (assets/img/home-v2/qr-app.svg, versione
  * https://app.trovapulizie.com/ senza parametri). Il tentacolo e l'avviso del telefono sono decorativi (alt vuoto, aria-hidden).
  * Il telefono e' template-parts/phone-mockup.php con lo schermo assets/img/home-v2/cta-screen.svg; l'avviso e' HTML sopra lo schermo
- * (lo animera' TICKET-129: cade dall'alto con rimbalzo, poi battito dell'icona).
+ * (TICKET-129: cade dall'alto con rimbalzo, poi battito dell'icona; telefono che sale, tentacoli che entrano da destra: CSS legato a .is-in del palco).
  *
  * Immagini del tentacolo: Higgsfield (account Digital On, nano_banana_pro, 20/11), scontornate; qui WebP (cta-tentacolo.webp 1100 x 1473,
  * cta-tentacolo-ricciolo.webp 420 x 400). Futuro: video generato al posto delle immagini (nota 7882:4118).
  * Fondo: la fascia verde ha il proprio fondo (main.hv2 da' la menta alle altre sezioni, 0.75.1); la luce dietro il telefono non e' tagliata
  * dal bordo della sezione, il tentacolo e il telefono si' tagliano solo in verticale (.hv2-cta__clip, clip-path con margine laterale: il telefono esce
  * dal bordo inferiore come nel Figma).
- * CSS: blocco `TICKET-127` in fondo a style.css (classi .hv2-cta). JS: nessuno (reveal.js per gli ingressi; movimento: TICKET-129).
+ * CSS: blocco `TICKET-127` in fondo a style.css (classi .hv2-cta). JS: nessuno (reveal.js per gli ingressi; il movimento e' CSS, blocco TICKET-129).
  *
  * Esempio: get_template_part( 'template-parts/home-cta-v2', null, array( 'note_hide' => true ) );
  */

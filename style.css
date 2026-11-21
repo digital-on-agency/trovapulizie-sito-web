@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.80.1
+Version: 0.81.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -10933,6 +10933,15 @@ html.tp-reveal .hv2 [data-reveal].is-in {
 	.hv2-steps__link span:last-child {
 		transition: none;
 	}
+	/* TICKET-129: nessun loop (testo del timbro fermo) e nessuna trasformazione sulla scritta del footer. Gli ingressi del
+	   timbro, delle pillole, delle icone, dei foglietti, dell'avviso e dei tentacoli sono solo dissolvenze da 200 ms: lo
+	   stato base del blocco TICKET-129 in fondo al file e' gia' questo, il movimento sta in no-preference. */
+	html .hv2-man__stamp .hv2-man__orbit {
+		animation: none;
+	}
+	html .site-footer-v2__word-text {
+		transform: none;
+	}
 }
 
 /* =========================
@@ -13310,7 +13319,7 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
    (QR: <img loading="lazy"> in un riquadro display:none; tentacolo: <picture> con <source media="(min-width: 1024px)"> e GIF 1x1).
    Eccezione di brand dichiarata: il bottone e' BIANCO con testo #062A22 (non verde con testo bianco come hero e barra).
    Desktop: palco di 1440 x 630 (.hv2-cta__scale) ancorato a destra e ridotto con scale(--hv2-cta-k) fra 1024 e 1279 px.
-   Il telefono e' 340 x 702,67 (--hv2-cta-s scala le misure dell'avviso e il telefono mobile). Movimento: TICKET-129.
+   Il telefono e' 340 x 702,67 (--hv2-cta-s scala le misure dell'avviso e il telefono mobile). Movimento (TICKET-129): blocco in fondo al file.
    ========================= */
 .hv2-cta {
 	--hv2-cta-k: 1;
@@ -13677,7 +13686,7 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
    TICKET-128 - Footer nuovo (SPEC-homepage-v2, Figma 7904:2856 desktop, 7946:2202 mobile)
    Solo selettori .site-footer-v2*: il footer attuale (.site-footer) non cambia. Markup in
    template-parts/site-footer-v2.php, fisarmonica mobile in assets/js/site-footer-v2.js.
-   Scritta grande: statica (il movimento legato allo scroll e' TICKET-129; transform libero sull'interno .__word-text).
+   Scritta grande: da 1024 px la muove lo scroll (GSAP, home-v2-motion.js, TICKET-129; transform dell'interno .__word-text), sotto e con riduci movimento e' ferma.
    ========================= */
 .site-footer-v2 {
 	--tpf-line: rgba(255, 255, 255, 0.14);
@@ -14028,7 +14037,7 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
    7946:2068 mobile). Solo selettori nuovi (.hv2-b2b, .hv2-faq, .faq--v2): nessun CSS esistente della FAQ e' modificato,
    le altre otto pagine che usano faq-accordion.php restano identiche. Fondo: lo da' main.hv2 (sfondo continuo), qui le
    sezioni sono trasparenti e le luci sfumano nelle vicine (isolation + z-index negativo, come le Zone). Ken burns della
-   foto e movimento dell'apertura: TICKET-129.
+   foto (home-v2-motion.js) e movimento dell'apertura: TICKET-129.
    [ATTENZIONE] Le regole riduci movimento di questo ticket stanno in fondo a questo blocco, non nel blocco unico della
    v2: da riunire in quello al merge dei ticket paralleli.
    ========================= */
@@ -14800,6 +14809,159 @@ html.tp-reveal .hv2 .faq--v2[data-reveal] {
 }
 
 /* =========================
+   TICKET-129 - Movimento della Home v2 (note Figma 7882:4118). Ingressi che i ticket di sezione avevano lasciato qui:
+   timbro del manifesto, pillole delle prove, icone dei servizi, foglietti delle recensioni, avviso e tentacoli della
+   chiusura, apertura morbida della FAQ. Gli effetti legati allo scroll da 1024 px (parallasse hero, ken burns della
+   foto aziende, scritta del footer) sono in assets/js/home-v2-motion.js.
+   Regola del blocco: lo stato base e' quello di "riduci movimento" (solo dissolvenza da 200 ms, nessun ritardo,
+   nessuno spostamento); il movimento (scale, rotate, translate, rimbalzo, stagger) sta tutto in
+   @media (prefers-reduced-motion: no-preference). Gli stati nascosti valgono solo con html.tp-reveal (messa da
+   reveal.js): senza JavaScript o con reveal.js bloccato tutto resta visibile. Proprieta' animate: opacity e le
+   trasformazioni individuali (translate, rotate, scale); l'unica eccezione e' l'altezza della risposta della FAQ
+   (grid-template-rows), che non puo' essere una trasformazione. Sotto 1024 px le durate sono x0,8 (--hv2-mm).
+   ========================= */
+.hv2 {
+	--hv2-mm: 1;
+}
+@media (max-width: 1023px) {
+	.hv2 {
+		--hv2-mm: 0.8;
+	}
+}
+@keyframes hv2-beat {
+	0% { transform: scale(1); }
+	40% { transform: scale(1.25); }
+	100% { transform: scale(1); }
+}
+
+/* Timbro del manifesto: compare con rimbalzo e mezzo giro, poi il testo ruota piano (fermo fuori schermo) */
+html.tp-reveal .hv2-man__stamp[data-pop] {
+	transition: opacity var(--tp-dur-reduced) linear;
+}
+html.tp-reveal .hv2-man__stamp[data-pop]:not(.is-in) {
+	opacity: 0;
+}
+/* Pillole delle prove: entrano dopo la loro promessa */
+html.tp-reveal .hv2 .hv2-man__proof {
+	transition: opacity var(--tp-dur-reduced) linear;
+}
+html.tp-reveal .hv2 .hv2-man__item:not(.is-in) .hv2-man__proof {
+	opacity: 0;
+}
+/* Icone dei servizi: spuntano una dopo l'altra (40 ms) quando entra il riquadro */
+html.tp-reveal .hv2 .hv2-services__tile {
+	transition: opacity var(--tp-dur-reduced) linear;
+}
+html.tp-reveal .hv2 .hv2-services__panel:not(.is-in) .hv2-services__tile {
+	opacity: 0;
+}
+/* Foglietti delle recensioni: scendono quando entra la testata della sezione */
+html.tp-reveal .hv2 .hv2-rev__carousel .tp-carousel__slide {
+	transition: opacity var(--tp-dur-reduced) linear;
+}
+html.tp-reveal .hv2 .hv2-rev__head:not(.is-in) ~ .hv2-rev__carousel .tp-carousel__slide {
+	opacity: 0;
+}
+/* Chiusura: avviso, tentacoli e telefono entrano quando entra il palco */
+html.tp-reveal .hv2 .hv2-cta__notif,
+html.tp-reveal .hv2 .hv2-cta__tent {
+	transition: opacity var(--tp-dur-reduced) linear;
+}
+html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__notif,
+html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__tent {
+	opacity: 0;
+}
+/* FAQ: la risposta si apre in morbido (altezza e dissolvenza, una sola domanda aperta per volta) */
+.faq--v2 .faq__a {
+	transition: grid-template-rows calc(var(--tp-dur) * var(--hv2-mm, 1)) var(--tp-ease-stage);
+}
+.faq--v2 .faq__a-inner {
+	transition: opacity calc(var(--tp-dur) * var(--hv2-mm, 1)) var(--tp-ease-stage);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+	html.tp-reveal .hv2-man__stamp[data-pop] {
+		transition:
+			opacity calc(var(--tp-dur) * var(--hv2-mm)) var(--tp-ease-in),
+			scale calc(var(--tp-dur-slow) * var(--hv2-mm)) var(--tp-ease-bounce),
+			rotate calc(var(--tp-dur-slow) * var(--hv2-mm)) var(--tp-ease-bounce);
+	}
+	html.tp-reveal .hv2-man__stamp[data-pop]:not(.is-in) {
+		scale: 0.6;
+		rotate: -40deg;
+	}
+	.hv2-man__stamp .hv2-man__orbit {
+		transform-origin: 50% 50%;
+		animation: hv2-spin 90s linear infinite;
+	}
+	.hv2-man__stamp.is-paused .hv2-man__orbit {
+		animation-play-state: paused;
+	}
+	html.tp-reveal .hv2 .hv2-man__proof {
+		transition:
+			opacity calc(var(--tp-dur) * var(--hv2-mm)) var(--tp-ease-in),
+			transform calc(var(--tp-dur) * var(--hv2-mm)) var(--tp-ease-bounce);
+		transition-delay: calc(var(--i, 0) * 80ms + 200ms);
+	}
+	html.tp-reveal .hv2 .hv2-man__item:not(.is-in) .hv2-man__proof {
+		transform: translateY(12px) scale(0.94);
+	}
+	html.tp-reveal .hv2 .hv2-services__tile {
+		transition:
+			transform var(--tp-dur-fast) var(--tp-ease-stage),
+			opacity calc(var(--tp-dur) * var(--hv2-mm)) var(--tp-ease-in) calc(120ms + var(--k, 0) * 40ms),
+			scale calc(var(--tp-dur) * var(--hv2-mm)) var(--tp-ease-bounce) calc(120ms + var(--k, 0) * 40ms);
+	}
+	html.tp-reveal .hv2 .hv2-services__panel:not(.is-in) .hv2-services__tile {
+		scale: 0.5;
+	}
+	html.tp-reveal .hv2 .hv2-rev__carousel .tp-carousel__slide {
+		transition:
+			opacity calc(var(--tp-dur) * var(--hv2-mm)) var(--tp-ease-in),
+			translate calc(var(--tp-dur-slow) * var(--hv2-mm)) var(--tp-ease-bounce);
+		transition-delay: calc(var(--i, 0) * 80ms);
+	}
+	html.tp-reveal .hv2 .hv2-rev__head:not(.is-in) ~ .hv2-rev__carousel .tp-carousel__slide {
+		translate: 0 -28px;
+	}
+	html.tp-reveal .hv2 .hv2-cta__notif {
+		transition:
+			opacity calc(var(--tp-dur) * var(--hv2-mm)) var(--tp-ease-in) 560ms,
+			translate calc(var(--tp-dur-slow) * var(--hv2-mm)) var(--tp-ease-bounce) 560ms;
+	}
+	html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__notif {
+		translate: 0 -90%;
+	}
+	html.tp-reveal .hv2 .hv2-cta__stage.is-in .hv2-cta__notif img {
+		animation: hv2-beat calc(var(--tp-dur) * 1.4 * var(--hv2-mm)) var(--tp-ease-bounce) 1.5s 1 both;
+	}
+	html.tp-reveal .hv2 .hv2-cta__tent {
+		transition:
+			opacity calc(var(--tp-dur-slow) * var(--hv2-mm)) var(--tp-ease-in),
+			translate calc(var(--tp-dur-slow) * var(--hv2-mm)) var(--tp-ease-stage);
+	}
+	html.tp-reveal .hv2 .hv2-cta__tent--curl {
+		transition-delay: 160ms;
+	}
+	html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__tent--back {
+		translate: 72px 0;
+	}
+	html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__tent--curl {
+		translate: 48px 24px;
+	}
+	html.tp-reveal .hv2 .hv2-cta__device {
+		transition: translate calc(var(--tp-dur-slow) * var(--hv2-mm)) var(--tp-ease-stage) 80ms;
+	}
+	html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__device {
+		translate: 0 48px;
+	}
+	.faq--v2 .faq__a-inner p {
+		transition: translate calc(var(--tp-dur) * var(--hv2-mm)) var(--tp-ease-stage);
+		translate: 0 -8px;
+	}
+	.faq--v2 .faq__item.is-open .faq__a-inner p {
+		translate: none;
+
    Giro 2 di revisione della Home v2 (tema 0.80.1). Solo regole che correggono quelle sopra, in fondo al file e senza
    forzature di priorita': a parita' di specificita' vince l'ordine. Per voce: P2-x e P3-x del pacchetto del revisore (review2).
    [ATTENZIONE] Il movimento (animazioni, riduci movimento) e' di TICKET-129: qui non si tocca.

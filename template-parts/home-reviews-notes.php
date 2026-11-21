@@ -29,8 +29,7 @@
  *
  * Componenti riusati, nessuno nuovo: tp-carousel (foglietti: griglia da 1024 px, carosello con indicatore "N di M" sotto
  * 1024 px, come Come funziona) e tp-marquee (fascia loghi, con `items_html`). Loop in pausa fuori viewport: tp-loops.js.
- * Movimento: ingresso della testata e della fascia con data-reveal; la "caduta" dei foglietti e la foto DOPO che scorre sono di
- * TICKET-129. Al passaggio del mouse il foglietto si raddrizza e si alza di 6 px (250 ms, solo transform, ferma con riduci movimento).
+ * Movimento: ingresso della testata e della fascia con data-reveal; i foglietti scendono con rimbalzo quando entra la testata (CSS, blocco TICKET-129). Al passaggio del mouse il foglietto si raddrizza e si alza di 6 px (250 ms, solo transform, ferma con riduci movimento).
  * CSS: blocco "TICKET-124" in fondo a style.css. Nessuna CTA: nessun data-cta-position.
  *
  * Esempio: get_template_part( 'template-parts/home-reviews-notes', null, array( 'items' => array( array( 'text' => '...', 'name' => 'Laura B.' ) ) ) );

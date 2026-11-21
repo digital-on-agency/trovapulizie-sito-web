@@ -30,7 +30,8 @@
  *   di default della riga con lo stesso numero d'ordine.
  *
  * Tracciamento: "Scopri i servizi nell'app" porta data-cta-position="services", href tp_app_url(), stessa scheda.
- * Ingressi: data-reveal sulla colonna di testo e sul riquadro (--i 0 e 1; il riquadro entra da destra di 32 px).
+ * Ingressi: data-reveal sulla colonna di testo e sul riquadro (--i 0 e 1; il riquadro entra da destra di 32 px); le icone spuntano
+ * con rimbalzo a stagger 40 ms (--k = posizione, CSS del blocco TICKET-129).
  * Hover (solo dispositivi con mouse): icona su di 4 px (150 ms) e nome sottolineato, sulle icone che sono link.
  * Immagini: WebP in assets/img/home-v2/svc-*.webp, con width e height, lazy. CSS: blocco `.hv2-services` di style.css.
  * JS: nessuno.
@@ -97,12 +98,12 @@ $hv2s_more  = tp_home_v2_altri_servizi();
 		</div>
 		<div class="hv2-services__panel" data-reveal style="--i: 1">
 			<ul class="hv2-services__grid">
-				<?php foreach ( $hv2s_rows as $hv2s_r ) : ?>
+				<?php foreach ( $hv2s_rows as $hv2s_k => $hv2s_r ) : ?>
 					<?php
 					$hv2s_href = tp_home_v2_service_href( $hv2s_r['url'], $hv2s_r['soon'] );
 					$hv2s_tag  = $hv2s_href ? 'a' : 'span';
 					?>
-					<li class="hv2-services__cell">
+					<li class="hv2-services__cell" style="--k: <?php echo (int) min( $hv2s_k, 11 ); ?>">
 						<<?php echo $hv2s_tag; ?> class="hv2-services__item<?php echo $hv2s_href ? '' : ' is-static'; ?>"<?php echo $hv2s_href ? ' href="' . esc_url( $hv2s_href ) . '"' : ''; ?>>
 							<span class="hv2-services__tile">
 								<?php if ( '' !== $hv2s_r['src'] ) : ?>
