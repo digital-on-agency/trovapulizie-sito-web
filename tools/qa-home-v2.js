@@ -1,9 +1,9 @@
 /* QA della Home v2 (SPEC-homepage-v2, TICKET-119 e seguenti).
-   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero] [--google on|off]
+   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero|frasi|servizi] [--google on|off] [--servizi base|rotto]
    <url-anteprima> e' la pagina d'anteprima (es. https://trovapulizie.it/anteprima-pagina-iniziale/).
 
    Ogni ticket aggiunge la propria funzione di controllo in CHECKS e il proprio nome in SEZIONI. Con --sezioni <nome>
-   si esegue solo quel gruppo (oggi: base, hero). Esce con 1 se un controllo fallisce.
+   si esegue solo quel gruppo (oggi: base, hero, frasi, servizi). Esce con 1 se un controllo fallisce.
 
    Gruppo "base" (TICKET-119):
    - la pagina risponde 200 senza redirect (nessun rimando ad app.trovapulizie.com), con meta robots noindex e header
@@ -25,11 +25,27 @@
      PerformanceObserver (se l'elemento LCP e' un testo, uguale all'unica img fetchpriority=high); fetchpriority=high
      su una sola immagine della pagina; ogni img della hero ha width e height; niente data-reveal nella hero;
    - testo circolare: SVG aria-hidden con textPath, nessuna lettera sovrapposta (angoli di getStart/EndPositionOfChar
-     in ordine crescente), un H1 solo; menu mobile: l'hamburger apre #nav-panel con le voci, Esc lo chiude. */
+     in ordine crescente), un H1 solo; menu mobile: l'hamburger apre #nav-panel con le voci, Esc lo chiude.
+
+   Gruppo "frasi" (TICKET-121), anche a 390 e 1440: la fascia ha un solo gruppo di frasi leggibile e gli altri con
+   aria-hidden="true"; le frasi sono le tre attese (o quelle del campo Carbon: --frasi "a|b|c"); testo #062A22 su
+   #37B299 con contrasto calcolato >= 4,5 (atteso 5,8); la pista si muove (transform diverso fra due letture) e ha
+   animation-name tp-marquee-left; con "riduci movimento" emulato la pista e' ferma (animation-name none); fuori dal
+   viewport riceve .is-paused e al ritorno la perde; col mouse sopra e' in pausa (animation-play-state paused);
+   nessuno scroll orizzontale; un solo h2 (nascosto agli occhi) e nessun h1 nuovo.
+
+   Gruppo "servizi" (TICKET-121), --servizi base|rotto dice quale pagina si prova. "base": Casa, Aziende, Condomini,
+   Disinfestazione sono <a> verso /roma/, /roma/pulizie-uffici/, /roma/pulizie-condomini/, /roma/zanzare-disinfestazione/;
+   Affitti brevi e Manutenzione sono <span> (non link) con la parola "presto" visibile e non nascosta agli screen reader;
+   "Scopri i servizi nell'app" verso l'app con data-cta-position="services"; la riga "Altri servizi a Roma" ha i sei link
+   con gli anchor di tp_service_pages() (letti da inc/seo.php) e href coerenti; ogni href della sezione risponde 200 (richiesta
+   HTTP diretta); un solo h2, nessun h1; riquadro largo 668,8 px a 1440 e 358 px a 390; hover sulle icone che sono
+   link: +4 px verso l'alto (hover reale); nessuna icona-span con hover. "rotto" (pagina con Carbon: Casa senza URL,
+   Aziende verso una pagina in bozza): Casa e Aziende sono <span> senza href, le altre restano link e nessun link porta a una 404. */
 const { withChrome } = require('./lib/cdp.js');
 
 const SECTIONS = ['01-hero', '02-frasi', '03-servizi', '04-come-funziona', '05-manifesto', '06-recensioni', '07-zone', '08-aziende', '09-faq', '10-chiusura'];
-const args = process.argv.slice(2).filter((a, i, all) => !a.startsWith('--') && !(i > 0 && ['--sezioni', '--google'].includes(all[i - 1])));
+const args = process.argv.slice(2).filter((a, i, all) => !a.startsWith('--') && !(i > 0 && ['--sezioni', '--google', '--servizi', '--frasi'].includes(all[i - 1])));
 const [bin, url, widthArg] = args;
 const width = Number(widthArg) || 1440;
 const gruppo = (process.argv.includes('--sezioni') ? process.argv[process.argv.indexOf('--sezioni') + 1] : 'base');
@@ -165,11 +181,182 @@ async function checkHeroBrowser(pre) {
 	});
 }
 
+
+/* Gruppo frasi (TICKET-121) */
+const frasiArg = process.argv.includes('--frasi') ? process.argv[process.argv.indexOf('--frasi') + 1] : '';
+const FRASI = frasiArg ? frasiArg.split('|') : ['La casa pulita. Il weekend libero.', 'Il divano ringrazia.', 'Lo sgrosso non è un hobby.'];
+async function checkFrasi() {
+	const res = await fetch(url, { redirect: 'manual' });
+	check('frasi: risposta 200', res.status === 200, 'stato ' + res.status);
+	if (res.status !== 200) return;
+	const html = await res.text();
+	const sec = (html.match(/<section class="hv2-frasi"[\s\S]*?<\/section>/) || [''])[0];
+	check('frasi: sezione 02-frasi con h2 e fascia .tp-marquee', /data-section="02-frasi"/.test(sec) && /<h2 /.test(sec) && /class="tp-marquee /.test(sec), sec.slice(0, 120));
+	check('frasi: nessun h1 e un solo h2 nella sezione', !/<h1/.test(sec) && (sec.match(/<h2 /g) || []).length === 1);
+	const groups = [...sec.matchAll(/<ul class="tp-marquee__group"([^>]*)>([\s\S]*?)<\/ul>/g)];
+	check('frasi: almeno due gruppi di frasi', groups.length >= 2, groups.length + ' gruppi');
+	check('frasi: il primo gruppo e\' letto, tutti gli altri aria-hidden="true"', groups.length >= 2 && !/aria-hidden/.test(groups[0][1]) && groups.slice(1).every(g => /aria-hidden="true"/.test(g[1])));
+	const testi = g => [...g[2].matchAll(/<span class="tp-marquee__text">([^<]*)<\/span>/g)].map(m => m[1].replace(/&#0?39;|&#8217;/g, '’').replace(/&amp;/g, '&'));
+	const norm = a => a.map(t => t.replace(/[’']/g, '’'));
+	check('frasi: il primo gruppo ha le frasi attese, in ordine', groups.length > 0 && JSON.stringify(norm(testi(groups[0]))) === JSON.stringify(norm(FRASI)), JSON.stringify(testi(groups[0] || [0, 0, ''])));
+	check('frasi: ogni gruppo ha le stesse frasi', groups.length > 0 && groups.every(g => JSON.stringify(testi(g)) === JSON.stringify(testi(groups[0]))));
+	check('frasi: i separatori sono aria-hidden', (sec.match(/<span class="tp-marquee__dot" aria-hidden="true">/g) || []).length === (sec.match(/tp-marquee__dot/g) || []).length);
+}
+async function checkFrasiBrowser() {
+	await withChrome(bin, 'about:blank', { port: 9513, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-frasi', args: ['--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4'] }, async ({ send, ev, sleep }) => {
+		await send('Page.navigate', { url });
+		await sleep(3500);
+		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
+		if (!(await ev('!!document.querySelector(".hv2-frasi .tp-marquee__track")'))) { check('frasi: la fascia esiste nel browser', false, 'assente'); return; }
+		await ev('document.querySelector(".hv2-frasi").scrollIntoView({block:"center"})');
+		await sleep(600);
+		const info = JSON.parse(await ev(`(() => {
+			const t = document.querySelector('.hv2-frasi__marquee .tp-marquee__text'), m = document.querySelector('.hv2-frasi'), tr = document.querySelector('.tp-marquee__track');
+			const cs = getComputedStyle(t), bg = getComputedStyle(m).backgroundColor, ts = getComputedStyle(tr);
+			return JSON.stringify({ color: cs.color, bg, fs: cs.fontSize, fw: cs.fontWeight, h: Math.round(m.getBoundingClientRect().height), name: ts.animationName, state: ts.animationPlayState,
+				border: getComputedStyle(m).borderTopColor, dot: getComputedStyle(document.querySelector('.tp-marquee__dot')).width,
+				x1: new DOMMatrix(ts.transform).m41, sw: document.scrollingElement.scrollWidth, cw: document.scrollingElement.clientWidth });
+		})()`));
+		const rgb = c => c.match(/\d+/g).slice(0, 3).map(Number);
+		const lum = c => { const [r, g, b] = rgb(c).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+		const ratio = (a, b) => { const l1 = lum(a), l2 = lum(b); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); };
+		check('frasi: testo ' + info.color + ' su ' + info.bg + ' (attesi #062A22 su #37B299)', info.color === 'rgb(6, 42, 34)' && info.bg === 'rgb(55, 178, 153)', JSON.stringify(info));
+		const cr = ratio(info.color, info.bg);
+		check('frasi: contrasto calcolato ' + cr.toFixed(2) + ':1 >= 4,5', cr >= 4.5, cr.toFixed(2));
+		check('frasi: bordo sopra #062A22, corpo ' + info.fs + ' peso ' + info.fw + ', altezza ' + info.h, info.border === 'rgb(6, 42, 34)' && info.fw === '800' && (width >= 1024 ? info.fs === '32px' && Math.abs(info.h - 85) <= 2 : info.fs === '20px' && Math.abs(info.h - 59) <= 2), JSON.stringify(info));
+		check('frasi: animazione tp-marquee-left in corso', info.name === 'tp-marquee-left' && info.state === 'running', info.name + ' ' + info.state);
+		await sleep(1200);
+		const x2 = Number(await ev('new DOMMatrix(getComputedStyle(document.querySelector(".tp-marquee__track")).transform).m41'));
+		check('frasi: la pista si muove verso sinistra (' + info.x1.toFixed(1) + ' -> ' + x2.toFixed(1) + ' px)', x2 < info.x1 - 5, info.x1 + ' ' + x2);
+		check('frasi: nessuno scroll orizzontale', info.sw <= info.cw, info.sw + ' > ' + info.cw);
+		// Fuori dal viewport: .is-paused
+		await ev('window.scrollTo(0, document.body.scrollHeight)');
+		await sleep(700);
+		const out = await ev('document.querySelector(".tp-marquee").classList.contains("is-paused") && getComputedStyle(document.querySelector(".tp-marquee__track")).animationPlayState');
+		check('frasi: fuori dal viewport la fascia e\' in pausa (.is-paused)', out === 'paused', String(out));
+		await ev('document.querySelector(".hv2-frasi").scrollIntoView({block:"center"})');
+		await sleep(700);
+		const back = JSON.parse(await ev('JSON.stringify({p: document.querySelector(".tp-marquee").classList.contains("is-paused"), s: getComputedStyle(document.querySelector(".tp-marquee__track")).animationPlayState})'));
+		check('frasi: al rientro nel viewport riparte', !back.p && back.s === 'running', JSON.stringify(back));
+		// Hover: pausa (solo con mouse)
+		if (width >= 1024) {
+			const b = JSON.parse(await ev('JSON.stringify(document.querySelector(".hv2-frasi").getBoundingClientRect())'));
+			await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 400, y: Math.round(b.y + b.height / 2) });
+			await sleep(300);
+			const hv = await ev('getComputedStyle(document.querySelector(".tp-marquee__track")).animationPlayState');
+			check('frasi: col mouse sopra la fascia e\' in pausa', hv === 'paused', hv);
+			await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 5, y: 5 });
+		}
+		// Riduci movimento
+		await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+		await sleep(400);
+		const r1 = Number(await ev('new DOMMatrix(getComputedStyle(document.querySelector(".tp-marquee__track")).transform).m41'));
+		await sleep(900);
+		const rr = JSON.parse(await ev('JSON.stringify({n: getComputedStyle(document.querySelector(".tp-marquee__track")).animationName, x: new DOMMatrix(getComputedStyle(document.querySelector(".tp-marquee__track")).transform).m41})'));
+		check('frasi: con "riduci movimento" la fascia e\' ferma (animation-name ' + rr.n + ', x ' + r1 + ' -> ' + rr.x + ')', rr.n === 'none' && r1 === rr.x, JSON.stringify(rr));
+	});
+}
+
+/* Gruppo servizi (TICKET-121) */
+const serviziArg = process.argv.includes('--servizi') ? process.argv[process.argv.indexOf('--servizi') + 1] : 'base';
+function anchorsAttesi() {
+	const src = require('fs').readFileSync(require('path').join(__dirname, '..', 'inc', 'seo.php'), 'utf8');
+	const body = (src.match(/function tp_service_pages\(\) \{[\s\S]*?\n\t\);/) || [''])[0];
+	const m = {};
+	for (const r of body.matchAll(/'(\/roma\/[^']*)'\s*=>\s*'([^']*)'/g)) m[r[1]] = r[2];
+	return m;
+}
+const ALTRI = ['/roma/sgrosso-casa/', '/roma/sgrosso-post-ristrutturazione/', '/roma/sgrosso-trasloco/', '/roma/sgrosso-fine-affitto/', '/roma/sgrosso-commerciale/', '/roma/prezzi-pulizie/'];
+async function checkServizi() {
+	const res = await fetch(url, { redirect: 'manual' });
+	check('servizi: risposta 200', res.status === 200, 'stato ' + res.status);
+	if (res.status !== 200) return null;
+	const html = await res.text();
+	const origin = new URL(url).origin;
+	const sec = (html.match(/<section class="hv2-section hv2-services"[\s\S]*?<\/section>/) || [''])[0];
+	check('servizi: sezione 03-servizi presente, un solo h2, nessun h1', /data-section="03-servizi"/.test(sec) && (sec.match(/<h2 /g) || []).length === 1 && !/<h1/.test(sec), sec.slice(0, 100));
+	const items = [...sec.matchAll(/<(a|span) class="hv2-services__item[^"]*"([^>]*)>([\s\S]*?)<\/\1>\s*<\/li>/g)].map(m => ({ tag: m[1], attrs: m[2], inner: m[3], name: (m[3].match(/hv2-services__name">([^<]*)</) || [, ''])[1], href: (m[2].match(/href="([^"]*)"/) || [, ''])[1], soon: /hv2-services__soon">presto</.test(m[3]) }));
+	check('servizi: sei icone nell\'ordine Casa, Affitti brevi, Aziende, Condomini, Disinfestazione, Manutenzione', JSON.stringify(items.map(i => i.name)) === JSON.stringify(['Casa', 'Affitti brevi', 'Aziende', 'Condomini', 'Disinfestazione', 'Manutenzione']), JSON.stringify(items.map(i => i.name)));
+	const per = n => items.find(i => i.name === n) || { tag: '?', href: '' };
+	const path = u => { try { return new URL(u).pathname; } catch (e) { return u; } };
+	const attesi = { Casa: '/roma/', Aziende: '/roma/pulizie-uffici/', Condomini: '/roma/pulizie-condomini/', Disinfestazione: '/roma/zanzare-disinfestazione/' };
+	if (serviziArg === 'base') {
+		for (const [n, p] of Object.entries(attesi)) check('servizi: ' + n + ' e\' un link verso ' + p, per(n).tag === 'a' && path(per(n).href) === p, per(n).tag + ' ' + per(n).href);
+	} else {
+		check('servizi (rotto): Casa senza URL in Carbon e\' uno span senza href', per('Casa').tag === 'span' && !per('Casa').href, per('Casa').tag + ' ' + per('Casa').href);
+		check('servizi (rotto): Aziende verso una pagina in bozza e\' uno span senza href', per('Aziende').tag === 'span' && !per('Aziende').href, per('Aziende').tag + ' ' + per('Aziende').href);
+		for (const n of ['Condomini', 'Disinfestazione']) check('servizi (rotto): ' + n + ' resta un link verso ' + attesi[n], per(n).tag === 'a' && path(per(n).href) === attesi[n], per(n).tag + ' ' + per(n).href);
+	}
+	for (const n of ['Affitti brevi', 'Manutenzione']) check('servizi: ' + n + ' e\' uno span, non un link, con "presto"', per(n).tag === 'span' && !per(n).href && per(n).soon && !/aria-hidden/.test(per(n).inner.match(/<span class="hv2-services__label">[\s\S]*$/)[0]), JSON.stringify(per(n)).slice(0, 200));
+	const cta = (sec.match(/<a class="hv2-services__cta"[^>]*>/) || [''])[0];
+	check('servizi: "Scopri i servizi nell\'app" verso l\'app con data-cta-position="services", stessa scheda', cta.includes('href="' + APP + '"') && cta.includes('data-cta-position="services"') && !/target=/.test(cta), cta);
+	const altri = [...sec.matchAll(/<a class="hv2-services__chip" href="([^"]*)">([^<]*)<\/a>/g)].map(m => [path(m[1]), m[2]]);
+	const anch = anchorsAttesi();
+	check('servizi: tp_service_pages() letta da inc/seo.php (' + Object.keys(anch).length + ' voci)', Object.keys(anch).length >= 10);
+	const attAltri = ALTRI.map(p => [p, anch[p]]);
+	check('servizi: la riga "Altri servizi a Roma" ha le sei pagine con gli anchor di tp_service_pages()', JSON.stringify(altri) === JSON.stringify(attAltri), JSON.stringify(altri));
+	const tutti = [...items.map(i => i.href), ...altri.map(a => origin + a[0])].filter(Boolean);
+	let ko = [];
+	for (const u of tutti) { const r = await fetch(u.startsWith('http') ? u : origin + u, { method: 'HEAD', redirect: 'follow' }); if (r.status !== 200) ko.push(u + ' ' + r.status); }
+	check('servizi: ogni href della sezione risponde 200 (' + tutti.length + ' link)', ko.length === 0, ko.join(', '));
+	const tpl = require('fs').readFileSync(require('path').join(__dirname, '..', 'template-parts', 'home-services-v2.php'), 'utf8').replace(/\/\*\*[\s\S]*?\*\//, '');
+	check('servizi: nessun anchor ne\' URL della riga "Altri servizi" scritto nel template', !/sgrosso-|prezzi-pulizie|Pulizia post|Sgrosso casa/.test(tpl));
+	return html;
+}
+async function checkServiziBrowser() {
+	await withChrome(bin, 'about:blank', { port: 9514, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-servizi', args: ['--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4'] }, async ({ send, ev, sleep }) => {
+		await send('Page.navigate', { url });
+		await sleep(3500);
+		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
+		if (!(await ev('!!document.querySelector(".hv2-services__panel")'))) { check('servizi: il riquadro esiste nel browser', false, 'assente'); return; }
+		await ev('document.querySelector(".hv2-services").scrollIntoView({block:"start"})');
+		await sleep(1500);
+		const m = JSON.parse(await ev(`(() => {
+			const r = e => { const b = document.querySelector(e).getBoundingClientRect(); return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width * 10) / 10, h: Math.round(b.height * 10) / 10 }; };
+			const tiles = [...document.querySelectorAll('.hv2-services__tile')].map(t => Math.round(t.getBoundingClientRect().width * 10) / 10);
+			return JSON.stringify({ sec: r('.hv2-services'), panel: r('.hv2-services__panel'), tiles, sw: document.scrollingElement.scrollWidth, cw: document.scrollingElement.clientWidth,
+				title: getComputedStyle(document.querySelector('.hv2-services__title')).fontSize, op: getComputedStyle(document.querySelector('.hv2-services__panel')).opacity });
+		})()`));
+		if (width >= 1440) check('servizi: riquadro 668,8 px e icone 115,2 px a ' + width + ' px (letto ' + m.panel.w + ' e ' + m.tiles[0] + ')', Math.abs(m.panel.w - 668.8) <= 1 && m.tiles.every(t => Math.abs(t - 115.2) <= 1), JSON.stringify(m));
+		if (width <= 430) check('servizi: riquadro 358 px e icone 61,7 px a ' + width + ' px (letto ' + m.panel.w + ' e ' + m.tiles[0] + ')', Math.abs(m.panel.w - 358) <= 1 && m.tiles.every(t => Math.abs(t - 61.7) <= 1), JSON.stringify(m));
+		// La sezione e' piu' alta del Figma (607 e 818) perche' i chip portano gli anchor SEO di tp_service_pages(), piu' lunghi
+		// delle etichette del disegno: si misura il riquadro (460,8 px desktop, 264,7 mobile), non la sezione.
+		if (width >= 1440) check('servizi: riquadro alto ~460,8 px (letto ' + m.panel.h + ')', Math.abs(m.panel.h - 460.8) <= 2, JSON.stringify(m.panel));
+		if (width <= 430) check('servizi: riquadro alto ~264,7 px (letto ' + m.panel.h + ')', Math.abs(m.panel.h - 264.7) <= 3, JSON.stringify(m.panel));
+		check('servizi: nessuno scroll orizzontale', m.sw <= m.cw, m.sw + ' > ' + m.cw);
+		check('servizi: il riquadro e\' entrato (opacita\' 1 dopo il reveal)', m.op === '1', m.op);
+		if (width >= 1024) {
+			const link = JSON.parse(await ev('(()=>{const a=document.querySelector("a.hv2-services__item .hv2-services__tile"); if(!a) return JSON.stringify(null); const b=a.getBoundingClientRect(); return JSON.stringify({x:b.x+b.width/2,y:b.y+b.height/2});})()'));
+			if (link) {
+				await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: Math.round(link.x), y: Math.round(link.y) });
+				await sleep(500);
+				const h = JSON.parse(await ev('JSON.stringify({ty:new DOMMatrix(getComputedStyle(document.querySelector("a.hv2-services__item .hv2-services__tile")).transform).m42, u:getComputedStyle(document.querySelector("a.hv2-services__item .hv2-services__name")).textDecorationLine})'));
+				check('servizi: hover su un\'icona-link: icona su di 4 px e nome sottolineato', Math.round(h.ty) === -4 && /underline/.test(h.u), JSON.stringify(h));
+				await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 5, y: 5 });
+			}
+			const sp = JSON.parse(await ev('(()=>{const a=document.querySelector("span.hv2-services__item .hv2-services__tile"); if(!a) return JSON.stringify(null); const b=a.getBoundingClientRect(); return JSON.stringify({x:b.x+b.width/2,y:b.y+b.height/2});})()'));
+			if (sp) {
+				await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: Math.round(sp.x), y: Math.round(sp.y) });
+				await sleep(400);
+				const t = Number(await ev('new DOMMatrix(getComputedStyle(document.querySelector("span.hv2-services__item .hv2-services__tile")).transform).m42'));
+				check('servizi: nessun hover sulle icone senza link', t === 0, String(t));
+				await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 5, y: 5 });
+			}
+		}
+	});
+}
+
 (async () => {
-	if (!['base', 'hero'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
+	if (!['base', 'hero', 'frasi', 'servizi'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
 	if (gruppo === 'hero') {
 		const h = await checkHero();
 		if (h) await checkHeroBrowser(h.pre);
+	} else if (gruppo === 'frasi') {
+		await checkFrasi();
+		await checkFrasiBrowser();
+	} else if (gruppo === 'servizi') {
+		await checkServizi();
+		await checkServiziBrowser();
 	} else {
 		const html = await checkHttp();
 		if (html) await checkBrowser();
