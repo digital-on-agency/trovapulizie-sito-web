@@ -41,7 +41,13 @@ withChrome(BIN, LOCAL_JS ? 'about:blank' : URL, { port: 9343 }, async ({ ev, sle
 		var tel = document.querySelector('a[href^="tel:"]'); if (tel) tel.click();
 		var form = document.querySelector('a[href="#form"]'); if (form) form.click();
 		var after = dl.slice(before).filter(function(x){ return x && x.event; }).map(function(x){ return x.event + ':' + (x.landing || '') + (x.target ? ':' + x.target : ''); });
-		return JSON.stringify({ gtm: gtm, iub: iub, clarity: clarity, banner: !!(banner && !banner.hidden), consent: consent, gclid: gclid, gclidNo: gclidNo, storedNo: storedNo, utm: utm, events: after, landing: window.tpLanding && window.tpLanding() });
+		// Pagina senza [data-landing] (TICKET-130): il bottone della barra emette marketing_cta_click con landing "" solo se
+		// tpTrackConfig.ctaAnywhere e' vero (v2 attiva); a interruttore spento nessun evento, come prima.
+		var nav = document.querySelector('a[data-cta-position="navbar"]'), nb = dl.length;
+		if (nav) nav.click();
+		var navEv = dl.slice(nb).filter(function(x){ return x && x.event && x.event.indexOf('marketing_') === 0; }).map(function(x){ return x.event + ':' + (x.landing === undefined ? '' : x.landing) + ':' + (x.cta_position || '') + ':' + (x.target || ''); });
+		var navHref = nav ? nav.getAttribute('href') : null;
+		return JSON.stringify({ gtm: gtm, iub: iub, clarity: clarity, banner: !!(banner && !banner.hidden), consent: consent, gclid: gclid, gclidNo: gclidNo, storedNo: storedNo, utm: utm, events: after, landing: window.tpLanding && window.tpLanding(), navEv: navEv, navHref: navHref, hasNav: !!nav, anywhere: !!(window.tpTrackConfig && window.tpTrackConfig.ctaAnywhere) });
 	})()`));
 	const checks = [
 		['gtm.js richiesto una volta', r.gtm === 1, r.gtm],
@@ -55,6 +61,11 @@ withChrome(BIN, LOCAL_JS ? 'about:blank' : URL, { port: 9343 }, async ({ ev, sle
 		['click tel: -> marketing_click_to_call', r.events.indexOf('marketing_click_to_call:' + r.landing) !== -1, r.events.join(' | ')],
 		['click #form -> marketing_click_to_form', r.events.some(function (e) { return e.indexOf('marketing_click_to_form:' + r.landing) === 0; }), r.events.join(' | ')],
 	];
+	// Barra: con landing l'evento porta il nome della landing; senza landing parte solo con ctaAnywhere (landing vuota).
+	if (r.hasNav) {
+		const atteso = r.landing || r.anywhere ? 'marketing_cta_click:' + r.landing + ':navbar:' + r.navHref : null;
+		checks.push([r.landing ? 'barra con landing -> marketing_cta_click navbar' : (r.anywhere ? 'pagina senza landing, v2 attiva -> marketing_cta_click navbar con landing vuota' : 'pagina senza landing, v2 spenta -> nessun evento dalla barra'), atteso ? r.navEv.length === 1 && r.navEv[0] === atteso : r.navEv.length === 0, r.navEv.join(' | ')]);
+	}
 	let ko = 0;
 	checks.forEach(function (c) { console.log((c[1] ? 'OK  ' : 'KO  ') + c[0] + '  [' + c[2] + ']'); if (!c[1]) ko++; });
 	console.log(ko ? 'ESITO: ' + ko + ' controlli falliti' : 'ESITO: verde');
