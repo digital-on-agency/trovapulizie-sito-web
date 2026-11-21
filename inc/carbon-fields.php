@@ -987,7 +987,40 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'text', 'footer_cta_link', __( 'Box cleaner: URL' ) ),
 			Field::make( 'text', 'footer_copyright', __( 'Riga copyright' ) )
 				->set_help_text( __( 'Vuota = anno corrente + Trovapulizie S.R.L.' ) ),
-			Field::make( 'textarea', 'footer_legal', __( 'Link legali (una riga per link: Etichetta | URL)' ) ),
+			Field::make( 'textarea', 'footer_legal', __( 'Link legali (una riga per link: Etichetta | URL)' ) )
+				->set_help_text( __( 'Vale per entrambi i footer. Footer nuovo con campo vuoto: Privacy Policy, Termini e Condizioni, Cookie.' ) ),
+			// Footer nuovo (TICKET-128, SPEC-homepage-v2): campi usati solo da template-parts/site-footer-v2.php, cioe'
+			// con Sito v2 acceso o sulla pagina d'anteprima. Vuoto = default del template. Wordmark, social e link
+			// legali sono quelli sopra; il box cleaner e la riga copyright del footer attuale non sono usati dal nuovo.
+			Field::make( 'separator', 'footer_v2_sep', __( 'Footer nuovo (Sito v2)' ) ),
+			Field::make( 'textarea', 'footer_v2_tagline', __( 'Footer nuovo: frase sotto il marchio (2 righe)' ) )
+				->set_rows( 2 )
+				->set_help_text( __( 'Vuoto = "Le pulizie, in un\'app." e "A Roma, quartiere per quartiere."' ) ),
+			Field::make( 'text', 'footer_v2_phone', __( 'Footer nuovo: telefono' ) )
+				->set_help_text( __( 'Vuoto = 320 098 0144. Il link e\' tel: col prefisso +39.' ) ),
+			Field::make( 'text', 'footer_v2_email', __( 'Footer nuovo: email' ) )
+				->set_help_text( __( 'Vuoto = help@trovapulizie.it.' ) ),
+			Field::make( 'complex', 'footer_v2_columns', __( 'Footer nuovo: colonne di link' ) )
+				->set_layout( 'tabbed-horizontal' )
+				->set_max( 3 )
+				->setup_labels( array( 'plural_name' => __( 'Colonne' ), 'singular_name' => __( 'Colonna' ) ) )
+				->set_help_text( __( 'Nessuna colonna = le tre di default: Piattaforma (Come funziona, Servizi, Prezzi, FAQ), Per i professionisti (Diventa professionista, Requisiti, Come guadagnare), Azienda (Chi siamo, Contatti, Blog). Una colonna senza titolo e senza link non viene stampata. "Servizi a Roma" si aggiunge da solo (elenco delle pagine di servizio).' ) )
+				->add_fields( array(
+					Field::make( 'text', 'title', __( 'Titolo colonna' ) ),
+					Field::make( 'textarea', 'links', __( 'Link (una riga per link: Etichetta | URL)' ) ),
+				) )
+				->set_header_template( '<%- title %>' ),
+			Field::make( 'textarea', 'footer_v2_b2b_title', __( 'Footer nuovo, riquadro aziende: titolo (2 righe)' ) )
+				->set_rows( 2 )
+				->set_help_text( __( 'Vuoto = "Hai un\'azienda" e "o un condominio?"' ) ),
+			Field::make( 'text', 'footer_v2_b2b_text', __( 'Footer nuovo, riquadro aziende: testo' ) )
+				->set_help_text( __( 'Vuoto = "Preventivi da imprese verificate."' ) ),
+			Field::make( 'text', 'footer_v2_b2b_label', __( 'Footer nuovo, riquadro aziende: etichetta del bottone' ) )
+				->set_help_text( __( 'Vuoto = "Richiedi un preventivo". Il bottone porta data-cta-position="footer_b2b".' ) ),
+			Field::make( 'text', 'footer_v2_b2b_link', __( 'Footer nuovo, riquadro aziende: URL del bottone' ) )
+				->set_help_text( __( 'Vuoto = /roma/pulizie-uffici/.' ) ),
+			Field::make( 'text', 'footer_v2_legal_line', __( 'Footer nuovo: riga dei dati legali' ) )
+				->set_help_text( __( 'Vuoto = "© [anno] Trovapulizie S.R.L. · Via Paolo Albera 63, 00181 Roma · P.IVA 18445521000 · REA RM-1785357". Se la compili, scrivi tu anche l\'anno.' ) ),
 		) );
 
 	// Home v2 (SPEC-homepage-v2, ADR-005). Container "Home v2 - Sezioni": solo sulle pagine col template
@@ -1000,11 +1033,11 @@ add_action( 'carbon_fields_register_fields', function () {
 	// | 03-servizi          | h2_servizi_title, h2_servizi_eyebrow, h2_servizi_subtitle, h2_servizi_more_label, h2_servizi_cta, h2_servizi_items | 121 (fatto) |
 	// | 04-come-funziona    | h2_come_funziona_title, _eyebrow, _subtitle, _subtitle_mobile, _link_label, _link_url, _steps | 122 (fatto) |
 	// | 05-manifesto        | h2_manifesto_title, h2_manifesto_eyebrow, h2_manifesto_subtitle, h2_manifesto_stamp, h2_manifesto_items, h2_manifesto_hide | 123 (fatto) |
-	// | 06-recensioni       | h2_recensioni_title | 124 |
+	// | 06-recensioni       | h2_recensioni_title, _eyebrow, _items, h2_loghi_label, h2_loghi_items | 124 |
 	// | 07-zone             | h2_zone_title, h2_zones_caps | 125 (fatto) |
-	// | 08-aziende          | h2_aziende_title    | 126 |
-	// | 09-faq              | h2_faq_title        | 126 |
-	// | 10-chiusura         | h2_chiusura_title   | 127 |
+	// | 08-aziende          | h2_aziende_title, _eyebrow, _text, _badges, _cta_label, _cta_url, _link_label, _link_url, _image | 126 |
+	// | 09-faq              | h2_faq_title, _eyebrow, _subtitle, _contact_title, _contact_text, _contact_cta, _items, _hide | 126 |
+	// | 10-chiusura         | h2_chiusura_title, _eyebrow, _subtitle, _cta_label, _qr_title, _qr_text, _note, _note_hide | 127 (fatto) |
 	$h2_aiuto = __( 'Vuoto = testo di default del template. I campi di contenuto di questa sezione arrivano col ticket indicato nel docblock di inc/carbon-fields.php.' );
 	$h2_tabs  = array(
 		'hero'          => 'Hero',
@@ -1012,7 +1045,7 @@ add_action( 'carbon_fields_register_fields', function () {
 		'servizi'       => 'Servizi',
 		'come_funziona' => 'Come funziona',
 		'manifesto'     => 'Manifesto',
-		'recensioni'    => 'Recensioni',
+		'recensioni'    => 'Recensioni e loghi',
 		'zone'          => 'Zone',
 		'aziende'       => 'Aziende',
 		'faq'           => 'FAQ',
@@ -1110,6 +1143,40 @@ add_action( 'carbon_fields_register_fields', function () {
 				Field::make( 'checkbox', 'h2_manifesto_hide', __( 'Nascondi il manifesto' ) )->set_option_value( 'yes' )->set_help_text( __( 'Acceso: la sezione non compare. Spento (default): compare con le promesse sopra, o con le quattro di default se non ce n\'e\' nessuna.' ) ),
 			) );
 		}
+		if ( 'recensioni' === $chiave ) {
+			// TICKET-124: recensioni a foglietti e fascia loghi. NESSUN default: finche' i campi sono vuoti la sezione (o la sola
+			// fascia loghi) non viene stampata. Solo recensioni vere e con consenso; loghi solo con autorizzazione scritta (SPEC §6).
+			$h2_campi[0]->set_help_text( __( 'Titolo della sezione (H2, maiuscolo da CSS). Vuoto = "Non lo diciamo solo noi." Compare solo se c\'e\' almeno una recensione.' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_recensioni_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Chi ci ha già scelto"' ) ),
+				Field::make( 'complex', 'h2_recensioni_items', __( 'Recensioni' ) )
+					->set_layout( 'tabbed-vertical' )
+					->setup_labels( array( 'plural_name' => __( 'Recensioni' ), 'singular_name' => __( 'Recensione' ) ) )
+					->set_help_text( __( '[ATTENZIONE] Solo recensioni vere, scritte da clienti reali e con il loro consenso; foto prima e dopo solo vere e con consenso. Nessuna riga = la sezione non compare. Una riga senza testo o senza nome e\' scartata. Il tema non emette nessun dato strutturato (Review, AggregateRating).' ) )
+					->add_fields( array(
+						Field::make( 'textarea', 'text', __( 'Testo della recensione' ) )->set_rows( 3 )->set_help_text( __( 'Una o due frasi, come l\'ha scritta il cliente.' ) ),
+						Field::make( 'text', 'name', __( 'Nome' ) )->set_help_text( __( 'Es. "Laura B." Le iniziali del cerchio si ricavano da qui.' ) ),
+						Field::make( 'text', 'zone', __( 'Zona' ) )->set_help_text( __( 'Es. "Prati". Facoltativa.' ) ),
+						Field::make( 'text', 'service', __( 'Servizio' ) )->set_help_text( __( 'Es. "Pulizie ordinarie". Facoltativo.' ) ),
+						Field::make( 'select', 'stars', __( 'Stelle' ) )->add_options( array( '5' => '5', '4' => '4', '3' => '3', '2' => '2', '1' => '1' ) )->set_help_text( __( 'Il voto dato dal cliente (default 5).' ) ),
+						Field::make( 'image', 'photo_before', __( 'Foto PRIMA' ) )->set_value_type( 'url' )->set_help_text( __( 'Facoltativa; esce solo se ci sono entrambe le foto (prima e dopo).' ) ),
+						Field::make( 'image', 'photo_after', __( 'Foto DOPO' ) )->set_value_type( 'url' )->set_help_text( __( 'Facoltativa; esce solo se ci sono entrambe le foto (prima e dopo).' ) ),
+						Field::make( 'image', 'avatar', __( 'Foto del cliente' ) )->set_value_type( 'url' )->set_help_text( __( 'Facoltativa. Vuoto = cerchio con le iniziali.' ) ),
+					) )
+					->set_header_template( '<%- name %> <%- zone %>' ),
+				Field::make( 'text', 'h2_loghi_label', __( 'Scritta della fascia loghi' ) )->set_help_text( __( 'Vuoto = "Lavoriamo con imprese e cleaner verificati"' ) ),
+				Field::make( 'complex', 'h2_loghi_items', __( 'Loghi e cleaner della fascia' ) )
+					->set_layout( 'tabbed-vertical' )
+					->setup_labels( array( 'plural_name' => __( 'Voci' ), 'singular_name' => __( 'Voce' ) ) )
+					->set_help_text( __( '[BLOCCO] I loghi di Igea Clean Service, Ready Solution e Disinfestazione Veloce si caricano solo con autorizzazione scritta dell\'impresa; le foto dei cleaner solo con il loro consenso. Nessuna riga = la fascia non compare. Una riga senza immagine e\' scartata. La fascia scorre in loop; con una sola voce le altre ripetono la stessa.' ) )
+					->add_fields( array(
+						Field::make( 'text', 'name', __( 'Nome' ) )->set_help_text( __( 'Testo alternativo dell\'immagine (es. "Igea Clean Service").' ) ),
+						Field::make( 'image', 'image', __( 'Logo o foto' ) )->set_value_type( 'url' ),
+						Field::make( 'select', 'kind', __( 'Tipo' ) )->add_options( array( 'logo' => __( 'Logo di un\'impresa' ), 'cleaner' => __( 'Foto di un cleaner verificato (con la spunta)' ) ) ),
+					) )
+					->set_header_template( '<%- name %>' ),
+			) );
+		}
 		if ( 'zone' === $chiave ) {
 			// TICKET-125: titolo e lista dei CAP attivi. Il testo del campo e' la lista del tema finche' non lo si salva.
 			$h2_campi[0]->set_help_text( __( 'Titolo della sezione (H2, maiuscolo da CSS). Vuoto = "Arriviamo anche da te?"' ) );
@@ -1118,6 +1185,54 @@ add_action( 'carbon_fields_register_fields', function () {
 					->set_rows( 12 )
 					->set_default_value( function_exists( 'tp_home_v2_zones_default_lines' ) ? tp_home_v2_zones_default_lines() : '' )
 					->set_help_text( __( 'Una riga per CAP: "00186 | Centro Storico". Sono i CAP per cui il controllo risponde "Ci siamo" e che la mappa colora di verde; sono validi solo CAP di Roma (00118-00199). [ATTENZIONE] Campo mai salvato = lista del tema (44 CAP). Campo svuotato e salvato = il controllo sparisce dalla pagina (restano titolo, mappa e chip). Il CAP 00194 non ha un poligono sulla mappa: il controllo risponde si ma la mappa non lo evidenzia.' ) ),
+			) );
+		}
+		if ( 'aziende' === $chiave ) {
+			// TICKET-126: fascia aziende. Testi vuoti = default del template (template-parts/home-b2b-band.php). Gli URL sono
+			// precompilati: un URL svuotato e salvato toglie il bottone (o il link).
+			$h2_campi[0]->set_help_text( __( 'Titolo della fascia (H2, maiuscolo da CSS). Vuoto = "Hai un ufficio, un condominio o un B&B?"' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_aziende_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Aziende e condomini"' ) ),
+				Field::make( 'textarea', 'h2_aziende_text', __( 'Frase sotto il titolo' ) )->set_rows( 3 )->set_help_text( __( 'Vuoto = "Ci dici cosa serve, ti arrivano i preventivi di imprese verificate. Senza rincorrere nessuno."' ) ),
+				Field::make( 'textarea', 'h2_aziende_badges', __( 'Garanzie (una per riga)' ) )
+					->set_rows( 4 )
+					->set_default_value( function_exists( 'tp_home_v2_b2b_default_badges' ) ? implode( "\n", tp_home_v2_b2b_default_badges() ) : '' )
+					->set_help_text( __( 'Una garanzia per riga, con la spunta. [ATTENZIONE] "Preventivo entro 24 ore" non e\' confermato: aggiungerlo solo dopo la conferma di Niccolo\'. Campo mai salvato = "Sopralluogo gratuito" e "Imprese verificate". Campo svuotato e salvato = nessuna garanzia.' ) ),
+				Field::make( 'text', 'h2_aziende_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Richiedi un preventivo"' ) ),
+				Field::make( 'text', 'h2_aziende_cta_url', __( 'Bottone: destinazione' ) )
+					->set_default_value( defined( 'TP_HV2_B2B_CTA_PATH' ) ? TP_HV2_B2B_CTA_PATH : '' )
+					->set_help_text( __( 'Percorso interno (es. /roma/sgrosso-commerciale/) o URL del sito. Svuotato e salvato = il bottone non esce; esce solo se la pagina e\' pubblicata.' ) ),
+				Field::make( 'text', 'h2_aziende_link_label', __( 'Link: testo' ) )->set_help_text( __( 'Vuoto = "Scopri le pulizie per aziende"' ) ),
+				Field::make( 'text', 'h2_aziende_link_url', __( 'Link: destinazione' ) )
+					->set_default_value( defined( 'TP_HV2_B2B_LINK_PATH' ) ? TP_HV2_B2B_LINK_PATH : '' )
+					->set_help_text( __( 'Percorso interno (es. /roma/pulizie-uffici/) o URL del sito. Svuotato e salvato = il link non esce; esce solo se la pagina e\' pubblicata.' ) ),
+				Field::make( 'image', 'h2_aziende_image', __( 'Foto di fondo' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuoto = la foto d\'ufficio del tema. Foto vera, orizzontale, almeno 1600 px di larghezza.' ) ),
+			) );
+		}
+		if ( 'faq' === $chiave ) {
+			// TICKET-126: FAQ con i fondatori. Nomi, ruolo e foto della card NON sono qui: vengono da Theme Options > Fondatori.
+			$h2_faq_def = array();
+			foreach ( function_exists( 'tp_home_v2_faq_defaults' ) ? tp_home_v2_faq_defaults() : array() as $h2_r ) {
+				$h2_faq_def[] = array_merge( array( '_type' => '_' ), $h2_r );
+			}
+			$h2_campi[0]->set_help_text( __( 'Titolo (H2, maiuscolo da CSS). Vuoto = "Le chiedete spesso."' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_faq_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Domande"' ) ),
+				Field::make( 'textarea', 'h2_faq_subtitle', __( 'Sottotitolo (solo desktop)' ) )->set_rows( 2 )->set_help_text( __( 'Vuoto = "Le risposte rapide prima di aprire l\'app. Per tutto il resto, ti rispondiamo noi."' ) ),
+				Field::make( 'text', 'h2_faq_contact_title', __( 'Card: titolo' ) )->set_help_text( __( 'Vuoto = "Rispondiamo di persona". Nomi, ruolo e foto dei fondatori: Theme Options > Fondatori.' ) ),
+				Field::make( 'textarea', 'h2_faq_contact_text', __( 'Card: testo' ) )->set_rows( 3 )->set_help_text( __( 'Vuoto = "Scrivici su WhatsApp: ti risponde Guido o Christian, in base alla disponibilita\'. I fondatori, non un call center."' ) ),
+				Field::make( 'text', 'h2_faq_contact_cta', __( 'Card: testo del bottone' ) )->set_help_text( __( 'Vuoto = "Scrivici su WhatsApp". Il link e\' il numero WhatsApp di Trovapulizie (320 098 0144).' ) ),
+				Field::make( 'complex', 'h2_faq_items', __( 'Domande' ) )
+					->set_layout( 'tabbed-vertical' )
+					->setup_labels( array( 'plural_name' => __( 'Domande' ), 'singular_name' => __( 'Domanda' ) ) )
+					->set_help_text( __( 'La prima si apre all\'avvio, una aperta per volta. [ATTENZIONE] Nessuna riga (campo mai salvato o svuotato) = le sei domande di default, risposte da confermare con Guido. Righe senza domanda o senza risposta non escono; se nessuna riga e\' completa la sezione non esce e non c\'e\' JSON-LD FAQPage. Per nasconderla di proposito: "Nascondi la FAQ".' ) )
+					->add_fields( array(
+						Field::make( 'text', 'question', __( 'Domanda' ) ),
+						Field::make( 'textarea', 'answer', __( 'Risposta' ) )->set_rows( 3 ),
+					) )
+					->set_default_value( $h2_faq_def )
+					->set_header_template( '<%- question %>' ),
+				Field::make( 'checkbox', 'h2_faq_hide', __( 'Nascondi la FAQ' ) )->set_option_value( 'yes' )->set_help_text( __( 'Acceso: la sezione FAQ non compare e non c\'e\' JSON-LD FAQPage. Spento (default): compare con le domande sopra.' ) ),
 			) );
 		}
 		if ( 'come_funziona' === $chiave ) {
@@ -1140,6 +1255,21 @@ add_action( 'carbon_fields_register_fields', function () {
 						Field::make( 'image', 'screen', __( 'Schermata dell\'app' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuoto = la schermata di default del passo. Stretta e alta, circa 376 x 710.' ) ),
 					) )
 					->set_header_template( '<%- title %>' ),
+			) );
+		}
+		if ( 'chiusura' === $chiave ) {
+			// TICKET-127: testi della chiusura "Apri l'app". Vuoto = default del template (template-parts/home-cta-v2.php).
+			$h2_campi[0]->set_help_text( __( 'Titolo della chiusura (H2, maiuscolo da CSS). Vuoto = "Apri l\'app."' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_chiusura_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Ultima cosa"' ) ),
+				Field::make( 'textarea', 'h2_chiusura_subtitle', __( 'Sottotitolo' ) )->set_rows( 2 )->set_help_text( __( 'Vuoto = "La prima pulizia la prenoti in due minuti. Il resto lo fa chi sa farlo."' ) ),
+				Field::make( 'text', 'h2_chiusura_cta_label', __( 'Testo del bottone' ) )->set_help_text( __( 'Il bottone porta sempre all\'app (stessa scheda). Vuoto = "Apri l\'app"' ) ),
+				Field::make( 'text', 'h2_chiusura_qr_title', __( 'Riquadro QR, riga in grassetto' ) )->set_help_text( __( 'Il QR si vede solo da 1024 px. Vuoto = "Sei al computer?"' ) ),
+				Field::make( 'text', 'h2_chiusura_qr_text', __( 'Riquadro QR, seconda riga' ) )->set_help_text( __( 'Vuoto = "Inquadra e aprila sul telefono."' ) ),
+				Field::make( 'textarea', 'h2_chiusura_note', __( 'Nota sotto i bottoni' ) )->set_rows( 2 )->set_help_text( __( 'Vuoto = "Si apre dal browser e la aggiungi alla Home in un tocco. Non serve passare dallo store." Vale finche\' l\'app non e\' sugli store: poi spuntare la casella qui sotto.' ) ),
+				Field::make( 'checkbox', 'h2_chiusura_note_hide', __( 'Nascondi la nota sotto i bottoni' ) )
+					->set_option_value( 'yes' )
+					->set_help_text( __( 'Da spuntare quando l\'app e\' sugli store e la frase "Non serve passare dallo store" non e\' piu vera.' ) ),
 			) );
 		}
 		$h2_container->add_tab( __( $etichetta ), $h2_campi );

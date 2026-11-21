@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.75.1
+Version: 0.79.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -12204,6 +12204,14 @@ html.tp-reveal .hv2 .hv2-zones__map[data-reveal].is-in {
 	.hv2-zones__mon--pantheon { display: none; }
 }
 
+/* Scena dei telefoni spostata a destra nella colonna (Guido 21/11), da 1280 px. left e non transform: la
+   parallasse di home-v2-motion.js usa il transform di .hv2-hero__stage. */
+@media (min-width: 1280px) {
+	.hv2-hero__stage-in {
+		left: calc(56px * var(--hv2-k)); /* sotto 1280 il telefono uscirebbe dallo schermo */
+	}
+}
+
 /* ---- Sfondo continuo della Home v2 (Guido 21/11): niente stacchi fra le sezioni chiare ----
    Il fondo menta lo da' la pagina, non le singole sezioni; le luci (radial-gradient) non vengono piu' tagliate al
    bordo della sezione e sfumano in quella vicina. Il taglio orizzontale lo fa main (overflow-x: clip, nessuna barra
@@ -12222,7 +12230,9 @@ main.hv2 > .hv2-steps,
 main.hv2 > .hv2-man,
 main.hv2 > .hv2-zones,
 main.hv2 > .hv2-section--recensioni,
-main.hv2 > .hv2-section--faq {
+main.hv2 > .hv2-section--faq,
+main.hv2 > .hv2-faq > .faq--v2,
+main.hv2 > .hv2-b2b {
 	background: transparent;
 	overflow: visible;
 }
@@ -13238,5 +13248,1490 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
 	.hv2-steps__more {
 		margin: 8px 0 0;
 		padding: 0 16px;
+	}
+}
+
+/* =========================
+   TICKET-127 - Chiusura "Apri l'app" della Home v2 (template-parts/home-cta-v2.php).
+   Figma 7903:7666 desktop (1440 x 630), 7946:2115 mobile (390 x 754). Fondo verde proprio.
+   [ATTENZIONE] Regola mobile (SPEC §2): sotto 1024 px QR e tentacolo non compaiono e le loro immagini non si scaricano
+   (QR: <img loading="lazy"> in un riquadro display:none; tentacolo: <picture> con <source media="(min-width: 1024px)"> e GIF 1x1).
+   Eccezione di brand dichiarata: il bottone e' BIANCO con testo #062A22 (non verde con testo bianco come hero e barra).
+   Desktop: palco di 1440 x 630 (.hv2-cta__scale) ancorato a destra e ridotto con scale(--hv2-cta-k) fra 1024 e 1279 px.
+   Il telefono e' 340 x 702,67 (--hv2-cta-s scala le misure dell'avviso e il telefono mobile). Movimento: TICKET-129.
+   ========================= */
+.hv2-cta {
+	--hv2-cta-k: 1;
+	--hv2-cta-s: 1;
+	position: relative;
+	background: var(--tp-v2-green);
+	color: var(--tp-v2-ink);
+}
+.hv2-cta__in {
+	position: relative;
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: 72px 16px 0;
+}
+.hv2-cta__text {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 16px;
+}
+.hv2-cta__eyebrow {
+	margin: 0;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--tp-v2-ink);
+}
+.hv2-cta__title {
+	margin: 0;
+	font-size: 72px;
+	line-height: 70px;
+	font-weight: 900;
+	letter-spacing: -0.03em;
+	text-transform: uppercase;
+	color: #fff;
+}
+.hv2-cta__sub {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 500;
+	color: var(--tp-v2-ink);
+}
+.hv2-cta__actions {
+	display: flex;
+	width: 100%;
+}
+.hv2-cta__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+	padding: 16px 32px;
+	border-radius: 999px;
+	background: #fff;
+	color: var(--tp-v2-ink); /* eccezione di brand: bottone bianco con testo scuro sul verde pieno */
+	font-size: 16px;
+	font-weight: 600;
+	line-height: normal;
+	white-space: nowrap;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+.hv2-cta__btn:focus-visible {
+	outline: 2px solid var(--tp-v2-ink);
+	outline-offset: 3px;
+}
+.hv2-cta__btn-arrow {
+	display: inline-block;
+}
+.hv2-cta__qr {
+	display: none;
+}
+.hv2-cta__note {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 0;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.5;
+	color: rgba(6, 42, 34, 0.85);
+}
+.hv2-cta__note img {
+	display: none; /* l'icona c'e' solo nel disegno desktop */
+}
+/* Palco con il telefono: su mobile e' un riquadro alto 300 px che taglia il telefono in basso */
+.hv2-cta__stage {
+	position: relative;
+	height: 300px;
+	margin: 16px -16px 0;
+	overflow: hidden;
+}
+.hv2-cta__scale {
+	position: absolute;
+	inset: 0;
+}
+.hv2-cta__clip {
+	position: absolute;
+	inset: 0;
+}
+.hv2-cta__glow,
+.hv2-cta__tent {
+	display: none;
+}
+.hv2-cta__device {
+	position: absolute;
+	left: calc(50% - 6.6px);
+	top: 47px;
+	width: calc(340px * var(--hv2-cta-s));
+	height: calc(702.667px * var(--hv2-cta-s));
+	margin-left: calc(170px * var(--hv2-cta-s) * -1);
+	transform: rotate(6deg);
+	--tp-phone-w: calc(340px * var(--hv2-cta-s));
+	--tp-phone-h: calc(702.667px * var(--hv2-cta-s));
+	--tp-phone-radius: calc(54.4px * var(--hv2-cta-s));
+	--tp-phone-screen-radius: calc(45.333px * var(--hv2-cta-s));
+	filter: drop-shadow(0 calc(34px * var(--hv2-cta-s)) calc(34px * var(--hv2-cta-s)) rgba(6, 42, 34, 0.35));
+}
+.hv2-cta__device .tp-phone__layer {
+	display: none; /* il disegno ha il telefono piatto, senza lo spessore a strati */
+}
+.hv2-cta__device .tp-phone {
+	background: none;
+}
+.hv2-cta__device .tp-phone__face {
+	padding: calc(var(--tp-phone-w) * 0.0267);
+	background: #0b0f0e;
+}
+.hv2-cta__device .tp-phone__face::before {
+	top: calc(var(--tp-phone-w) * 0.06);
+	width: calc(var(--tp-phone-w) * 0.32);
+	height: calc(var(--tp-phone-w) * 0.0933);
+	border-radius: calc(var(--tp-phone-w) * 0.0467);
+	background: #000;
+}
+.hv2-cta__device .tp-phone__img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+/* Avviso "Aggiunta alla schermata Home" (Figma 7903:7887): HTML sopra lo schermo, in unita' del telefono */
+.hv2-cta__notif {
+	position: absolute;
+	left: 12.2%;
+	top: 9.54%;
+	display: flex;
+	align-items: center;
+	gap: calc(10px * var(--hv2-cta-s));
+	padding: calc(10px * var(--hv2-cta-s));
+	border-radius: calc(20px * var(--hv2-cta-s));
+	background: rgba(255, 255, 255, 0.94);
+	backdrop-filter: blur(10px);
+	box-shadow: 0 calc(10px * var(--hv2-cta-s)) calc(24px * var(--hv2-cta-s)) rgba(0, 0, 0, 0.3);
+	white-space: nowrap;
+}
+.hv2-cta__notif img {
+	width: calc(36px * var(--hv2-cta-s));
+	height: auto;
+}
+.hv2-cta__notif p {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+}
+.hv2-cta__notif strong {
+	font-size: calc(14px * var(--hv2-cta-s));
+	font-weight: 700;
+	line-height: 1.5;
+	color: var(--tp-v2-ink);
+}
+.hv2-cta__notif span {
+	font-size: calc(12px * var(--hv2-cta-s));
+	font-weight: 500;
+	line-height: 1.5;
+	color: rgba(6, 42, 34, 0.75);
+}
+@media (max-width: 1023px) {
+	.hv2-cta {
+		--hv2-cta-s: 0.7059;
+	}
+	.hv2-cta__btn {
+		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+	}
+}
+@media (min-width: 1024px) {
+	.hv2-cta {
+		--hv2-cta-k: 0.72;
+		--hv2-cta-s: 1;
+	}
+	.hv2-cta__in {
+		padding: calc(120px * var(--hv2-cta-k)) calc(96px * var(--hv2-cta-k));
+		min-height: calc(630px * var(--hv2-cta-k));
+		box-sizing: border-box;
+	}
+	.hv2-cta__text {
+		max-width: calc(712px * var(--hv2-cta-k));
+		gap: calc(22px * var(--hv2-cta-k));
+		position: relative;
+		z-index: 2;
+	}
+	.hv2-cta__eyebrow {
+		font-size: 13px;
+		letter-spacing: 0.12em;
+	}
+	.hv2-cta__title {
+		font-size: calc(128px * var(--hv2-cta-k));
+		line-height: calc(124px * var(--hv2-cta-k));
+		letter-spacing: -0.03em;
+		white-space: nowrap;
+	}
+	.hv2-cta__sub {
+		font-size: calc(19px * var(--hv2-cta-k) + 5px);
+		margin-top: calc(-2px * var(--hv2-cta-k));
+	}
+	.hv2-cta__actions {
+		align-items: center;
+		gap: 20px;
+		padding-top: 12px;
+		width: auto;
+	}
+	.hv2-cta__btn {
+		width: auto;
+		padding: 18px 32px;
+		font-size: 18px;
+		box-shadow: 0 12px 32px rgba(55, 178, 153, 0.45);
+	}
+	.hv2-cta__qr {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		padding: 10px 20px 10px 10px;
+		border: 1px solid rgba(255, 255, 255, 0.35);
+		border-radius: 18px;
+		background: rgba(255, 255, 255, 0.16);
+	}
+	.hv2-cta__qr img {
+		flex: 0 0 72px;
+		width: 72px;
+		height: 72px;
+		border-radius: 8px;
+		background: #fff;
+	}
+	.hv2-cta__qr p {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		margin: 0;
+	}
+	.hv2-cta__qr strong {
+		font-size: 15px;
+		font-weight: 600;
+	}
+	.hv2-cta__qr span {
+		font-size: 13px;
+		font-weight: 400;
+	}
+	.hv2-cta__note {
+		font-size: 15px;
+		line-height: normal;
+		align-items: center;
+	}
+	.hv2-cta__note img {
+		display: block;
+		flex: 0 0 14px;
+	}
+	/* Palco: 1440 x 630 ancorato a destra, ridotto con --hv2-cta-k sotto 1280 px */
+	.hv2-cta__stage {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		height: auto;
+		width: calc(1440px * var(--hv2-cta-k));
+		margin: 0;
+		overflow: visible;
+		pointer-events: none;
+		z-index: 1;
+	}
+	.hv2-cta__scale {
+		inset: auto;
+		top: 0;
+		right: 0;
+		width: 1440px;
+		height: calc(100% / var(--hv2-cta-k));
+		transform: scale(var(--hv2-cta-k));
+		transform-origin: top right;
+	}
+	.hv2-cta__clip {
+		clip-path: inset(0 -2000px);
+	}
+	.hv2-cta__glow {
+		display: block;
+		position: absolute;
+		left: 644px;
+		top: -159.2px;
+		width: 1080px;
+		height: 1080px;
+		background: url("assets/img/home-v2/cta-glow.svg") center / 100% 100% no-repeat;
+	}
+	.hv2-cta__tent {
+		display: block;
+		position: absolute;
+	}
+	.hv2-cta__tent img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.hv2-cta__tent--back {
+		left: 703.57px;
+		top: -46.83px;
+		width: 883.01px;
+		height: 1182.61px;
+	}
+	.hv2-cta__tent--curl {
+		left: 871.1px;
+		top: 406.51px;
+		width: 206.96px;
+		height: 197.1px;
+	}
+	.hv2-cta__device {
+		left: 966.7px;
+		top: 120.2px;
+		margin-left: 0;
+		transform: rotate(10.58deg);
+	}
+}
+@media (min-width: 1280px) {
+	.hv2-cta {
+		--hv2-cta-k: 1;
+	}
+	.hv2-cta__sub {
+		font-size: 19px;
+	}
+}
+@media (hover: hover) {
+	.hv2-cta__btn {
+		transition: background-color var(--tp-dur-fast) var(--tp-ease-stage), transform 100ms var(--tp-ease-stage);
+	}
+	.hv2-cta__btn:hover {
+		background: var(--tp-v2-mint); /* il verde #2A9580 della hero non va: testo scuro su verde medio perde contrasto */
+	}
+	.hv2-cta__btn-arrow {
+		transition: transform var(--tp-dur-fast) var(--tp-ease-stage);
+	}
+	.hv2-cta__btn:hover .hv2-cta__btn-arrow {
+		transform: translateX(4px);
+	}
+	.hv2-cta__btn:active {
+		transform: scale(0.97);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.hv2-cta__btn,
+	.hv2-cta__btn-arrow {
+		transition: none;
+	}
+}
+
+/* =========================
+   TICKET-128 - Footer nuovo (SPEC-homepage-v2, Figma 7904:2856 desktop, 7946:2202 mobile)
+   Solo selettori .site-footer-v2*: il footer attuale (.site-footer) non cambia. Markup in
+   template-parts/site-footer-v2.php, fisarmonica mobile in assets/js/site-footer-v2.js.
+   Scritta grande: statica (il movimento legato allo scroll e' TICKET-129; transform libero sull'interno .__word-text).
+   ========================= */
+.site-footer-v2 {
+	--tpf-line: rgba(255, 255, 255, 0.14);
+	--tpf-mint: #7FE3C9;
+	--tpf-word: min(196px, 13.6vw);
+	position: relative;
+	overflow: hidden;
+	box-sizing: border-box;
+	background: var(--tp-v2-ink, #062A22);
+	color: rgba(255, 255, 255, 0.68);
+	font-family: 'Poppins', system-ui, sans-serif;
+	padding: 80px 24px calc(var(--tpf-word) * 0.908 + 10px);
+	interpolate-size: allow-keywords;
+}
+.site-footer-v2 *,
+.site-footer-v2 *::before,
+.site-footer-v2 *::after {
+	box-sizing: border-box;
+}
+.site-footer-v2__inner {
+	position: relative;
+	z-index: 1;
+	max-width: 1248px;
+	margin: 0 auto;
+}
+.site-footer-v2 ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.site-footer-v2 p {
+	margin: 0;
+}
+.site-footer-v2__top {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 32px;
+}
+.site-footer-v2__nav {
+	display: contents;
+}
+.site-footer-v2__brand {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 16px;
+}
+.site-footer-v2__logo {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	color: #fff;
+	font-size: 22px;
+	font-weight: 700;
+	line-height: normal;
+	text-decoration: none;
+}
+.site-footer-v2__logo img {
+	display: block;
+	width: 36px;
+	height: auto;
+}
+.site-footer-v2__tagline {
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 15px;
+	line-height: normal;
+}
+.site-footer-v2__contacts {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+.site-footer-v2__contacts a {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	color: rgba(255, 255, 255, 0.9);
+	font-size: 15px;
+	font-weight: 500;
+	line-height: normal;
+	text-decoration: none;
+}
+.site-footer-v2__ico {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	color: var(--tpf-mint);
+}
+.site-footer-v2__social {
+	display: flex;
+	gap: 14px;
+}
+.site-footer-v2__social a {
+	display: block;
+	color: var(--tpf-mint);
+	transition: opacity var(--tp-dur-fast, 150ms) var(--tp-ease-stage, ease);
+}
+.site-footer-v2__social a:hover {
+	opacity: 0.75;
+}
+.site-footer-v2__social-ico {
+	display: block;
+	width: 22px;
+	height: 22px;
+}
+/* Colonne: da 1024 px titoli fissi (details sempre aperto, vedi il JS), sotto una fisarmonica. */
+.site-footer-v2__group {
+	display: block;
+}
+.site-footer-v2__group-title {
+	display: block;
+	margin: 0 0 14px;
+	color: #fff;
+	font-size: 15px;
+	font-weight: 600;
+	line-height: normal;
+	list-style: none;
+	pointer-events: none;
+}
+.site-footer-v2__group-title::-webkit-details-marker {
+	display: none;
+}
+.site-footer-v2__chevron {
+	display: none;
+}
+.site-footer-v2__links {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	font-size: 15px;
+	line-height: normal;
+}
+.site-footer-v2__links a,
+.site-footer-v2__legal-links a {
+	background: linear-gradient(currentColor, currentColor) left bottom / 0 1px no-repeat;
+	color: inherit;
+	text-decoration: none;
+	transition: background-size 200ms var(--tp-ease-stage, ease), color 200ms var(--tp-ease-stage, ease);
+}
+.site-footer-v2__links a:hover,
+.site-footer-v2__legal-links a:hover {
+	background-size: 100% 1px;
+	color: #fff;
+}
+.site-footer-v2 a:focus-visible,
+.site-footer-v2 summary:focus-visible {
+	outline: 2px solid var(--tp-focus, #7FE3C9);
+	outline-offset: 3px;
+}
+/* "Servizi a Roma": riga sotto le colonne (deviazione dichiarata dal Figma, link SEO del footer attuale). */
+.site-footer-v2__services {
+	margin-top: 40px;
+}
+.site-footer-v2__services .site-footer-v2__links {
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 10px 28px;
+	font-size: 14px;
+}
+/* Riquadro aziende e condomini */
+.site-footer-v2__b2b {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 12px;
+	padding: 20px;
+	border: 1px solid rgba(127, 227, 201, 0.35);
+	border-radius: 20px;
+	background: rgba(255, 255, 255, 0.06);
+}
+.site-footer-v2__b2b-title {
+	color: #fff;
+	font-size: 17px;
+	font-weight: 600;
+	line-height: normal;
+}
+.site-footer-v2__b2b-text {
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 13px;
+	line-height: normal;
+}
+.site-footer-v2__b2b-btn {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.3em;
+	padding: 10px 18px;
+	border-radius: 999px;
+	background: var(--tp-v2-green, #37B299);
+	color: #fff;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: normal;
+	text-decoration: none;
+	white-space: nowrap;
+	transition: transform var(--tp-dur-fast, 150ms) var(--tp-ease-stage, ease);
+}
+.site-footer-v2__b2b-btn:hover {
+	transform: translateY(-1px);
+}
+.site-footer-v2__divider {
+	height: 1px;
+	margin: 40px 0;
+	background: var(--tpf-line);
+}
+.site-footer-v2__bottom {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px 24px;
+	color: rgba(255, 255, 255, 0.55);
+	font-size: 13px;
+	line-height: normal;
+}
+.site-footer-v2__legal-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 24px;
+}
+/* Scritta grande: decorativa, ferma. Altezza visibile 178 px su 196 di corpo (Figma): le lettere escono dal basso. */
+.site-footer-v2__word {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 0;
+	height: calc(var(--tpf-word) * 0.908);
+	overflow: hidden;
+	text-align: center;
+	pointer-events: none;
+	user-select: none;
+}
+.site-footer-v2__word-text {
+	display: block;
+	color: rgba(55, 178, 153, 0.12);
+	font-size: var(--tpf-word);
+	font-weight: 900;
+	letter-spacing: -0.03em;
+	line-height: 1.5;
+	white-space: nowrap;
+}
+@media (max-width: 1023px) {
+	.site-footer-v2 {
+		display: flex;
+		flex-direction: column;
+		padding: 56px 16px 0;
+	}
+	.site-footer-v2__inner {
+		display: flex;
+		flex-direction: column;
+		gap: 24px;
+		max-width: none;
+		margin: 0;
+	}
+	.site-footer-v2__top {
+		display: contents;
+	}
+	.site-footer-v2__brand { order: 1; }
+	.site-footer-v2__nav { display: block; order: 2; margin-bottom: -24px; }
+	.site-footer-v2__services { order: 3; margin: 0; }
+	.site-footer-v2__b2b { order: 4; align-items: flex-start; }
+	.site-footer-v2__divider { order: 5; margin: 0; }
+	.site-footer-v2__bottom { order: 6; flex-direction: column; align-items: flex-start; gap: 24px; font-size: 12px; }
+	.site-footer-v2__legal-links { gap: 8px 18px; }
+	.site-footer-v2__group {
+		border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+	}
+	.site-footer-v2__group-title {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		min-height: 44px;
+		margin: 0;
+		padding: 16px 0;
+		font-size: 16px;
+		cursor: pointer;
+		pointer-events: auto;
+	}
+	.site-footer-v2__chevron {
+		display: block;
+		flex: none;
+		width: 8px;
+		height: 8px;
+		margin-right: 2px;
+		border-right: 2px solid var(--tpf-mint);
+		border-bottom: 2px solid var(--tpf-mint);
+		transform: translateY(-2px) rotate(45deg);
+		transition: transform 250ms var(--tp-ease-stage, ease);
+	}
+	.site-footer-v2__group[open] .site-footer-v2__chevron {
+		transform: translateY(2px) rotate(-135deg);
+	}
+	.site-footer-v2__links {
+		gap: 0;
+		padding-bottom: 12px;
+	}
+	.site-footer-v2__links a {
+		display: inline-block;
+		padding-block: 11px;
+	}
+	.site-footer-v2__services .site-footer-v2__links {
+		flex-direction: column;
+		flex-wrap: nowrap;
+		gap: 0;
+		font-size: 15px;
+	}
+	.site-footer-v2__b2b-btn { padding: 13px 18px; }
+	.site-footer-v2__contacts a { min-height: 32px; }
+	.site-footer-v2__word {
+		position: relative;
+		height: 70px;
+		margin: 24px -16px 0;
+		text-align: left;
+	}
+	.site-footer-v2__word-text {
+		margin-left: 12px;
+		font-size: min(50px, 13.4vw);
+		line-height: 1.5;
+		color: rgba(55, 178, 153, 0.14);
+		letter-spacing: 0;
+	}
+}
+@media (max-width: 1023px) {
+	.site-footer-v2__group::details-content {
+		block-size: 0;
+		overflow: hidden;
+		transition: block-size 250ms var(--tp-ease-stage, ease), content-visibility 250ms allow-discrete;
+	}
+	.site-footer-v2__group[open]::details-content {
+		block-size: auto;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.site-footer-v2__links a,
+	.site-footer-v2__legal-links a,
+	.site-footer-v2__chevron,
+	.site-footer-v2__social a,
+	.site-footer-v2__b2b-btn,
+	.site-footer-v2__group::details-content {
+		transition: none;
+	}
+}
+
+/* =========================
+   TICKET-126 - Fascia aziende e FAQ con i fondatori della Home v2 (Figma 7903:7601 e 7903:7623 desktop, 7946:2048 e
+   7946:2068 mobile). Solo selettori nuovi (.hv2-b2b, .hv2-faq, .faq--v2): nessun CSS esistente della FAQ e' modificato,
+   le altre otto pagine che usano faq-accordion.php restano identiche. Fondo: lo da' main.hv2 (sfondo continuo), qui le
+   sezioni sono trasparenti e le luci sfumano nelle vicine (isolation + z-index negativo, come le Zone). Ken burns della
+   foto e movimento dell'apertura: TICKET-129.
+   [ATTENZIONE] Le regole riduci movimento di questo ticket stanno in fondo a questo blocco, non nel blocco unico della
+   v2: da riunire in quello al merge dei ticket paralleli.
+   ========================= */
+.hv2-b2b {
+	position: relative;
+	isolation: isolate;
+	padding: 100px clamp(24px, 6.667vw, 96px);
+}
+.hv2-b2b__light {
+	position: absolute;
+	z-index: -1;
+	border-radius: 50%;
+	pointer-events: none;
+	background: radial-gradient(closest-side, rgba(55, 178, 153, 0.16), rgba(55, 178, 153, 0));
+}
+.hv2-b2b__light--a { left: -166px; top: -184px; width: 620px; height: 480px; }
+.hv2-b2b__light--b { right: -166px; top: 261px; width: 620px; height: 480px; }
+.hv2-b2b__box {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	box-sizing: border-box;
+	max-width: 1248px;
+	margin: 0 auto;
+	padding: 110px 56px;
+	overflow: hidden;
+	border-radius: 28px;
+	background: #062A22;
+	color: #fff;
+}
+.hv2-b2b__photo {
+	position: absolute;
+	inset: 0;
+	display: block;
+}
+.hv2-b2b__photo img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.hv2-b2b__photo::after {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to right, rgba(6, 42, 34, 0.95) 0%, rgba(6, 42, 34, 0.85) 50%, rgba(6, 42, 34, 0.45) 100%);
+}
+.hv2-b2b__text,
+.hv2-b2b__actions {
+	position: relative;
+}
+.hv2-b2b__text {
+	display: flex;
+	flex: 0 1 840px;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 14px;
+	min-width: 0;
+}
+.hv2-b2b__eyebrow {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: normal;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: #7FE3C9;
+}
+.hv2-b2b__title {
+	margin: 0;
+	font-size: 48px;
+	font-weight: 900;
+	line-height: 52px;
+	text-transform: uppercase;
+	color: #fff;
+}
+.hv2-b2b__lead {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 500;
+	line-height: normal;
+	color: rgba(255, 255, 255, 0.8);
+}
+.hv2-b2b__badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin: 16px 0 0;
+	padding: 0;
+	list-style: none;
+}
+.hv2-b2b__badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 7px 14px 7px 12px;
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.12);
+	font-size: 14px;
+	font-weight: 600;
+	line-height: normal;
+	color: #fff;
+}
+.hv2-b2b__check {
+	flex: 0 0 auto;
+	color: #7FE3C9;
+}
+.hv2-b2b__actions {
+	display: flex;
+	flex: 0 0 auto;
+	flex-direction: column;
+	align-items: center;
+	gap: 14px;
+	white-space: nowrap;
+}
+.hv2-b2b__cta {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	padding: 18px 32px;
+	border-radius: 999px;
+	background: var(--tp-v2-green);
+	box-shadow: 0 12px 32px rgba(55, 178, 153, 0.45);
+	font-size: 18px;
+	font-weight: 600;
+	line-height: normal;
+	color: #fff; /* eccezione di brand dichiarata: testo bianco nei bottoni verdi pieni (SPEC §2) */
+	text-decoration: none;
+	transition: transform var(--tp-dur-fast) var(--tp-ease-stage);
+}
+.hv2-b2b__cta:hover {
+	transform: translateY(-2px);
+}
+.hv2-b2b__link {
+	font-size: 15px;
+	font-weight: 600;
+	line-height: normal;
+	color: #7FE3C9;
+	text-decoration: none;
+}
+.hv2-b2b__link:hover {
+	text-decoration: underline;
+}
+.hv2-b2b__cta:focus-visible,
+.hv2-b2b__link:focus-visible,
+.hv2-faq .faq__contact-cta:focus-visible,
+.hv2-faq .faq__q:focus-visible {
+	outline: 2px solid var(--tp-focus);
+	outline-offset: 3px;
+}
+
+/* FAQ v2: faq-accordion.php con variant="v2". Colonna sinistra e lista come sulle altre pagine; cambiano fondo, titolo, colori. */
+.hv2-faq {
+	position: relative;
+	isolation: isolate;
+}
+.hv2-faq::before,
+.hv2-faq::after {
+	content: '';
+	position: absolute;
+	z-index: -1;
+	border-radius: 50%;
+	pointer-events: none;
+	background: radial-gradient(closest-side, rgba(55, 178, 153, 0.16), rgba(55, 178, 153, 0));
+}
+.hv2-faq::before { right: -206px; top: -175px; width: 700px; height: 560px; }
+.hv2-faq::after { left: -208px; bottom: -60px; width: 560px; height: 420px; }
+.faq.faq--v2 {
+	padding: 80px clamp(24px, 8.333vw, 120px);
+	background: transparent;
+}
+.faq--v2 .faq__eyebrow {
+	color: var(--tp-v2-niente);
+}
+.faq--v2 .faq__title {
+	font-size: 48px;
+	font-weight: 900;
+	line-height: 52px;
+	text-transform: uppercase;
+	color: var(--tp-v2-ink);
+}
+.faq--v2 .faq__contact-cta {
+	background: var(--tp-v2-green);
+	color: #fff; /* eccezione di brand dichiarata: testo bianco nei bottoni verdi pieni (SPEC §2) */
+}
+.faq--v2 .faq__contact-cta:hover {
+	box-shadow: 0 12px 22px -10px rgba(55, 178, 153, 0.7);
+}
+.faq--v2 .faq__item {
+	border-color: #EBEDF0;
+}
+.faq--v2 .faq__toggle {
+	line-height: 28px; /* riga da 70 px come nel Figma (segno da 20 px su interlinea normale) */
+}
+.faq--v2 .faq__founders-text strong {
+	font-weight: 600;
+}
+.faq--v2 .faq__item:hover {
+	background: #fff;
+}
+.faq--v2 .faq__item.is-open .faq__toggle {
+	color: var(--tp-v2-niente);
+}
+/* Ingressi: senza JavaScript la colonna e le domande sono visibili; con reveal.js (html.tp-reveal) entrano come sulle altre pagine.
+   La sezione stessa non si dissolve due volte (ci pensano la colonna e le righe). */
+.faq--v2 .faq__aside,
+.faq--v2 .faq__item {
+	opacity: 1;
+	transform: none;
+}
+html.tp-reveal .faq--v2:not(.is-in) .faq__aside,
+html.tp-reveal .faq--v2:not(.is-in) .faq__item {
+	opacity: 0;
+	transform: translateY(12px);
+}
+html.tp-reveal .hv2 .faq--v2[data-reveal] {
+	opacity: 1;
+	transform: none;
+}
+
+@media (max-width: 1023px) {
+	.hv2-b2b {
+		padding: 24px 16px 72px;
+	}
+	.hv2-b2b__light--a { left: -121px; top: -74px; width: 320px; height: 260px; }
+	.hv2-b2b__light--b { right: -121px; left: auto; top: 375px; width: 320px; height: 260px; }
+	.hv2-b2b__box {
+		flex-direction: column;
+		align-items: stretch;
+		justify-content: flex-start;
+		gap: 14px;
+		padding: 28px 22px;
+		border-radius: 24px;
+	}
+	.hv2-b2b__photo::after {
+		background: linear-gradient(to bottom, rgba(6, 42, 34, 0.55) 0%, rgba(6, 42, 34, 0.88) 45%, rgba(6, 42, 34, 0.96) 100%);
+	}
+	.hv2-b2b__text {
+		flex: 0 0 auto;
+	}
+	.hv2-b2b__eyebrow {
+		font-size: 12px;
+	}
+	.hv2-b2b__title {
+		font-size: 28px;
+		line-height: 32px;
+	}
+	.hv2-b2b__lead {
+		font-size: 15px;
+		font-weight: 400;
+		color: rgba(255, 255, 255, 0.85);
+	}
+	.hv2-b2b__badges {
+		flex-direction: column;
+		flex-wrap: nowrap;
+		gap: 8px;
+		margin-top: 0;
+	}
+	.hv2-b2b__badge {
+		padding: 0;
+		border: 0;
+		border-radius: 0;
+		background: none;
+	}
+	.hv2-b2b__actions {
+		align-items: stretch;
+		gap: 14px;
+		text-align: center;
+	}
+	.hv2-b2b__cta {
+		padding: 16px 22px;
+		box-shadow: none;
+		font-size: 16px;
+	}
+	.hv2-b2b__link {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		min-height: 44px;
+		font-size: 14px;
+	}
+
+	.hv2-faq::before { right: auto; left: 181px; top: -23px; width: 340px; height: 280px; }
+	.hv2-faq::after { left: -130px; bottom: 0; width: 300px; height: 240px; }
+	.faq.faq--v2 {
+		padding: 72px 16px;
+	}
+	.faq--v2 .faq__inner {
+		grid-template-columns: 1fr;
+		gap: 14px;
+	}
+	.faq--v2 .faq__aside {
+		align-items: flex-start;
+		gap: 14px;
+		text-align: left;
+	}
+	.faq--v2 .faq__eyebrow {
+		padding: 0;
+		background: none;
+		font-size: 12px;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+	}
+	.faq--v2 .faq__title {
+		font-size: 40px;
+		line-height: 42px;
+	}
+	.faq--v2 .faq__subtitle {
+		display: none;
+	}
+	.faq--v2 .faq__list {
+		gap: 10px;
+	}
+	.faq--v2 .faq__item {
+		padding: 14px 16px;
+		border-color: rgba(6, 42, 34, 0.06);
+		border-radius: 16px;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+	}
+	.faq--v2 .faq__q {
+		min-height: 44px;
+		font-size: 17px;
+		line-height: 1.3;
+		color: var(--tp-v2-ink);
+	}
+	.faq--v2 .faq__toggle {
+		line-height: 1;
+		font-size: 24px;
+		font-weight: 500;
+		color: var(--tp-v2-niente);
+	}
+	.faq--v2 .faq__a-inner p {
+		margin-top: 10px;
+		font-size: 15px;
+		line-height: 23px;
+		color: #4F6660;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hv2-b2b__cta {
+		transition: none;
+	}
+	html.tp-reveal .faq--v2:not(.is-in) .faq__aside,
+	html.tp-reveal .faq--v2:not(.is-in) .faq__item {
+		transform: none;
+	}
+}
+
+/* =========================
+   TICKET-124: recensioni a foglietti e fascia loghi della Home v2. Figma 7903:7496 desktop, 7946:1871 mobile.
+   Solo selettori nuovi `.hv2-rev` (template-parts/home-reviews-notes.php). Componenti riusati: .tp-carousel (foglietti,
+   come Come funziona: da 1024 px sono in fila centrata, sotto un carosello a scorrimento) e .tp-marquee (fascia loghi).
+   La sezione e' trasparente (elenco "Sfondo continuo della Home v2" piu' in alto, tramite .hv2-section--recensioni).
+   Desktop-first: i valori mobile stanno in @media (max-width: 1023px). prefers-reduced-motion in fondo a questo blocco.
+   ========================= */
+.hv2-section.hv2-rev {
+	position: relative;
+	padding: 110px 0 96px;
+}
+.hv2-rev--solo-loghi {
+	padding: 0;
+}
+.hv2-rev__light {
+	position: absolute;
+	z-index: -1;
+	border-radius: 50%;
+	pointer-events: none;
+	background: radial-gradient(closest-side, rgba(55, 178, 153, 0.16), rgba(55, 178, 153, 0));
+}
+.hv2-rev__light--a {
+	left: -278px;
+	top: -122px;
+	width: 700px;
+	height: 560px;
+}
+.hv2-rev__light--b {
+	right: -176px;
+	top: 585px;
+	width: 640px;
+	height: 520px;
+}
+.hv2-rev__inner {
+	position: relative;
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: 0 clamp(24px, 6.667vw, 96px);
+}
+.hv2-rev__head {
+	text-align: center;
+}
+.hv2-rev__eyebrow {
+	margin: 0 0 12px;
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	line-height: 20px;
+	text-transform: uppercase;
+	color: var(--tp-v2-niente);
+}
+.hv2-rev__title {
+	margin: 0;
+	font-size: clamp(44px, 5vw, 72px);
+	font-weight: 900;
+	line-height: 1.5;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	color: var(--tp-v2-ink);
+}
+.hv2-rev__carousel {
+	margin-top: 72px;
+}
+/* Foglietti: fila centrata da 1024 px (pochi foglietti restano al centro), tutti dell'altezza del piu' alto */
+.hv2-rev__carousel .tp-carousel__track {
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 24px;
+	/* 16 px di margine interno compensato dal margine negativo: i foglietti ruotati escono dai bordi di qualche pixel e,
+	   senza questo spazio, la pista risulterebbe scorrevole (tp-carousel.js terrebbe il ruolo "carosello" su una fila) */
+	margin: 0 -16px;
+	padding: 0 16px;
+	overflow: visible;
+	scroll-snap-type: none;
+}
+.hv2-rev__carousel .tp-carousel__slide {
+	display: flex;
+	flex: 0 0 calc((100% - 48px) / 3);
+	min-width: 0;
+	scroll-snap-align: none;
+}
+.hv2-rev__carousel .tp-carousel__nav {
+	display: none;
+}
+.hv2-rev__note {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 20px 20px 24px;
+	border-radius: 20px;
+	background: #fff;
+	box-shadow: 0 18px 40px -6px rgba(6, 42, 34, 0.12);
+	transform: rotate(var(--hv2-rev-rot, 0deg));
+	transition: transform 250ms var(--tp-ease-stage, ease);
+}
+@media (hover: hover) {
+	.hv2-rev__note:hover {
+		transform: translateY(-6px);
+	}
+}
+.hv2-rev__photos {
+	display: flex;
+	gap: 8px;
+}
+.hv2-rev__photo {
+	position: relative;
+	flex: 1 1 0;
+	min-width: 0;
+	height: 150px;
+	margin: 0;
+	overflow: hidden;
+	border-radius: 12px;
+	background: #E4EFEA;
+}
+.hv2-rev__photo img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.hv2-rev__tag {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	padding: 3px 8px;
+	border-radius: 6px;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: #fff;
+}
+.hv2-rev__tag--before {
+	background: var(--tp-v2-ink);
+}
+.hv2-rev__tag--after {
+	background: var(--tp-v2-green);
+}
+.hv2-rev__stars {
+	margin: 0;
+	font-size: 20px;
+	line-height: 1.5;
+	letter-spacing: 0;
+	color: #F2B84B;
+}
+.hv2-rev__stars-off {
+	color: rgba(6, 42, 34, 0.15);
+}
+.hv2-rev__text {
+	flex: 1 1 auto;
+	margin: 0;
+}
+.hv2-rev__text p {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 500;
+	line-height: 27px;
+	color: var(--tp-v2-ink);
+}
+.hv2-rev__author {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.hv2-rev__avatar {
+	display: flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+.hv2-rev__avatar--initials {
+	background: #D9F0E8;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--tp-v2-niente);
+}
+.hv2-rev__who {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	min-width: 0;
+}
+.hv2-rev__name {
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.5;
+	color: var(--tp-v2-ink);
+}
+.hv2-rev__meta {
+	font-size: 13px;
+	line-height: 1.5;
+	color: #4F6660;
+}
+
+/* Fascia loghi: bianca a tutta larghezza, scorre (tp-marquee). Voci senza punto: lo spazio e' il padding destro */
+.hv2-rev__band {
+	margin-top: 80px;
+	border-top: 1px solid rgba(6, 42, 34, 0.08);
+	border-bottom: 1px solid rgba(6, 42, 34, 0.08);
+	background: #fff;
+}
+.hv2-rev--solo-loghi .hv2-rev__band {
+	margin-top: 0;
+}
+.hv2-rev__marquee {
+	padding: 22px 0;
+}
+.hv2-rev__marquee .tp-marquee__item {
+	padding-right: 64px;
+}
+.hv2-rev__band-label {
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	line-height: 1.5;
+	text-transform: uppercase;
+	white-space: nowrap;
+	color: var(--tp-v2-niente);
+}
+.hv2-rev__logo {
+	display: flex;
+	align-items: center;
+	height: 52px;
+	overflow: hidden;
+	border-radius: 12px;
+}
+.hv2-rev__logo img {
+	display: block;
+	width: auto;
+	max-width: none;
+	height: 44px;
+	object-fit: contain;
+}
+.hv2-rev__cleaner {
+	position: relative;
+	display: block;
+	flex: none;
+	width: 52px;
+	height: 52px;
+}
+.hv2-rev__cleaner img {
+	display: block;
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+.hv2-rev__verified {
+	position: absolute;
+	left: 34px;
+	top: 34px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 20px;
+	height: 20px;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	background: var(--tp-v2-green);
+	color: #fff;
+}
+.hv2-rev__check {
+	width: 10px;
+	height: 10px;
+}
+
+@media (max-width: 1279px) and (min-width: 1024px) {
+	.hv2-rev__text p {
+		font-size: 16px;
+		line-height: 24px;
+	}
+	.hv2-rev__photo {
+		height: 120px;
+	}
+}
+
+@media (max-width: 1023px) {
+	.hv2-section.hv2-rev {
+		padding: 72px 0 56px;
+	}
+	.hv2-rev--solo-loghi {
+		padding: 0;
+	}
+	.hv2-rev__light--a {
+		left: 181px;
+		right: auto;
+		top: -66px;
+		width: 340px;
+		height: 280px;
+	}
+	.hv2-rev__light--b {
+		left: -121px;
+		right: auto;
+		top: 535px;
+		width: 320px;
+		height: 260px;
+	}
+	.hv2-rev__inner {
+		padding: 0;
+	}
+	.hv2-rev__head {
+		padding: 0 16px;
+		text-align: left;
+	}
+	.hv2-rev__eyebrow {
+		font-size: 12px;
+		letter-spacing: 0.12em;
+	}
+	.hv2-rev__title {
+		font-size: 40px;
+		line-height: 42px;
+	}
+	.hv2-rev__carousel {
+		margin-top: 14px;
+	}
+	/* Carosello: un foglietto e mezzo, il secondo si vede a meta' per far capire che si scorre */
+	.hv2-rev__carousel .tp-carousel__track {
+		flex-wrap: nowrap;
+		justify-content: flex-start;
+		gap: 12px;
+		margin: 0;
+		padding: 20px 16px 24px;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scroll-padding: 0 16px;
+	}
+	.hv2-rev__carousel .tp-carousel__slide {
+		flex: 0 0 min(300px, calc(100vw - 56px));
+		scroll-snap-align: center;
+	}
+	.hv2-rev__carousel .tp-carousel__nav {
+		display: flex;
+		padding: 0 16px;
+	}
+	.hv2-rev__carousel .tp-carousel__nav[hidden] {
+		display: none;
+	}
+	.hv2-rev__note {
+		gap: 10.5px;
+		padding: 15px 15px 18px;
+		border-radius: 15px;
+		box-shadow: 0 13.5px 30px -4.5px rgba(6, 42, 34, 0.12);
+	}
+	.hv2-rev__photos {
+		gap: 6px;
+	}
+	.hv2-rev__photo {
+		height: 112px;
+		border-radius: 9px;
+	}
+	.hv2-rev__tag {
+		top: 7px;
+		left: 7px;
+		padding: 2px 6px;
+		border-radius: 4.5px;
+		font-size: 8.25px;
+	}
+	.hv2-rev__stars {
+		font-size: 15px;
+	}
+	.hv2-rev__text p {
+		font-size: 13.5px;
+		line-height: 20.25px;
+	}
+	.hv2-rev__author {
+		gap: 7.5px;
+	}
+	.hv2-rev__avatar {
+		width: 30px;
+		height: 30px;
+	}
+	.hv2-rev__avatar--initials {
+		font-size: 11px;
+	}
+	.hv2-rev__name {
+		font-size: 11.25px;
+	}
+	.hv2-rev__meta {
+		font-size: 9.75px;
+	}
+	.hv2-rev__band {
+		margin-top: 8px;
+	}
+	.hv2-rev__marquee .tp-marquee__item {
+		padding-right: 32px;
+	}
+	.hv2-rev__band-label {
+		font-size: 12px;
+		letter-spacing: 0.1em;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hv2-rev__note {
+		transition: none;
 	}
 }
