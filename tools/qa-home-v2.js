@@ -1,5 +1,5 @@
 /* QA della Home v2 (SPEC-homepage-v2, TICKET-119 e seguenti).
-   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero|frasi|servizi|manifesto|come-funziona] [--google on|off] [--servizi base|rotto]
+   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero|frasi|servizi|manifesto|come-funziona|aziende|faq] [--google on|off] [--servizi base|rotto] [--badges N] [--bottoni on|off] [--domande N] [--fondatori "Nomi|Ruolo"]
    <url-anteprima> e' la pagina d'anteprima (es. https://trovapulizie.it/anteprima-pagina-iniziale/).
 
    Ogni ticket aggiunge la propria funzione di controllo in CHECKS e il proprio nome in SEZIONI. Con --sezioni <nome>
@@ -60,11 +60,30 @@
    "riduci movimento" nessuna scheda scala; con JavaScript spento le schede restano sticky. A 390: scroll-snap-type x
    mandatory, indicatore visibile con quattro puntini e bottoni alti almeno 44 px, "1 di 4" in aria-live="polite" che
    avanza dopo uno scroll, un clic su "avanti" e il tasto freccia destra sulla pista (evento tp:carousel-change a ogni
-   cambio), pagina senza scroll orizzontale; con JavaScript spento la pista scorre ancora a scatti e l'indicatore non c'e'. */
+   cambio), pagina senza scroll orizzontale; con JavaScript spento la pista scorre ancora a scatti e l'indicatore non c'e'.
+
+   Gruppo "aziende" (TICKET-126), a 390 e 1440; --badges N dice quante garanzie ha la pagina provata (default 2: "Sopralluogo
+   gratuito" e "Imprese verificate", mai "Preventivo entro 24 ore" se non e' nel campo), --bottoni on|off se bottone e link
+   escono (off = URL svuotati). Sezione 08-aziende con un solo h2; "Richiedi un preventivo" verso /roma/sgrosso-commerciale/
+   con data-cta-position="home_b2b", "Scopri le pulizie per aziende" verso /roma/pulizie-uffici/, entrambi con risposta
+   200; con --bottoni off nessuno dei due e nessun contenitore delle azioni. Colori e misure calcolati dal Figma (riquadro
+   1248 px e raggio 28 a 1440, raggio 24 a 390; titolo 48/52 e 28/32 in maiuscolo; bottone #37B299 col testo bianco, alto
+   almeno 44 px); sezione trasparente e senza overflow nascosto (sfondo continuo); testo e azioni su una riga a 1440 e
+   impilati a 390 con il bottone a tutta larghezza; nessuno scroll orizzontale; foto decorativa (alt vuoto, lazy).
+
+   Gruppo "faq" (TICKET-126), a 390 e 1440; --domande N dice quante domande escono (default 6 = le sei di default; 0 = sezione
+   assente e nessun JSON-LD), --fondatori "Nomi|Ruolo" i valori attesi della card (default "Guido & Christian|Fondatori", quelli
+   di Theme Options). Sezione 09-faq con classe faq--v2; la pagina espone un solo JSON-LD FAQPage con le stesse domande e
+   risposte del DOM, ogni risposta e' nel DOM anche da chiusa; la prima domanda e' aperta (is-open) nel markup del server;
+   card "Rispondiamo di persona" con nomi e ruolo come Theme Options e due foto, bottone "Scrivici su WhatsApp" verso wa.me con
+   data-cta-position="faq_whatsapp"; nessun altro data-cta-position nella sezione. Nel browser, con clic reali: aprendo una
+   domanda si chiude quella aperta (aria-expanded), un secondo clic la richiude; misure: titolo in maiuscolo 48 px a 1440 e 40 a
+   390, domande a 14 px di raggio (16 a 390), card a sinistra sotto il titolo a 1440 e sotto la lista a 390, sottotitolo nascosto a
+   390, bottone #37B299 col testo bianco; nessuno scroll orizzontale. */
 const { withChrome } = require('./lib/cdp.js');
 
 const SECTIONS = ['01-hero', '02-frasi', '03-servizi', '04-come-funziona', '05-manifesto', '06-recensioni', '07-zone', '08-aziende', '09-faq', '10-chiusura'];
-const args = process.argv.slice(2).filter((a, i, all) => !a.startsWith('--') && !(i > 0 && ['--sezioni', '--google', '--servizi', '--frasi', '--voci'].includes(all[i - 1])));
+const args = process.argv.slice(2).filter((a, i, all) => !a.startsWith('--') && !(i > 0 && ['--sezioni', '--google', '--servizi', '--frasi', '--voci', '--badges', '--bottoni', '--domande', '--fondatori'].includes(all[i - 1])));
 const [bin, url, widthArg] = args;
 const width = Number(widthArg) || 1440;
 const gruppo = (process.argv.includes('--sezioni') ? process.argv[process.argv.indexOf('--sezioni') + 1] : 'base');
@@ -549,8 +568,167 @@ async function checkManifestoBrowser() {
 	});
 }
 
+const opt = (n, d) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : d);
+const badgesArg = Number(opt('--badges', 2));
+const bottoniArg = opt('--bottoni', 'on');
+const domandeArg = Number(opt('--domande', 6));
+const fondatoriArg = opt('--fondatori', 'Guido & Christian|Fondatori').split('|');
+const stripTags = h => dec(h.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim());
+async function headStatus(u) { try { const r = await fetch(u, { redirect: 'manual' }); return r.status; } catch (e) { return 0; } }
+async function checkAziende() {
+	const res = await fetch(url, { redirect: 'manual' });
+	check('aziende: risposta 200', res.status === 200, 'stato ' + res.status);
+	if (res.status !== 200) return;
+	const html = await res.text();
+	const sec = (html.match(/<section class="hv2-b2b"[\s\S]*?<\/section>/) || [''])[0];
+	check('aziende: sezione 08-aziende presente', /data-section="08-aziende"/.test(sec), sec.slice(0, 80));
+	check('aziende: un solo h2 e nessun h1', (sec.match(/<h2[ >]/g) || []).length === 1 && !/<h1/.test(sec));
+	const badges = [...sec.matchAll(/<li class="hv2-b2b__badge">([\s\S]*?)<\/li>/g)].map(m => stripTags(m[1]));
+	check('aziende: ' + badgesArg + ' garanzie', badges.length === badgesArg, JSON.stringify(badges));
+	check('aziende: "Sopralluogo gratuito" confermato presente, "Preventivo entro 24 ore" solo se in elenco', (badgesArg === 0 || badges.includes('Sopralluogo gratuito')) && (badges.includes('Preventivo entro 24 ore') === (badgesArg === 3)), JSON.stringify(badges));
+	const cta = (sec.match(/<a class="hv2-b2b__cta"[^>]*>/) || [''])[0];
+	const link = (sec.match(/<a class="hv2-b2b__link"[^>]*>/) || [''])[0];
+	if (bottoniArg === 'off') {
+		check('aziende: con URL svuotati nessun bottone, nessun link, nessun contenitore delle azioni', !cta && !link && !/hv2-b2b__actions/.test(sec), cta + link);
+	} else {
+		const href = a => (a.match(/href="([^"]*)"/) || [0, ''])[1];
+		check('aziende: bottone verso /roma/sgrosso-commerciale/ con data-cta-position="home_b2b"', /\/roma\/sgrosso-commerciale\/$/.test(href(cta)) && /data-cta-position="home_b2b"/.test(cta), cta);
+		check('aziende: link verso /roma/pulizie-uffici/', /\/roma\/pulizie-uffici\/$/.test(href(link)), link);
+		check('aziende: il bottone e il link rispondono 200', (await headStatus(href(cta))) === 200 && (await headStatus(href(link))) === 200);
+		check('aziende: etichette "Richiedi un preventivo" e "Scopri le pulizie per aziende"', /Richiedi un preventivo/.test(sec) && /Scopri le pulizie per aziende/.test(sec));
+	}
+	const img = (sec.match(/<img[^>]*>/) || [''])[0];
+	check('aziende: foto decorativa (alt vuoto, lazy, dimensioni)', /alt=""/.test(img) && /loading="lazy"/.test(img) && /width="\d+"/.test(img) && /height="\d+"/.test(img), img.slice(0, 160));
+}
+async function checkAziendeBrowser() {
+	await withChrome(bin, 'about:blank', { port: 9561, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-azi' }, async ({ send, ev, sleep }) => {
+		await send('Page.navigate', { url });
+		await sleep(3500);
+		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
+		await ev('document.querySelector(".hv2-b2b").scrollIntoView({block:"start"})');
+		await sleep(1500);
+		const info = JSON.parse(await ev(`(() => {
+			const q = s => document.querySelector(s), cs = e => getComputedStyle(e);
+			const r = e => { const b = e.getBoundingClientRect(); return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) }; };
+			const sec = q('.hv2-b2b'), box = q('.hv2-b2b__box'), cta = q('.hv2-b2b__cta'), link = q('.hv2-b2b__link');
+			return JSON.stringify({
+				secBg: cs(sec).backgroundColor, secOv: cs(sec).overflow, boxRadius: cs(box).borderTopLeftRadius, box: r(box),
+				title: { fs: cs(q('.hv2-b2b__title')).fontSize, lh: cs(q('.hv2-b2b__title')).lineHeight, tt: cs(q('.hv2-b2b__title')).textTransform, fw: cs(q('.hv2-b2b__title')).fontWeight, c: cs(q('.hv2-b2b__title')).color },
+				text: r(q('.hv2-b2b__text')), actions: q('.hv2-b2b__actions') ? r(q('.hv2-b2b__actions')) : null,
+				cta: cta ? { bg: cs(cta).backgroundColor, c: cs(cta).color, r: r(cta), fs: cs(cta).fontSize } : null,
+				link: link ? { c: cs(link).color, r: r(link) } : null,
+				eyebrow: cs(q('.hv2-b2b__eyebrow')).color, imgFit: cs(q('.hv2-b2b__photo img')).objectFit,
+				sw: document.scrollingElement.scrollWidth, cw: document.scrollingElement.clientWidth
+			});
+		})()`));
+		const wide = width >= 1024;
+		check('aziende: sezione trasparente e senza overflow nascosto (sfondo continuo)', info.secBg === 'rgba(0, 0, 0, 0)' && info.secOv === 'visible', info.secBg + ' ' + info.secOv);
+		check('aziende: raggio ' + (wide ? 28 : 24) + ' px e titolo in maiuscolo', info.boxRadius === (wide ? '28px' : '24px') && info.title.tt === 'uppercase', info.boxRadius + ' ' + info.title.tt);
+		check('aziende: titolo ' + (wide ? '48/52' : '28/32') + ' bianco, peso 900', info.title.fs === (wide ? '48px' : '28px') && info.title.lh === (wide ? '52px' : '32px') && info.title.c === 'rgb(255, 255, 255)' && info.title.fw === '900', JSON.stringify(info.title));
+		check('aziende: etichetta #7FE3C9, foto object-fit cover', info.eyebrow === 'rgb(127, 227, 201)' && info.imgFit === 'cover', info.eyebrow + ' ' + info.imgFit);
+		if (width === 1440) check('aziende: riquadro 1248 px da x 96', info.box.w === 1248 && info.box.x === 96, JSON.stringify(info.box));
+		if (width === 390) check('aziende: riquadro 358 px da x 16', info.box.w === 358 && info.box.x === 16, JSON.stringify(info.box));
+		if (bottoniArg === 'on') {
+			check('aziende: bottone #37B299 con testo bianco, alto almeno 44 px', info.cta.bg === 'rgb(55, 178, 153)' && info.cta.c === 'rgb(255, 255, 255)' && info.cta.r.h >= 44, JSON.stringify(info.cta));
+			check('aziende: link #7FE3C9', info.link.c === 'rgb(127, 227, 201)', info.link.c);
+			if (wide) check('aziende: testo e azioni sulla stessa riga (azioni a destra del testo)', info.actions.x >= info.text.x + info.text.w - 2 && Math.abs((info.actions.y + info.actions.h / 2) - (info.text.y + info.text.h / 2)) < 30, JSON.stringify([info.text, info.actions]));
+			else check('aziende: azioni sotto il testo, bottone a tutta larghezza (314 px)', info.actions.y >= info.text.y + info.text.h - 2 && info.cta.r.w === 314, JSON.stringify([info.text, info.actions, info.cta.r]));
+		}
+		check('aziende: nessuno scroll orizzontale', info.sw <= info.cw, info.sw + ' > ' + info.cw);
+	});
+}
+const FAQ_ATTESE = 6;
+async function checkFaq() {
+	const res = await fetch(url, { redirect: 'manual' });
+	check('faq: risposta 200', res.status === 200, 'stato ' + res.status);
+	if (res.status !== 200) return;
+	const html = await res.text();
+	const lds = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(m => m[1]).filter(t => /"FAQPage"/.test(t));
+	if (domandeArg === 0) {
+		check('faq: con zero domande la sezione 09-faq non e\' nel DOM e non c\'e\' JSON-LD FAQPage', !/data-section="09-faq"/.test(html) && !/class="faq faq--v2"/.test(html) && lds.length === 0, lds.length + ' FAQPage');
+		return;
+	}
+	const sec = (html.match(/<div class="hv2-faq" data-section="09-faq">[\s\S]*?<\/section>/) || [''])[0];
+	check('faq: sezione 09-faq con classe faq--v2', /data-section="09-faq"/.test(sec) && /<section class="faq faq--v2"/.test(sec), sec.slice(0, 120));
+	check('faq: un solo h2 della sezione e nessun h1', (sec.match(/<h2[ >]/g) || []).length === 1 && !/<h1/.test(sec));
+	check('faq: un solo JSON-LD FAQPage nella pagina', lds.length === 1, lds.length + ' FAQPage');
+	const items = [...sec.matchAll(/<div class="faq__item[^"]*"[^>]*>[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g)].map(m => m[0]);
+	check('faq: ' + domandeArg + ' domande nel DOM', items.length === domandeArg, items.length + ' item');
+	const dom = items.map(h => [stripTags((h.match(/<span class="faq__q-text">([\s\S]*?)<\/span>/) || [0, ''])[1]), stripTags((h.match(/<div class="faq__a-inner">([\s\S]*?)<\/div>/) || [0, ''])[1])]);
+	let ld = []; try { ld = JSON.parse(lds[0]).mainEntity.map(e => [e.name, e.acceptedAnswer.text]); } catch (e) { /* dettaglio sotto */ }
+	check('faq: il JSON-LD ha le stesse domande e risposte del DOM, nello stesso ordine', ld.length === dom.length && ld.every((e, i) => dec(e[0]) === dom[i][0] && dec(e[1]) === dom[i][1]), JSON.stringify(ld).slice(0, 200) + ' / ' + JSON.stringify(dom).slice(0, 200));
+	check('faq: ogni risposta e\' nel DOM anche da chiusa (testo non vuoto)', dom.length > 0 && dom.every(d => d[0] && d[1]));
+	check('faq: la prima domanda e\' aperta (is-open, aria-expanded true) e le altre chiuse nel markup del server', /faq__item is-open/.test(items[0] || '') && /aria-expanded="true"/.test(items[0] || '') && items.slice(1).every(h => !/is-open/.test(h) && /aria-expanded="false"/.test(h)));
+	const contact = (sec.match(/<aside class="faq__contact">[\s\S]*?<\/aside>/) || [''])[0];
+	const nomi = stripTags((contact.match(/<strong>([\s\S]*?)<\/strong>/) || [0, ''])[1]), ruolo = stripTags((contact.match(/<\/strong><span>([\s\S]*?)<\/span>/) || [0, ''])[1]);
+	check('faq: la card ha nomi e ruolo come Theme Options (' + fondatoriArg.join(' / ') + ')', nomi === fondatoriArg[0] && ruolo === fondatoriArg[1], nomi + ' / ' + ruolo);
+	check('faq: la card ha due foto dei fondatori', (contact.match(/class="faq__avatar"/g) || []).length === 2);
+	check('faq: titolo "Rispondiamo di persona"', /Rispondiamo di persona/.test(contact));
+	const cta = (contact.match(/<a class="faq__contact-cta"[^>]*>[\s\S]*?<\/a>/) || [''])[0];
+	check('faq: bottone "Scrivici su WhatsApp" verso wa.me con data-cta-position="faq_whatsapp"', /href="https:\/\/wa\.me\/39\d{9,10}"/.test(cta) && /data-cta-position="faq_whatsapp"/.test(cta) && /Scrivici su WhatsApp/.test(cta), cta.slice(0, 200));
+	check('faq: nessun altro data-cta-position nella sezione', (sec.match(/data-cta-position=/g) || []).length === 1);
+}
+async function checkFaqBrowser() {
+	if (domandeArg === 0) return;
+	await withChrome(bin, 'about:blank', { port: 9562, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-faq' }, async ({ send, ev, sleep }) => {
+		await send('Page.navigate', { url });
+		await sleep(3500);
+		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
+		await ev('document.querySelector(".faq--v2").scrollIntoView({block:"start"})');
+		await sleep(1800);
+		const info = JSON.parse(await ev(`(() => {
+			const q = s => document.querySelector(s), cs = e => getComputedStyle(e);
+			const r = e => { const b = e.getBoundingClientRect(); return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) }; };
+			const t = q('.faq--v2 .faq__title'), it = q('.faq--v2 .faq__item'), cta = q('.faq--v2 .faq__contact-cta');
+			return JSON.stringify({
+				title: { fs: cs(t).fontSize, lh: cs(t).lineHeight, tt: cs(t).textTransform, fw: cs(t).fontWeight, c: cs(t).color, r: r(t) },
+				radius: cs(it).borderTopLeftRadius, sub: cs(q('.faq--v2 .faq__subtitle')).display, bg: cs(q('.faq--v2')).backgroundColor,
+				list: r(q('.faq--v2 .faq__list')), contact: r(q('.faq--v2 .faq__contact')), aside: r(q('.faq--v2 .faq__aside')),
+				cta: { bg: cs(cta).backgroundColor, c: cs(cta).color, h: r(cta).h },
+				sw: document.scrollingElement.scrollWidth, cw: document.scrollingElement.clientWidth
+			});
+		})()`));
+		const wide = width >= 1024;
+		check('faq: titolo in maiuscolo ' + (wide ? '48/52' : '40/42') + ', peso 900, #062A22', info.title.tt === 'uppercase' && info.title.fs === (wide ? '48px' : '40px') && info.title.lh === (wide ? '52px' : '42px') && info.title.fw === '900' && info.title.c === 'rgb(6, 42, 34)', JSON.stringify(info.title));
+		check('faq: domande con raggio ' + (wide ? 14 : 16) + ' px, fondo della sezione trasparente', info.radius === (wide ? '14px' : '16px') && info.bg === 'rgba(0, 0, 0, 0)', info.radius + ' ' + info.bg);
+		check('faq: bottone #37B299 con testo bianco, alto almeno 44 px', info.cta.bg === 'rgb(55, 178, 153)' && info.cta.c === 'rgb(255, 255, 255)' && info.cta.h >= 44, JSON.stringify(info.cta));
+		if (wide) check('faq: card a sinistra sotto il titolo, lista a destra', info.contact.x < info.list.x && info.contact.y >= info.aside.y + info.aside.h - 2 && info.list.x >= info.contact.x + info.contact.w, JSON.stringify([info.aside, info.contact, info.list]));
+		else {
+			check('faq: card sotto la lista, sottotitolo nascosto', info.contact.y >= info.list.y + info.list.h - 2 && info.sub === 'none', JSON.stringify([info.list, info.contact]) + ' ' + info.sub);
+			check('faq: lista e card larghe 358 px da x 16', info.list.w === 358 && info.list.x === 16 && info.contact.w === 358, JSON.stringify([info.list, info.contact]));
+		}
+		if (width === 1440) check('faq: colonne 360 e 792 px da x 120', info.aside.w === 360 && info.aside.x === 120 && info.list.w === 792, JSON.stringify([info.aside, info.list]));
+		// Apertura esclusiva con clic reali al centro del pulsante
+		const stato = async () => JSON.parse(await ev('JSON.stringify([...document.querySelectorAll(".faq--v2 .faq__q")].map(b=>b.getAttribute("aria-expanded")==="true"))'));
+		const clic = async i => {
+			await ev('document.querySelectorAll(".faq--v2 .faq__q")[' + i + '].scrollIntoView({block:"center"})');
+			await sleep(400);
+			const c = JSON.parse(await ev('(()=>{const b=document.querySelectorAll(".faq--v2 .faq__q")[' + i + '].getBoundingClientRect();return JSON.stringify({x:Math.round(b.x+b.width/2),y:Math.round(b.y+b.height/2)})})()'));
+			await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: c.x, y: c.y });
+			await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: c.x, y: c.y, button: 'left', clickCount: 1 });
+			await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: c.x, y: c.y, button: 'left', clickCount: 1 });
+			await sleep(700);
+		};
+		const s0 = await stato();
+		check('faq: all\'avvio e\' aperta solo la prima', s0[0] && s0.slice(1).every(v => !v), JSON.stringify(s0));
+		await clic(2);
+		const s1 = await stato();
+		check('faq: aprendo la terza si chiude la prima (una sola aperta)', !s1[0] && s1[2] && s1.filter(Boolean).length === 1, JSON.stringify(s1));
+		let h = 0; // l'altezza e' animata (0,3 s): con la macchina carica puo' servire piu' tempo
+		for (let k = 0; k < 10 && !(h > 20); k++) { h = JSON.parse(await ev('(()=>{const a=document.querySelectorAll(".faq--v2 .faq__a")[2];return JSON.stringify(Math.round(a.getBoundingClientRect().height))})()')); if (!(h > 20)) await sleep(300); }
+		check('faq: la risposta aperta ha altezza visibile (' + h + ' px) e il segno e\' "−"', h > 20 && (await ev('getComputedStyle(document.querySelectorAll(".faq--v2 .faq__toggle")[2],"::before").content')) === '"\u2212"', h + ' px');
+		await clic(2);
+		const s2 = await stato();
+		check('faq: un secondo clic sulla stessa domanda la richiude', s2.every(v => !v), JSON.stringify(s2));
+		await clic(0);
+		const s3 = await stato();
+		check('faq: riaprendo la prima si apre solo lei', s3[0] && s3.filter(Boolean).length === 1, JSON.stringify(s3));
+		check('faq: nessuno scroll orizzontale', info.sw <= info.cw, info.sw + ' > ' + info.cw);
+	});
+}
+
 (async () => {
-	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
+	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona', 'aziende', 'faq'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
 	if (gruppo === 'hero') {
 		const h = await checkHero();
 		if (h) await checkHeroBrowser(h.pre);
@@ -566,6 +744,12 @@ async function checkManifestoBrowser() {
 	} else if (gruppo === 'come-funziona') {
 		await checkSteps();
 		await checkStepsBrowser();
+	} else if (gruppo === 'aziende') {
+		await checkAziende();
+		await checkAziendeBrowser();
+	} else if (gruppo === 'faq') {
+		await checkFaq();
+		await checkFaqBrowser();
 	} else {
 		const html = await checkHttp();
 		if (html) await checkBrowser();
