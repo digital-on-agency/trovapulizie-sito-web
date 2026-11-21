@@ -16,7 +16,7 @@
  * | 02-frasi         | tp-marquee (TICKET-121, fatto)              | 7903:6209, mobile 7946:662 |
  * | 03-servizi       | home-services-v2 (TICKET-121, fatto)        | 7903:6228, mobile 7946:668 |
  * | 04-come-funziona | home-steps-v2 (TICKET-122)                  | 7903:6508 |
- * | 05-manifesto     | home-manifesto (TICKET-123)                 | 7903:7379 |
+ * | 05-manifesto     | home-manifesto (TICKET-123, fatto)          | 7903:7379, mobile 7946:1823 |
  * | 06-recensioni    | home-reviews-notes (TICKET-124)             | 7903:7496 |
  * | 07-zone          | home-zones-v2 (TICKET-125)                  | 7903:7567 |
  * | 08-aziende       | home-b2b-band (TICKET-126)                  | 7903:7601 |
@@ -109,6 +109,35 @@ $hv2_sections = array(
 				'more_label' => carbon_get_the_post_meta( 'h2_servizi_more_label' ),
 				'cta_label'  => carbon_get_the_post_meta( 'h2_servizi_cta' ),
 				'items'      => $hv2_righe,
+			) );
+			++$hv2_i;
+			continue;
+		endif;
+		if ( 'manifesto' === $hv2_def[0] ) :
+			// Manifesto (TICKET-123): template-part dedicato. Le promesse vengono dal campo complex. Carbon non restituisce sul sito il
+			// valore precompilato di un campo mai salvato: senza righe (e senza "Nascondi") il template usa le quattro del Figma
+			// (items null); con "Nascondi" acceso la sezione non esce (items vuoto).
+			$hv2_righe = array();
+			foreach ( (array) carbon_get_the_post_meta( 'h2_manifesto_items' ) as $hv2_riga ) {
+				if ( is_array( $hv2_riga ) ) {
+					$hv2_righe[] = array(
+						'lead'    => $hv2_riga['lead'] ?? '',
+						'keyword' => $hv2_riga['keyword'] ?? '',
+						'text'    => $hv2_riga['text'] ?? '',
+						'proof'   => $hv2_riga['proof'] ?? '',
+						'icon'    => $hv2_riga['icon'] ?? '',
+					);
+				}
+			}
+			if ( ! $hv2_righe ) {
+				$hv2_righe = carbon_get_the_post_meta( 'h2_manifesto_hide' ) ? array() : null;
+			}
+			get_template_part( 'template-parts/home-manifesto', null, array(
+				'eyebrow'  => carbon_get_the_post_meta( 'h2_manifesto_eyebrow' ),
+				'title'    => carbon_get_the_post_meta( 'h2_manifesto_title' ),
+				'subtitle' => carbon_get_the_post_meta( 'h2_manifesto_subtitle' ),
+				'stamp'    => carbon_get_the_post_meta( 'h2_manifesto_stamp' ),
+				'items'    => $hv2_righe,
 			) );
 			++$hv2_i;
 			continue;
