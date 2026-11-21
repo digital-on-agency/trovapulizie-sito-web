@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.73.3
+Version: 0.73.4
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -10997,7 +10997,7 @@ body.tp-v2-header {
 	min-height: 100vh;
 	min-height: 100svh;
 	padding: calc(var(--tp-navbar-h) + clamp(16px, 5vh, 72px)) 0 clamp(24px, 4vh, 56px);
-	--hv2-k: 1;
+	--hv2-k: 1.1; /* scena +10% sul Figma (Guido 21/11) */
 	--hv2-light-a: 0.22;
 	--hv2-light-b: 0.22;
 	--hv2-light-c: 0.22;
@@ -11034,11 +11034,11 @@ body.tp-v2-header {
 	box-sizing: border-box;
 	display: grid;
 	grid-template-columns: 716px calc(540px * var(--hv2-k));
-	column-gap: 40px;
-	align-items: start;
+	column-gap: 24px;
+	align-items: center; /* scena centrata in verticale sul testo (Guido 21/11) */
 	max-width: 1440px;
 	margin: 0 auto;
-	padding: 0 48px 0 96px;
+	padding: 0 0 0 96px;
 }
 .hv2-hero__text {
 	display: flex;
@@ -11186,7 +11186,6 @@ body.tp-v2-header {
 	position: relative;
 	width: calc(540px * var(--hv2-k));
 	height: calc(780px * var(--hv2-k));
-	margin-top: -56px;
 }
 .hv2-hero__stage-in {
 	position: absolute;
@@ -11396,20 +11395,20 @@ body.tp-v2-header {
 
 /* Scena dei telefoni proporzionata all'altezza della finestra, perche' la hero entri senza scorrere */
 @media (min-width: 1280px) and (max-height: 940px) {
-	.hv2-hero { --hv2-k: 0.88; }
+	.hv2-hero { --hv2-k: 0.98; }
 }
 @media (min-width: 1280px) and (max-height: 860px) {
-	.hv2-hero { --hv2-k: 0.8; }
+	.hv2-hero { --hv2-k: 0.86; }
 	.hv2-hero__qr { padding: 8px 20px 8px 8px; }
 	.hv2-hero__qr img { flex-basis: 84px; width: 84px; height: 84px; }
 }
 @media (min-width: 1024px) and (max-height: 780px) {
-	.hv2-hero { --hv2-k: 0.72; }
+	.hv2-hero { --hv2-k: 0.74; }
 	.hv2-hero__cta { padding: 15px 28px; }
 	.hv2-hero__ghost { padding: 15px 24px; }
 }
 @media (min-width: 1024px) and (max-height: 700px) {
-	.hv2-hero { --hv2-k: 0.64; }
+	.hv2-hero { --hv2-k: 0.66; }
 	.hv2-hero__title { font-size: 48px; }
 	.hv2-hero__subtitle { font-size: 17px; line-height: 27px; }
 }
