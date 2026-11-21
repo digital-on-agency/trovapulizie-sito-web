@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.80.0
+Version: 0.80.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -14796,5 +14796,274 @@ html.tp-reveal .hv2 .faq--v2[data-reveal] {
 @media (prefers-reduced-motion: reduce) {
 	.hv2-rev__note {
 		transition: none;
+	}
+}
+
+/* =========================
+   Giro 2 di revisione della Home v2 (tema 0.80.1). Solo regole che correggono quelle sopra, in fondo al file e senza
+   forzature di priorita': a parita' di specificita' vince l'ordine. Per voce: P2-x e P3-x del pacchetto del revisore (review2).
+   [ATTENZIONE] Il movimento (animazioni, riduci movimento) e' di TICKET-129: qui non si tocca.
+   ========================= */
+
+/* P2-1 - Servizi: etichette scure sul riquadro verde (il bianco con ombra arrivava a 3,0-3,7:1; #062A22 su #37B299-#31A58E
+   supera 4,5:1). Il verde fine del gradiente e' piu' chiaro (#31A58E, era #2A9580) perche' il testo scuro lo regga. */
+.hv2-services__panel {
+	background: linear-gradient(145.43deg, #37B299 0%, #31A58E 71.429%);
+}
+.hv2-services__item {
+	color: var(--tp-v2-ink);
+}
+.hv2-services__item:focus-visible {
+	outline-color: var(--tp-v2-ink); /* il bianco non stacca piu' dal verde chiaro */
+}
+.hv2-services__name {
+	font-weight: 700;
+	text-shadow: none;
+}
+.hv2-services__tile {
+	box-shadow: 0 0.6em 0.8em rgba(0, 64, 51, 0.1); /* l'ombra scende sotto l'etichetta: piu' leggera, il testo scuro non perde contrasto */
+}
+
+/* P2-2 - Come funziona: velo dal basso, oltre alla diagonale del Figma, perche' titolo e frase reggano le foto chiare */
+.hv2-steps__shade {
+	background:
+		linear-gradient(0deg, rgba(6, 42, 34, 0.62) 0, rgba(6, 42, 34, 0) 62%),
+		linear-gradient(160.58deg, rgba(6, 42, 34, 0) 39.286%, rgba(6, 42, 34, 0.82) 85.714%);
+}
+
+/* Sotto 1024 px il testo sta in basso a sinistra, dove la diagonale pesa meno: il velo dal basso sale */
+@media (max-width: 1023px) {
+	.hv2-steps__shade {
+		background:
+			linear-gradient(0deg, rgba(6, 42, 34, 0.74) 0, rgba(6, 42, 34, 0) 70%),
+			linear-gradient(160.58deg, rgba(6, 42, 34, 0) 39.286%, rgba(6, 42, 34, 0.82) 85.714%);
+	}
+}
+
+/* P2-3 - Zone, CAP non servito: il messaggio e' una frase lunga, non piu' una pillola da una riga */
+.hv2-zones__msg--no {
+	border-radius: 22px;
+}
+
+/* P3-1 e P3-2 - Come funziona: badge "N di 4" a 12 px anche sotto 1024; il contatore del carosello resta per gli
+   screen reader (aria-live) ma non si vede: sotto ci sono gia' i pallini. */
+.hv2-steps__badge {
+	font-size: 12px;
+	line-height: 18px;
+}
+.tp-carousel__count {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+/* P3-4 - Titoli di sezione con la stessa scala: 72 px a 1440 (come Come funziona), 40 px sotto 1024; aziende e FAQ a
+   peso 800 come gli altri; titolo del manifesto #062A22; sottotitolo FAQ 17 px #4F6660. */
+.hv2-b2b__title,
+.faq--v2 .faq__title {
+	font-weight: 800;
+}
+.hv2-man__title {
+	color: var(--tp-v2-ink);
+}
+.faq--v2 .faq__subtitle {
+	font-size: 17px;
+	line-height: 26px;
+	color: #4F6660;
+}
+@media (min-width: 1024px) {
+	.hv2-services__title,
+	.hv2-zones__title {
+		font-size: clamp(44px, 5vw, 72px);
+	}
+}
+
+/* P3-5 - Eyebrow della FAQ: testo semplice anche a desktop (era una pillola menta), come le altre sezioni */
+.faq--v2 .faq__eyebrow {
+	padding: 0;
+	background: none;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	color: var(--tp-v2-niente);
+}
+@media (min-width: 1024px) {
+	.faq--v2 .faq__eyebrow {
+		font-size: 13px;
+	}
+}
+
+/* P3-6a - Link secondario della fascia aziende: spazio fra il testo e la freccia anche quando il link e' un flex (mobile) */
+.hv2-b2b__link {
+	gap: 8px;
+}
+
+/* P3-9 - Riquadro QR della hero: fondo bianco al 70% e bordo chiaro (sul grigio il QR bianco sembrava incollato) */
+.hv2-hero__qr {
+	border-color: rgba(15, 31, 27, 0.1);
+	background: rgba(255, 255, 255, 0.7);
+}
+
+/* P3-3 - Hover e focus mancanti */
+.hv2-zones__submit:focus-visible,
+.hv2-zones__cta:focus-visible {
+	outline: 2px solid var(--tp-focus);
+	outline-offset: 3px;
+}
+@media (hover: hover) {
+	.hv2-zones__submit:hover {
+		background: #2A9580;
+	}
+	.hv2-cta__btn:hover {
+		background: #E6FFF5;
+	}
+	.navbar--v2 .navbar__login:hover,
+	.site-footer-v2__contacts a:hover {
+		text-decoration: underline;
+		text-underline-offset: 4px;
+	}
+}
+
+/* P3-7 - Burger della barra v2: la X quando il menu e' aperto (le tre linee sono alte 2 px con 5 px di vuoto: 7 px di passo) */
+.navbar--v2 .navbar__burger span {
+	transition: transform var(--tp-dur-fast) var(--tp-ease-stage), opacity var(--tp-dur-fast) var(--tp-ease-stage), width var(--tp-dur-fast) var(--tp-ease-stage);
+}
+.navbar--v2 .navbar__burger[aria-expanded="true"] span:nth-child(1) {
+	transform: translateY(7px) rotate(45deg);
+}
+.navbar--v2 .navbar__burger[aria-expanded="true"] span:nth-child(2) {
+	opacity: 0;
+}
+.navbar--v2 .navbar__burger[aria-expanded="true"] span:nth-child(3) {
+	width: 18px;
+	transform: translateY(-7px) rotate(-45deg);
+}
+@media (prefers-reduced-motion: reduce) {
+	.navbar--v2 .navbar__burger span {
+		transition: none;
+	}
+}
+
+/* P3-1 - Chiusura: l'avviso sul telefono non scende sotto i 10 px nemmeno a scala ridotta */
+.hv2-cta__notif strong {
+	font-size: max(10px, calc(14px * var(--hv2-cta-s)));
+}
+.hv2-cta__notif span {
+	font-size: max(10px, calc(12px * var(--hv2-cta-s)));
+}
+
+/* P3-1 - Come funziona fra 768 e 1023 px: schede da 340 e telefono da 150 (da 132; le misure interne in proporzione) */
+@media (min-width: 768px) and (max-width: 1023px) {
+	.hv2-steps__carousel .tp-carousel__slide {
+		flex-basis: 340px;
+	}
+	.hv2-steps__phone {
+		width: 150px;
+		padding: 4.8px;
+		border-radius: 24px;
+	}
+	.hv2-steps__screen {
+		border-radius: 19.5px;
+	}
+	.hv2-steps__island {
+		left: 52.5px;
+		top: 8.4px;
+		width: 45px;
+		height: 12.6px;
+	}
+	.hv2-steps__text {
+		max-width: 268px;
+	}
+	.hv2-steps__card {
+		height: 420px; /* il telefono piu' grande non tocca piu' il titolo */
+	}
+}
+
+/* P2-5 - Hero fra 768 e 1023 px: la colonna di testo parte dal margine sinistro come le altre sezioni (non centrata),
+   titolo piu' piccolo, scena dei telefoni centrata sotto. */
+@media (min-width: 768px) and (max-width: 1023px) {
+	.hv2-hero__text {
+		max-width: 656px;
+		margin: 0;
+		padding: 0 var(--hv2-gx, 16px);
+	}
+	.hv2-hero__title {
+		font-size: clamp(40px, 6.2vw, 56px);
+	}
+	.hv2-hero__actions {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: center;
+	}
+}
+
+@media (max-width: 1023px) {
+	/* P2-4 - Ritmo: una sola distanza fra i contenuti di due sezioni, circa 96 px a 390 e a 360, in proporzione fino a 1023.
+	   Sta tutta sul padding alto del contenitore interno della sezione che segue; il basso di quella che precede e' 0. */
+	.hv2 {
+		--hv2-gap: clamp(96px, calc(96px + (100vw - 390px) * 0.0253), 112px);
+	}
+	.hv2-services__inner {
+		padding-top: var(--hv2-gap);
+		padding-bottom: 0;
+	}
+	.hv2-steps__inner {
+		padding-top: var(--hv2-gap);
+		padding-bottom: 0;
+	}
+	.hv2-man {
+		padding-top: var(--hv2-gap);
+		padding-bottom: 0;
+	}
+	.hv2-zones__inner {
+		padding-top: var(--hv2-gap);
+		padding-bottom: 0;
+	}
+	.hv2-b2b {
+		padding-top: var(--hv2-gap);
+		padding-bottom: 0;
+	}
+	.faq.faq--v2 {
+		padding-top: var(--hv2-gap);
+		padding-bottom: 24px; /* + 72 di padding alto della chiusura = una distanza di 96 px fra i contenuti */
+	}
+	/* I pallini hanno un'area di tocco da 44 px ma il segno e' alto 8: 34 px di quell'area vuota non contano come distanza,
+	   cosi' dai pallini alla sezione dopo restano circa 80 px visibili (dalle schede 112). */
+	.hv2-steps__carousel .tp-carousel__nav {
+		margin-bottom: -34px;
+	}
+
+	/* P2-6 - Footer v2: logo, telefono, mail e link legali con area di tocco di almeno 44 px (padding-block, distanze ridotte) */
+	.site-footer-v2__brand {
+		gap: 8px;
+	}
+	.site-footer-v2__logo {
+		min-height: 44px;
+	}
+	.site-footer-v2__contacts {
+		gap: 0;
+	}
+	.site-footer-v2__contacts a {
+		min-height: 44px;
+	}
+	.site-footer-v2__bottom {
+		gap: 12px;
+	}
+	.site-footer-v2__legal-links {
+		gap: 0 18px;
+	}
+	.site-footer-v2__legal-links a {
+		display: inline-block;
+		padding-block: 13px;
+	}
+
+	/* P3-4 - 40 px come i titoli degli altri blocchi (servizi era gia' a 40, zone a 39, passi a 36) */
+	.hv2-zones__title,
+	.hv2-steps__title {
+		font-size: 40px;
 	}
 }

@@ -64,8 +64,8 @@
 
    Gruppo "aziende" (TICKET-126), a 390 e 1440; --badges N dice quante garanzie ha la pagina provata (default 2: "Sopralluogo
    gratuito" e "Imprese verificate", mai "Preventivo entro 24 ore" se non e' nel campo), --bottoni on|off se bottone e link
-   escono (off = URL svuotati). Sezione 08-aziende con un solo h2; "Richiedi un preventivo" verso /roma/sgrosso-commerciale/
-   con data-cta-position="home_b2b", "Scopri le pulizie per aziende" verso /roma/pulizie-uffici/, entrambi con risposta
+   escono (off = URL svuotati). Sezione 08-aziende con un solo h2; "Richiedi un preventivo" verso /roma/pulizie-uffici/
+   con data-cta-position="home_b2b", "Hai un condominio? Scopri il servizio" verso /roma/pulizie-condomini/, entrambi con risposta
    200; con --bottoni off nessuno dei due e nessun contenitore delle azioni. Colori e misure calcolati dal Figma (riquadro
    1248 px e raggio 28 a 1440, raggio 24 a 390; titolo 48/52 e 28/32 in maiuscolo; bottone #37B299 col testo bianco, alto
    almeno 44 px); sezione trasparente e senza overflow nascosto (sfondo continuo); testo e azioni su una riga a 1440 e
@@ -94,7 +94,18 @@
    posizione dalla sezione (prova con tre link sintetici nelle sezioni 08, 09, 10); WhatsApp con posizione emette
    marketing_cta_click e non marketing_click_whatsapp; senza consenso l'evento resta nel dataLayer e il link e' intatto;
    un link senza posizione e non verso app/WhatsApp non emette niente; tpTrackConfig.ctaAnywhere e' vero sull'anteprima.
-   Il click e' reale (dispatchEvent su un click intercettato in coda con preventDefault: nessuna navigazione). */
+   Il click e' reale (dispatchEvent su un click intercettato in coda con preventDefault: nessuna navigazione).
+
+   Gruppo "giro2" (revisione UI/UX giro 2, tema 0.80.1), da lanciare a 1440, 768 e 390 (e 360): etichette dei servizi #062A22 peso 700
+   senza ombra e riquadro col gradiente chiaro; velo dal basso su .hv2-steps__shade; CAP non servito con la frase intera e il
+   link WhatsApp con testo precompilato "Ciao, il mio CAP e' <CAP>: quando arrivate da me?" (codificato) e lo stesso numero di
+   data-wa-url; sotto 1024 distanze uniformi fra le sezioni (--hv2-gap, 96 px a 390); da 768 a 1023 hero con testo allineato a
+   sinistra e titolo clamp(40, 6.2vw, 56), schede dei passi da 340 e telefono da 150; footer v2 con aree di tocco da 44 px;
+   fascia aziende (bottone verso uffici, link verso condomini, spazio prima della freccia); sottotitolo del passo 3; badge a 12 px;
+   contatore del carosello fuori vista ma nel DOM; titoli di sezione (72 a 1440, 40 sotto 1024), peso 800, manifesto #062A22,
+   FAQ con eyebrow senza pillola e sottotitolo 17 px #4F6660; spazio non separabile in "due minuti."; pista del carosello fuori
+   dalla tastiera quando non scorre; QR della hero con fondo bianco al 70%; avviso della chiusura da 10 px; burger con la X e Esc;
+   hover (Controlla #2A9580, Apri l'app della chiusura #E6FFF5, Accedi e contatti del footer sottolineati) e focus 2 px #08875F. */
 const { withChrome } = require('./lib/cdp.js');
 
 const SECTIONS = ['01-hero', '02-frasi', '03-servizi', '04-come-funziona', '05-manifesto', '06-recensioni', '07-zone', '08-aziende', '09-faq', '10-chiusura'];
@@ -185,10 +196,10 @@ async function checkAziende() {
 		check('aziende: con URL svuotati nessun bottone, nessun link, nessun contenitore delle azioni', !cta && !link && !/hv2-b2b__actions/.test(sec), cta + link);
 	} else {
 		const href = a => (a.match(/href="([^"]*)"/) || [0, ''])[1];
-		check('aziende: bottone verso /roma/sgrosso-commerciale/ con data-cta-position="home_b2b"', /\/roma\/sgrosso-commerciale\/$/.test(href(cta)) && /data-cta-position="home_b2b"/.test(cta), cta);
-		check('aziende: link verso /roma/pulizie-uffici/', /\/roma\/pulizie-uffici\/$/.test(href(link)), link);
+		check('aziende: bottone verso /roma/pulizie-uffici/ con data-cta-position="home_b2b"', /\/roma\/pulizie-uffici\/$/.test(href(cta)) && /data-cta-position="home_b2b"/.test(cta), cta);
+		check('aziende: link verso /roma/pulizie-condomini/ (giro 2, P2-7: non ripete la destinazione del bottone)', /\/roma\/pulizie-condomini\/$/.test(href(link)), link);
 		check('aziende: il bottone e il link rispondono 200', (await headStatus(href(cta))) === 200 && (await headStatus(href(link))) === 200);
-		check('aziende: etichette "Richiedi un preventivo" e "Scopri le pulizie per aziende"', /Richiedi un preventivo/.test(sec) && /Scopri le pulizie per aziende/.test(sec));
+		check('aziende: etichette "Richiedi un preventivo" e "Hai un condominio? Scopri il servizio"', /Richiedi un preventivo/.test(sec) && /Hai un condominio\? Scopri il servizio/.test(sec));
 	}
 	const img = (sec.match(/<img[^>]*>/) || [''])[0];
 	check('aziende: foto decorativa (alt vuoto, lazy, dimensioni)', /alt=""/.test(img) && /loading="lazy"/.test(img) && /width="\d+"/.test(img) && /height="\d+"/.test(img), img.slice(0, 160));
@@ -217,7 +228,7 @@ async function checkAziendeBrowser() {
 		const wide = width >= 1024;
 		check('aziende: sezione trasparente e senza overflow nascosto (sfondo continuo)', info.secBg === 'rgba(0, 0, 0, 0)' && info.secOv === 'visible', info.secBg + ' ' + info.secOv);
 		check('aziende: raggio ' + (wide ? 28 : 24) + ' px e titolo in maiuscolo', info.boxRadius === (wide ? '28px' : '24px') && info.title.tt === 'uppercase', info.boxRadius + ' ' + info.title.tt);
-		check('aziende: titolo ' + (wide ? '48/52' : '28/32') + ' bianco, peso 900', info.title.fs === (wide ? '48px' : '28px') && info.title.lh === (wide ? '52px' : '32px') && info.title.c === 'rgb(255, 255, 255)' && info.title.fw === '900', JSON.stringify(info.title));
+		check('aziende: titolo ' + (wide ? '48/52' : '28/32') + ' bianco, peso 800 (giro 2, P3-4)', info.title.fs === (wide ? '48px' : '28px') && info.title.lh === (wide ? '52px' : '32px') && info.title.c === 'rgb(255, 255, 255)' && info.title.fw === '800', JSON.stringify(info.title));
 		check('aziende: etichetta #7FE3C9, foto object-fit cover', info.eyebrow === 'rgb(127, 227, 201)' && info.imgFit === 'cover', info.eyebrow + ' ' + info.imgFit);
 		if (width === 1440) check('aziende: riquadro 1248 px da x 96', info.box.w === 1248 && info.box.x === 96, JSON.stringify(info.box));
 		if (width === 390) check('aziende: riquadro 358 px da x 16', info.box.w === 358 && info.box.x === 16, JSON.stringify(info.box));
@@ -282,7 +293,7 @@ async function checkFaqBrowser() {
 			});
 		})()`));
 		const wide = width >= 1024;
-		check('faq: titolo in maiuscolo ' + (wide ? '48/52' : '40/42') + ', peso 900, #062A22', info.title.tt === 'uppercase' && info.title.fs === (wide ? '48px' : '40px') && info.title.lh === (wide ? '52px' : '42px') && info.title.fw === '900' && info.title.c === 'rgb(6, 42, 34)', JSON.stringify(info.title));
+		check('faq: titolo in maiuscolo ' + (wide ? '48/52' : '40/42') + ', peso 800 (giro 2, P3-4), #062A22', info.title.tt === 'uppercase' && info.title.fs === (wide ? '48px' : '40px') && info.title.lh === (wide ? '52px' : '42px') && info.title.fw === '800' && info.title.c === 'rgb(6, 42, 34)', JSON.stringify(info.title));
 		check('faq: domande con raggio ' + (wide ? 14 : 16) + ' px, fondo della sezione trasparente', info.radius === (wide ? '14px' : '16px') && info.bg === 'rgba(0, 0, 0, 0)', info.radius + ' ' + info.bg);
 		check('faq: bottone #37B299 con testo bianco, alto almeno 44 px', info.cta.bg === 'rgb(55, 178, 153)' && info.cta.c === 'rgb(255, 255, 255)' && info.cta.h >= 44, JSON.stringify(info.cta));
 		if (wide) check('faq: card a sinistra sotto il titolo, lista a destra', info.contact.x < info.list.x && info.contact.y >= info.aside.y + info.aside.h - 2 && info.list.x >= info.contact.x + info.contact.w, JSON.stringify([info.aside, info.contact, info.list]));
@@ -931,8 +942,121 @@ async function checkGiro1() {
 	});
 }
 
+
+/* Gruppo giro2 (revisione UI/UX giro 2, tema 0.80.1). Da lanciare a 1440, 768, 390 e 360. */
+async function checkGiro2() {
+	await withChrome(bin, 'about:blank', { port: 9565, width, height: width === 768 ? 1024 : 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-giro2', args: ['--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4'] }, async ({ send, ev, sleep }) => {
+		await send('Page.navigate', { url });
+		await sleep(3500);
+		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
+		await ev('(async()=>{for(let y=0;y<document.documentElement.scrollHeight;y+=250){window.scrollTo({top:y,behavior:"instant"});await new Promise(r=>setTimeout(r,200));}window.scrollTo({top:0,behavior:"instant"});await new Promise(r=>setTimeout(r,3000));return 1})()');
+		const J = async expr => JSON.parse(await ev('(async () => JSON.stringify(await (' + expr + ')))()'));
+		const eq = (n, ok, d) => check('giro2: ' + n, ok, d);
+		const wide = width >= 1024, tablet = width >= 768 && width < 1024;
+		const i = JSON.parse(await J(`(() => {
+			const q = s => document.querySelector(s), qa = s => [...document.querySelectorAll(s)], cs = e => getComputedStyle(e);
+			const R = e => { const r = e.getBoundingClientRect(); return { x: Math.round(r.left), y: Math.round(r.top + scrollY), w: Math.round(r.width), h: Math.round(r.height) }; };
+			const nm = qa('.hv2-services__name'), pn = q('.hv2-services__panel'), sh = q('.hv2-steps__shade'), bd = q('.hv2-steps__badge'), ct = q('.tp-carousel__count');
+			// Per ogni sezione: elementi che ne fissano l'alto e il basso del contenuto (come tools gaps3 del revisore)
+			const S = [[['.hv2-frasi'], ['.hv2-frasi']], [['.hv2-services__eyebrow', '.hv2-services__panel'], ['.hv2-services__cta', '.hv2-services__panel']], [['.hv2-steps__eyebrow'], ['.hv2-steps__card']], [['.hv2-man__eyebrow'], ['.hv2-man__item']], [['.hv2-zones__eyebrow', '.hv2-zones__map'], ['.hv2-zones__more summary', '.hv2-zones__map']], [['.hv2-b2b__box'], ['.hv2-b2b__box']], [['.faq--v2 .faq__eyebrow', '.faq--v2 .faq__list'], ['.faq--v2 .faq__list', '.faq--v2 .faq__contact']], [['.hv2-cta__eyebrow'], ['.hv2-cta__actions']]];
+			const ext = (sels, top) => { let v = top ? 1e9 : -1; sels.forEach(s => qa(s).forEach(e => { const r = e.getBoundingClientRect(); if (r.height) v = top ? Math.min(v, r.top + scrollY) : Math.max(v, r.bottom + scrollY); })); return v; };
+			const gaps = []; for (let k = 1; k < S.length; k++) gaps.push(Math.round(ext(S[k][0], true) - ext(S[k - 1][1], false)));
+			const sec = q('.hv2-frasi'); const ph = q('.hv2-steps__phone'); const sl = q('.hv2-steps__carousel .tp-carousel__slide');
+			const sub = qa('.hv2-steps__card')[2]; const title = q('.hv2-steps__title');
+			const cta = q('.hv2-b2b__cta'), lk = q('.hv2-b2b__link'), fb = q('.site-footer-v2__b2b-btn');
+			const ft = [q('.site-footer-v2__logo'), ...qa('.site-footer-v2__contacts a'), ...qa('.site-footer-v2__legal-links a')].map(e => R(e).h);
+			const qr = q('.hv2-hero__qr'), notif = qa('.hv2-cta__notif strong, .hv2-cta__notif span').map(e => parseFloat(cs(e).fontSize));
+			const fe = q('.faq--v2 .faq__eyebrow'), fsub = q('.faq--v2 .faq__subtitle'), trk = q('.hv2-steps__carousel .tp-carousel__track');
+			return JSON.stringify({
+				nameC: nm.map(e => cs(e).color), nameW: nm.map(e => cs(e).fontWeight), nameS: nm.map(e => cs(e).textShadow), panelBg: cs(pn).backgroundImage,
+				shade: cs(sh).backgroundImage, badgeFs: cs(bd).fontSize, countW: R(ct).w, countH: R(ct).h, countTxt: ct.textContent, countLive: ct.getAttribute('aria-live'),
+				gaps, gapVar: parseFloat(cs(q('.hv2-services__inner')).paddingTop) || 0,
+				titles: { serv: cs(q('.hv2-services__title')).fontSize, zone: cs(q('.hv2-zones__title')).fontSize, steps: cs(title).fontSize, manC: cs(q('.hv2-man__title')).color, b2bW: cs(q('.hv2-b2b__title')).fontWeight, faqW: cs(q('.faq--v2 .faq__title')).fontWeight },
+				stepsTitle: title.textContent, step3: sub && sub.querySelector('.hv2-steps__text').textContent,
+				faqEyebrow: { bg: cs(fe).backgroundColor, pad: cs(fe).paddingTop, c: cs(fe).color, fs: cs(fe).fontSize }, faqSub: { fs: cs(fsub).fontSize, c: cs(fsub).color, d: cs(fsub).display },
+				trackTab: trk.getAttribute('tabindex'), trackScroll: trk.scrollWidth > trk.clientWidth + 1,
+				heroText: R(q('.hv2-hero__text')), heroTitleFs: cs(q('.hv2-hero__title')).fontSize, logoX: R(q('.navbar__brand')).x, heroTitleX: Math.round(q('.hv2-hero__title').getBoundingClientRect().left),
+				stage: R(q('.hv2-hero__stage')), qr: qr ? { bg: cs(qr).backgroundColor, bc: cs(qr).borderTopColor, vis: R(qr).w > 0 } : null,
+				slideW: sl && R(sl).w, phoneW: ph && R(ph).w, cardH: R(qa('.hv2-steps__card')[0]).h, notif,
+				cta: cta && { h: cta.getAttribute('href'), pos: cta.getAttribute('data-cta-position') }, lk: lk && { h: lk.getAttribute('href'), t: lk.textContent.replace(/\\s+/g, ' ').trim(), gap: cs(lk).columnGap, disp: cs(lk).display }, fb: fb && { h: fb.getAttribute('href'), pos: fb.getAttribute('data-cta-position') },
+				ft, soonC: qa('.hv2-services__soon').map(e => cs(e).color)
+			});
+		})()`));
+		eq('servizi: etichette #062A22, peso 700, senza ombra', i.nameC.every(c => c === 'rgb(6, 42, 34)') && i.nameW.every(w => w === '700') && i.nameS.every(t => t === 'none'), JSON.stringify([i.nameC[0], i.nameW[0], i.nameS[0]]));
+		eq('servizi: riquadro col gradiente #37B299 -> #31A58E', /rgb\(55, 178, 153\)/.test(i.panelBg) && /rgb\(49, 165, 142\)/.test(i.panelBg), i.panelBg);
+		eq('come funziona: velo dal basso (due gradienti sul velo, il primo a 0deg)', (i.shade.match(/linear-gradient/g) || []).length === 2 && /^linear-gradient\(0deg/.test(i.shade), i.shade);
+		eq('come funziona: sottotitolo del passo 3 "Scegli giorno e ora, in due tocchi. Il professionista conferma."', i.step3 === 'Scegli giorno e ora, in due tocchi. Il professionista conferma.', String(i.step3));
+		eq('come funziona: titolo con spazio non separabile in "due minuti."', i.stepsTitle === 'Spoiler: due minuti.', JSON.stringify(i.stepsTitle));
+		eq('come funziona: badge "N di 4" a 12 px', i.badgeFs === '12px', i.badgeFs);
+		eq('come funziona: contatore fuori vista (1 x 1 px) ma nel DOM con aria-live', i.countW <= 1 && i.countH <= 1 && /^\d di 4$/.test(i.countTxt) && i.countLive === 'polite', JSON.stringify([i.countW, i.countH, i.countTxt, i.countLive]));
+		eq('pista del carosello ' + (i.trackScroll ? 'che scorre: tabindex 0' : 'ferma: fuori dalla tastiera'), i.trackScroll ? i.trackTab === '0' : i.trackTab === null, JSON.stringify([i.trackScroll, i.trackTab]));
+		eq('titoli: servizi e zone ' + (wide ? 'clamp(44, 5vw, 72)' : '40 px') + ', passi ' + (wide ? '' : '40 px'), wide ? (i.titles.serv === i.titles.zone && Math.abs(parseFloat(i.titles.serv) - Math.min(72, Math.max(44, width * 0.05))) < 0.6) : (i.titles.serv === '40px' && i.titles.zone === '40px' && i.titles.steps === '40px'), JSON.stringify(i.titles));
+		eq('titoli: aziende e FAQ peso 800, manifesto #062A22', i.titles.b2bW === '800' && i.titles.faqW === '800' && i.titles.manC === 'rgb(6, 42, 34)', JSON.stringify(i.titles));
+		eq('FAQ: eyebrow senza pillola (fondo trasparente, nessun padding), #007A5C', i.faqEyebrow.bg === 'rgba(0, 0, 0, 0)' && i.faqEyebrow.pad === '0px' && i.faqEyebrow.c === 'rgb(0, 122, 92)', JSON.stringify(i.faqEyebrow));
+		if (wide) eq('FAQ: sottotitolo 17 px #4F6660', i.faqSub.fs === '17px' && i.faqSub.c === 'rgb(79, 102, 96)', JSON.stringify(i.faqSub));
+		eq('aziende: bottone verso uffici con data-cta-position="home_b2b", link verso condomini con testo nuovo e spazio prima della freccia', !!i.cta && /\/roma\/pulizie-uffici\/$/.test(i.cta.h) && i.cta.pos === 'home_b2b' && !!i.lk && /\/roma\/pulizie-condomini\/$/.test(i.lk.h) && i.lk.t === 'Hai un condominio? Scopri il servizio →' && (i.lk.disp !== 'flex' || i.lk.gap === '8px'), JSON.stringify([i.cta, i.lk]));
+		eq('footer v2: bottone aziende verso /roma/pulizie-uffici/ con data-cta-position="footer_b2b"', !!i.fb && /\/roma\/pulizie-uffici\/$/.test(i.fb.h) && i.fb.pos === 'footer_b2b', JSON.stringify(i.fb));
+		if (width < 1024) {
+			eq('footer v2: logo, telefono, mail e link legali alti almeno 44 px (' + i.ft.join(',') + ')', i.ft.every(h => h >= 44), JSON.stringify(i.ft));
+			const g = i.gapVar;
+			eq('ritmo: --hv2-gap ' + g.toFixed(1) + ' px (96 a 390, in proporzione fino a 1023)', Math.abs(g - Math.min(112, Math.max(96, 96 + (width - 390) * 0.0253))) < 0.6, String(g));
+			// fascia > servizi, servizi > passi, passi > manifesto, manifesto > zone, zone > aziende, aziende > FAQ, FAQ > chiusura: una
+			// distanza sola; dopo le schede dei passi (indice 2) restano 16 px in piu' (area dei pallini non contata solo in parte)
+			eq('ritmo: distanza fra i contenuti delle sezioni = --hv2-gap (+16 dopo le schede dei passi) in ogni passaggio (' + i.gaps.join(', ') + ')', i.gaps.every((d, k) => Math.abs(d - (g + (k === 2 ? 16 : 0))) <= 2), JSON.stringify(i.gaps));
+		}
+		if (tablet) {
+			eq('hero 768-1023: testo allineato a sinistra (non centrato), x titolo = x logo (' + i.heroTitleX + ' / ' + i.logoX + ')', Math.abs(i.heroTitleX - i.logoX) <= 1 && i.heroText.x <= 1, JSON.stringify([i.heroTitleX, i.logoX, i.heroText]));
+			eq('hero 768-1023: titolo clamp(40, 6.2vw, 56)', Math.abs(parseFloat(i.heroTitleFs) - Math.min(56, Math.max(40, width * 0.062))) < 0.6, i.heroTitleFs);
+			eq('hero 768-1023: scena dei telefoni centrata sotto il testo', Math.abs((i.stage.x + i.stage.w / 2) - width / 2) <= 1 && i.stage.y > i.heroText.y + i.heroText.h - 40, JSON.stringify([i.stage, i.heroText]));
+			eq('come funziona 768-1023: schede da 340, telefono da 150', i.slideW === 340 && i.phoneW === 150, JSON.stringify([i.slideW, i.phoneW]));
+		}
+		if (width < 768) eq('come funziona mobile: scheda da 300 (o larghezza meno 56), telefono da 132', i.slideW === Math.min(300, width - 56) && i.phoneW === 132, JSON.stringify([i.slideW, i.phoneW]));
+		if (wide) eq('hero: riquadro QR con fondo bianco al 70% e bordo chiaro', !!i.qr && i.qr.vis && i.qr.bg === 'rgba(255, 255, 255, 0.7)' && /rgba\(15, 31, 27, 0\.1\)/.test(i.qr.bc), JSON.stringify(i.qr));
+		eq('chiusura: avviso sul telefono da almeno 10 px (' + i.notif.join(',') + ')', i.notif.length > 0 && i.notif.every(f => f >= 10), JSON.stringify(i.notif));
+
+		// Zone: CAP non servito
+		const nz = await J(`(async () => { const f = document.querySelector('.hv2-zones__check'); const inp = f.querySelector('.hv2-zones__input'); inp.value = '00133'; f.requestSubmit(); await new Promise(r => setTimeout(r, 700));
+			const m = f.querySelector('.hv2-zones__msg'), a = f.querySelector('.hv2-zones__cta'); return { state: f.getAttribute('data-state'), msg: m && m.textContent, href: a && a.getAttribute('href'), pos: a && a.getAttribute('data-cta-position'), label: a && a.textContent, wa: f.getAttribute('data-wa-url') }; })()`);
+		eq('zone, CAP non servito: "<CAP> · Non ancora da te. Scrivici su WhatsApp per sapere quando arriviamo."', nz.state === 'no' && nz.msg === '00133 · Non ancora da te. Scrivici su WhatsApp per sapere quando arriviamo.', JSON.stringify(nz));
+		const waBase = (nz.wa || '').split('?')[0];
+		eq('zone, CAP non servito: link WhatsApp con testo precompilato codificato, stesso numero, data-cta-position="zones_whatsapp"', !!nz.href && nz.href.startsWith(waBase) && /^https:\/\/wa\.me\/\d+/.test(nz.href) && new URL(nz.href).searchParams.get('text') === 'Ciao, il mio CAP è 00133: quando arrivate da me?' && /%C3%A8/.test(nz.href) && nz.pos === 'zones_whatsapp' && nz.label === 'Scrivici su WhatsApp', JSON.stringify(nz));
+
+		// Hover e focus (hover reale con il mouse)
+		const hov = async (sel, prop) => { const c = await J(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); e.scrollIntoView({ block: 'center', behavior: 'instant' }); const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+			await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: c.x, y: c.y }); await sleep(1100);
+			const v = await J(`(() => { const s = getComputedStyle(document.querySelector(${JSON.stringify(sel)})); return { bg: s.backgroundColor, td: s.textDecorationLine }; })()`);
+			await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 2, y: 2 }); await sleep(250); return v; };
+		if (wide) {
+			const h1 = await hov('.hv2-zones__submit'); eq('hover: "Controlla" #2A9580 come il primario', h1.bg === 'rgb(42, 149, 128)', JSON.stringify(h1));
+			const h2 = await hov('.hv2-cta__btn'); eq('hover: "Apri l’app" della chiusura #E6FFF5', h2.bg === 'rgb(230, 255, 245)', JSON.stringify(h2));
+			const h3 = await hov('.navbar__login'); eq('hover: "Accedi" sottolineato', /underline/.test(h3.td), JSON.stringify(h3));
+			const h4 = await hov('.site-footer-v2__contacts a'); eq('hover: telefono del footer sottolineato', /underline/.test(h4.td), JSON.stringify(h4));
+		} else {
+			const h1 = await hov('.hv2-zones__submit'); eq('hover: "Controlla" #2A9580', h1.bg === 'rgb(42, 149, 128)', JSON.stringify(h1));
+		}
+		const fo = await J(`(() => { const e = document.querySelector('.hv2-zones__submit'); e.scrollIntoView({ block: 'center', behavior: 'instant' }); e.focus({ focusVisible: true }); const s = getComputedStyle(e); return { fv: e.matches(':focus-visible'), w: s.outlineWidth, st: s.outlineStyle, c: s.outlineColor, o: s.outlineOffset }; })()`);
+		await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Shift' }); await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Shift' }); await sleep(200);
+		const fo2 = await J(`(() => { const s = getComputedStyle(document.querySelector('.hv2-zones__submit')); return { w: s.outlineWidth, st: s.outlineStyle, c: s.outlineColor, o: s.outlineOffset }; })()`);
+		eq('focus: "Controlla" 2 px #08875F offset 3', fo2.w === '2px' && fo2.st === 'solid' && fo2.c === 'rgb(8, 135, 95)' && fo2.o === '3px', JSON.stringify([fo, fo2]));
+
+		// Burger: X a menu aperto, Esc nasconde il pannello
+		if (width < 1024) {
+			await ev('window.scrollTo({top:0,behavior:"instant"})'); await sleep(300);
+			const b0 = await J(`(() => { const b = document.getElementById('nav-burger'), p = document.getElementById('nav-panel'); return { exp: b.getAttribute('aria-expanded'), hid: p.hidden, tr: [...b.querySelectorAll('span')].map(s => getComputedStyle(s).transform) }; })()`);
+			await ev('document.getElementById("nav-burger").click()'); await sleep(1200);
+			const b1 = await J(`(() => { const b = document.getElementById('nav-burger'), p = document.getElementById('nav-panel'); const m = s => { const t = getComputedStyle(s).transform; if (t === 'none') return 0; const v = t.match(/matrix\\(([^)]+)\\)/)[1].split(',').map(Number); return Math.round(Math.atan2(v[1], v[0]) * 180 / Math.PI); }; const sp = [...b.querySelectorAll('span')]; return { exp: b.getAttribute('aria-expanded'), hid: p.hidden, disp: getComputedStyle(p).display, ang: sp.map(m), op: sp.map(s => getComputedStyle(s).opacity), lbl: b.getAttribute('aria-label') }; })()`);
+			eq('burger: a menu aperto il primo segno ruota di 45, il secondo sparisce, il terzo di -45', b1.exp === 'true' && b1.hid === false && b1.ang[0] === 45 && b1.ang[2] === -45 && b1.op[1] === '0', JSON.stringify([b0, b1]));
+			await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); await sleep(500);
+			const b2 = await J(`(() => { const b = document.getElementById('nav-burger'), p = document.getElementById('nav-panel'); const r = p.getBoundingClientRect(); return { exp: b.getAttribute('aria-expanded'), hid: p.hidden, disp: getComputedStyle(p).display, h: Math.round(r.height), lock: document.documentElement.classList.contains('tp-nav-lock'), lbl: b.getAttribute('aria-label') }; })()`);
+			eq('burger: Esc chiude e nasconde il pannello (hidden, display none, altezza 0), la pagina torna a scorrere', b2.exp === 'false' && b2.hid === true && b2.disp === 'none' && b2.h === 0 && !b2.lock && b2.lbl === 'Apri il menu', JSON.stringify(b2));
+		}
+		const ov = await J('document.documentElement.scrollWidth <= document.documentElement.clientWidth');
+		eq('nessuno scroll orizzontale', ov);
+	});
+}
+
 (async () => {
-	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona', 'chiusura', 'aziende', 'faq', 'tracking', 'giro1'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
+	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona', 'chiusura', 'aziende', 'faq', 'tracking', 'giro1', 'giro2'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
 	if (gruppo === 'hero') {
 		const h = await checkHero();
 		if (h) await checkHeroBrowser(h.pre);
@@ -950,6 +1074,8 @@ async function checkGiro1() {
 		await checkServiziBrowser();
 	} else if (gruppo === 'giro1') {
 		await checkGiro1();
+	} else if (gruppo === 'giro2') {
+		await checkGiro2();
 	} else if (gruppo === 'tracking') {
 		await checkTracking();
 	} else if (gruppo === 'come-funziona') {

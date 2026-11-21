@@ -57,7 +57,7 @@ $hv2c_img = static function ( $file ) {
 $hv2c_default = array(
 	array( 'title' => 'Scegli.', 'text' => 'Dici cosa ti serve e dove. Il resto lo cerca l’app.', 'bg_w' => 1200, 'bg_h' => 630, 'alt' => 'Una professionista passa l’aspirapolvere sul divano di un salotto luminoso' ),
 	array( 'title' => 'Confronta.', 'text' => 'Vedi chi è libero vicino a te e scegli chi ti piace.', 'bg_w' => 1440, 'bg_h' => 804, 'alt' => 'Una spugna gialla su una superficie in lavorazione, accanto a una pianta' ),
-	array( 'title' => 'Prenota.', 'text' => 'Scegli giorno e ora, in due tocchi.', 'bg_w' => 1440, 'bg_h' => 804, 'alt' => 'Una camera con letto rifatto e asciugamani piegati' ),
+	array( 'title' => 'Prenota.', 'text' => 'Scegli giorno e ora, in due tocchi. Il professionista conferma.', 'bg_w' => 1440, 'bg_h' => 804, 'alt' => 'Una camera con letto rifatto e asciugamani piegati' ),
 	array( 'title' => 'Fatto.', 'text' => 'Torni a casa ed è tutto a posto. Il resto della giornata è tuo.', 'bg_w' => 1376, 'bg_h' => 768, 'alt' => 'Un salotto in ordine, pieno di luce' ),
 );
 $hv2c_in = is_array( $args['items'] ) ? array_values( array_filter( $args['items'], static function ( $r ) {
@@ -126,6 +126,8 @@ foreach ( $hv2c_rows as $hv2c_i => $hv2c_r ) {
 }
 $hv2c_link = $hv2c_pick( $args['link_url'], '' ) ? tp_home_v2_service_href( $args['link_url'] ) : '';
 $hv2c_title = $hv2c_pick( $args['title'], 'Spoiler: due minuti.' );
+// Le ultime due parole non vanno a capo separate (giro 2, P3-9): "DUE MINUTI." non lascia "MINUTI." da solo su una riga.
+$hv2c_title = preg_replace( '/\s+(\S+)$/u', "\u{00A0}\$1", $hv2c_title );
 ?>
 <section class="hv2-section hv2-steps" id="come-funziona" data-section="04-come-funziona">
 	<span class="hv2-steps__light hv2-steps__light--a" aria-hidden="true"></span>

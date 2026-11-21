@@ -10,10 +10,10 @@
  * non da campi della pagina: il cambio di pagina iniziale non svuota le card delle landing.
  */
 
-/** Percorso (nel sito) della richiesta di preventivo B2B: destinazione del bottone della fascia aziende. */
-const TP_HV2_B2B_CTA_PATH = '/roma/sgrosso-commerciale/';
-/** Percorso della pagina pulizie per uffici: destinazione del link secondario della fascia aziende. */
-const TP_HV2_B2B_LINK_PATH = '/roma/pulizie-uffici/';
+/** Percorso (nel sito) della richiesta di preventivo B2B: destinazione del bottone della fascia aziende (giro 2, P2-7: pulizie uffici). */
+const TP_HV2_B2B_CTA_PATH = '/roma/pulizie-uffici/';
+/** Percorso del link secondario della fascia aziende: la pagina dei condomini, per non ripetere la destinazione del bottone. */
+const TP_HV2_B2B_LINK_PATH = '/roma/pulizie-condomini/';
 
 /**
  * Le tre garanzie della fascia aziende del Figma (7903:7608), una per riga nel campo Carbon. "Preventivo entro 24 ore"

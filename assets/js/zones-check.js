@@ -6,8 +6,9 @@
    - CAP in lista     -> "<CAP> · Ci siamo: sei in <quartiere>" e il link "Apri l'app" (data-cta-position="zones_check");
                          il CAP si evidenzia sulla mappa (path[data-cap] riceve .is-selected, la mappa si sposta sulla zona);
                          se il CAP e' in lista ma non ha un poligono (00194) l'esito e' lo stesso, senza evidenziazione.
-   - CAP di Roma fuori lista (00118-00199) -> "Non ancora da te" e "Scrivici su WhatsApp" (data-cta-position="zones_whatsapp",
-                         testo precompilato col CAP). Nessun campo email.
+   - CAP di Roma fuori lista (00118-00199) -> "<CAP> · Non ancora da te. Scrivici su WhatsApp per sapere quando arriviamo." e il
+                         link "Scrivici su WhatsApp" (data-cta-position="zones_whatsapp", testo precompilato "Ciao, il mio CAP e'
+                         <CAP>: quando arrivate da me?"). Nessun campo email.
    - altro (non 5 cifre, o fuori da 00118-00199) -> "Scrivi un CAP di Roma (5 cifre)": il campo resta compilato e prende il focus.
    Stato sul form: data-state = "ok" | "no" | "errore" | assente. Dopo "Controlla" l'esito scende di 8 px e appare (CSS). */
 (function () {
@@ -94,10 +95,10 @@
 			showOnMap(v);
 		} else {
 			resetMap();
-			var msg = el('p', 'hv2-zones__msg hv2-zones__msg--no', 'Non ancora da te');
+			var msg = el('p', 'hv2-zones__msg hv2-zones__msg--no', v + ' · Non ancora da te. Scrivici su WhatsApp per sapere quando arriviamo.');
 			var nodes = [msg];
 			if (waUrl) {
-				var t = 'Ciao, il mio CAP è ' + v + ': quando arrivate nella mia zona?';
+				var t = 'Ciao, il mio CAP è ' + v + ': quando arrivate da me?';
 				nodes.push(link(waUrl + (waUrl.indexOf('?') < 0 ? '?' : '&') + 'text=' + encodeURIComponent(t), 'Scrivici su WhatsApp', 'zones_whatsapp'));
 			}
 			show('no', nodes);

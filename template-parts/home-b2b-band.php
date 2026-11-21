@@ -2,7 +2,7 @@
 /**
  * Fascia aziende della Home v2, `08-aziende` (SPEC-homepage-v2, TICKET-126). Figma file UiW4TPgvqCODW5bhyFV5eK, pagina 30:
  * desktop 7903:7601 (dentro 7903:5256), mobile 7946:2048 (dentro 7946:2). Riquadro scuro con foto d'ufficio e velo verde:
- * etichetta, titolo, frase, garanzie, bottone "Richiedi un preventivo" e link "Scopri le pulizie per aziende".
+ * etichetta, titolo, frase, garanzie, bottone "Richiedi un preventivo" e link "Hai un condominio? Scopri il servizio".
  *
  * Argomenti (tutti con default; le letture Carbon e la risoluzione degli URL stanno in tp_home_v2_b2b_args(),
  * inc/home-v2-b2b.php):
@@ -15,7 +15,7 @@
  * - cta_label (string) e cta_url (string): bottone verde. Senza cta_url il bottone non viene stampato.
  *   data-cta-position="home_b2b". Default etichetta "Richiedi un preventivo".
  * - link_label (string) e link_url (string): link secondario. Senza link_url il link non viene stampato.
- *   Default etichetta "Scopri le pulizie per aziende".
+ *   Default etichetta "Hai un condominio? Scopri il servizio".
  * - image (string): URL della foto di fondo; vuoto = foto d'ufficio del tema (assets/img/home-v2/aziende-ufficio*.webp).
  *
  * Semantica: un H2, le garanzie in una lista, la foto e' decorativa (alt vuoto, lazy). Ingressi: data-reveal sul testo e
@@ -74,7 +74,7 @@ $hb_link   = trim( (string) $args['link_url'] );
 					<a class="hv2-b2b__cta" href="<?php echo esc_url( $hb_cta ); ?>" data-cta-position="home_b2b"><span><?php echo esc_html( $hb_pick( $args['cta_label'], 'Richiedi un preventivo' ) ); ?></span><span aria-hidden="true">&rarr;</span></a>
 				<?php endif; ?>
 				<?php if ( '' !== $hb_link ) : ?>
-					<a class="hv2-b2b__link" href="<?php echo esc_url( $hb_link ); ?>"><span><?php echo esc_html( $hb_pick( $args['link_label'], 'Scopri le pulizie per aziende' ) ); ?></span> <span aria-hidden="true">&rarr;</span></a>
+					<a class="hv2-b2b__link" href="<?php echo esc_url( $hb_link ); ?>"><span><?php echo esc_html( $hb_pick( $args['link_label'], 'Hai un condominio? Scopri il servizio' ) ); ?></span> <span aria-hidden="true">&rarr;</span></a>
 				<?php endif; ?>
 			</div>
 		<?php endif; ?>

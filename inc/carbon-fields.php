@@ -1201,11 +1201,11 @@ add_action( 'carbon_fields_register_fields', function () {
 				Field::make( 'text', 'h2_aziende_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Richiedi un preventivo"' ) ),
 				Field::make( 'text', 'h2_aziende_cta_url', __( 'Bottone: destinazione' ) )
 					->set_default_value( defined( 'TP_HV2_B2B_CTA_PATH' ) ? TP_HV2_B2B_CTA_PATH : '' )
-					->set_help_text( __( 'Percorso interno (es. /roma/sgrosso-commerciale/) o URL del sito. Svuotato e salvato = il bottone non esce; esce solo se la pagina e\' pubblicata.' ) ),
-				Field::make( 'text', 'h2_aziende_link_label', __( 'Link: testo' ) )->set_help_text( __( 'Vuoto = "Scopri le pulizie per aziende"' ) ),
+					->set_help_text( __( 'Percorso interno (es. /roma/pulizie-uffici/) o URL del sito. Svuotato e salvato = il bottone non esce; esce solo se la pagina e\' pubblicata.' ) ),
+				Field::make( 'text', 'h2_aziende_link_label', __( 'Link: testo' ) )->set_help_text( __( 'Vuoto = "Hai un condominio? Scopri il servizio"' ) ),
 				Field::make( 'text', 'h2_aziende_link_url', __( 'Link: destinazione' ) )
 					->set_default_value( defined( 'TP_HV2_B2B_LINK_PATH' ) ? TP_HV2_B2B_LINK_PATH : '' )
-					->set_help_text( __( 'Percorso interno (es. /roma/pulizie-uffici/) o URL del sito. Svuotato e salvato = il link non esce; esce solo se la pagina e\' pubblicata.' ) ),
+					->set_help_text( __( 'Percorso interno (es. /roma/pulizie-condomini/) o URL del sito. Svuotato e salvato = il link non esce; esce solo se la pagina e\' pubblicata.' ) ),
 				Field::make( 'image', 'h2_aziende_image', __( 'Foto di fondo' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuoto = la foto d\'ufficio del tema. Foto vera, orizzontale, almeno 1600 px di larghezza.' ) ),
 			) );
 		}

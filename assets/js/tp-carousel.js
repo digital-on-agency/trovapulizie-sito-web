@@ -3,7 +3,7 @@
    nascosto nel markup con `hidden` finche' questo script non lo toglie), [data-tp-carousel-dot], [data-tp-carousel-prev],
    [data-tp-carousel-next], [data-tp-carousel-count] (testo "N di M" dentro aria-live="polite").
    Evento: `tp:carousel-change` sul contenitore (bubbles), detail { index, total }, a ogni cambio di scheda corrente.
-   Scheda corrente = quella il cui centro e' piu' vicino al centro della pista. Tastiera: sulla pista (tabindex 0) frecce
+   Scheda corrente = quella il cui centro e' piu' vicino al centro della pista. Tastiera: sulla pista (tabindex 0 solo se scorre) frecce
    sinistra e destra, Home e Fine; i puntini e le frecce sono button (Invio e Spazio). Senza questo script resta lo
    scroll-snap CSS e l'indicatore non compare.
    Quando la pista non scorre (il CSS del chiamante la mette in colonna o in griglia, es. Come funziona da 1024 px) lo
@@ -65,6 +65,8 @@
 		function sync() {
 			var on = scrolls();
 			if (on) root.setAttribute('aria-roledescription', 'carosello'); else root.removeAttribute('aria-roledescription');
+			// La pista e' un punto di sosta della tastiera solo quando scorre (frecce, Home, Fine): in pila non c'e' nulla da fare.
+			if (on) track.setAttribute('tabindex', '0'); else track.removeAttribute('tabindex');
 			if (on) render(nearest(), true);
 		}
 
