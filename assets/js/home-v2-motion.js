@@ -19,7 +19,7 @@
 
    Cosa fa questo file:
    1. Testo circolare della hero: IntersectionObserver aggiunge .is-paused a .hv2-hero__orbit fuori schermo.
-   2. Da 1024 px con movimento consentito, GSAP + ScrollTrigger da cdnjs (una sola volta, al load o al primo scroll) per tre
+   2. Da 1024 px con movimento consentito, GSAP + ScrollTrigger dal tema (assets/vendor/gsap/), una sola volta, al load o al primo scroll) per tre
       effetti, tutti con solo transform: parallasse della hero, ken burns della foto aziende, scritta del footer.
       Sotto 1024 px o con "riduci movimento" GSAP non viene richiesto.
    Dove viene caricato: sul template page-home-v2.php e, per la scritta del footer, ovunque esca il footer nuovo
@@ -42,7 +42,10 @@
 		}).observe(orbit);
 	}
 
-	var GSAP_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/';
+	// GSAP 3.13.0 servito dal tema (assets/vendor/gsap/, licenza standard GSAP): nessuna richiesta a terzi. Il percorso si
+	// ricava dall'URL di questo file; se manca (caso teorico) si torna a cdnjs.
+	var ME = document.currentScript && document.currentScript.src;
+	var GSAP_CDN = ME ? ME.replace(/assets\/js\/home-v2-motion\.js.*$/, 'assets/vendor/gsap/') : 'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.13.0/';
 	var QUERY = '(min-width: 1024px) and (prefers-reduced-motion: no-preference)';
 	var desktop = window.matchMedia(QUERY);
 	if (!desktop.matches) return;

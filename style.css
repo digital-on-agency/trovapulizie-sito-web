@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.81.1
+Version: 0.81.2
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -15230,5 +15230,64 @@ html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__tent {
 	.hv2-zones__title,
 	.hv2-steps__title {
 		font-size: 40px;
+	}
+}
+
+/* =========================
+   Giro 3 di controllo finale (21/11, Claude): ultimi difetti prima dell'accensione.
+   ========================= */
+/* D1 - Sotto 1024 il margine negativo dei pallini (giro 2) faceva passare la sezione dopo sopra i controlli del carosello:
+   frecce e pallini restano sopra e cliccabili. */
+.hv2-steps__carousel .tp-carousel__nav {
+	position: relative;
+	z-index: 2;
+}
+/* D2 - Titolo e sottotitolo del manifesto non entrano nella colonna del timbro, a tutte le larghezze (768-860 px li copriva). */
+.hv2-man__title,
+.hv2-man__subtitle {
+	max-width: calc(100% - var(--hvm-stamp) * 1.16 - 8px); /* 1,16 = ingombro del timbro ruotato di 10 gradi */
+}
+/* D3 - Riquadro dei servizi da desktop: il badge "presto" dell'ultima riga restava a filo o fuori dal bordo (1024-1110 px).
+   Altezza libera e margine sotto pari ai laterali. */
+@media (min-width: 1024px) {
+	.hv2-services__panel {
+		height: auto;
+		min-height: 28.8em;
+		padding-bottom: calc(3em + 14px);
+	}
+}
+/* C1 - Link del footer: tocco comodo anche da desktop e a tutta colonna sotto 1024. */
+.site-footer-v2__links a {
+	padding-block: 6px;
+}
+@media (max-width: 1023px) {
+	.site-footer-v2__links a {
+		display: block;
+	}
+}
+/* C2 - Passi 1 e 2 a 1440: velo dal basso un po' piu' alto, i titoli da 112 px reggono le zone chiare delle foto. */
+@media (min-width: 1280px) {
+	.hv2-steps__shade {
+		background:
+			linear-gradient(0deg, rgba(6, 42, 34, 0.7) 0, rgba(6, 42, 34, 0) 70%),
+			linear-gradient(160.58deg, rgba(6, 42, 34, 0) 39.286%, rgba(6, 42, 34, 0.82) 85.714%);
+	}
+}
+/* C3 - Titolo della FAQ sulla stessa scala delle altre sezioni (72 px a 1440, 40 sotto 1024). */
+.faq--v2 .faq__title {
+	font-size: clamp(44px, 5vw, 72px);
+	line-height: 1;
+	letter-spacing: -0.02em;
+}
+@media (max-width: 1023px) {
+	.faq--v2 .faq__title {
+		font-size: 40px;
+	}
+}
+/* C4 - Stato al passaggio per "Vedi tutti i quartieri serviti". */
+@media (hover: hover) {
+	.hv2-zones__more summary:hover {
+		text-decoration: underline;
+		text-underline-offset: 3px;
 	}
 }

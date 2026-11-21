@@ -10,7 +10,7 @@
      1440foot, 390foot, 1440footoff  con --footer-url=<pagina qualunque>: footer nuovo (interruttore acceso) o vecchio (spento).
 
    Controlli (a 1440 con movimento: gli effetti legati allo scroll; negli altri modi: la loro assenza):
-   - GSAP e ScrollTrigger richiesti a cdnjs una volta sola a 1440; mai a 390, mai con riduci movimento;
+   - GSAP e ScrollTrigger (dal tema, assets/vendor/gsap/) richiesti una volta sola a 1440; mai a 390, mai con riduci movimento;
    - parallasse della hero, ken burns della foto aziende e scritta del footer: la trasformazione cambia con lo scroll
      a 1440 (foto: scala > 1; scritta: fuori posto con il footer appena entrato, a posto in fondo alla pagina);
      a 390 e con riduci movimento nessuna trasformazione (none);
@@ -62,7 +62,7 @@ async function modoFooter(m, idx, pageUrl) {
 		await sleep(5500);
 		await ev("document.documentElement.style.scrollBehavior='auto';0");
 		const motion = reqs.filter(u => /assets\/js\/home-v2-motion\.js/.test(u)).length;
-		const gsapReq = reqs.filter(u => /cdnjs\.cloudflare\.com\/ajax\/libs\/gsap/.test(u)).length;
+		const gsapReq = reqs.filter(u => /(cdnjs\.cloudflare\.com\/ajax\/libs\/gsap|assets\/vendor\/gsap\/)/.test(u)).length;
 		const nf = await ev("document.querySelectorAll('footer.site-footer-v2').length+'/'+document.querySelectorAll('footer.site-footer').length");
 		if (off) {
 			ok(motion === 0 && gsapReq === 0, 'interruttore spento: nessun home-v2-motion.js (' + motion + ') e nessuna richiesta a cdnjs (' + gsapReq + ')');
@@ -114,7 +114,7 @@ async function modo(m, idx) {
 		const has = await js("return {stamp:!!document.querySelector('.hv2-man__stamp'),svc:document.querySelectorAll('.hv2-services__tile').length,cta:!!document.querySelector('.hv2-cta__notif'),faq:!!document.querySelector('.faq--v2 .faq__a'),photo:!!document.querySelector('.hv2-b2b__photo img'),word:!!document.querySelector('.site-footer-v2__word-text')}");
 		ok(has.stamp && has.svc >= 4 && has.cta && has.faq && has.photo && has.word, 'markup presente: timbro, ' + has.svc + ' icone, avviso, FAQ, foto aziende, scritta footer');
 
-		const gsapReq = reqs.filter(u => /cdnjs\.cloudflare\.com\/ajax\/libs\/gsap/.test(u));
+		const gsapReq = reqs.filter(u => /(cdnjs\.cloudflare\.com\/ajax\/libs\/gsap|assets\/vendor\/gsap\/)/.test(u));
 		if (desk && !nojs) {
 			// GSAP parte al load o al primo scroll: lo scroll di questa funzione e' dopo, quindi qui deve essere gia' partito
 			ok(gsapReq.length === 2, 'GSAP richiesto una volta (gsap.min.js e ScrollTrigger.min.js): ' + gsapReq.length + ' richieste');
