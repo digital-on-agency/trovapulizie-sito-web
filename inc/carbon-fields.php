@@ -987,7 +987,40 @@ add_action( 'carbon_fields_register_fields', function () {
 			Field::make( 'text', 'footer_cta_link', __( 'Box cleaner: URL' ) ),
 			Field::make( 'text', 'footer_copyright', __( 'Riga copyright' ) )
 				->set_help_text( __( 'Vuota = anno corrente + Trovapulizie S.R.L.' ) ),
-			Field::make( 'textarea', 'footer_legal', __( 'Link legali (una riga per link: Etichetta | URL)' ) ),
+			Field::make( 'textarea', 'footer_legal', __( 'Link legali (una riga per link: Etichetta | URL)' ) )
+				->set_help_text( __( 'Vale per entrambi i footer. Footer nuovo con campo vuoto: Privacy Policy, Termini e Condizioni, Cookie.' ) ),
+			// Footer nuovo (TICKET-128, SPEC-homepage-v2): campi usati solo da template-parts/site-footer-v2.php, cioe'
+			// con Sito v2 acceso o sulla pagina d'anteprima. Vuoto = default del template. Wordmark, social e link
+			// legali sono quelli sopra; il box cleaner e la riga copyright del footer attuale non sono usati dal nuovo.
+			Field::make( 'separator', 'footer_v2_sep', __( 'Footer nuovo (Sito v2)' ) ),
+			Field::make( 'textarea', 'footer_v2_tagline', __( 'Footer nuovo: frase sotto il marchio (2 righe)' ) )
+				->set_rows( 2 )
+				->set_help_text( __( 'Vuoto = "Le pulizie, in un\'app." e "A Roma, quartiere per quartiere."' ) ),
+			Field::make( 'text', 'footer_v2_phone', __( 'Footer nuovo: telefono' ) )
+				->set_help_text( __( 'Vuoto = 320 098 0144. Il link e\' tel: col prefisso +39.' ) ),
+			Field::make( 'text', 'footer_v2_email', __( 'Footer nuovo: email' ) )
+				->set_help_text( __( 'Vuoto = help@trovapulizie.it.' ) ),
+			Field::make( 'complex', 'footer_v2_columns', __( 'Footer nuovo: colonne di link' ) )
+				->set_layout( 'tabbed-horizontal' )
+				->set_max( 3 )
+				->setup_labels( array( 'plural_name' => __( 'Colonne' ), 'singular_name' => __( 'Colonna' ) ) )
+				->set_help_text( __( 'Nessuna colonna = le tre di default: Piattaforma (Come funziona, Servizi, Prezzi, FAQ), Per i professionisti (Diventa professionista, Requisiti, Come guadagnare), Azienda (Chi siamo, Contatti, Blog). Una colonna senza titolo e senza link non viene stampata. "Servizi a Roma" si aggiunge da solo (elenco delle pagine di servizio).' ) )
+				->add_fields( array(
+					Field::make( 'text', 'title', __( 'Titolo colonna' ) ),
+					Field::make( 'textarea', 'links', __( 'Link (una riga per link: Etichetta | URL)' ) ),
+				) )
+				->set_header_template( '<%- title %>' ),
+			Field::make( 'textarea', 'footer_v2_b2b_title', __( 'Footer nuovo, riquadro aziende: titolo (2 righe)' ) )
+				->set_rows( 2 )
+				->set_help_text( __( 'Vuoto = "Hai un\'azienda" e "o un condominio?"' ) ),
+			Field::make( 'text', 'footer_v2_b2b_text', __( 'Footer nuovo, riquadro aziende: testo' ) )
+				->set_help_text( __( 'Vuoto = "Preventivi da imprese verificate."' ) ),
+			Field::make( 'text', 'footer_v2_b2b_label', __( 'Footer nuovo, riquadro aziende: etichetta del bottone' ) )
+				->set_help_text( __( 'Vuoto = "Richiedi un preventivo". Il bottone porta data-cta-position="footer_b2b".' ) ),
+			Field::make( 'text', 'footer_v2_b2b_link', __( 'Footer nuovo, riquadro aziende: URL del bottone' ) )
+				->set_help_text( __( 'Vuoto = /roma/pulizie-uffici/.' ) ),
+			Field::make( 'text', 'footer_v2_legal_line', __( 'Footer nuovo: riga dei dati legali' ) )
+				->set_help_text( __( 'Vuoto = "© [anno] Trovapulizie S.R.L. · Via Paolo Albera 63, 00181 Roma · P.IVA 18445521000 · REA RM-1785357". Se la compili, scrivi tu anche l\'anno.' ) ),
 		) );
 
 	// Home v2 (SPEC-homepage-v2, ADR-005). Container "Home v2 - Sezioni": solo sulle pagine col template
