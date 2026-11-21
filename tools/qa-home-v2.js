@@ -122,7 +122,9 @@ async function checkHttp() {
 	const mains = html.match(/<main[^>]*>/g) || [];
 	check('un solo <main class="hv2" data-landing="home">', mains.length === 1 && /class="[^"]*\bhv2\b/.test(mains[0]) && /data-landing="home"/.test(mains[0]), JSON.stringify(mains));
 	const found = [...html.matchAll(/data-section="([^"]+)"/g)].map(m => m[1]);
-	check('dieci sezioni data-section nell\'ordine', JSON.stringify(found) === JSON.stringify(SECTIONS), found.join(','));
+	// 06-recensioni esce solo con recensioni o loghi compilati (TICKET-124): a campi vuoti manca, ed e' corretto (qa-home-v2-reviews.js)
+	const attese = found.includes('06-recensioni') ? SECTIONS : SECTIONS.filter(x => x !== '06-recensioni');
+	check('sezioni data-section nell\'ordine (nove, dieci con recensioni compilate)', JSON.stringify(found) === JSON.stringify(attese), found.join(','));
 	check('un solo h1', (html.match(/<h1[\s>]/g) || []).length === 1, (html.match(/<h1[\s>]/g) || []).length + ' h1');
 	const origin = new URL(url).origin;
 	const slug = new URL(url).pathname;
@@ -143,10 +145,11 @@ async function checkBrowser() {
 		await send('Page.navigate', { url });
 		await sleep(3500);
 		check('nessuna eccezione JavaScript', errors.length === 0, errors.join(' | ').slice(0, 300));
-		check('niente Three.js ne\' GSAP richiesti', !requests.some(u => /three|gsap/i.test(u)), requests.filter(u => /three|gsap/i.test(u)).join(', '));
+		// GSAP: caricato in modo pigro da home-v2-motion.js solo da 1024 px (parallasse della hero); sotto 1024 non deve esserci
+		check('niente Three.js; GSAP solo da 1024 px', !requests.some(u => /three/i.test(u)) && (width >= 1024 || !requests.some(u => /gsap/i.test(u))), requests.filter(u => /three|gsap/i.test(u)).join(', '));
 		check('nessun scroll orizzontale', await ev('document.scrollingElement.scrollWidth <= document.scrollingElement.clientWidth'), '');
 		// Reveal: con JavaScript attivo la classe tp-reveal e' sull'html e dopo lo scroll tutto e' visibile
-		const reveal = await ev('(async()=>{const els=[...document.querySelectorAll("main.hv2 [data-reveal]")]; for(const e of els){e.scrollIntoView();await new Promise(r=>setTimeout(r,120));} await new Promise(r=>setTimeout(r,900)); return JSON.stringify({n:els.length,cls:document.documentElement.classList.contains("tp-reveal"),nascosti:els.filter(e=>getComputedStyle(e).opacity<0.99).length});})()');
+		const reveal = await ev('(async()=>{const els=[...document.querySelectorAll("main.hv2 [data-reveal]")]; for(let y=0;y<document.documentElement.scrollHeight;y+=250){window.scrollTo({top:y,behavior:"instant"});await new Promise(r=>setTimeout(r,150));} await new Promise(r=>setTimeout(r,800)); for(const e of els.filter(x=>getComputedStyle(x).opacity<0.99)){e.scrollIntoView({block:"center",behavior:"instant"});await new Promise(r=>setTimeout(r,700));} return JSON.stringify({n:els.length,cls:document.documentElement.classList.contains("tp-reveal"),nascosti:els.filter(e=>getComputedStyle(e).opacity<0.99).length,quali:els.filter(e=>getComputedStyle(e).opacity<0.99).map(e=>(e.className||e.tagName).toString().slice(0,40)+" op="+getComputedStyle(e).opacity)});})()');
 		const r = JSON.parse(reveal);
 		check('reveal.js: classe tp-reveal su html e tutto visibile dopo lo scroll', r.n > 0 && r.cls && r.nascosti === 0, reveal);
 		// JavaScript spento
@@ -158,36 +161,7 @@ async function checkBrowser() {
 	});
 }
 
-/* Gruppo hero (TICKET-120) */
-async function checkHero() {
-	const res = await fetch(url, { redirect: 'manual' });
-	check('hero: risposta 200', res.status === 200, 'stato ' + res.status);
-	if (res.status !== 200) return;
-	const html = await res.text();
-	const origin = new URL(url).origin;
-	check('hero: un solo h1', (html.match(/<h1[\s>]/g) || []).length === 1);
-	check('hero: nessun AggregateRating nell\'HTML', !/AggregateRating/i.test(html));
-	check('hero: "Apri l\'app" della hero verso l\'app con data-cta-position="hero", stessa scheda', new RegExp('<a[^>]*class="hv2-hero__cta"[^>]*href="' + APP.replace(/[.\/]/g, '\\$&') + '"[^>]*data-cta-position="hero"[^>]*>').test(html) && !/<a[^>]*class="hv2-hero__cta"[^>]*target=/.test(html));
-	check('hero: "Apri l\'app" della barra con data-cta-position="navbar", stessa scheda', new RegExp('<a[^>]*class="navbar__app"[^>]*data-cta-position="navbar"').test(html) && /<a href="https:\/\/app\.trovapulizie\.com\/"[^>]*class="navbar__app"/.test(html) && !/class="navbar__app"[^>]*target=/.test(html));
-	check('hero: "Come funziona" verso #come-funziona e l\'ancora esiste', /class="hv2-hero__ghost" href="#come-funziona"/.test(html) && /id="come-funziona"/.test(html));
-	check('hero: un solo fetchpriority="high" fra le immagini della pagina', (html.match(/<img[^>]*fetchpriority="high"/g) || []).length === 1);
-	check('hero: niente data-reveal nella hero', !/<section[^>]*data-section="01-hero"[^>]*data-reveal/.test(html) && !/hv2-hero[\s\S]*?data-reveal[\s\S]*?<\/section>/.test(html.split('data-section="02-frasi"')[0]));
-	const hero = (html.match(/<section class="hv2-hero"[\s\S]*?<\/section>/) || [''])[0];
-	const imgs = hero.match(/<img[^>]*>/g) || [];
-	check('hero: ogni immagine ha width e height espliciti', imgs.length > 0 && imgs.every(i => /\swidth="\d+"/.test(i) && /\sheight="\d+"/.test(i)), imgs.length + ' img');
-	check('hero: riquadro Google ' + (google === 'on' ? 'presente' : 'assente dal DOM'), (hero.includes('hv2-hero__google"')) === (google === 'on'));
-	const qr = await fetch(origin + new URL((hero.match(/src="([^"]*qr-app\.svg[^"]*)"/) || [, '/x'])[1], origin).pathname).then(r => r.text());
-	check('hero: <title> dell\'SVG del QR = ' + APP, qr.includes('<title>' + APP + '</title>'), qr.slice(0, 120));
-	const pre = [...html.matchAll(/<link rel="preload"[^>]*>/g)].map(m => m[0]).filter(l => /as="image"/.test(l) && /fetchpriority="high"/.test(l));
-	return { pre };
-}
-
-async function checkHeroBrowser(pre) {
-	await withChrome(bin, 'about:blank', { port: 9512, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-hero' }, async ({ send, ev, shot, sleep }) => {
-		await send('Page.navigate', { url });
-		await ev('0');
-		await sleep(4500);
-		const r = JSON.parse(await ev(`const opt = (n, d) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : d);
+const opt = (n, d) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : d);
 const badgesArg = Number(opt('--badges', 2));
 const bottoniArg = opt('--bottoni', 'on');
 const domandeArg = Number(opt('--domande', 6));
@@ -235,7 +209,7 @@ async function checkAziendeBrowser() {
 				title: { fs: cs(q('.hv2-b2b__title')).fontSize, lh: cs(q('.hv2-b2b__title')).lineHeight, tt: cs(q('.hv2-b2b__title')).textTransform, fw: cs(q('.hv2-b2b__title')).fontWeight, c: cs(q('.hv2-b2b__title')).color },
 				text: r(q('.hv2-b2b__text')), actions: q('.hv2-b2b__actions') ? r(q('.hv2-b2b__actions')) : null,
 				cta: cta ? { bg: cs(cta).backgroundColor, c: cs(cta).color, r: r(cta), fs: cs(cta).fontSize } : null,
-				link: link ? { c: cs(link).color, r: r(link) } : null,
+				link: link ? { c: cs(link).color, u: cs(link).textDecorationLine, r: r(link) } : null,
 				eyebrow: cs(q('.hv2-b2b__eyebrow')).color, imgFit: cs(q('.hv2-b2b__photo img')).objectFit,
 				sw: document.scrollingElement.scrollWidth, cw: document.scrollingElement.clientWidth
 			});
@@ -249,7 +223,7 @@ async function checkAziendeBrowser() {
 		if (width === 390) check('aziende: riquadro 358 px da x 16', info.box.w === 358 && info.box.x === 16, JSON.stringify(info.box));
 		if (bottoniArg === 'on') {
 			check('aziende: bottone #37B299 con testo bianco, alto almeno 44 px', info.cta.bg === 'rgb(55, 178, 153)' && info.cta.c === 'rgb(255, 255, 255)' && info.cta.r.h >= 44, JSON.stringify(info.cta));
-			check('aziende: link #7FE3C9', info.link.c === 'rgb(127, 227, 201)', info.link.c);
+			if (info.link) check('aziende: link bianco sottolineato (giro 1, voce 11)', info.link.c === 'rgb(255, 255, 255)' && /underline/.test(info.link.u || ''), JSON.stringify(info.link));
 			if (wide) check('aziende: testo e azioni sulla stessa riga (azioni a destra del testo)', info.actions.x >= info.text.x + info.text.w - 2 && Math.abs((info.actions.y + info.actions.h / 2) - (info.text.y + info.text.h / 2)) < 30, JSON.stringify([info.text, info.actions]));
 			else check('aziende: azioni sotto il testo, bottone a tutta larghezza (314 px)', info.actions.y >= info.text.y + info.text.h - 2 && info.cta.r.w === 314, JSON.stringify([info.text, info.actions, info.cta.r]));
 		}
@@ -316,7 +290,7 @@ async function checkFaqBrowser() {
 			check('faq: card sotto la lista, sottotitolo nascosto', info.contact.y >= info.list.y + info.list.h - 2 && info.sub === 'none', JSON.stringify([info.list, info.contact]) + ' ' + info.sub);
 			check('faq: lista e card larghe 358 px da x 16', info.list.w === 358 && info.list.x === 16 && info.contact.w === 358, JSON.stringify([info.list, info.contact]));
 		}
-		if (width === 1440) check('faq: colonne 360 e 792 px da x 120', info.aside.w === 360 && info.aside.x === 120 && info.list.w === 792, JSON.stringify([info.aside, info.list]));
+		if (width === 1440) check('faq: colonne 360 e 840 px da x 96 (contenitore unico)', info.aside.w === 360 && info.aside.x === 96 && info.list.w === 840, JSON.stringify([info.aside, info.list]));
 		// Apertura esclusiva con clic reali al centro del pulsante
 		const stato = async () => JSON.parse(await ev('JSON.stringify([...document.querySelectorAll(".faq--v2 .faq__q")].map(b=>b.getAttribute("aria-expanded")==="true"))'));
 		const clic = async i => {
@@ -346,7 +320,37 @@ async function checkFaqBrowser() {
 	});
 }
 
-(async () => {
+
+/* Gruppo hero (TICKET-120) */
+async function checkHero() {
+	const res = await fetch(url, { redirect: 'manual' });
+	check('hero: risposta 200', res.status === 200, 'stato ' + res.status);
+	if (res.status !== 200) return;
+	const html = await res.text();
+	const origin = new URL(url).origin;
+	check('hero: un solo h1', (html.match(/<h1[\s>]/g) || []).length === 1);
+	check('hero: nessun AggregateRating nell\'HTML', !/AggregateRating/i.test(html));
+	check('hero: "Apri l\'app" della hero verso l\'app con data-cta-position="hero", stessa scheda', new RegExp('<a[^>]*class="hv2-hero__cta"[^>]*href="' + APP.replace(/[.\/]/g, '\\$&') + '"[^>]*data-cta-position="hero"[^>]*>').test(html) && !/<a[^>]*class="hv2-hero__cta"[^>]*target=/.test(html));
+	check('hero: "Apri l\'app" della barra con data-cta-position="navbar", stessa scheda', new RegExp('<a[^>]*class="navbar__app"[^>]*data-cta-position="navbar"').test(html) && /<a href="https:\/\/app\.trovapulizie\.com\/"[^>]*class="navbar__app"/.test(html) && !/class="navbar__app"[^>]*target=/.test(html));
+	check('hero: "Come funziona" verso #come-funziona e l\'ancora esiste', /class="hv2-hero__ghost" href="#come-funziona"/.test(html) && /id="come-funziona"/.test(html));
+	check('hero: un solo fetchpriority="high" fra le immagini della pagina', (html.match(/<img[^>]*fetchpriority="high"/g) || []).length === 1);
+	check('hero: niente data-reveal nella hero', !/<section[^>]*data-section="01-hero"[^>]*data-reveal/.test(html) && !/hv2-hero[\s\S]*?data-reveal[\s\S]*?<\/section>/.test(html.split('data-section="02-frasi"')[0]));
+	const hero = (html.match(/<section class="hv2-hero"[\s\S]*?<\/section>/) || [''])[0];
+	const imgs = hero.match(/<img[^>]*>/g) || [];
+	check('hero: ogni immagine ha width e height espliciti', imgs.length > 0 && imgs.every(i => /\swidth="\d+"/.test(i) && /\sheight="\d+"/.test(i)), imgs.length + ' img');
+	check('hero: riquadro Google ' + (google === 'on' ? 'presente' : 'assente dal DOM'), (hero.includes('hv2-hero__google"')) === (google === 'on'));
+	const qr = await fetch(origin + new URL((hero.match(/src="([^"]*qr-app\.svg[^"]*)"/) || [, '/x'])[1], origin).pathname).then(r => r.text());
+	check('hero: <title> dell\'SVG del QR = ' + APP, qr.includes('<title>' + APP + '</title>'), qr.slice(0, 120));
+	const pre = [...html.matchAll(/<link rel="preload"[^>]*>/g)].map(m => m[0]).filter(l => /as="image"/.test(l) && /fetchpriority="high"/.test(l));
+	return { pre };
+}
+
+async function checkHeroBrowser(pre) {
+	await withChrome(bin, 'about:blank', { port: 9512, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-hero' }, async ({ send, ev, shot, sleep }) => {
+		await send('Page.navigate', { url });
+		await ev('0');
+		await sleep(4500);
+		const r = JSON.parse(await ev(`(async () => {
 			const lcp = await new Promise(res => { let last = null; new PerformanceObserver(l => { last = l.getEntries().pop(); }).observe({ type: 'largest-contentful-paint', buffered: true }); setTimeout(() => res(last), 300); });
 			const preloads = [...document.querySelectorAll('link[rel=preload][as=image][fetchpriority=high]')].filter(l => !l.media || matchMedia(l.media).matches).map(l => l.href);
 			const fp = [...document.querySelectorAll('img[fetchpriority=high]')].map(i => i.currentSrc);
@@ -426,16 +430,17 @@ async function checkFrasiBrowser() {
 			const t = document.querySelector('.hv2-frasi__marquee .tp-marquee__text'), m = document.querySelector('.hv2-frasi'), tr = document.querySelector('.tp-marquee__track');
 			const cs = getComputedStyle(t), bg = getComputedStyle(m).backgroundColor, ts = getComputedStyle(tr);
 			return JSON.stringify({ color: cs.color, bg, fs: cs.fontSize, fw: cs.fontWeight, h: Math.round(m.getBoundingClientRect().height), name: ts.animationName, state: ts.animationPlayState,
-				border: getComputedStyle(m).borderTopColor, dot: getComputedStyle(document.querySelector('.tp-marquee__dot')).width,
+				border: getComputedStyle(m).borderTopWidth, dot: getComputedStyle(document.querySelector('.tp-marquee__dot')).width,
 				x1: new DOMMatrix(ts.transform).m41, sw: document.scrollingElement.scrollWidth, cw: document.scrollingElement.clientWidth });
 		})()`));
 		const rgb = c => c.match(/\d+/g).slice(0, 3).map(Number);
 		const lum = c => { const [r, g, b] = rgb(c).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
 		const ratio = (a, b) => { const l1 = lum(a), l2 = lum(b); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); };
-		check('frasi: testo ' + info.color + ' su ' + info.bg + ' (attesi #062A22 su #37B299)', info.color === 'rgb(6, 42, 34)' && info.bg === 'rgb(55, 178, 153)', JSON.stringify(info));
+		// Frasi in bianco su #37B299 (Guido 21/11): scelta di brand su testo decorativo grande, 2,63:1 dichiarato in style.css
+		check('frasi: testo ' + info.color + ' su ' + info.bg + ' (attesi bianco su #37B299)', info.color === 'rgb(255, 255, 255)' && info.bg === 'rgb(55, 178, 153)', JSON.stringify(info));
 		const cr = ratio(info.color, info.bg);
-		check('frasi: contrasto calcolato ' + cr.toFixed(2) + ':1 >= 4,5', cr >= 4.5, cr.toFixed(2));
-		check('frasi: bordo sopra #062A22, corpo ' + info.fs + ' peso ' + info.fw + ', altezza ' + info.h, info.border === 'rgb(6, 42, 34)' && info.fw === '800' && (width >= 1024 ? info.fs === '32px' && Math.abs(info.h - 85) <= 2 : info.fs === '20px' && Math.abs(info.h - 59) <= 2), JSON.stringify(info));
+		check('frasi: contrasto calcolato ' + cr.toFixed(2) + ':1 (scelta di brand, minimo 2,5 per il testo grande decorativo)', cr >= 2.5, cr.toFixed(2));
+		check('frasi: nessun filo scuro sopra (giro 1, voce 14), corpo ' + info.fs + ' peso ' + info.fw + ', altezza ' + info.h, info.border === '0px' && info.fw === '800' && (width >= 1024 ? info.fs === '32px' && Math.abs(info.h - 85) <= 2 : info.fs === '20px' && Math.abs(info.h - 59) <= 2), JSON.stringify(info));
 		check('frasi: animazione tp-marquee-left in corso', info.name === 'tp-marquee-left' && info.state === 'running', info.name + ' ' + info.state);
 		await sleep(1200);
 		const x2 = Number(await ev('new DOMMatrix(getComputedStyle(document.querySelector(".tp-marquee__track")).transform).m41'));
@@ -529,12 +534,12 @@ async function checkServiziBrowser() {
 			return JSON.stringify({ sec: r('.hv2-services'), panel: r('.hv2-services__panel'), tiles, sw: document.scrollingElement.scrollWidth, cw: document.scrollingElement.clientWidth,
 				title: getComputedStyle(document.querySelector('.hv2-services__title')).fontSize, op: getComputedStyle(document.querySelector('.hv2-services__panel')).opacity });
 		})()`));
-		if (width >= 1440) check('servizi: riquadro 668,8 px e icone 115,2 px a ' + width + ' px (letto ' + m.panel.w + ' e ' + m.tiles[0] + ')', Math.abs(m.panel.w - 668.8) <= 1 && m.tiles.every(t => Math.abs(t - 115.2) <= 1), JSON.stringify(m));
+		if (width >= 1440) check('servizi: riquadro 564,3 px (84% del Figma) e icone 97,2 px a ' + width + ' px (letto ' + m.panel.w + ' e ' + m.tiles[0] + ')', Math.abs(m.panel.w - 564.3) <= 1 && m.tiles.every(t => Math.abs(t - 97.2) <= 1), JSON.stringify(m));
 		if (width <= 430) check('servizi: riquadro 358 px e icone 61,7 px a ' + width + ' px (letto ' + m.panel.w + ' e ' + m.tiles[0] + ')', Math.abs(m.panel.w - 358) <= 1 && m.tiles.every(t => Math.abs(t - 61.7) <= 1), JSON.stringify(m));
 		// La sezione e' piu' alta del Figma (607 e 818) perche' i chip portano gli anchor SEO di tp_service_pages(), piu' lunghi
 		// delle etichette del disegno: si misura il riquadro (460,8 px desktop, 264,7 mobile), non la sezione.
-		if (width >= 1440) check('servizi: riquadro alto ~460,8 px (letto ' + m.panel.h + ')', Math.abs(m.panel.h - 460.8) <= 2, JSON.stringify(m.panel));
-		if (width <= 430) check('servizi: riquadro alto ~264,7 px (letto ' + m.panel.h + ')', Math.abs(m.panel.h - 264.7) <= 3, JSON.stringify(m.panel));
+		if (width >= 1440) check('servizi: riquadro alto ~388,8 px (84%, letto ' + m.panel.h + ')', Math.abs(m.panel.h - 388.8) <= 2, JSON.stringify(m.panel));
+		if (width <= 430) check('servizi: riquadro alto ~268,5 px (letto ' + m.panel.h + ')', Math.abs(m.panel.h - 268.5) <= 3, JSON.stringify(m.panel));
 		check('servizi: nessuno scroll orizzontale', m.sw <= m.cw, m.sw + ' > ' + m.cw);
 		check('servizi: il riquadro e\' entrato (opacita\' 1 dopo il reveal)', m.op === '1', m.op);
 		if (width >= 1024) {
@@ -587,22 +592,29 @@ async function checkStepsBrowser() {
 	await withChrome(bin, 'about:blank', { port: 9515, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-steps' }, async ({ send, ev, sleep }) => {
 		const errors = [];
 		await send('Page.navigate', { url });
-		await sleep(3500);
+		await sleep(7000);
 		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
 		const J = async e => JSON.parse(await ev('JSON.stringify(' + e + ')'));
 		const info = await J('({navh: parseFloat(getComputedStyle(document.body).getPropertyValue("--tp-navbar-h")), nav: (()=>{const n=document.querySelector("[data-tp-carousel-nav]");const cs=getComputedStyle(n);return {hidden:n.hidden,display:cs.display}})(), role: document.querySelector("[data-tp-carousel]").getAttribute("aria-roledescription"), sc: document.scrollingElement.scrollWidth <= document.scrollingElement.clientWidth})');
 		check('come-funziona: nessuno scroll orizzontale della pagina', info.sc);
 		if (width >= 1024) {
 			check('come-funziona: l\'indicatore non si vede su desktop (display none)', info.nav.display === 'none', JSON.stringify(info.nav));
-			await ev('window.scrollTo(0, document.querySelector("#come-funziona").getBoundingClientRect().top + scrollY + 1400)');
+			// Con il padding alto di sezione uniforme (giro 1, voce 7) la pila parte piu' in basso: offset di arrivo 1460 e non 1400
+			await ev('window.scrollTo(0, document.querySelector("#come-funziona").getBoundingClientRect().top + scrollY + 1460)');
 			await sleep(900);
 			const st = await J('[...document.querySelectorAll(".tp-carousel__slide")].map(l=>({pos:getComputedStyle(l).position, top:Math.round(l.getBoundingClientRect().top*10)/10, topcss:getComputedStyle(l).top, m:new DOMMatrix(getComputedStyle(l.firstElementChild).transform).a}))');
 			check('come-funziona: le quattro schede sono position sticky', st.length === 4 && st.every(s => s.pos === 'sticky'), JSON.stringify(st));
 			const tops = st.map(s => s.top);
 			check('come-funziona: top crescente di 16 px da scheda a scheda, ' + tops.slice(0, 3).join(' < '), tops[0] < tops[1] && tops[1] < tops[2] && Math.abs(tops[1] - tops[0] - 16) <= 1.5 && Math.abs(tops[2] - tops[1] - 16) <= 1.5 && Math.abs(tops[0] - (info.navh + 24)) <= 1.5, JSON.stringify(st));
 			check('come-funziona: la scheda precedente scala a 0,96 (' + st.slice(0, 3).map(s => s.m.toFixed(3)).join(', ') + ') e l\'ultima resta a 1', st.slice(0, 3).every(s => Math.abs(s.m - 0.96) <= 0.006) && st[3].m === 1, JSON.stringify(st.map(s => s.m)));
-			await ev('window.scrollTo(0, document.querySelector("#come-funziona").getBoundingClientRect().top + scrollY + 400)');
-			await sleep(500);
+			// Posizione di arrivo della seconda scheda cercata a passi (dipende dal padding alto della sezione)
+			for (let o = 200; o <= 800; o += 25) {
+				await ev('window.scrollTo(0, document.querySelector("#come-funziona").getBoundingClientRect().top + scrollY + ' + o + ')');
+				await sleep(160);
+				const m0 = Number(await ev('new DOMMatrix(getComputedStyle(document.querySelector(".tp-carousel__slide").firstElementChild).transform).a'));
+				if (m0 > 0.962 && m0 < 0.998) break;
+			}
+			await sleep(300);
 			const mid = await J('[...document.querySelectorAll(".tp-carousel__slide")].map(l=>new DOMMatrix(getComputedStyle(l.firstElementChild).transform).a)');
 			check('come-funziona: durante l\'arrivo della seconda scheda la prima e\' fra 0,96 e 1 (' + mid[0].toFixed(3) + ')', mid[0] > 0.96 && mid[0] < 1 && mid[3] === 1, JSON.stringify(mid));
 			// Ancora: la sezione sta sotto la barra
@@ -660,10 +672,10 @@ async function checkStepsBrowser() {
 /* Gruppo manifesto (TICKET-123) */
 const vociArg = process.argv.includes('--voci') ? Number(process.argv[process.argv.indexOf('--voci') + 1]) : 4;
 const MANIFESTO = [
-	['Niente', 'sconosciuti.', 'Controlliamo documenti e identità di ognuno.', 'Documento verificato · Laura B.'],
-	['Niente', 'sorprese.', 'Il prezzo lo vedi prima di inviare la richiesta.', 'Totale 76 € · 4 ore'],
+	['Niente', 'sconosciuti.', 'Controlliamo documenti e identità di ognuno.', 'Documento verificato'],
+	['Niente', 'sorprese.', 'Il prezzo lo vedi prima di inviare la richiesta.', 'Esempio: totale 76 € · 4 ore'],
 	['Niente', 'anticipi a vuoto.', 'L’addebito parte solo quando il professionista accetta.', 'Addebito dopo l’accettazione'],
-	['Niente', 'buchi.', 'Se chi hai scelto non può, te ne proponiamo un altro.', 'Ti proponiamo Marco, stesse condizioni'],
+	['Niente', 'buchi.', 'Se chi hai scelto non può, te ne proponiamo un altro.', 'Ti proponiamo un altro professionista, stesse condizioni'],
 ];
 const dec = t => t.replace(/&#0?39;|&#8217;|&rsquo;/g, '’').replace(/&amp;/g, '&').replace(/&#8364;/g, '€').replace(/&euro;/g, '€').replace(/&middot;|&#183;/g, '·').replace(/&nbsp;/g, ' ');
 async function checkManifesto() {
@@ -702,7 +714,7 @@ async function checkManifestoBrowser() {
 			const q = s => document.querySelector(s), cs = e => getComputedStyle(e);
 			const sec = q('.hv2-man'), items = [...document.querySelectorAll('.hv2-man__item')], list = q('.hv2-man__list').getBoundingClientRect();
 			const rect = e => { const r = e.getBoundingClientRect(); return { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(r.width), h: Math.round(r.height) }; };
-			const pair = (e, bg) => ({ c: cs(e).color, bg: bg || cs(sec).backgroundColor, fs: parseFloat(cs(e).fontSize), fw: +cs(e).fontWeight });
+			const pair = (e, bg) => ({ c: cs(e).color, bg: bg || 'rgb(243, 250, 247)', fs: parseFloat(cs(e).fontSize), fw: +cs(e).fontWeight });
 			return JSON.stringify({
 				bg: cs(sec).backgroundColor, lead: pair(q('.hv2-man__lead')), key: pair(q('.hv2-man__key')), title: pair(q('.hv2-man__title')), eyebrow: pair(q('.hv2-man__eyebrow')),
 				sub: pair(q('.hv2-man__subtitle')), num: pair(q('.hv2-man__num')), text: pair(q('.hv2-man__text')), proof: pair(q('.hv2-man__proof-text'), cs(q('.hv2-man__proof')).backgroundColor),
@@ -716,8 +728,9 @@ async function checkManifestoBrowser() {
 		const rgb = c => c.match(/\d+/g).slice(0, 3).map(Number);
 		const lum = c => { const [r, g, b] = rgb(c).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
 		const ratio = (a, b) => { const l1 = lum(a), l2 = lum(b); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); };
-		check('manifesto: fondo #F3FAF7', info.bg === 'rgb(243, 250, 247)', info.bg);
-		check('manifesto: "NIENTE" #008866', info.lead.c === 'rgb(0, 136, 102)', info.lead.c);
+		// Sfondo continuo (Guido 21/11): la sezione e' trasparente e il fondo #F3FAF7 lo da' main.hv2; i contrasti si calcolano su di esso
+		check('manifesto: sezione trasparente (sfondo continuo)', info.bg === 'rgba(0, 0, 0, 0)', info.bg);
+		check('manifesto: "NIENTE" #007A5C', info.lead.c === 'rgb(0, 122, 92)', info.lead.c);
 		check('manifesto: parola chiave #0F1F1B', info.key.c === 'rgb(15, 31, 27)', info.key.c);
 		check('manifesto: lead e parola chiave in maiuscolo', info.up);
 		const grande = p => p.fs >= 24 || (p.fs >= 18.66 && p.fw >= 700);
@@ -725,7 +738,7 @@ async function checkManifestoBrowser() {
 			const r = ratio(p.c, p.bg), soglia = grande(p) ? 3 : 4.5;
 			check('manifesto: contrasto ' + nome + ' ' + r.toFixed(2) + ':1 >= ' + soglia + ' (' + p.fs + ' px, peso ' + p.fw + ')', r >= soglia, p.c + ' su ' + p.bg);
 		}
-		check('manifesto: icona prova 28 px, tondo #E6FFF5, glifo #008866', info.ico.w === 28 && info.ico.h === 28 && info.ico.bg === 'rgb(230, 255, 245)' && info.ico.c === 'rgb(0, 136, 102)', JSON.stringify(info.ico));
+		check('manifesto: icona prova 28 px, tondo #E6FFF5, glifo #007A5C', info.ico.w === 28 && info.ico.h === 28 && info.ico.bg === 'rgb(230, 255, 245)' && info.ico.c === 'rgb(0, 122, 92)', JSON.stringify(info.ico));
 		const n = info.items.length, xs = [...new Set(info.items.map(i => i.x))];
 		if (width >= 1024) {
 			check('manifesto: due colonne a ' + width + ' (' + xs.length + ' x diverse)', xs.length === 2 || n === 1, JSON.stringify(xs));
@@ -865,8 +878,61 @@ async function checkTracking() {
 	});
 }
 
+
+/* Gruppo giro1 (revisione UI/UX giro 1, tema 0.80.0): contenitore unico, verde del testo, font self-hosted, etichette,
+   aree di tocco, copy e blocco dello scroll del menu mobile. Da lanciare a 1440, 1280, 1024, 390 e 360. */
+async function checkGiro1() {
+	const reqs = [];
+	await withChrome(bin, 'about:blank', { port: 9563, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-giro1' }, async ({ send, ev, sleep, on }) => {
+		on('Network.requestWillBeSent', p => reqs.push(p.request.url));
+		await send('Network.enable');
+		await send('Page.navigate', { url });
+		await sleep(3500);
+		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
+		// Gli ingressi (data-reveal) spostano gli elementi: si scorre la pagina prima di misurare i bordi
+		await ev('(async()=>{for(let y=0;y<document.documentElement.scrollHeight;y+=250){window.scrollTo({top:y,behavior:"instant"});await new Promise(r=>setTimeout(r,150));}window.scrollTo({top:0,behavior:"instant"});await new Promise(r=>setTimeout(r,1200));return 1})()');
+		const i = JSON.parse(await ev(`(() => {
+			const q = s => document.querySelector(s), qa = s => [...document.querySelectorAll(s)], cs = e => getComputedStyle(e), L = e => Math.round(e.getBoundingClientRect().left);
+			const lefts = {};
+			for (const [k, s] of Object.entries({ hero: '.hv2-hero__title', servizi: '.hv2-services__eyebrow', come: '.hv2-steps__eyebrow', manifesto: '.hv2-man__eyebrow', zone: '.hv2-zones__eyebrow', aziende: '.hv2-b2b__box', faq: '.faq--v2 .faq__eyebrow', chiusura: '.hv2-cta__eyebrow', footer: '.site-footer-v2__logo' })) { const e = q(s); lefts[k] = e ? L(e) : null; }
+			const tiny = qa('.hv2-services__name, .hv2-services__soon').map(e => parseFloat(cs(e).fontSize));
+			const names = qa('.hv2-services__name').map(e => { const r = e.getBoundingClientRect(); return e.scrollWidth <= Math.ceil(r.width) + 1 && r.height < 24; });
+			const sum = q('.hv2-zones__more summary'), dots = qa('.tp-carousel__dot').map(e => { const r = e.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; });
+			const cta = q('.hv2-services__cta'), ghost = q('.hv2-hero__ghost'), prim = q('.hv2-hero__cta'), fq = q('.faq--v2 .faq__q');
+			const R = e => e ? e.getBoundingClientRect() : { height: 0, width: 0 };
+			const stamp = q('.hv2-man__stamp'), mt = q('.hv2-man__title'), rg = document.createRange(); if (mt) rg.selectNodeContents(mt);
+			return JSON.stringify({ logo: L(q('.navbar__brand')), lefts, niente: cs(q('.hv2-man__lead')).color, eyebrow: cs(q('.hv2-services__eyebrow')).color, btn: cs(q('.hv2-hero__cta')).backgroundColor,
+				minFont: Math.min(...tiny), nomiUnaRiga: names.every(Boolean), summaryH: Math.round(R(sum).height), summaryTxt: sum && sum.textContent.trim(), chevron: sum && getComputedStyle(sum, '::after').content, labelZone: (q('.hv2-zones__list-label') || {}).textContent,
+				dots, ctaH: Math.round(R(cta).height), ghostH: Math.round(R(ghost).height), primH: Math.round(R(prim).height), ghostBorder: ghost && cs(ghost).borderTopWidth, faqH: Math.round(R(fq).height),
+				stampLeft: stamp ? Math.round(stamp.getBoundingClientRect().left) : 0, stampTop: stamp ? Math.round(stamp.getBoundingClientRect().top) : 0, stampDisp: stamp ? cs(stamp).display : '', titleRight: mt ? Math.round(rg.getBoundingClientRect().right) : 0, titleTop: mt ? Math.round(mt.getBoundingClientRect().top) : 0,
+				subSteps: (q('.hv2-steps__subtitle--desktop') || {}).textContent, subStepsM: (q('.hv2-steps__subtitle--mobile') || {}).textContent, footTitle: (q('.site-footer-v2__b2b-title, .site-footer-v2__b2b h3, .site-footer-v2__b2b p') || {}).textContent,
+				faqRisposta: (qa('.faq--v2 .faq__a-inner p').find(p => /altro/.test(p.textContent)) || {}).textContent, navApp: (q('.navbar__app') || {}).textContent,
+				eager: (q('.hv2-hero__phone--profilo img') || {}).loading, mq: (typeof document.fonts !== 'undefined') ? [...document.fonts].filter(f => f.family.replace(/"/g, '') === 'Poppins').length : 0 });
+		})()`));
+		const eq = (n, ok, d) => check('giro1: ' + n, ok, d);
+		eq('tutti i bordi sinistri uguali al logo (' + i.logo + ' px)', Object.values(i.lefts).filter(v => v !== null).every(v => Math.abs(v - i.logo) <= 1), JSON.stringify(i.lefts));
+		eq('margine del logo ' + (width >= 1280 ? 96 : width >= 1024 ? 32 : 16) + ' px', i.logo === (width >= 1280 ? 96 : width >= 1024 ? 32 : 16), String(i.logo));
+		eq('verde del testo #007A5C (NIENTE ed eyebrow), bottoni #37B299', i.niente === 'rgb(0, 122, 92)' && i.eyebrow === 'rgb(0, 122, 92)' && i.btn === 'rgb(55, 178, 153)', JSON.stringify([i.niente, i.eyebrow, i.btn]));
+		eq('etichette dei servizi almeno 12 px e su una riga (minimo ' + i.minFont + ')', i.minFont >= 12 && i.nomiUnaRiga, JSON.stringify([i.minFont, i.nomiUnaRiga]));
+		eq('zone: etichetta "Alcune delle zone servite" e riepilogo "Vedi tutti i quartieri serviti (N)" con chevron', /^Alcune delle zone servite$/.test(i.labelZone || '') && /^Vedi tutti i quartieri serviti \(\d+\)$/.test(i.summaryTxt || '') && i.chevron === '""', JSON.stringify([i.labelZone, i.summaryTxt, i.chevron]));
+		eq('Come funziona: sottotitolo uguale a tutte le larghezze', i.subSteps === 'Quattro passi. L’ultimo lo fai sul divano.' && i.subStepsM === i.subSteps, JSON.stringify([i.subSteps, i.subStepsM]));
+		eq('FAQ: risposta "Te ne proponiamo un altro, alle stesse condizioni."', i.faqRisposta === 'Te ne proponiamo un altro, alle stesse condizioni.', String(i.faqRisposta));
+		eq('"Apri l’app" con apostrofo tipografico nella barra', i.navApp === 'Apri l’app', String(i.navApp));
+		eq('FAQ: area della domanda alta almeno 44 px (' + i.faqH + ')', i.faqH >= 44, String(i.faqH));
+		eq('hero: telefono del profilo con loading eager', i.eager === 'eager', String(i.eager));
+		eq('font: sei file Poppins self-hosted, nessuna richiesta a Google Fonts', reqs.filter(u => /poppins-latin-\d+\.woff2/.test(u)).length >= 2 && !reqs.some(u => /fonts\.(googleapis|gstatic)\.com/.test(u)), reqs.filter(u => /font/.test(u)).join(' '));
+		if (width < 1024) {
+			eq('aree di tocco 44: link servizi, riepilogo quartieri, pallini', i.ctaH >= 44 && i.summaryH >= 44 && i.dots.every(d => d[0] >= 44 && d[1] >= 44), JSON.stringify([i.ctaH, i.summaryH, i.dots]));
+			eq('hero mobile: "Come funziona" con bordo e alto come il primario (' + i.ghostH + ' / ' + i.primH + ')', i.ghostBorder === '1px' && Math.abs(i.ghostH - i.primH) <= 2, JSON.stringify([i.ghostBorder, i.ghostH, i.primH]));
+			const lock = JSON.parse(await ev(`(async () => { const b = document.getElementById('nav-burger'); b.click(); await new Promise(r => setTimeout(r, 200)); const a = getComputedStyle(document.documentElement).overflow; b.click(); await new Promise(r => setTimeout(r, 200)); return JSON.stringify({ aperto: a, chiuso: getComputedStyle(document.documentElement).overflow }); })()`));
+			eq('menu mobile aperto: la pagina non scorre, chiuso torna a scorrere', lock.aperto === 'hidden' && lock.chiuso !== 'hidden', JSON.stringify(lock));
+			if (width < 400) eq('manifesto: il sigillo non tocca il titolo (sigillo da x ' + i.stampLeft + ', titolo fino a x ' + i.titleRight + ')', i.stampLeft >= i.titleRight || i.stampTop + 90 <= i.titleTop, JSON.stringify([i.stampLeft, i.titleRight, i.stampTop, i.titleTop]));
+		}
+	});
+}
+
 (async () => {
-	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona', 'chiusura', 'aziende', 'faq', 'tracking'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
+	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona', 'chiusura', 'aziende', 'faq', 'tracking', 'giro1'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
 	if (gruppo === 'hero') {
 		const h = await checkHero();
 		if (h) await checkHeroBrowser(h.pre);
@@ -882,6 +948,8 @@ async function checkTracking() {
 	} else if (gruppo === 'servizi') {
 		await checkServizi();
 		await checkServiziBrowser();
+	} else if (gruppo === 'giro1') {
+		await checkGiro1();
 	} else if (gruppo === 'tracking') {
 		await checkTracking();
 	} else if (gruppo === 'come-funziona') {
