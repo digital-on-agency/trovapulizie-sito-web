@@ -1096,7 +1096,7 @@ add_action( 'carbon_fields_register_fields', function () {
 				Field::make( 'complex', 'h2_manifesto_items', __( 'Promesse' ) )
 					->set_layout( 'tabbed-vertical' )
 					->setup_labels( array( 'plural_name' => __( 'Promesse' ), 'singular_name' => __( 'Promessa' ) ) )
-					->set_help_text( __( 'Le promesse in ordine (di solito quattro, numerate dal tema). Nessuna riga = le quattro di default (per nascondere la sezione usa "Nascondi il manifesto" qui sotto). Le prove sono esempi del design in attesa di conferma: nelle prove vanno dati reali dell\'app, mai numeri o nomi inventati.' ) )
+					->set_help_text( __( 'Le promesse in ordine (di solito quattro, numerate dal tema). Nessuna riga = le quattro di default, come una pagina mai salvata (per nascondere la sezione usa "Nascondi il manifesto" qui sotto). Le prove sono esempi del design in attesa di conferma: nelle prove vanno dati reali dell\'app, mai numeri o nomi inventati.' ) )
 					->add_fields( array(
 						Field::make( 'text', 'lead', __( 'Parola iniziale (verde)' ) )->set_help_text( __( 'Di solito "Niente".' ) ),
 						Field::make( 'text', 'keyword', __( 'Parola chiave (scura)' ) )->set_help_text( __( 'Es. "sconosciuti." Il maiuscolo lo fa il tema.' ) ),

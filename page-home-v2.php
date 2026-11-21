@@ -114,9 +114,9 @@ $hv2_sections = array(
 			continue;
 		endif;
 		if ( 'manifesto' === $hv2_def[0] ) :
-			// Manifesto (TICKET-123): template-part dedicato. Le promesse vengono dal campo complex. Carbon non restituisce sul sito il
-			// valore precompilato di un campo mai salvato: senza righe (e senza "Nascondi") il template usa le quattro del Figma
-			// (items null); con "Nascondi" acceso la sezione non esce (items vuoto).
+			// Manifesto (TICKET-123): template-part dedicato. Le promesse vengono dal campo complex (su una pagina mai salvata Carbon
+			// restituisce i valori precompilati, le quattro del Figma). "Nascondi" acceso: la sezione non esce (items vuoto). Campo
+			// svuotato e salvato (nessuna riga): il template usa le quattro del Figma (items null).
 			$hv2_righe = array();
 			foreach ( (array) carbon_get_the_post_meta( 'h2_manifesto_items' ) as $hv2_riga ) {
 				if ( is_array( $hv2_riga ) ) {
@@ -129,8 +129,10 @@ $hv2_sections = array(
 					);
 				}
 			}
-			if ( ! $hv2_righe ) {
-				$hv2_righe = carbon_get_the_post_meta( 'h2_manifesto_hide' ) ? array() : null;
+			if ( carbon_get_the_post_meta( 'h2_manifesto_hide' ) ) {
+				$hv2_righe = array();
+			} elseif ( ! $hv2_righe ) {
+				$hv2_righe = null;
 			}
 			get_template_part( 'template-parts/home-manifesto', null, array(
 				'eyebrow'  => carbon_get_the_post_meta( 'h2_manifesto_eyebrow' ),
