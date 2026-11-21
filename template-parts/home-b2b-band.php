@@ -19,7 +19,7 @@
  * - image (string): URL della foto di fondo; vuoto = foto d'ufficio del tema (assets/img/home-v2/aziende-ufficio*.webp).
  *
  * Semantica: un H2, le garanzie in una lista, la foto e' decorativa (alt vuoto, lazy). Ingressi: data-reveal sul testo e
- * sulle azioni (--i). Ken burns della foto: TICKET-129 (non qui). Riduci movimento: nel blocco unico della v2.
+ * sulle azioni (--i). Ken burns della foto da 1024 px: assets/js/home-v2-motion.js (TICKET-129). Riduci movimento: nel blocco unico della v2.
  * CSS: blocco `TICKET-126` in fondo a style.css. JS: nessuno.
  *
  * Esempio: get_template_part( 'template-parts/home-b2b-band', null, array( 'cta_url' => home_url( '/roma/sgrosso-commerciale/' ) ) );

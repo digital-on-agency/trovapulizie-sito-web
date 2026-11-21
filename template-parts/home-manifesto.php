@@ -24,7 +24,9 @@
  *
  * Griglia: due colonne da 1024 px, una sotto 768 px; con meno di quattro promesse (o un numero dispari) l'ultima
  * occupa tutta la riga, senza buchi. Semantica: un solo h2, promesse in una lista <ol>, numeri e timbro aria-hidden.
- * Ingressi: data-reveal sulla testata e su ogni promessa (--i). Effetto timbro e pillole: TICKET-129.
+ * Ingressi: data-reveal sulla testata e su ogni promessa (--i). Timbro (TICKET-129): data-pop (reveal.js: comparsa con rimbalzo e
+ * rotazione) e data-tp-loop (tp-loops.js: il testo del timbro ruota piano e si ferma fuori schermo); le pillole delle prove
+ * entrano dopo la promessa, solo con CSS (nessun markup in piu').
  * CSS: blocco `TICKET-123` di style.css. JS: nessuno.
  *
  * Esempio: get_template_part( 'template-parts/home-manifesto', null, array( 'title' => 'Quattro «niente».' ) );
@@ -77,7 +79,7 @@ $hvm_stamp    = mb_strtoupper( ltrim( $hvm_stamp ) );
 ?>
 <section class="hv2-man" data-section="05-manifesto" aria-labelledby="hv2-man-titolo">
 	<div class="hv2-man__inner">
-		<div class="hv2-man__stamp" aria-hidden="true">
+		<div class="hv2-man__stamp" aria-hidden="true" data-pop data-tp-loop>
 			<?php
 			get_template_part( 'template-parts/tp-orbit-text', null, array(
 				'text'      => $hvm_stamp,

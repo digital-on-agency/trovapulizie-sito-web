@@ -23,7 +23,7 @@
  * lo spazio in piu' o in meno si ripartisce fra le lettere, le lettere non vengono deformate. Il CSS del chiamante
  * deve mettere white-space: pre su `.tp-orbit-text text` per conservare lo spazio finale della frase. Con la frase di
  * default lo spazio in piu' e' di circa 10 unita' fra una lettera e l'altra (come nel Figma).
- * La rotazione (TICKET-129) si applica con transform sull'<svg>, non qui.
+ * La rotazione si applica con transform sull'<svg> dal CSS del chiamante (hero e timbro del manifesto), non qui.
  *
  * Esempio:
  *   get_template_part( 'template-parts/tp-orbit-text', null, array(

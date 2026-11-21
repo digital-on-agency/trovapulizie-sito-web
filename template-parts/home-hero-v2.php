@@ -24,7 +24,7 @@
  * inc/home-v2.php precarica con media query uguali. Il telefono Profilo e' lazy (su mobile e' display:none, quindi non
  * viene mai richiesto). Niente data-reveal in questa sezione: contiene l'LCP e l'ingresso non deve nasconderlo.
  * Telefoni: template-parts/phone-mockup.php (esteso); testo circolare: template-parts/tp-orbit-text.php.
- * CSS: blocco `.hv2-hero` di style.css. JS: nessuno (parallasse e rotazione arrivano con TICKET-129).
+ * CSS: blocco `.hv2-hero` di style.css. JS: assets/js/home-v2-motion.js (pausa del testo circolare fuori schermo, parallasse da 1024 px).
  *
  * Esempio: get_template_part( 'template-parts/home-hero-v2', null, array( 'google_badge' => false ) );
  */

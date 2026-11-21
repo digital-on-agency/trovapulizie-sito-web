@@ -17,7 +17,7 @@
  * Senza reveal: il footer non porta data-reveal, quindi e' visibile anche senza reveal.js e con JavaScript spento.
  * Mobile (max-width: 1023px): le colonne diventano una fisarmonica con <details>/<summary>; senza JavaScript restano
  * tutte aperte (attributo open), con assets/js/site-footer-v2.js sono chiuse e se ne apre una per volta.
- * La scritta grande e' decorativa (aria-hidden) e statica: il movimento legato allo scroll e' di TICKET-129.
+ * La scritta grande e' decorativa (aria-hidden); da 1024 px con movimento consentito sale con lo scroll (GSAP, assets/js/home-v2-motion.js, TICKET-129), sotto 1024 px e con riduci movimento e' ferma.
  * CSS: blocco "TICKET-128" in fondo a style.css, solo selettori .site-footer-v2*.
  *
  * [DEVIAZIONE dal Figma] "Servizi a Roma" (11 link interni) e' un quarto gruppo sotto le colonne: il footer attuale lo
