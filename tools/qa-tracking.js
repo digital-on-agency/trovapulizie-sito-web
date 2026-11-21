@@ -41,7 +41,12 @@ withChrome(BIN, LOCAL_JS ? 'about:blank' : URL, { port: 9343 }, async ({ ev, sle
 		var tel = document.querySelector('a[href^="tel:"]'); if (tel) tel.click();
 		var form = document.querySelector('a[href="#form"]'); if (form) form.click();
 		var after = dl.slice(before).filter(function(x){ return x && x.event; }).map(function(x){ return x.event + ':' + (x.landing || '') + (x.target ? ':' + x.target : ''); });
-		return JSON.stringify({ gtm: gtm, iub: iub, clarity: clarity, banner: !!(banner && !banner.hidden), consent: consent, gclid: gclid, gclidNo: gclidNo, storedNo: storedNo, utm: utm, events: after, landing: window.tpLanding && window.tpLanding() });
+		// Pagina senza [data-landing] (TICKET-130): il bottone della barra emette marketing_cta_click con landing "" solo se
+		// tpTrackConfig.ctaAnywhere e' vero (v2 attiva); a interruttore spento nessun evento, come prima.
+		// Tutti i link con posizione fuori da <main> (barra e footer nuovo con "footer_b2b"), uno alla volta.
+		var navs = [].slice.call(document.querySelectorAll('a[data-cta-position]')).filter(function(a){ return !a.closest('main'); });
+		var navList = navs.map(function(a){ var nb = dl.length, h = a.getAttribute('href'); a.click(); return { pos: a.getAttribute('data-cta-position'), href: h, ev: dl.slice(nb).filter(function(x){ return x && x.event && x.event.indexOf('marketing_') === 0; }).map(function(x){ return x.event + ':' + (x.landing === undefined ? '' : x.landing) + ':' + (x.cta_position || '') + ':' + (x.target || ''); }) }; });
+		return JSON.stringify({ gtm: gtm, iub: iub, clarity: clarity, banner: !!(banner && !banner.hidden), consent: consent, gclid: gclid, gclidNo: gclidNo, storedNo: storedNo, utm: utm, events: after, landing: window.tpLanding && window.tpLanding(), navList: navList, anywhere: !!(window.tpTrackConfig && window.tpTrackConfig.ctaAnywhere) });
 	})()`));
 	const checks = [
 		['gtm.js richiesto una volta', r.gtm === 1, r.gtm],
@@ -55,6 +60,12 @@ withChrome(BIN, LOCAL_JS ? 'about:blank' : URL, { port: 9343 }, async ({ ev, sle
 		['click tel: -> marketing_click_to_call', r.events.indexOf('marketing_click_to_call:' + r.landing) !== -1, r.events.join(' | ')],
 		['click #form -> marketing_click_to_form', r.events.some(function (e) { return e.indexOf('marketing_click_to_form:' + r.landing) === 0; }), r.events.join(' | ')],
 	];
+	// Link fuori da <main> (barra, footer nuovo): con landing l'evento porta il nome della landing; senza landing parte solo
+	// con ctaAnywhere (landing vuota) e altrimenti non parte nulla.
+	r.navList.forEach(function (n) {
+		const atteso = r.landing || r.anywhere ? 'marketing_cta_click:' + r.landing + ':' + n.pos + ':' + n.href : null;
+		checks.push([(r.landing ? 'con landing' : (r.anywhere ? 'senza landing, v2 attiva' : 'senza landing, v2 spenta')) + ' -> ' + (atteso ? 'marketing_cta_click ' + n.pos : 'nessun evento da ' + n.pos), atteso ? n.ev.length === 1 && n.ev[0] === atteso : n.ev.length === 0, n.ev.join(' | ')]);
+	});
 	let ko = 0;
 	checks.forEach(function (c) { console.log((c[1] ? 'OK  ' : 'KO  ') + c[0] + '  [' + c[2] + ']'); if (!c[1]) ko++; });
 	console.log(ko ? 'ESITO: ' + ko + ' controlli falliti' : 'ESITO: verde');

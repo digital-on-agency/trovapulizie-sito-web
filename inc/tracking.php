@@ -13,7 +13,8 @@
  *
  * Ordine nel <head> (priorita' 0, prima di ogni altro script): consent default + funzione gtag, snippet GTM.
  * assets/js/tp-track.js (caricato in testa, non deferred) espone tpTrack/tpGetGclid/tpGetUtm/tpConsent/tpAppUrl ai
- * moduli. Prima del file esce window.tpTrackConfig (interruttore degli UTM verso l'app, Theme Options > Integrazioni).
+ * moduli. Prima del file esce window.tpTrackConfig (interruttore degli UTM verso l'app, Theme Options > Integrazioni;
+ * ctaAnywhere, vero dove la v2 e' attiva: marketing_cta_click anche senza [data-landing]).
  * Niente noscript di GTM: senza JavaScript il consenso non si puo' raccogliere.
  *
  * [ATTENZIONE] Un solo GTM per pagina: la lezione del 24/09 sul portale era un contenitore caricato due volte.
@@ -66,7 +67,11 @@ function gtag(){dataLayer.push(arguments);}
 add_action( 'wp_enqueue_scripts', function () {
 	wp_enqueue_script( 'trovapulizie-tp-track', get_stylesheet_directory_uri() . '/assets/js/tp-track.js', array(), tp_theme_version(), false );
 	$utm_to_app = ! tp_tracking_off() && function_exists( 'carbon_get_theme_option' ) && carbon_get_theme_option( 'tp_utm_to_app' );
-	wp_add_inline_script( 'trovapulizie-tp-track', 'window.tpTrackConfig = ' . wp_json_encode( array( 'utmToApp' => (bool) $utm_to_app ) ) . ';', 'before' );
+	// ctaAnywhere (TICKET-130): marketing_cta_click anche senza [data-landing] (barra chiara e footer v2). Vero solo dove
+	// la v2 e' attiva (tp_header_v2_on(): interruttore tp_site_v2 o pagina col template v2); a interruttore spento le
+	// pagine senza landing tracciano come prima.
+	$cta_anywhere = ! tp_tracking_off() && function_exists( 'tp_header_v2_on' ) && tp_header_v2_on();
+	wp_add_inline_script( 'trovapulizie-tp-track', 'window.tpTrackConfig = ' . wp_json_encode( array( 'utmToApp' => (bool) $utm_to_app, 'ctaAnywhere' => (bool) $cta_anywhere ) ) . ';', 'before' );
 	if ( tp_tracking_off() ) {
 		return;
 	}

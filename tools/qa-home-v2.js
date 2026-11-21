@@ -1,5 +1,5 @@
 /* QA della Home v2 (SPEC-homepage-v2, TICKET-119 e seguenti).
-   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero|frasi|servizi|manifesto|come-funziona|chiusura|aziende|faq] [--google on|off] [--servizi base|rotto] [--badges N] [--bottoni on|off] [--domande N] [--fondatori "Nomi|Ruolo"]
+   Uso: node tools/qa-home-v2.js <chrome> <url-anteprima> [larghezza=1440] [--sezioni base|hero|frasi|servizi|manifesto|come-funziona|chiusura|aziende|faq|tracking] [--google on|off] [--servizi base|rotto] [--badges N] [--bottoni on|off] [--domande N] [--fondatori "Nomi|Ruolo"]
    <url-anteprima> e' la pagina d'anteprima (es. https://trovapulizie.it/anteprima-pagina-iniziale/).
 
    Ogni ticket aggiunge la propria funzione di controllo in CHECKS e il proprio nome in SEZIONI. Con --sezioni <nome>
@@ -86,7 +86,15 @@
    lo stesso SVG della hero (<title> = https://app.trovapulizie.com/). A 1440: QR 72 px visibile, immagini del tentacolo caricate
    (naturalWidth > 0), fascia alta 630. A 390: bottone a tutta larghezza (358), QR e tentacolo non visibili e NESSUNA richiesta di
    qr-app.svg ne' cta-tentacolo*.webp (performance.getEntriesByType('resource') dopo uno scroll completo), fascia alta 754; con "riduci
-   movimento" nessuna transizione sul bottone. Nessuno scroll orizzontale. */
+   movimento" nessuna transizione sul bottone. Nessuno scroll orizzontale.
+
+   Gruppo "tracking" (TICKET-130), a 1440: ogni link con data-cta-position (barra, hero, servizi, come funziona, zone e, se
+   ci sono, aziende, FAQ, chiusura) emette un solo marketing_cta_click con landing "home", cta_position uguale all'attributo
+   e target uguale all'href originale (senza UTM); un link verso l'app o WhatsApp dentro main.hv2 senza attributo prende la
+   posizione dalla sezione (prova con tre link sintetici nelle sezioni 08, 09, 10); WhatsApp con posizione emette
+   marketing_cta_click e non marketing_click_whatsapp; senza consenso l'evento resta nel dataLayer e il link e' intatto;
+   un link senza posizione e non verso app/WhatsApp non emette niente; tpTrackConfig.ctaAnywhere e' vero sull'anteprima.
+   Il click e' reale (dispatchEvent su un click intercettato in coda con preventDefault: nessuna navigazione). */
 const { withChrome } = require('./lib/cdp.js');
 
 const SECTIONS = ['01-hero', '02-frasi', '03-servizi', '04-come-funziona', '05-manifesto', '06-recensioni', '07-zone', '08-aziende', '09-faq', '10-chiusura'];
@@ -808,8 +816,57 @@ async function checkChiusuraBrowser() {
 	});
 }
 
+/* Gruppo tracking (TICKET-130) */
+async function checkTracking() {
+	await withChrome(bin, 'about:blank', { port: 9533, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-track' }, async ({ send, ev, sleep }) => {
+		await send('Page.navigate', { url });
+		await sleep(3500);
+		const cfg = await ev('JSON.stringify(window.tpTrackConfig || null)');
+		check('tracking: tpTrackConfig.ctaAnywhere vero sull\'anteprima', JSON.parse(cfg) && JSON.parse(cfg).ctaAnywhere === true, cfg);
+		// Tre link sintetici nelle sezioni 08, 09 e 10 (anche se non ancora in questo ramo): senza data-cta-position.
+		await ev(`(function(){ var main=document.querySelector('main.hv2');
+			[['08-aziende','https://app.trovapulizie.com/'],['09-faq','https://wa.me/393200980144?text=Ciao'],['10-chiusura','https://app.trovapulizie.com/']].forEach(function(x){
+				var s=main.querySelector('[data-section="'+x[0]+'"]'); if(!s){ s=document.createElement('section'); s.setAttribute('data-section',x[0]); s.setAttribute('data-qa-sintetica','1'); main.appendChild(s); }
+				var a=document.createElement('a'); a.href=x[1]; a.textContent='qa'; a.setAttribute('data-qa-sintetico',x[0]); s.appendChild(a); });
+			var n=document.createElement('a'); n.href='/privacy/'; n.setAttribute('data-qa-neutro','1'); n.textContent='n'; main.appendChild(n);
+			document.addEventListener('click',function(e){ e.preventDefault(); },false); })()`);
+		const clicks = JSON.parse(await ev(`(function(){
+			var out=[]; var sel='a[data-cta-position],main.hv2 a[data-qa-sintetico]';
+			var els=[].slice.call(document.querySelectorAll(sel));
+			els.forEach(function(a){ var before=window.dataLayer.length; var href=a.getAttribute('href'); a.click();
+				var ev=window.dataLayer.slice(before).filter(function(x){return x&&x.event&&x.event.indexOf('marketing_')===0;});
+				out.push({pos:a.getAttribute('data-cta-position'),sec:(a.closest('[data-section]')||{getAttribute:function(){return ''}}).getAttribute('data-section'),inV2:!!a.closest('main.hv2'),land:!!a.closest('[data-landing]')||!!document.querySelector('[data-landing]'),href:href,hrefDopo:a.getAttribute('href'),sint:a.getAttribute('data-qa-sintetico'),events:ev}); });
+			var nb=window.dataLayer.length; document.querySelector('[data-qa-neutro]').click();
+			return JSON.stringify({clicks:out,neutro:window.dataLayer.slice(nb).filter(function(x){return x&&x.event&&x.event.indexOf('marketing_')===0;})}); })()`));
+		const att = { '08-aziende': 'home_b2b', '09-faq': 'faq_whatsapp', '10-chiusura': 'cta_final' };
+		let posViste = [];
+		clicks.clicks.forEach(c => {
+			const e = c.events;
+			const atteso = c.sint ? att[c.sint] : c.pos;
+			posViste.push(atteso);
+			check('tracking: ' + (c.sint ? 'link sintetico ' + c.sint : 'link ' + c.pos) + ' emette un solo marketing_cta_click', e.length === 1 && e[0].event === 'marketing_cta_click', JSON.stringify(e));
+			if (e.length === 1) check('tracking: ' + atteso + ' porta landing home, posizione e target originale', e[0].landing === 'home' && e[0].cta_position === atteso && e[0].target === c.href && c.hrefDopo === c.href, JSON.stringify(e[0]));
+			if (/wa\.me|whatsapp/.test(c.href)) check('tracking: WhatsApp ' + atteso + ' non emette marketing_click_whatsapp', !e.some(x => x.event === 'marketing_click_whatsapp'), JSON.stringify(e));
+		});
+		// Zone: i due link nascono dal controllo del CAP (zones-check.js). Un CAP in lista -> "Apri l'app" (zones_check),
+		// un CAP di Roma fuori lista -> "Scrivici su WhatsApp" (zones_whatsapp).
+		for (const [cap, atteso] of [['00186', 'zones_check'], ['00150', 'zones_whatsapp']]) {
+			const z = JSON.parse(await ev(`(function(){ var f=document.querySelector('.hv2-zones__check'); if(!f) return JSON.stringify({noform:true}); f.hidden=false; var i=f.querySelector('input'); i.value='${cap}'; f.dispatchEvent(new Event('submit',{cancelable:true,bubbles:true}));
+				return new Promise(function(r){ setTimeout(function(){ var a=f.querySelector('a[data-cta-position]'); if(!a) return r(JSON.stringify({nolink:true,html:f.innerHTML.slice(0,200)}));
+					var b=window.dataLayer.length, href=a.getAttribute('href'); a.click(); r(JSON.stringify({pos:a.getAttribute('data-cta-position'),href:href,hrefDopo:a.getAttribute('href'),events:window.dataLayer.slice(b).filter(function(x){return x&&x.event&&x.event.indexOf('marketing_')===0;})})); },400); }); })()`));
+			if (z.noform) { check('tracking: controllo CAP assente (nessun CAP in lista), zone non provate', true); break; }
+			check('tracking: ' + atteso + ' (CAP ' + cap + ') emette un solo marketing_cta_click con landing home e target originale', !z.nolink && z.pos === atteso && z.events.length === 1 && z.events[0].event === 'marketing_cta_click' && z.events[0].landing === 'home' && z.events[0].cta_position === atteso && z.events[0].target === z.href && z.hrefDopo === z.href, JSON.stringify(z));
+		}
+		check('tracking: coperte navbar e hero', ['navbar', 'hero'].every(p => posViste.includes(p)), posViste.join(','));
+		check('tracking: un link senza posizione e non verso app/WhatsApp non emette niente', clicks.neutro.length === 0, JSON.stringify(clicks.neutro));
+		// Senza consenso statistiche: l'evento resta nel dataLayer (GTM non invia, consent mode), il link e' intatto.
+		const noc = JSON.parse(await ev(`(function(){ document.cookie='tp_consent=; path=/; max-age=0'; var a=document.querySelector('a[data-cta-position="hero"]'); var b=window.dataLayer.length; a.click(); return JSON.stringify({ev:window.dataLayer.slice(b).filter(function(x){return x&&x.event&&x.event.indexOf('marketing_')===0;}),href:a.getAttribute('href'),cons:window.tpConsent()}); })()`));
+		check('tracking: senza consenso l\'evento resta nel dataLayer e il link non cambia', noc.cons === null && noc.ev.length === 1 && noc.ev[0].cta_position === 'hero' && /^https:\/\/app\.trovapulizie\.com\/?$/.test(noc.href), JSON.stringify(noc));
+	});
+}
+
 (async () => {
-	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona', 'chiusura', 'aziende', 'faq'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
+	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona', 'chiusura', 'aziende', 'faq', 'tracking'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
 	if (gruppo === 'hero') {
 		const h = await checkHero();
 		if (h) await checkHeroBrowser(h.pre);
@@ -825,6 +882,8 @@ async function checkChiusuraBrowser() {
 	} else if (gruppo === 'servizi') {
 		await checkServizi();
 		await checkServiziBrowser();
+	} else if (gruppo === 'tracking') {
+		await checkTracking();
 	} else if (gruppo === 'come-funziona') {
 		await checkSteps();
 		await checkStepsBrowser();

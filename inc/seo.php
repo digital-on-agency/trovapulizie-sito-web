@@ -479,9 +479,12 @@ function tp_seo_print_jsonld( $dati ) {
 	echo '<script type="application/ld+json">' . wp_json_encode( $dati, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) . '</script>' . "\n";
 }
 
-/* Home: Organization + WebSite. Stessi dati di Chi siamo (nome, ragione sociale, P.IVA, email, contactPoint). */
+/* Home: Organization + WebSite. Stessi dati di Chi siamo (nome, ragione sociale, P.IVA, email, contactPoint).
+   Legati alla pagina iniziale e non al template (TICKET-130, ADR-005): seguono page_on_front, quindi la Home attuale
+   (page-home.php) oggi, la Home v2 dopo il rilascio e di nuovo la Home attuale col rollback. L'anteprima della v2 non
+   e' la pagina iniziale e non li ha. Nessun AggregateRating in nessun caso (SPEC-homepage-v2, US-03). */
 add_action( 'wp_head', function () {
-	if ( ! is_singular() || ! is_page_template( 'page-home.php' ) ) {
+	if ( ! is_singular() || ! is_front_page() ) {
 		return;
 	}
 	$org = array_merge(
