@@ -1001,7 +1001,7 @@ add_action( 'carbon_fields_register_fields', function () {
 	// | 04-come-funziona    | h2_come_funziona_title | 122 |
 	// | 05-manifesto        | h2_manifesto_title, h2_manifesto_eyebrow, h2_manifesto_subtitle, h2_manifesto_stamp, h2_manifesto_items, h2_manifesto_hide | 123 (fatto) |
 	// | 06-recensioni       | h2_recensioni_title | 124 |
-	// | 07-zone             | h2_zone_title       | 125 |
+	// | 07-zone             | h2_zone_title, h2_zones_caps | 125 (fatto) |
 	// | 08-aziende          | h2_aziende_title    | 126 |
 	// | 09-faq              | h2_faq_title        | 126 |
 	// | 10-chiusura         | h2_chiusura_title   | 127 |
@@ -1108,6 +1108,16 @@ add_action( 'carbon_fields_register_fields', function () {
 					->set_default_value( $h2_righe_def )
 					->set_header_template( '<%- lead %> <%- keyword %>' ),
 				Field::make( 'checkbox', 'h2_manifesto_hide', __( 'Nascondi il manifesto' ) )->set_option_value( 'yes' )->set_help_text( __( 'Acceso: la sezione non compare. Spento (default): compare con le promesse sopra, o con le quattro di default se non ce n\'e\' nessuna.' ) ),
+			) );
+		}
+		if ( 'zone' === $chiave ) {
+			// TICKET-125: titolo e lista dei CAP attivi. Il testo del campo e' la lista del tema finche' non lo si salva.
+			$h2_campi[0]->set_help_text( __( 'Titolo della sezione (H2, maiuscolo da CSS). Vuoto = "Arriviamo anche da te?"' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'textarea', 'h2_zones_caps', __( 'CAP attivi (controllo del CAP)' ) )
+					->set_rows( 12 )
+					->set_default_value( function_exists( 'tp_home_v2_zones_default_lines' ) ? tp_home_v2_zones_default_lines() : '' )
+					->set_help_text( __( 'Una riga per CAP: "00186 | Centro Storico". Sono i CAP per cui il controllo risponde "Ci siamo" e che la mappa colora di verde; sono validi solo CAP di Roma (00118-00199). [ATTENZIONE] Campo mai salvato = lista del tema (44 CAP). Campo svuotato e salvato = il controllo sparisce dalla pagina (restano titolo, mappa e chip). Il CAP 00194 non ha un poligono sulla mappa: il controllo risponde si ma la mappa non lo evidenzia.' ) ),
 			) );
 		}
 		$h2_container->add_tab( __( $etichetta ), $h2_campi );

@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.74.4
+Version: 0.74.5
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -10882,6 +10882,28 @@ html.tp-reveal .hv2 [data-reveal].is-in {
 	.hv2-services__item .hv2-services__tile {
 		transition: none;
 	}
+	/* TICKET-125: raggio e impulsi del radar fermi, mappa che non si sposta, ingressi solo in dissolvenza */
+	html.tp-reveal body .hv2 .hv2-zones__text[data-reveal],
+	html.tp-reveal body .hv2 .hv2-zones__map[data-reveal] {
+		transform: none;
+		transition-duration: var(--tp-dur-reduced);
+	}
+	html .hv2-zones__sweep {
+		display: none;
+	}
+	html .hv2-zones__pulse > i,
+	html .is-ping .hv2-zones__pulse > b,
+	html .hv2-zones__result.is-in {
+		animation: none;
+	}
+	html .hv2-zones__pulse > i + i {
+		display: none;
+	}
+	html .hv2-zones__stage,
+	html .hv2-zones__submit,
+	html .hv2-zones__svg path[data-state="active"] {
+		transition: none;
+	}
 }
 
 /* =========================
@@ -11701,6 +11723,477 @@ body.tp-v2-header {
 		box-shadow: 0 4px 12px rgba(15, 31, 27, 0.1);
 		font-size: 13px;
 	}
+}
+
+/* =========================
+   TICKET-125 - Zone: mappa dei CAP, radar e controllo del CAP (Figma 7903:7567 desktop, 7946:1972 mobile).
+   Solo selettori nuovi (.hv2-zones). Il disco e' un quadrato 1:1 che ritaglia la mappa; i CAP attivi sono verdi, gli
+   altri bianchi. Raggio, impulsi e ingressi sono animazioni CSS; il raggio e' messo in pausa fuori viewport da
+   tp-loops.js (classe .is-paused). Le regole "riduci movimento" stanno nel blocco unico della v2 piu' in alto.
+   ========================= */
+.hv2-zones {
+	position: relative;
+	overflow: hidden;
+	isolation: isolate;
+	padding: 0;
+	background: var(--tp-v2-mint);
+}
+.hv2-zones__light {
+	position: absolute;
+	z-index: -1;
+	border-radius: 50%;
+	pointer-events: none;
+	background: radial-gradient(closest-side, rgba(55, 178, 153, 0.16), rgba(55, 178, 153, 0));
+}
+.hv2-zones__light--a { left: 988px; top: -83px; width: 760px; height: 640px; }
+.hv2-zones__light--b { left: -280px; top: 501px; width: 560px; height: 420px; }
+.hv2-zones__inner {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 560px) minmax(0, 744px);
+	justify-content: space-between;
+	align-items: center;
+	gap: 40px;
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: 23px 28px 23px clamp(24px, 6.667vw, 96px);
+	min-height: 790px;
+}
+.hv2-zones__text {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	min-width: 0;
+}
+.hv2-zones__eyebrow {
+	margin: 0 0 14px;
+	font-size: 13px;
+	font-weight: 700;
+	line-height: normal;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--tp-v2-niente);
+}
+.hv2-zones__title {
+	margin: 0 0 16px;
+	font-size: clamp(44px, 4.444vw, 64px);
+	font-weight: 800;
+	line-height: 1.03;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	color: var(--tp-v2-ink);
+}
+.hv2-zones__subtitle {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 500;
+	line-height: 28px;
+	color: #4F6660;
+}
+
+/* Controllo del CAP: campo a pillola con il bottone dentro, esito sotto */
+.hv2-zones__check {
+	width: 100%;
+	margin-top: 28px;
+}
+.hv2-zones__check[hidden] {
+	display: none;
+}
+.hv2-zones__field {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 6px 6px 6px 22px;
+	border-radius: 999px;
+	background: #fff;
+	box-shadow: 0 8px 12px rgba(6, 42, 34, 0.08);
+}
+.hv2-zones__pin {
+	flex: none;
+	width: 14px;
+	height: 18px;
+}
+.hv2-zones__input {
+	flex: 1 1 0;
+	min-width: 0;
+	padding: 10px 0;
+	border: 0;
+	background: transparent;
+	font: inherit;
+	font-size: 17px;
+	color: var(--tp-v2-ink);
+}
+.hv2-zones__input::placeholder {
+	color: #596B66;
+	opacity: 1;
+}
+.hv2-zones__input:focus {
+	outline: none;
+}
+.hv2-zones__field:focus-within {
+	box-shadow: 0 8px 12px rgba(6, 42, 34, 0.08), 0 0 0 3px rgba(55, 178, 153, 0.45);
+}
+.hv2-zones__submit {
+	flex: none;
+	padding: 14px 24px;
+	border: 0;
+	border-radius: 999px;
+	background: var(--tp-v2-green);
+	font: inherit;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: normal;
+	color: #fff;
+	cursor: pointer;
+	transition: transform var(--tp-dur-fast) var(--tp-ease-stage);
+}
+.hv2-zones__submit:focus-visible,
+.hv2-zones__cta:focus-visible {
+	outline: 3px solid var(--tp-v2-ink);
+	outline-offset: 2px;
+}
+@media (hover: hover) {
+	.hv2-zones__submit:hover {
+		transform: translateY(-1px);
+	}
+}
+.hv2-zones__result {
+	margin-top: 14px;
+	min-height: 40px;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 10px 14px;
+}
+.hv2-zones__result.is-in {
+	animation: hv2-zones-result var(--tp-dur) var(--tp-ease-in) both;
+}
+.hv2-zones__result:empty {
+	margin-top: 0;
+	min-height: 0;
+}
+@keyframes hv2-zones-result {
+	from { opacity: 0; transform: translateY(-8px); }
+	to { opacity: 1; transform: none; }
+}
+.hv2-zones__msg {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	margin: 0;
+	padding: 8px 16px 8px 10px;
+	border-radius: 999px;
+	background: rgba(55, 178, 153, 0.12);
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.3;
+	color: var(--tp-v2-ink);
+}
+.hv2-zones__msg--no,
+.hv2-zones__check[data-state="errore"] .hv2-zones__msg {
+	padding-left: 16px;
+	background: #E8EEEC;
+}
+.hv2-zones__tick {
+	flex: none;
+	display: inline-grid;
+	place-items: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: var(--tp-v2-green);
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1;
+	color: #fff;
+}
+.hv2-zones__cta {
+	display: inline-block;
+	padding: 10px 20px;
+	border-radius: 999px;
+	background: var(--tp-v2-green);
+	font-size: 15px;
+	font-weight: 600;
+	line-height: normal;
+	color: #fff;
+	text-decoration: none;
+}
+.hv2-zones__check[data-state="no"] .hv2-zones__cta {
+	background: transparent;
+	box-shadow: inset 0 0 0 1.5px var(--tp-v2-green);
+	color: var(--tp-v2-niente);
+}
+
+/* Elenco delle zone attive (testo equivalente alla mappa) */
+.hv2-zones__list {
+	margin-top: 28px;
+}
+.hv2-zones__list-label {
+	margin: 0 0 12px;
+	font-size: 13px;
+	font-weight: 600;
+	color: #4F6661;
+}
+.hv2-zones__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.hv2-zones__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	padding: 7px 14px 7px 12px;
+	border: 1px solid var(--tp-v2-green);
+	border-radius: 999px;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: normal;
+	color: var(--tp-v2-niente);
+}
+.hv2-zones__chip::before {
+	content: "";
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--tp-v2-green);
+}
+.hv2-zones__more {
+	margin-top: 12px;
+}
+.hv2-zones__more summary {
+	display: inline-block;
+	padding: 4px 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--tp-v2-niente);
+	cursor: pointer;
+}
+.hv2-zones__more summary:focus-visible {
+	outline: 3px solid var(--tp-v2-ink);
+	outline-offset: 2px;
+}
+.hv2-zones__chips--all {
+	margin-top: 10px;
+}
+
+/* Mappa */
+.hv2-zones__map {
+	width: 100%;
+	max-width: 744px;
+	justify-self: end;
+}
+.hv2-zones__disc {
+	position: relative;
+	aspect-ratio: 1;
+	overflow: hidden;
+	border-radius: 50%;
+	background: rgba(255, 255, 255, 0.55);
+	box-shadow: inset 0 0 0 1px rgba(55, 178, 153, 0.3);
+}
+.hv2-zones__stage {
+	--zs: 1;
+	--zx: 0%;
+	--zy: 0%;
+	position: absolute;
+	inset: 0;
+	transform-origin: 0 0;
+	transform: translate(var(--zx), var(--zy)) scale(var(--zs));
+	transition: transform 400ms var(--tp-ease-stage);
+}
+.hv2-zones__svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.hv2-zones__svg path {
+	stroke-width: 0.6;
+	stroke-linejoin: round;
+}
+.hv2-zones__svg path[data-state="none"] {
+	fill: #fff;
+	stroke: #CFE3DC;
+}
+.hv2-zones__svg path[data-state="active"] {
+	fill: #55BFA9;
+	stroke: #fff;
+	stroke-width: 0.8;
+	transition: fill var(--tp-dur) var(--tp-ease-stage);
+}
+.hv2-zones__svg path.is-selected {
+	fill: #1F8C75;
+	stroke: var(--tp-v2-ink);
+	stroke-width: 1.4;
+}
+.hv2-zones__ring {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	border: 1px dashed rgba(55, 178, 153, 0.4);
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+	pointer-events: none;
+}
+.hv2-zones__ring--1 { width: 25%; height: 25%; }
+.hv2-zones__ring--2 { width: 50%; height: 50%; }
+.hv2-zones__ring--3 { width: 75%; height: 75%; }
+.hv2-zones__sweep {
+	position: absolute;
+	inset: 0;
+	border-radius: 50%;
+	background: conic-gradient(from -50deg, rgba(55, 178, 153, 0) 0deg, rgba(55, 178, 153, 0.2) 50deg, rgba(55, 178, 153, 0) 50deg);
+	pointer-events: none;
+	animation: hv2-zones-sweep 8s linear infinite;
+}
+.hv2-zones__sweep.is-paused {
+	animation-play-state: paused;
+}
+@keyframes hv2-zones-sweep {
+	to { transform: rotate(360deg); }
+}
+
+/* Impulsi, etichette e monumenti: posizionati in percentuale sullo stage; si controscalano per restare della stessa misura */
+.hv2-zones__pulse,
+.hv2-zones__mon {
+	position: absolute;
+	width: 0;
+	height: 0;
+}
+.hv2-zones__pulse > i,
+.hv2-zones__pulse > b {
+	position: absolute;
+	left: 0;
+	top: 0;
+	border-radius: 50%;
+	transform: translate(-50%, -50%);
+}
+.hv2-zones__pulse > i {
+	aspect-ratio: 1;
+	width: calc(72 / 744 * 100cqw);
+	border: 2px solid var(--tp-v2-green);
+	background: rgba(255, 255, 255, 0.5);
+	opacity: 0.8;
+	animation: hv2-zones-pulse 2s var(--tp-ease-stage) infinite;
+}
+.hv2-zones__pulse > i + i {
+	animation-delay: 0.6s;
+}
+.hv2-zones__pulse > b {
+	width: calc(22 / 744 * 100cqw);
+	aspect-ratio: 1;
+	border: 3px solid #fff;
+	background: var(--tp-v2-green);
+	box-shadow: 0 0 0 1px rgba(6, 42, 34, 0.1);
+}
+.hv2-zones__map {
+	container-type: inline-size;
+}
+@keyframes hv2-zones-pulse {
+	from { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+	to { transform: translate(-50%, -50%) scale(2.2); opacity: 0; }
+}
+.is-ping .hv2-zones__pulse > b {
+	animation: hv2-zones-ping 700ms var(--tp-ease-bounce) 1;
+}
+@keyframes hv2-zones-ping {
+	50% { transform: translate(-50%, -50%) scale(2); }
+}
+.hv2-zones__tag {
+	position: absolute;
+	top: 0;
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: var(--tp-v2-ink);
+	font-size: 14px;
+	font-style: normal;
+	font-weight: 600;
+	line-height: normal;
+	white-space: nowrap;
+	color: #fff;
+	transform: translateY(-50%);
+}
+.hv2-zones__tag--sinistra { right: calc(22 / 744 * 100cqw); }
+.hv2-zones__tag--destra { left: calc(22 / 744 * 100cqw); }
+.hv2-zones__mon > img {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: calc(75 / 744 * 100cqw);
+	height: auto;
+	max-width: none;
+	transform: translate(-50%, -50%);
+}
+.hv2-zones__mon-label {
+	position: absolute;
+	left: 0;
+	font-size: 12px;
+	font-style: normal;
+	font-weight: 600;
+	line-height: normal;
+	white-space: nowrap;
+	color: var(--tp-v2-ink);
+	transform: translateX(-50%);
+}
+.hv2-zones__mon-label--sotto { top: calc(28 / 744 * 100cqw); }
+.hv2-zones__mon-label--sopra { bottom: calc(28 / 744 * 100cqw); }
+.hv2-zones__stage > * {
+	scale: calc(1 / var(--zs));
+	transform-origin: 0 0;
+}
+.hv2-zones__svg {
+	scale: 1;
+}
+
+/* Ingressi: testo da sinistra, mappa a scala 0,96 -> 1 (600 ms) */
+html.tp-reveal .hv2 .hv2-zones__text[data-reveal] {
+	transform: translateX(-32px);
+	transition-duration: 600ms;
+}
+html.tp-reveal .hv2 .hv2-zones__map[data-reveal] {
+	transform: scale(0.96);
+	transition-duration: 600ms;
+}
+html.tp-reveal .hv2 .hv2-zones__text[data-reveal].is-in,
+html.tp-reveal .hv2 .hv2-zones__map[data-reveal].is-in {
+	transform: none;
+}
+
+@media (max-width: 1023px) {
+	.hv2-zones__light--a { left: 140px; top: -60px; width: 560px; height: 480px; }
+	.hv2-zones__light--b { left: -240px; top: 520px; width: 480px; height: 360px; }
+	/* Ordine del Figma mobile: testo e controllo, mappa, elenco delle zone. Il testo diventa "contents" per poter
+	   mettere la mappa fra il controllo e l'elenco. */
+	.hv2-zones__inner {
+		grid-template-columns: minmax(0, 1fr);
+		gap: 0;
+		min-height: 0;
+		padding: 48px 16px 40px;
+	}
+	.hv2-zones__text {
+		display: contents;
+	}
+	.hv2-zones__eyebrow { order: 1; }
+	.hv2-zones__title { order: 2; }
+	.hv2-zones__subtitle { order: 3; }
+	.hv2-zones__check { order: 4; }
+	.hv2-zones__map { order: 5; margin-top: 32px; }
+	.hv2-zones__list { order: 6; margin-top: 28px; }
+	.hv2-zones__title {
+		font-size: clamp(34px, 10vw, 40px);
+		line-height: 1.03;
+	}
+	.hv2-zones__subtitle {
+		font-size: 17px;
+		line-height: 26px;
+	}
+	.hv2-zones__check { margin-top: 24px; }
+	.hv2-zones__map { justify-self: center; }
+	.hv2-zones__tag { padding: 5px 10px; font-size: 12px; }
+	.hv2-zones__mon-label { font-size: 10px; }
+	.hv2-zones__mon--pantheon { display: none; }
 }
 
 /* Scena dei telefoni proporzionata all'altezza della finestra, perche' la hero entri senza scorrere */

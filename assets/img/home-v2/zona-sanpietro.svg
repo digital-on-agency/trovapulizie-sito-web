@@ -1,0 +1,22 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="75.25" height="75.25" viewBox="0 0 75.25 75.25" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="Monumento &#194;&#183; San Pietro" filter="url(#filter0_d_0_35)">
+<path id="Vector" d="M37.625 55.25C50.6727 55.25 61.25 44.6727 61.25 31.625C61.25 18.5773 50.6727 8 37.625 8C24.5773 8 14 18.5773 14 31.625C14 44.6727 24.5773 55.25 37.625 55.25Z" fill="white"/>
+<g id="Group">
+<path id="Vector_2" d="M23.625 42.125H51.625M26.25 42.125V35.125H49V42.125M30.625 42.125V37.75M37.625 42.125V37.75M44.625 42.125V37.75" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke="#062A22"/>
+<path id="Vector_3" d="M29.75 35.125V31.625H45.5V35.125" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke="#062A22"/>
+<path id="Vector_4" d="M30.625 31.625C30.625 25.2083 32.9583 21.7083 37.625 21.125C42.2917 21.7083 44.625 25.2083 44.625 31.625" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke="#062A22"/>
+<path id="Vector_5" d="M37.625 21.125V17.625M35.875 18.9375H39.375" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke="#062A22"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_d_0_35" x="-4.375" y="-4.375" width="84" height="84" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset dy="6"/>
+<feGaussianBlur stdDeviation="7"/>
+<feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0.16 0 0 0 0 0.13 0 0 0 0.25 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_35"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_35" result="shape"/>
+</filter>
+</defs>
+</svg>
