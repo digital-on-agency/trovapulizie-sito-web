@@ -1,4 +1,12 @@
 <?php
+// Footer nuovo (TICKET-128): solo con l'interruttore tp_site_v2 acceso o sulla pagina col template page-home-v2.php.
+// Altrimenti nessun output da qui e il ramo attuale, sotto, resta com'e'.
+if ( tp_footer_v2_on() ) {
+	get_template_part( 'template-parts/site-footer-v2' );
+	wp_footer();
+	echo "</body>\n</html>\n";
+	return;
+}
 /**
  * Footer — Figma 3564:167 (mobile 4026:1007). Contenuti da Theme Options > Footer (Carbon Fields, inc/carbon-fields.php).
  * Motion spec §10: reveal con colonne in stagger da 60 ms; hover link verde + 2 px a destra; social scale 1.1.

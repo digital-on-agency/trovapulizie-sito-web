@@ -314,3 +314,5 @@ require_once __DIR__ . '/inc/survey.php';
 require_once __DIR__ . '/inc/home-v2.php';
 require_once __DIR__ . '/inc/home-v2-zones.php';
 require_once __DIR__ . '/inc/home-v2-reviews.php';
+require_once __DIR__ . '/inc/home-v2-b2b.php';
+require_once __DIR__ . '/inc/home-v2-cta.php';

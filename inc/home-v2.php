@@ -68,6 +68,18 @@ function tp_header_v2_on() {
 	return tp_site_v2_on() || is_page_template( 'page-home-v2.php' );
 }
 
+/**
+ * True se la richiesta usa il footer nuovo (footer.php, template-parts/site-footer-v2.php, TICKET-128): stessa regola
+ * della barra, cioe' interruttore tp_site_v2 acceso oppure pagina col template page-home-v2.php (anteprima e, dopo il
+ * rilascio, pagina iniziale). Con interruttore spento e qualunque altra pagina e' false e footer.php stampa il
+ * markup di sempre.
+ *
+ * @return bool
+ */
+function tp_footer_v2_on() {
+	return tp_header_v2_on();
+}
+
 /* Classe di body per il ramo v2: porta --tp-navbar-h alla misura della barra chiara (style.css, blocco Home v2). */
 add_filter( 'body_class', function ( $classes ) {
 	if ( tp_header_v2_on() ) {

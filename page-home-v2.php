@@ -21,7 +21,7 @@
  * | 07-zone          | home-zones-v2 (TICKET-125, fatto)           | 7903:7567, mobile 7946:1972 |
  * | 08-aziende       | home-b2b-band (TICKET-126)                  | 7903:7601 |
  * | 09-faq           | faq-accordion con fondatori (TICKET-126)    | 7903:7623 |
- * | 10-chiusura      | home-cta-v2 (TICKET-127)                    | 7903:7666 |
+ * | 10-chiusura      | home-cta-v2 (TICKET-127, fatto)             | 7903:7666 |
  * Footer 7904:2856: TICKET-128.
  *
  * <main> porta data-landing="home": tp-track.js emette marketing_cta_click solo con [data-landing] (o per ogni
@@ -157,6 +157,31 @@ $hv2_sections = array(
 				'title' => carbon_get_the_post_meta( 'h2_zone_title' ),
 				'caps'  => tp_home_v2_zones_caps( get_the_ID() ),
 			) );
+			++$hv2_i;
+			continue;
+		endif;
+		if ( 'chiusura' === $hv2_def[0] ) :
+			// Chiusura "Apri l'app" (TICKET-127): QR e tentacolo solo da 1024 px, bottone bianco (inc/home-v2-cta.php).
+			get_template_part( 'template-parts/home-cta-v2', null, tp_home_v2_cta_args( get_the_ID() ) );
+			++$hv2_i;
+			continue;
+		endif;
+		if ( 'aziende' === $hv2_def[0] ) :
+			// Fascia aziende (TICKET-126): argomenti dai campi Carbon in inc/home-v2-b2b.php.
+			get_template_part( 'template-parts/home-b2b-band', null, tp_home_v2_b2b_args( get_the_ID() ) );
+			++$hv2_i;
+			continue;
+		endif;
+		if ( 'faq' === $hv2_def[0] ) :
+			// FAQ con i fondatori (TICKET-126): faq-accordion in variante v2. Nessuna domanda = niente sezione e niente JSON-LD.
+			$hv2_faq = tp_home_v2_faq_args( get_the_ID() );
+			if ( $hv2_faq['items'] ) :
+				?>
+	<div class="hv2-faq" data-section="09-faq">
+				<?php get_template_part( 'template-parts/faq-accordion', null, $hv2_faq ); ?>
+	</div>
+				<?php
+			endif;
 			++$hv2_i;
 			continue;
 		endif;
