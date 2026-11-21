@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.74.0
+Version: 0.74.3
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -12152,6 +12152,11 @@ html.tp-reveal .hv2 .hv2-zones__map[data-reveal].is-in {
 	gap: 40px;
 	padding-right: 40px;
 }
+/* Frasi in bianco (Guido 21/11; il punto resta verde scuro). [ATTENZIONE] Bianco su #37B299 = 2,6:1, sotto la soglia
+   AA anche per testo grande: accettato come scelta di brand su testo decorativo da 32 px in nero 800. */
+.hv2-frasi__marquee .tp-marquee__text {
+	color: #fff;
+}
 .hv2-frasi__marquee .tp-marquee__dot {
 	flex: none;
 	width: 12px;
@@ -12309,7 +12314,7 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
 	border-radius: 2.5em;
 	background: linear-gradient(145.43deg, #37B299 0%, #2A9580 71.429%);
 	box-shadow: 0 1.875em 3.75em -0.625em rgba(55, 178, 153, 0.3);
-	font-size: min(16px, 1.25vw);
+	font-size: min(13.5px, 1.05vw); /* riquadro all'84% del Figma su desktop (Guido 21/11); il mobile ha la sua regola */
 }
 .hv2-services__grid {
 	display: grid;
