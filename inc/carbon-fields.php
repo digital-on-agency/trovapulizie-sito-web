@@ -998,7 +998,7 @@ add_action( 'carbon_fields_register_fields', function () {
 	// | 01-hero             | h2_hero_title, h2_hero_title_accent, h2_hero_label, h2_hero_subtitle, h2_hero_orbit, h2_google_badge, h2_google_rating | 120 (fatto) |
 	// | 02-frasi            | h2_frasi_title (titolo nascosto, per gli screen reader), h2_frasi_items, h2_frasi_speed | 121 (fatto) |
 	// | 03-servizi          | h2_servizi_title, h2_servizi_eyebrow, h2_servizi_subtitle, h2_servizi_more_label, h2_servizi_cta, h2_servizi_items | 121 (fatto) |
-	// | 04-come-funziona    | h2_come_funziona_title | 122 |
+	// | 04-come-funziona    | h2_come_funziona_title, _eyebrow, _subtitle, _subtitle_mobile, _link_label, _link_url, _steps | 122 (fatto) |
 	// | 05-manifesto        | h2_manifesto_title  | 123 |
 	// | 06-recensioni       | h2_recensioni_title | 124 |
 	// | 07-zone             | h2_zone_title       | 125 |
@@ -1076,6 +1076,28 @@ add_action( 'carbon_fields_register_fields', function () {
 						Field::make( 'checkbox', 'soon', __( 'Presto' ) )->set_option_value( 'yes' )->set_help_text( __( 'Mostra l\'etichetta "presto" e toglie il link.' ) ),
 					) )
 					->set_header_template( '<%- name %>' ),
+			) );
+		}
+		if ( 'come_funziona' === $chiave ) {
+			// TICKET-122: testi e passi della sezione Come funziona. Vuoto = default del template (template-parts/home-steps-v2.php).
+			$h2_campi[0]->set_help_text( __( 'Titolo della sezione (H2, maiuscolo da CSS). Vuoto = "Spoiler: due minuti."' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_come_funziona_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Come funziona"' ) ),
+				Field::make( 'text', 'h2_come_funziona_subtitle', __( 'Sottotitolo (desktop)' ) )->set_help_text( __( 'Vuoto = "Quattro passi. Dal tuo divano."' ) ),
+				Field::make( 'text', 'h2_come_funziona_subtitle_mobile', __( 'Sottotitolo (mobile)' ) )->set_help_text( __( 'Sotto 1024 px. Vuoto = "Quattro passi. L\'ultimo lo fai sul divano."' ) ),
+				Field::make( 'text', 'h2_come_funziona_link_label', __( 'Testo del link in fondo' ) )->set_help_text( __( 'Vuoto = "Vedi come funziona nel dettaglio". Il link esce solo se l\'URL qui sotto e\' compilato.' ) ),
+				Field::make( 'text', 'h2_come_funziona_link_url', __( 'URL del link in fondo' ) )->set_help_text( __( 'Percorso interno (es. /roma/) o URL. Vuoto = il link non esce. Un percorso interno esce solo se la pagina e\' pubblicata.' ) ),
+				Field::make( 'complex', 'h2_come_funziona_steps', __( 'Passi' ) )
+					->set_layout( 'tabbed-vertical' )
+					->setup_labels( array( 'plural_name' => __( 'Passi' ), 'singular_name' => __( 'Passo' ) ) )
+					->set_help_text( __( 'Le schede, in ordine (di solito quattro). Nessuna riga = i quattro di default: Scegli, Confronta, Prenota, Fatto, con foto e schermate del tema. Righe compilate ma tutte senza titolo = la sezione non esce. Il componente si adatta al numero di schede.' ) )
+					->add_fields( array(
+						Field::make( 'text', 'title', __( 'Titolo del passo (maiuscolo da CSS)' ) ),
+						Field::make( 'text', 'text', __( 'Frase' ) ),
+						Field::make( 'image', 'photo', __( 'Foto' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuoto = la foto di default del passo con lo stesso numero d\'ordine. Foto vera, ritagliata orizzontale (la scheda desktop e\' 1248 x 440).' ) ),
+						Field::make( 'image', 'screen', __( 'Schermata dell\'app' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuoto = la schermata di default del passo. Stretta e alta, circa 376 x 710.' ) ),
+					) )
+					->set_header_template( '<%- title %>' ),
 			) );
 		}
 		$h2_container->add_tab( __( $etichetta ), $h2_campi );

@@ -15,7 +15,7 @@
  * | 01-hero          | home-hero-v2 (TICKET-120, fatto)            | 7903:5257, mobile 7946:3 |
  * | 02-frasi         | tp-marquee (TICKET-121, fatto)              | 7903:6209, mobile 7946:662 |
  * | 03-servizi       | home-services-v2 (TICKET-121, fatto)        | 7903:6228, mobile 7946:668 |
- * | 04-come-funziona | home-steps-v2 (TICKET-122)                  | 7903:6508 |
+ * | 04-come-funziona | home-steps-v2 (TICKET-122, fatto)           | 7903:6508, mobile 7946:947 |
  * | 05-manifesto     | home-manifesto (TICKET-123)                 | 7903:7379 |
  * | 06-recensioni    | home-reviews-notes (TICKET-124)             | 7903:7496 |
  * | 07-zone          | home-zones-v2 (TICKET-125)                  | 7903:7567 |
@@ -113,11 +113,40 @@ $hv2_sections = array(
 			++$hv2_i;
 			continue;
 		endif;
+		if ( 'come_funziona' === $hv2_def[0] ) :
+			// Come funziona (TICKET-122): template-part dedicato (schede impilate da 1024 px, carosello sotto). Senza righe in Carbon valgono i quattro passi di default; con righe tutte senza titolo la sezione non esce.
+			$hv2_passi = null;
+			$hv2_raw   = (array) carbon_get_the_post_meta( 'h2_come_funziona_steps' );
+			if ( $hv2_raw ) {
+				$hv2_passi = array();
+				foreach ( $hv2_raw as $hv2_riga ) {
+					if ( is_array( $hv2_riga ) ) {
+						$hv2_passi[] = array(
+							'title'  => $hv2_riga['title'] ?? '',
+							'text'   => $hv2_riga['text'] ?? '',
+							'photo'  => $hv2_riga['photo'] ?? '',
+							'screen' => $hv2_riga['screen'] ?? '',
+						);
+					}
+				}
+			}
+			get_template_part( 'template-parts/home-steps-v2', null, array(
+				'title'           => carbon_get_the_post_meta( 'h2_come_funziona_title' ),
+				'eyebrow'         => carbon_get_the_post_meta( 'h2_come_funziona_eyebrow' ),
+				'subtitle'        => carbon_get_the_post_meta( 'h2_come_funziona_subtitle' ),
+				'subtitle_mobile' => carbon_get_the_post_meta( 'h2_come_funziona_subtitle_mobile' ),
+				'link_label'      => carbon_get_the_post_meta( 'h2_come_funziona_link_label' ),
+				'link_url'        => carbon_get_the_post_meta( 'h2_come_funziona_link_url' ),
+				'items'           => $hv2_passi,
+			) );
+			++$hv2_i;
+			continue;
+		endif;
 		$hv2_title = trim( (string) carbon_get_the_post_meta( 'h2_' . $hv2_def[0] . '_title' ) );
 		$hv2_title = '' !== $hv2_title ? $hv2_title : $hv2_def[1];
 		$hv2_tag   = 'h2'; // l'unico h1 e' nella hero
 		?>
-	<section class="hv2-section hv2-section--<?php echo esc_attr( $hv2_def[0] ); ?>"<?php if ( 'come_funziona' === $hv2_def[0] ) : ?> id="come-funziona"<?php endif; ?> data-section="<?php echo esc_attr( $hv2_slug ); ?>" data-reveal>
+	<section class="hv2-section hv2-section--<?php echo esc_attr( $hv2_def[0] ); ?>" data-section="<?php echo esc_attr( $hv2_slug ); ?>" data-reveal>
 		<<?php echo $hv2_tag; ?> class="hv2-section__title"><?php echo esc_html( $hv2_title ); ?></<?php echo $hv2_tag; ?>>
 	</section>
 		<?php

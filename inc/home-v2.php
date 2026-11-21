@@ -107,14 +107,15 @@ add_filter( 'wp_sitemaps_posts_query_args', function ( $args, $post_type ) {
 
 /* ---- Script per template ----------------------------------------------------------------------------------- */
 
-/* Ingressi (reveal), fisarmonica delle FAQ, pausa dei loop fuori schermo (tp-loops, TICKET-121) e movimento della hero
-   (home-v2-motion: pausa del testo circolare, parallasse da desktop con GSAP pigro). Carosello, movimento e controllo CAP li aggiungono i ticket
+/* Ingressi (reveal), fisarmonica delle FAQ, pausa dei loop fuori schermo (tp-loops, TICKET-121), carosello (tp-carousel) e
+   pila delle schede di Come funziona (home-steps-stack, TICKET-122) e movimento della hero (home-v2-motion: pausa del testo
+   circolare, parallasse da desktop con GSAP pigro). Il controllo CAP e il resto del movimento li aggiungono i ticket
    delle rispettive sezioni. Niente Three.js (nessun importmap) e niente GSAP a questo livello. */
 add_action( 'wp_enqueue_scripts', function () {
 	if ( ! is_page_template( 'page-home-v2.php' ) ) {
 		return;
 	}
-	foreach ( array( 'reveal', 'faq-accordion', 'tp-loops', 'home-v2-motion' ) as $handle ) {
+	foreach ( array( 'reveal', 'faq-accordion', 'tp-loops', 'tp-carousel', 'home-steps-stack', 'home-v2-motion' ) as $handle ) {
 		wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 	}
 } );

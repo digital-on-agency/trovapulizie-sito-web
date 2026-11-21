@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.74.0
+Version: 0.75.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -10882,6 +10882,14 @@ html.tp-reveal .hv2 [data-reveal].is-in {
 	.hv2-services__item .hv2-services__tile {
 		transition: none;
 	}
+	/* TICKET-122: il carosello scorre senza animazione, il puntino e la freccia del link non si animano; la pila delle schede resta (e' CSS statico), il rimpicciolimento lo ferma home-steps-stack.js */
+	.tp-carousel__track {
+		scroll-behavior: auto;
+	}
+	.tp-carousel__dot span,
+	.hv2-steps__link span:last-child {
+		transition: none;
+	}
 }
 
 /* =========================
@@ -11973,5 +11981,442 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
 		padding: 1px 7px;
 		font-size: 13px;
 		line-height: 18px;
+	}
+}
+
+/* =========================
+   Carosello generico (TICKET-122). template-parts/tp-carousel.php + assets/js/tp-carousel.js.
+   Solo selettori nuovi `.tp-carousel`. Base = carosello a scorrimento con scroll-snap (funziona senza JavaScript);
+   l'indicatore (.tp-carousel__nav) e' nascosto con l'attributo `hidden` finche' lo script non lo toglie. Larghezza e
+   altezza delle schede, spazi laterali e l'eventuale passaggio a griglia o a pila su desktop li decide il chiamante.
+   ========================= */
+.tp-carousel__track {
+	display: flex;
+	gap: 12px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	overflow-x: auto;
+	scroll-snap-type: x mandatory;
+	scroll-behavior: smooth;
+	scrollbar-width: none;
+	-webkit-overflow-scrolling: touch;
+}
+.tp-carousel__track::-webkit-scrollbar {
+	display: none;
+}
+.tp-carousel__track:focus-visible {
+	outline: 2px solid var(--tp-focus, #008866);
+	outline-offset: 2px;
+}
+.tp-carousel__slide {
+	flex: none;
+	scroll-snap-align: center;
+}
+.tp-carousel__nav {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.tp-carousel__nav[hidden] {
+	display: none;
+}
+.tp-carousel__dots {
+	display: flex;
+	align-items: center;
+}
+.tp-carousel__dot {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 44px;
+	padding: 0;
+	border: 0;
+	background: none;
+	cursor: pointer;
+}
+.tp-carousel__dot span {
+	display: block;
+	width: 6px;
+	height: 6px;
+	border-radius: 3px;
+	background: #C5D8D1;
+	transition: width var(--tp-dur-fast) var(--tp-ease-stage), background-color var(--tp-dur-fast) var(--tp-ease-stage);
+}
+.tp-carousel__dot.is-active span {
+	width: 18px;
+	background: var(--tp-v2-green);
+}
+.tp-carousel__dot:focus-visible,
+.tp-carousel__arrow:focus-visible {
+	outline: 2px solid var(--tp-focus, #008866);
+	outline-offset: 0;
+}
+.tp-carousel__count {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 500;
+	color: #4F6660;
+}
+.tp-carousel__arrows {
+	display: flex;
+	gap: 8px;
+	margin-left: auto;
+}
+.tp-carousel__arrow {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	padding: 0;
+	border: 1px solid rgba(6, 42, 34, 0.18);
+	border-radius: 50%;
+	background: #fff;
+	font-size: 18px;
+	line-height: 1;
+	color: var(--tp-v2-ink);
+	cursor: pointer;
+}
+.tp-carousel__arrow:disabled {
+	opacity: 0.4;
+	cursor: default;
+}
+
+/* =========================
+   Come funziona della Home v2 (TICKET-122). Figma 7903:6508 desktop (1440 x 2186), 7946:947 mobile (390 x 712).
+   Desktop (>= 1024 px, base): quattro schede 1248 x 440 impilate con position: sticky; il `top` cresce di scheda in scheda
+   (--i sul <li>, messo dal componente) e tiene conto di --tp-navbar-h; la precedente scala a 0,96 (home-steps-stack.js).
+   Mobile (max-width: 1023px): carosello a scorrimento, schede 300 x 400, indicatore dopo la pista.
+   Solo selettori nuovi `.hv2-steps`.
+   ========================= */
+.hv2-steps {
+	position: relative;
+	overflow: clip;
+	isolation: isolate;
+	padding: 0;
+	background: var(--tp-v2-mint);
+	scroll-margin-top: var(--tp-navbar-h);
+}
+.hv2-steps__light {
+	position: absolute;
+	z-index: -1;
+	border-radius: 50%;
+	pointer-events: none;
+	background: radial-gradient(closest-side, rgba(55, 178, 153, 0.16), rgba(55, 178, 153, 0));
+}
+.hv2-steps__light--a {
+	left: -380px;
+	top: -91px;
+	width: 760px;
+	height: 620px;
+}
+.hv2-steps__light--b {
+	left: 1018px;
+	top: 882px;
+	width: 700px;
+	height: 640px;
+}
+.hv2-steps__light--c {
+	left: -166px;
+	top: 1867px;
+	width: 620px;
+	height: 420px;
+}
+.hv2-steps__inner {
+	position: relative;
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: 24px clamp(24px, 6.667vw, 96px) 120px;
+}
+.hv2-steps__head {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	column-gap: 40px;
+	align-items: end;
+	padding-bottom: 24px;
+	margin-bottom: 16px;
+}
+.hv2-steps__eyebrow {
+	grid-column: 1 / -1;
+	margin: 0 0 16px;
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	line-height: 20px;
+	text-transform: uppercase;
+	color: var(--tp-v2-niente);
+}
+.hv2-steps__title {
+	margin: 0;
+	font-size: clamp(44px, 5vw, 72px);
+	font-weight: 800;
+	line-height: 1.5;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	color: var(--tp-v2-ink);
+}
+.hv2-steps__subtitle {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 500;
+	line-height: 26px;
+	color: #4F6660;
+}
+.hv2-steps__subtitle--mobile {
+	display: none;
+}
+/* Pila: il <li> e' l'elemento sticky (il suo contenitore e' la lista, alta quanto tutte le schede) */
+.hv2-steps__carousel .tp-carousel__track {
+	flex-direction: column;
+	gap: 16px;
+	overflow: visible;
+	scroll-snap-type: none;
+}
+.hv2-steps__carousel .tp-carousel__slide {
+	position: sticky;
+	top: calc(var(--tp-navbar-h) + 24px + var(--i, 0) * 16px);
+	scroll-snap-align: none;
+}
+.hv2-steps__carousel .tp-carousel__nav {
+	display: none;
+}
+.hv2-steps__card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	height: 440px;
+	padding: 32px;
+	overflow: hidden;
+	border-radius: 24px;
+	box-shadow: 0 16px 40px -8px rgba(6, 42, 34, 0.12);
+	background: var(--tp-v2-ink);
+	transform-origin: 50% 0;
+	will-change: transform;
+}
+.hv2-steps__photo {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.hv2-steps__shade {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background: linear-gradient(160.58deg, rgba(6, 42, 34, 0) 39.286%, rgba(6, 42, 34, 0.82) 85.714%);
+}
+.hv2-steps__badge {
+	position: relative;
+	z-index: 2;
+	align-self: flex-start;
+	padding: 6px 12px;
+	border-radius: 8px;
+	background: #E6FFF5;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	line-height: 18px;
+	text-transform: uppercase;
+	color: var(--tp-v2-niente);
+}
+.hv2-steps__phone {
+	position: absolute;
+	z-index: 2;
+	left: 96px;
+	top: 80px;
+	bottom: 0;
+	width: 201px;
+	padding: 6.44px 6.44px 0;
+	border-radius: 32px 32px 0 0;
+	background: #0B0F0E;
+	box-shadow: 0 24px 48px 0 rgba(0, 20, 15, 0.35);
+}
+.hv2-steps__screen {
+	display: block;
+	overflow: hidden;
+	border-radius: 25.75px 25.75px 0 0;
+	background: #fff;
+}
+.hv2-steps__screen img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+.hv2-steps__island {
+	position: absolute;
+	left: 70.4px;
+	top: 11.26px;
+	width: 60.35px;
+	height: 16.9px;
+	border-radius: 16px;
+	background: #000;
+}
+.hv2-steps__copy {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 6px;
+	text-align: right;
+}
+.hv2-steps__step {
+	margin: 0;
+	font-size: clamp(64px, 7.78vw, 112px);
+	font-weight: 800;
+	line-height: 0.964;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	color: #fff;
+}
+.hv2-steps__text {
+	margin: 0;
+	font-size: 17px;
+	font-weight: 500;
+	line-height: 1.5;
+	color: rgba(255, 255, 255, 0.9);
+}
+.hv2-steps__more {
+	margin: 16px 0 0;
+	padding-top: 8px;
+}
+.hv2-steps__link {
+	display: inline-flex;
+	gap: 8px;
+	font-size: 17px;
+	font-weight: 600;
+	line-height: 26px;
+	color: var(--tp-v2-niente);
+	text-decoration: none;
+}
+.hv2-steps__link:hover span:first-child {
+	text-decoration: underline;
+}
+.hv2-steps__link span:last-child {
+	transition: transform var(--tp-dur-fast) var(--tp-ease-stage);
+}
+.hv2-steps__link:hover span:last-child {
+	transform: translateX(4px);
+}
+
+@media (max-width: 1023px) {
+	.hv2-steps__light--a {
+		left: -160px;
+		top: -43px;
+		width: 360px;
+		height: 300px;
+	}
+	.hv2-steps__light--b {
+		left: 200px;
+		top: 420px;
+		width: 340px;
+		height: 300px;
+	}
+	.hv2-steps__light--c {
+		display: none;
+	}
+	.hv2-steps__inner {
+		padding: 32px 0 64px;
+	}
+	.hv2-steps__head {
+		display: block;
+		padding: 0 16px;
+		margin-bottom: 0;
+	}
+	.hv2-steps__eyebrow {
+		margin-bottom: 14px;
+		font-size: 12px;
+		line-height: 18px;
+	}
+	.hv2-steps__title {
+		font-size: 36px;
+		line-height: 40px;
+	}
+	.hv2-steps__subtitle--desktop {
+		display: none;
+	}
+	.hv2-steps__subtitle--mobile {
+		display: block;
+		margin-top: 14px;
+		font-size: 16px;
+		font-weight: 400;
+		line-height: 24px;
+	}
+	.hv2-steps__carousel {
+		margin-top: 34px;
+	}
+	.hv2-steps__carousel .tp-carousel__track {
+		flex-direction: row;
+		gap: 12px;
+		padding: 0 16px;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scroll-padding: 0 16px;
+	}
+	.hv2-steps__carousel .tp-carousel__slide {
+		position: static;
+		min-width: 0;
+		flex: 0 0 min(300px, calc(100vw - 56px));
+		scroll-snap-align: center;
+	}
+	.hv2-steps__carousel .tp-carousel__nav {
+		display: flex;
+		padding: 6px 16px 0;
+	}
+	.hv2-steps__carousel .tp-carousel__nav[hidden] {
+		display: none;
+	}
+	.hv2-steps__card {
+		height: 400px;
+		padding: 16px;
+		border-radius: 24px;
+		will-change: auto;
+	}
+	.hv2-steps__badge {
+		font-size: 11px;
+		line-height: 16px;
+	}
+	.hv2-steps__phone {
+		left: auto;
+		right: 16px;
+		top: 16px;
+		bottom: auto;
+		width: 132px;
+		padding: 4.22px;
+		border-radius: 21px;
+	}
+	.hv2-steps__screen {
+		border-radius: 17px;
+	}
+	.hv2-steps__island {
+		left: 46.2px;
+		top: 7.4px;
+		width: 39.6px;
+		height: 11.1px;
+	}
+	.hv2-steps__copy {
+		align-items: flex-start;
+		text-align: left;
+	}
+	.hv2-steps__step {
+		font-size: 48px;
+	}
+	/* Titoli lunghi (9 lettere o piu', es. CONFRONTA.): a 48 px non entrerebbero nei 268 px utili della scheda */
+	.hv2-steps__step--long {
+		font-size: 40px;
+	}
+	.hv2-steps__text {
+		font-size: 16px;
+		line-height: 24px;
+		max-width: 236px;
+	}
+	.hv2-steps__more {
+		margin: 8px 0 0;
+		padding: 0 16px;
 	}
 }
