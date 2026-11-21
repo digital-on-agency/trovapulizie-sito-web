@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.74.3
+Version: 0.74.4
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -11081,10 +11081,12 @@ body.tp-v2-header {
 }
 .hv2-hero__title {
 	margin: 0;
-	font-size: clamp(50px, 7.6vh, 68px); /* +6% sul Figma, Guido 21/11 */
-	font-weight: 700;
-	line-height: 1.125;
-	letter-spacing: -1.28px;
+	/* Figma 7903:5292 (21/11): Poppins Black 82/82, -2%, maiuscolo, tre parti scuro-verde-scuro */
+	font-size: clamp(56px, 9.6vh, 82px);
+	font-weight: 900;
+	line-height: 1;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
 	color: var(--tp-v2-text);
 }
 .hv2-hero__title-line {
@@ -11280,9 +11282,8 @@ body.tp-v2-header {
 		padding: 0;
 	}
 	.hv2-hero__title {
-		font-size: 54px;
-		line-height: 1.125;
-		letter-spacing: -1px;
+		font-size: 62px;
+		letter-spacing: -0.02em;
 	}
 	.hv2-hero__subtitle {
 		font-size: 18px;
@@ -11420,7 +11421,7 @@ body.tp-v2-header {
 }
 @media (min-width: 1024px) and (max-height: 700px) {
 	.hv2-hero { --hv2-k: 0.66; }
-	.hv2-hero__title { font-size: 48px; }
+	.hv2-hero__title { font-size: 56px; }
 	.hv2-hero__subtitle { font-size: 17px; line-height: 27px; }
 }
 
@@ -11517,9 +11518,9 @@ body.tp-v2-header {
 		height: 7px;
 	}
 	.hv2-hero__title {
-		font-size: min(10vw, 40px); /* "La pulizia cambia." su una riga fino a 360 px */
-		line-height: 1.15;
-		letter-spacing: -0.57px;
+		font-size: min(10.5vw, 42px); /* "PRENOTA PULIZIE" su una riga fino a 360 px */
+		line-height: 1;
+		letter-spacing: -0.02em;
 	}
 	.hv2-hero__subtitle {
 		font-size: 16px;

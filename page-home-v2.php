@@ -53,6 +53,7 @@ $hv2_sections = array(
 			get_template_part( 'template-parts/home-hero-v2', null, array(
 				'title'         => carbon_get_the_post_meta( 'h2_hero_title' ),
 				'accent'        => carbon_get_the_post_meta( 'h2_hero_title_accent' ),
+				'title_end'     => carbon_get_the_post_meta( 'h2_hero_title_end' ),
 				'label'         => carbon_get_the_post_meta( 'h2_hero_label' ),
 				'subtitle'      => carbon_get_the_post_meta( 'h2_hero_subtitle' ),
 				'orbit'         => carbon_get_the_post_meta( 'h2_hero_orbit' ),

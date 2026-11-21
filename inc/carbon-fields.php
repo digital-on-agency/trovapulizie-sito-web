@@ -995,7 +995,7 @@ add_action( 'carbon_fields_register_fields', function () {
 	// return). Con TICKET-119 ogni tab ha solo il titolo; i campi di contenuto li aggiungono i ticket di sezione.
 	//
 	// | Tab (data-section)  | Campi oggi          | Ticket che aggiunge i campi |
-	// | 01-hero             | h2_hero_title, h2_hero_title_accent, h2_hero_label, h2_hero_subtitle, h2_hero_orbit, h2_google_badge, h2_google_rating | 120 (fatto) |
+	// | 01-hero             | h2_hero_title, h2_hero_title_accent, h2_hero_title_end, h2_hero_label, h2_hero_subtitle, h2_hero_orbit, h2_google_badge, h2_google_rating | 120 (fatto) |
 	// | 02-frasi            | h2_frasi_title (titolo nascosto, per gli screen reader), h2_frasi_items, h2_frasi_speed | 121 (fatto) |
 	// | 03-servizi          | h2_servizi_title, h2_servizi_eyebrow, h2_servizi_subtitle, h2_servizi_more_label, h2_servizi_cta, h2_servizi_items | 121 (fatto) |
 	// | 04-come-funziona    | h2_come_funziona_title | 122 |
@@ -1026,9 +1026,10 @@ add_action( 'carbon_fields_register_fields', function () {
 		);
 		if ( 'hero' === $chiave ) {
 			// TICKET-120: testi della hero e riquadro Google. Vuoto = default del template (template-parts/home-hero-v2.php).
-			$h2_campi[0]->set_help_text( __( 'Prima riga del titolo (H1, colore scuro). Vuoto = "La pulizia cambia."' ) );
+			$h2_campi[0]->set_help_text( __( 'Inizio del titolo (H1, scuro). Vuoto = "Prenota"' ) );
 			$h2_campi = array_merge( $h2_campi, array(
-				Field::make( 'text', 'h2_hero_title_accent', __( 'Titolo, seconda riga (verde)' ) )->set_help_text( __( 'Vuoto = "Il modo di sceglierla, anche."' ) ),
+				Field::make( 'text', 'h2_hero_title_accent', __( 'Titolo, parte in verde' ) )->set_help_text( __( 'Segue l\'inizio sulla stessa riga. Vuoto = "pulizie professionali"' ) ),
+				Field::make( 'text', 'h2_hero_title_end', __( 'Titolo, ultima riga (scura)' ) )->set_help_text( __( 'Sempre su una riga propria. Vuoto = "in due minuti"' ) ),
 				Field::make( 'text', 'h2_hero_label', __( 'Etichetta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "La nuova app di Trovapulizie, a Roma"' ) ),
 				Field::make( 'textarea', 'h2_hero_subtitle', __( 'Sottotitolo' ) )->set_rows( 3 )->set_help_text( __( 'Vuoto = "Professionisti verificati vicino a te e il prezzo prima di prenotare. Scegli, prenota e segui tutto dal telefono."' ) ),
 				Field::make( 'text', 'h2_hero_orbit', __( 'Testo circolare' ) )->set_help_text( __( 'Frase che gira attorno ai telefoni, in maiuscolo. Se e\' troppo lunga il corpo si riduce da solo. Vuoto = "PROFESSIONISTI VERIFICATI · PREZZO CHIARO · PAGAMENTO SICURO · TUTTO IN UN\'APP ·"' ) ),
