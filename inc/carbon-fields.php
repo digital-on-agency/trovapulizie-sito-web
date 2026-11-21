@@ -999,7 +999,7 @@ add_action( 'carbon_fields_register_fields', function () {
 	// | 02-frasi            | h2_frasi_title (titolo nascosto, per gli screen reader), h2_frasi_items, h2_frasi_speed | 121 (fatto) |
 	// | 03-servizi          | h2_servizi_title, h2_servizi_eyebrow, h2_servizi_subtitle, h2_servizi_more_label, h2_servizi_cta, h2_servizi_items | 121 (fatto) |
 	// | 04-come-funziona    | h2_come_funziona_title | 122 |
-	// | 05-manifesto        | h2_manifesto_title  | 123 |
+	// | 05-manifesto        | h2_manifesto_title, h2_manifesto_eyebrow, h2_manifesto_subtitle, h2_manifesto_stamp, h2_manifesto_items, h2_manifesto_hide | 123 (fatto) |
 	// | 06-recensioni       | h2_recensioni_title | 124 |
 	// | 07-zone             | h2_zone_title       | 125 |
 	// | 08-aziende          | h2_aziende_title    | 126 |
@@ -1077,6 +1077,37 @@ add_action( 'carbon_fields_register_fields', function () {
 						Field::make( 'checkbox', 'soon', __( 'Presto' ) )->set_option_value( 'yes' )->set_help_text( __( 'Mostra l\'etichetta "presto" e toglie il link.' ) ),
 					) )
 					->set_header_template( '<%- name %>' ),
+			) );
+		}
+		if ( 'manifesto' === $chiave ) {
+			// TICKET-123: testi, timbro e promesse del manifesto. I default sono quelli del Figma (inc/home-v2-manifesto.php).
+			$h2_icone = array();
+			foreach ( tp_home_v2_manifesto_icons() as $h2_k => $h2_i ) {
+				$h2_icone[ $h2_k ] = $h2_i[1];
+			}
+			$h2_righe_def = array();
+			foreach ( tp_home_v2_manifesto_defaults() as $h2_r ) {
+				$h2_righe_def[] = array_merge( array( '_type' => '_' ), $h2_r );
+			}
+			$h2_campi[0]->set_help_text( __( 'Titolo (H2, maiuscolo da CSS). Vuoto = "Quattro «niente»."' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_manifesto_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Perché fidarti"' ) ),
+				Field::make( 'textarea', 'h2_manifesto_subtitle', __( 'Sottotitolo' ) )->set_rows( 2 )->set_help_text( __( 'Vuoto = "Le regole che valgono per ogni pulizia. Senza asterischi."' ) ),
+				Field::make( 'text', 'h2_manifesto_stamp', __( 'Testo del timbro' ) )->set_help_text( __( 'La frase che gira attorno al timbro (decorativa, in maiuscolo; il separatore finale lo mette il tema). Vuoto = "PROFESSIONISTI VERIFICATI · TROVAPULIZIE · ROMA".' ) ),
+				Field::make( 'complex', 'h2_manifesto_items', __( 'Promesse' ) )
+					->set_layout( 'tabbed-vertical' )
+					->setup_labels( array( 'plural_name' => __( 'Promesse' ), 'singular_name' => __( 'Promessa' ) ) )
+					->set_help_text( __( 'Le promesse in ordine (di solito quattro, numerate dal tema). Nessuna riga = le quattro di default, come una pagina mai salvata (per nascondere la sezione usa "Nascondi il manifesto" qui sotto). Le prove sono esempi del design in attesa di conferma: nelle prove vanno dati reali dell\'app, mai numeri o nomi inventati.' ) )
+					->add_fields( array(
+						Field::make( 'text', 'lead', __( 'Parola iniziale (verde)' ) )->set_help_text( __( 'Di solito "Niente".' ) ),
+						Field::make( 'text', 'keyword', __( 'Parola chiave (scura)' ) )->set_help_text( __( 'Es. "sconosciuti." Il maiuscolo lo fa il tema.' ) ),
+						Field::make( 'text', 'text', __( 'Frase' ) ),
+						Field::make( 'text', 'proof', __( 'Prova (pillola)' ) )->set_help_text( __( 'Vuoto = nessuna pillola.' ) ),
+						Field::make( 'select', 'icon', __( 'Icona della prova' ) )->add_options( $h2_icone ),
+					) )
+					->set_default_value( $h2_righe_def )
+					->set_header_template( '<%- lead %> <%- keyword %>' ),
+				Field::make( 'checkbox', 'h2_manifesto_hide', __( 'Nascondi il manifesto' ) )->set_option_value( 'yes' )->set_help_text( __( 'Acceso: la sezione non compare. Spento (default): compare con le promesse sopra, o con le quattro di default se non ce n\'e\' nessuna.' ) ),
 			) );
 		}
 		$h2_container->add_tab( __( $etichetta ), $h2_campi );
