@@ -202,8 +202,9 @@ const PROBE = `(() => {
 			}
 			// Navbar mobile (TICKET-11): vale su ogni pagina, la barra sta in header.php.
 			if (!desktop && !landing) {
-				if (r.nav.h !== 65) errors.push('navbar alta ' + r.nav.h + ', attesa 65');
-				if (!r.nav.burger || r.nav.burger[2] !== 24) errors.push('hamburger assente o non 24px');
+				// Barra chiara della Home v2 (TICKET-120, Figma 7946:6): alta 64 con hamburger da 44; le altre pagine 65 e 24.
+				if (r.nav.h !== (r.v2 ? 64 : 65)) errors.push('navbar alta ' + r.nav.h + ', attesa ' + (r.v2 ? 64 : 65));
+				if (!r.nav.burger || r.nav.burger[2] !== (r.v2 ? 44 : 24)) errors.push('hamburger assente o non ' + (r.v2 ? 44 : 24) + 'px');
 				if (r.nav.aria !== 'false' || r.nav.panelHidden !== true) errors.push('pannello non chiuso al caricamento');
 				if (r.nav.accediVisibile) errors.push('Accedi visibile nella barra: va nel pannello');
 			}
