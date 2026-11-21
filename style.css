@@ -13240,3 +13240,372 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
 		padding: 0 16px;
 	}
 }
+
+/* =========================
+   TICKET-127 - Chiusura "Apri l'app" della Home v2 (template-parts/home-cta-v2.php).
+   Figma 7903:7666 desktop (1440 x 630), 7946:2115 mobile (390 x 754). Fondo verde proprio.
+   [ATTENZIONE] Regola mobile (SPEC §2): sotto 1024 px QR e tentacolo non compaiono e le loro immagini non si scaricano
+   (QR: <img loading="lazy"> in un riquadro display:none; tentacolo: <picture> con <source media="(min-width: 1024px)"> e GIF 1x1).
+   Eccezione di brand dichiarata: il bottone e' BIANCO con testo #062A22 (non verde con testo bianco come hero e barra).
+   Desktop: palco di 1440 x 630 (.hv2-cta__scale) ancorato a destra e ridotto con scale(--hv2-cta-k) fra 1024 e 1279 px.
+   Il telefono e' 340 x 702,67 (--hv2-cta-s scala le misure dell'avviso e il telefono mobile). Movimento: TICKET-129.
+   ========================= */
+.hv2-cta {
+	--hv2-cta-k: 1;
+	--hv2-cta-s: 1;
+	position: relative;
+	background: var(--tp-v2-green);
+	color: var(--tp-v2-ink);
+}
+.hv2-cta__in {
+	position: relative;
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: 72px 16px 0;
+}
+.hv2-cta__text {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 16px;
+}
+.hv2-cta__eyebrow {
+	margin: 0;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--tp-v2-ink);
+}
+.hv2-cta__title {
+	margin: 0;
+	font-size: 72px;
+	line-height: 70px;
+	font-weight: 900;
+	letter-spacing: -0.03em;
+	text-transform: uppercase;
+	color: #fff;
+}
+.hv2-cta__sub {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 500;
+	color: var(--tp-v2-ink);
+}
+.hv2-cta__actions {
+	display: flex;
+	width: 100%;
+}
+.hv2-cta__btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 10px;
+	width: 100%;
+	padding: 16px 32px;
+	border-radius: 999px;
+	background: #fff;
+	color: var(--tp-v2-ink); /* eccezione di brand: bottone bianco con testo scuro sul verde pieno */
+	font-size: 16px;
+	font-weight: 600;
+	line-height: normal;
+	white-space: nowrap;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+.hv2-cta__btn:focus-visible {
+	outline: 2px solid var(--tp-v2-ink);
+	outline-offset: 3px;
+}
+.hv2-cta__btn-arrow {
+	display: inline-block;
+}
+.hv2-cta__qr {
+	display: none;
+}
+.hv2-cta__note {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	margin: 0;
+	font-size: 13px;
+	font-weight: 500;
+	line-height: 1.5;
+	color: rgba(6, 42, 34, 0.85);
+}
+.hv2-cta__note img {
+	display: none; /* l'icona c'e' solo nel disegno desktop */
+}
+/* Palco con il telefono: su mobile e' un riquadro alto 300 px che taglia il telefono in basso */
+.hv2-cta__stage {
+	position: relative;
+	height: 300px;
+	margin: 16px -16px 0;
+	overflow: hidden;
+}
+.hv2-cta__scale {
+	position: absolute;
+	inset: 0;
+}
+.hv2-cta__clip {
+	position: absolute;
+	inset: 0;
+}
+.hv2-cta__glow,
+.hv2-cta__tent {
+	display: none;
+}
+.hv2-cta__device {
+	position: absolute;
+	left: calc(50% - 6.6px);
+	top: 47px;
+	width: calc(340px * var(--hv2-cta-s));
+	height: calc(702.667px * var(--hv2-cta-s));
+	margin-left: calc(170px * var(--hv2-cta-s) * -1);
+	transform: rotate(6deg);
+	--tp-phone-w: calc(340px * var(--hv2-cta-s));
+	--tp-phone-h: calc(702.667px * var(--hv2-cta-s));
+	--tp-phone-radius: calc(54.4px * var(--hv2-cta-s));
+	--tp-phone-screen-radius: calc(45.333px * var(--hv2-cta-s));
+	filter: drop-shadow(0 calc(34px * var(--hv2-cta-s)) calc(34px * var(--hv2-cta-s)) rgba(6, 42, 34, 0.35));
+}
+.hv2-cta__device .tp-phone__layer {
+	display: none; /* il disegno ha il telefono piatto, senza lo spessore a strati */
+}
+.hv2-cta__device .tp-phone {
+	background: none;
+}
+.hv2-cta__device .tp-phone__face {
+	padding: calc(var(--tp-phone-w) * 0.0267);
+	background: #0b0f0e;
+}
+.hv2-cta__device .tp-phone__face::before {
+	top: calc(var(--tp-phone-w) * 0.06);
+	width: calc(var(--tp-phone-w) * 0.32);
+	height: calc(var(--tp-phone-w) * 0.0933);
+	border-radius: calc(var(--tp-phone-w) * 0.0467);
+	background: #000;
+}
+.hv2-cta__device .tp-phone__img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+/* Avviso "Aggiunta alla schermata Home" (Figma 7903:7887): HTML sopra lo schermo, in unita' del telefono */
+.hv2-cta__notif {
+	position: absolute;
+	left: 12.2%;
+	top: 9.54%;
+	display: flex;
+	align-items: center;
+	gap: calc(10px * var(--hv2-cta-s));
+	padding: calc(10px * var(--hv2-cta-s));
+	border-radius: calc(20px * var(--hv2-cta-s));
+	background: rgba(255, 255, 255, 0.94);
+	backdrop-filter: blur(10px);
+	box-shadow: 0 calc(10px * var(--hv2-cta-s)) calc(24px * var(--hv2-cta-s)) rgba(0, 0, 0, 0.3);
+	white-space: nowrap;
+}
+.hv2-cta__notif img {
+	width: calc(36px * var(--hv2-cta-s));
+	height: auto;
+}
+.hv2-cta__notif p {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+}
+.hv2-cta__notif strong {
+	font-size: calc(14px * var(--hv2-cta-s));
+	font-weight: 700;
+	line-height: 1.5;
+	color: var(--tp-v2-ink);
+}
+.hv2-cta__notif span {
+	font-size: calc(12px * var(--hv2-cta-s));
+	font-weight: 500;
+	line-height: 1.5;
+	color: rgba(6, 42, 34, 0.75);
+}
+@media (max-width: 1023px) {
+	.hv2-cta {
+		--hv2-cta-s: 0.7059;
+	}
+	.hv2-cta__btn {
+		box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+	}
+}
+@media (min-width: 1024px) {
+	.hv2-cta {
+		--hv2-cta-k: 0.72;
+		--hv2-cta-s: 1;
+	}
+	.hv2-cta__in {
+		padding: calc(120px * var(--hv2-cta-k)) calc(96px * var(--hv2-cta-k));
+		min-height: calc(630px * var(--hv2-cta-k));
+		box-sizing: border-box;
+	}
+	.hv2-cta__text {
+		max-width: calc(712px * var(--hv2-cta-k));
+		gap: calc(22px * var(--hv2-cta-k));
+		position: relative;
+		z-index: 2;
+	}
+	.hv2-cta__eyebrow {
+		font-size: 13px;
+		letter-spacing: 0.12em;
+	}
+	.hv2-cta__title {
+		font-size: calc(128px * var(--hv2-cta-k));
+		line-height: calc(124px * var(--hv2-cta-k));
+		letter-spacing: -0.03em;
+		white-space: nowrap;
+	}
+	.hv2-cta__sub {
+		font-size: calc(19px * var(--hv2-cta-k) + 5px);
+		margin-top: calc(-2px * var(--hv2-cta-k));
+	}
+	.hv2-cta__actions {
+		align-items: center;
+		gap: 20px;
+		padding-top: 12px;
+		width: auto;
+	}
+	.hv2-cta__btn {
+		width: auto;
+		padding: 18px 32px;
+		font-size: 18px;
+		box-shadow: 0 12px 32px rgba(55, 178, 153, 0.45);
+	}
+	.hv2-cta__qr {
+		display: flex;
+		align-items: center;
+		gap: 14px;
+		padding: 10px 20px 10px 10px;
+		border: 1px solid rgba(255, 255, 255, 0.35);
+		border-radius: 18px;
+		background: rgba(255, 255, 255, 0.16);
+	}
+	.hv2-cta__qr img {
+		flex: 0 0 72px;
+		width: 72px;
+		height: 72px;
+		border-radius: 8px;
+		background: #fff;
+	}
+	.hv2-cta__qr p {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		margin: 0;
+	}
+	.hv2-cta__qr strong {
+		font-size: 15px;
+		font-weight: 600;
+	}
+	.hv2-cta__qr span {
+		font-size: 13px;
+		font-weight: 400;
+	}
+	.hv2-cta__note {
+		font-size: 15px;
+		line-height: normal;
+		align-items: center;
+	}
+	.hv2-cta__note img {
+		display: block;
+		flex: 0 0 14px;
+	}
+	/* Palco: 1440 x 630 ancorato a destra, ridotto con --hv2-cta-k sotto 1280 px */
+	.hv2-cta__stage {
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		height: auto;
+		width: calc(1440px * var(--hv2-cta-k));
+		margin: 0;
+		overflow: visible;
+		pointer-events: none;
+		z-index: 1;
+	}
+	.hv2-cta__scale {
+		inset: auto;
+		top: 0;
+		right: 0;
+		width: 1440px;
+		height: calc(100% / var(--hv2-cta-k));
+		transform: scale(var(--hv2-cta-k));
+		transform-origin: top right;
+	}
+	.hv2-cta__clip {
+		clip-path: inset(0 -2000px);
+	}
+	.hv2-cta__glow {
+		display: block;
+		position: absolute;
+		left: 644px;
+		top: -159.2px;
+		width: 1080px;
+		height: 1080px;
+		background: url("assets/img/home-v2/cta-glow.svg") center / 100% 100% no-repeat;
+	}
+	.hv2-cta__tent {
+		display: block;
+		position: absolute;
+	}
+	.hv2-cta__tent img {
+		display: block;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.hv2-cta__tent--back {
+		left: 703.57px;
+		top: -46.83px;
+		width: 883.01px;
+		height: 1182.61px;
+	}
+	.hv2-cta__tent--curl {
+		left: 871.1px;
+		top: 406.51px;
+		width: 206.96px;
+		height: 197.1px;
+	}
+	.hv2-cta__device {
+		left: 966.7px;
+		top: 120.2px;
+		margin-left: 0;
+		transform: rotate(10.58deg);
+	}
+}
+@media (min-width: 1280px) {
+	.hv2-cta {
+		--hv2-cta-k: 1;
+	}
+	.hv2-cta__sub {
+		font-size: 19px;
+	}
+}
+@media (hover: hover) {
+	.hv2-cta__btn {
+		transition: background-color var(--tp-dur-fast) var(--tp-ease-stage), transform 100ms var(--tp-ease-stage);
+	}
+	.hv2-cta__btn:hover {
+		background: var(--tp-v2-mint); /* il verde #2A9580 della hero non va: testo scuro su verde medio perde contrasto */
+	}
+	.hv2-cta__btn-arrow {
+		transition: transform var(--tp-dur-fast) var(--tp-ease-stage);
+	}
+	.hv2-cta__btn:hover .hv2-cta__btn-arrow {
+		transform: translateX(4px);
+	}
+	.hv2-cta__btn:active {
+		transform: scale(0.97);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.hv2-cta__btn,
+	.hv2-cta__btn-arrow {
+		transition: none;
+	}
+}
