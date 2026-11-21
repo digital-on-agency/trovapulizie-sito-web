@@ -10,7 +10,10 @@
    nella cartella il markup di <header>, #nav-panel e <footer>, con ?ver= normalizzato, e l'elenco degli script
    del tema caricati. Anche l'origine (host e porta) e' normalizzata. Va preso PRIMA del primo deploy del ticket.
    compare: rifa' la lettura e confronta con la fotografia; esce con 1 se una parte differisce (stampa la prima
-   riga diversa). --cache-bust aggiunge ?v=<casuale> alla richiesta (LiteSpeed puo' tenere l'HTML vecchio).
+   riga diversa). Dal TICKET-126 la fotografia comprende anche la sezione FAQ (`<section class="faq"` fino a
+   `</section>`, JSON-LD compreso; 'ASSENTE' se la pagina non ne ha una) e la pagina /contatti/: le altre pagine che
+   usano faq-accordion.php devono restare identiche. Una fotografia presa prima del TICKET-126 non ha queste parti:
+   il confronto le segnala e va rifatta. --cache-bust aggiunge ?v=<casuale> alla richiesta (LiteSpeed puo' tenere l'HTML vecchio).
 
    Scelta di progetto: si legge l'HTML che il server consegna (fetch), non l'outerHTML del browser. Le classi che
    i moduli JS aggiungono dopo il caricamento (is-in, motion-ok) rendono l'outerHTML instabile fra due letture;
@@ -26,7 +29,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const PAGES = ['/', '/roma/', '/roma/sgrosso-casa/', '/roma/sgrosso-commerciale/', '/privacy/'];
+const PAGES = ['/', '/roma/', '/roma/sgrosso-casa/', '/roma/sgrosso-commerciale/', '/privacy/', '/contatti/'];
 const [mode, base, dir] = process.argv.slice(2, 5);
 const bust = process.argv.includes('--cache-bust');
 // Modalita' footer-v2: controlli a video sul footer nuovo (tools/lib/qa-footer-v2.js). Il return di primo livello e'
@@ -63,12 +66,13 @@ async function read(p) {
 		header: norm(cut(html, /<header[\s>]/, '</header>')),
 		panel: norm(cut(html, /<nav[^>]*id="nav-panel"/, '</nav>')),
 		footer: norm(cut(html, /<footer[\s>]/, '</footer>')),
+		faq: norm(cut(html, /<section class="faq[ "]/, '</section>')),
 		scripts: scripts.join('\n')
 	};
 }
 
 const fname = (p, k) => path.join(dir, (p === '/' ? 'home' : p.replace(/\//g, '_').replace(/^_|_$/g, '')) + '.' + k + '.txt');
-const KEYS = ['header', 'panel', 'footer', 'scripts'];
+const KEYS = ['header', 'panel', 'footer', 'faq', 'scripts'];
 
 (async () => {
 	fs.mkdirSync(dir, { recursive: true });
@@ -83,6 +87,7 @@ const KEYS = ['header', 'panel', 'footer', 'scripts'];
 		}
 		const diff = [];
 		KEYS.forEach(k => {
+			if (!fs.existsSync(fname(p, k))) { diff.push(k + ': manca nella fotografia (presa prima del TICKET-126): rifare lo snapshot'); return; }
 			const old = fs.readFileSync(fname(p, k), 'utf8');
 			if (old !== cur[k]) {
 				const a = old.split('\n'), b = cur[k].split('\n');

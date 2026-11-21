@@ -160,6 +160,25 @@ $hv2_sections = array(
 			++$hv2_i;
 			continue;
 		endif;
+		if ( 'aziende' === $hv2_def[0] ) :
+			// Fascia aziende (TICKET-126): argomenti dai campi Carbon in inc/home-v2-b2b.php.
+			get_template_part( 'template-parts/home-b2b-band', null, tp_home_v2_b2b_args( get_the_ID() ) );
+			++$hv2_i;
+			continue;
+		endif;
+		if ( 'faq' === $hv2_def[0] ) :
+			// FAQ con i fondatori (TICKET-126): faq-accordion in variante v2. Nessuna domanda = niente sezione e niente JSON-LD.
+			$hv2_faq = tp_home_v2_faq_args( get_the_ID() );
+			if ( $hv2_faq['items'] ) :
+				?>
+	<div class="hv2-faq" data-section="09-faq">
+				<?php get_template_part( 'template-parts/faq-accordion', null, $hv2_faq ); ?>
+	</div>
+				<?php
+			endif;
+			++$hv2_i;
+			continue;
+		endif;
 		if ( 'come_funziona' === $hv2_def[0] ) :
 			// Come funziona (TICKET-122): template-part dedicato (schede impilate da 1024 px, carosello sotto). Senza righe in Carbon valgono i quattro passi di default; con righe tutte senza titolo la sezione non esce.
 			$hv2_passi = null;

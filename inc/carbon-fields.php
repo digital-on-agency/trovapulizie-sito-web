@@ -1035,8 +1035,8 @@ add_action( 'carbon_fields_register_fields', function () {
 	// | 05-manifesto        | h2_manifesto_title, h2_manifesto_eyebrow, h2_manifesto_subtitle, h2_manifesto_stamp, h2_manifesto_items, h2_manifesto_hide | 123 (fatto) |
 	// | 06-recensioni       | h2_recensioni_title | 124 |
 	// | 07-zone             | h2_zone_title, h2_zones_caps | 125 (fatto) |
-	// | 08-aziende          | h2_aziende_title    | 126 |
-	// | 09-faq              | h2_faq_title        | 126 |
+	// | 08-aziende          | h2_aziende_title, _eyebrow, _text, _badges, _cta_label, _cta_url, _link_label, _link_url, _image | 126 |
+	// | 09-faq              | h2_faq_title, _eyebrow, _subtitle, _contact_title, _contact_text, _contact_cta, _items, _hide | 126 |
 	// | 10-chiusura         | h2_chiusura_title, _eyebrow, _subtitle, _cta_label, _qr_title, _qr_text, _note, _note_hide | 127 (fatto) |
 	$h2_aiuto = __( 'Vuoto = testo di default del template. I campi di contenuto di questa sezione arrivano col ticket indicato nel docblock di inc/carbon-fields.php.' );
 	$h2_tabs  = array(
@@ -1151,6 +1151,54 @@ add_action( 'carbon_fields_register_fields', function () {
 					->set_rows( 12 )
 					->set_default_value( function_exists( 'tp_home_v2_zones_default_lines' ) ? tp_home_v2_zones_default_lines() : '' )
 					->set_help_text( __( 'Una riga per CAP: "00186 | Centro Storico". Sono i CAP per cui il controllo risponde "Ci siamo" e che la mappa colora di verde; sono validi solo CAP di Roma (00118-00199). [ATTENZIONE] Campo mai salvato = lista del tema (44 CAP). Campo svuotato e salvato = il controllo sparisce dalla pagina (restano titolo, mappa e chip). Il CAP 00194 non ha un poligono sulla mappa: il controllo risponde si ma la mappa non lo evidenzia.' ) ),
+			) );
+		}
+		if ( 'aziende' === $chiave ) {
+			// TICKET-126: fascia aziende. Testi vuoti = default del template (template-parts/home-b2b-band.php). Gli URL sono
+			// precompilati: un URL svuotato e salvato toglie il bottone (o il link).
+			$h2_campi[0]->set_help_text( __( 'Titolo della fascia (H2, maiuscolo da CSS). Vuoto = "Hai un ufficio, un condominio o un B&B?"' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_aziende_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Aziende e condomini"' ) ),
+				Field::make( 'textarea', 'h2_aziende_text', __( 'Frase sotto il titolo' ) )->set_rows( 3 )->set_help_text( __( 'Vuoto = "Ci dici cosa serve, ti arrivano i preventivi di imprese verificate. Senza rincorrere nessuno."' ) ),
+				Field::make( 'textarea', 'h2_aziende_badges', __( 'Garanzie (una per riga)' ) )
+					->set_rows( 4 )
+					->set_default_value( function_exists( 'tp_home_v2_b2b_default_badges' ) ? implode( "\n", tp_home_v2_b2b_default_badges() ) : '' )
+					->set_help_text( __( 'Una garanzia per riga, con la spunta. [ATTENZIONE] "Preventivo entro 24 ore" non e\' confermato: aggiungerlo solo dopo la conferma di Niccolo\'. Campo mai salvato = "Sopralluogo gratuito" e "Imprese verificate". Campo svuotato e salvato = nessuna garanzia.' ) ),
+				Field::make( 'text', 'h2_aziende_cta_label', __( 'Bottone: testo' ) )->set_help_text( __( 'Vuoto = "Richiedi un preventivo"' ) ),
+				Field::make( 'text', 'h2_aziende_cta_url', __( 'Bottone: destinazione' ) )
+					->set_default_value( defined( 'TP_HV2_B2B_CTA_PATH' ) ? TP_HV2_B2B_CTA_PATH : '' )
+					->set_help_text( __( 'Percorso interno (es. /roma/sgrosso-commerciale/) o URL del sito. Svuotato e salvato = il bottone non esce; esce solo se la pagina e\' pubblicata.' ) ),
+				Field::make( 'text', 'h2_aziende_link_label', __( 'Link: testo' ) )->set_help_text( __( 'Vuoto = "Scopri le pulizie per aziende"' ) ),
+				Field::make( 'text', 'h2_aziende_link_url', __( 'Link: destinazione' ) )
+					->set_default_value( defined( 'TP_HV2_B2B_LINK_PATH' ) ? TP_HV2_B2B_LINK_PATH : '' )
+					->set_help_text( __( 'Percorso interno (es. /roma/pulizie-uffici/) o URL del sito. Svuotato e salvato = il link non esce; esce solo se la pagina e\' pubblicata.' ) ),
+				Field::make( 'image', 'h2_aziende_image', __( 'Foto di fondo' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuoto = la foto d\'ufficio del tema. Foto vera, orizzontale, almeno 1600 px di larghezza.' ) ),
+			) );
+		}
+		if ( 'faq' === $chiave ) {
+			// TICKET-126: FAQ con i fondatori. Nomi, ruolo e foto della card NON sono qui: vengono da Theme Options > Fondatori.
+			$h2_faq_def = array();
+			foreach ( function_exists( 'tp_home_v2_faq_defaults' ) ? tp_home_v2_faq_defaults() : array() as $h2_r ) {
+				$h2_faq_def[] = array_merge( array( '_type' => '_' ), $h2_r );
+			}
+			$h2_campi[0]->set_help_text( __( 'Titolo (H2, maiuscolo da CSS). Vuoto = "Le chiedete spesso."' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_faq_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Domande"' ) ),
+				Field::make( 'textarea', 'h2_faq_subtitle', __( 'Sottotitolo (solo desktop)' ) )->set_rows( 2 )->set_help_text( __( 'Vuoto = "Le risposte rapide prima di aprire l\'app. Per tutto il resto, ti rispondiamo noi."' ) ),
+				Field::make( 'text', 'h2_faq_contact_title', __( 'Card: titolo' ) )->set_help_text( __( 'Vuoto = "Rispondiamo di persona". Nomi, ruolo e foto dei fondatori: Theme Options > Fondatori.' ) ),
+				Field::make( 'textarea', 'h2_faq_contact_text', __( 'Card: testo' ) )->set_rows( 3 )->set_help_text( __( 'Vuoto = "Scrivici su WhatsApp: ti risponde Guido o Christian, in base alla disponibilita\'. I fondatori, non un call center."' ) ),
+				Field::make( 'text', 'h2_faq_contact_cta', __( 'Card: testo del bottone' ) )->set_help_text( __( 'Vuoto = "Scrivici su WhatsApp". Il link e\' il numero WhatsApp di Trovapulizie (320 098 0144).' ) ),
+				Field::make( 'complex', 'h2_faq_items', __( 'Domande' ) )
+					->set_layout( 'tabbed-vertical' )
+					->setup_labels( array( 'plural_name' => __( 'Domande' ), 'singular_name' => __( 'Domanda' ) ) )
+					->set_help_text( __( 'La prima si apre all\'avvio, una aperta per volta. [ATTENZIONE] Nessuna riga (campo mai salvato o svuotato) = le sei domande di default, risposte da confermare con Guido. Righe senza domanda o senza risposta non escono; se nessuna riga e\' completa la sezione non esce e non c\'e\' JSON-LD FAQPage. Per nasconderla di proposito: "Nascondi la FAQ".' ) )
+					->add_fields( array(
+						Field::make( 'text', 'question', __( 'Domanda' ) ),
+						Field::make( 'textarea', 'answer', __( 'Risposta' ) )->set_rows( 3 ),
+					) )
+					->set_default_value( $h2_faq_def )
+					->set_header_template( '<%- question %>' ),
+				Field::make( 'checkbox', 'h2_faq_hide', __( 'Nascondi la FAQ' ) )->set_option_value( 'yes' )->set_help_text( __( 'Acceso: la sezione FAQ non compare e non c\'e\' JSON-LD FAQPage. Spento (default): compare con le domande sopra.' ) ),
 			) );
 		}
 		if ( 'come_funziona' === $chiave ) {
