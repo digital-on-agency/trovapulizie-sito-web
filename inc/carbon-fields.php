@@ -1000,7 +1000,7 @@ add_action( 'carbon_fields_register_fields', function () {
 	// | 03-servizi          | h2_servizi_title, h2_servizi_eyebrow, h2_servizi_subtitle, h2_servizi_more_label, h2_servizi_cta, h2_servizi_items | 121 (fatto) |
 	// | 04-come-funziona    | h2_come_funziona_title, _eyebrow, _subtitle, _subtitle_mobile, _link_label, _link_url, _steps | 122 (fatto) |
 	// | 05-manifesto        | h2_manifesto_title, h2_manifesto_eyebrow, h2_manifesto_subtitle, h2_manifesto_stamp, h2_manifesto_items, h2_manifesto_hide | 123 (fatto) |
-	// | 06-recensioni       | h2_recensioni_title | 124 |
+	// | 06-recensioni       | h2_recensioni_title, _eyebrow, _items, h2_loghi_label, h2_loghi_items | 124 |
 	// | 07-zone             | h2_zone_title, h2_zones_caps | 125 (fatto) |
 	// | 08-aziende          | h2_aziende_title    | 126 |
 	// | 09-faq              | h2_faq_title        | 126 |
@@ -1012,7 +1012,7 @@ add_action( 'carbon_fields_register_fields', function () {
 		'servizi'       => 'Servizi',
 		'come_funziona' => 'Come funziona',
 		'manifesto'     => 'Manifesto',
-		'recensioni'    => 'Recensioni',
+		'recensioni'    => 'Recensioni e loghi',
 		'zone'          => 'Zone',
 		'aziende'       => 'Aziende',
 		'faq'           => 'FAQ',
@@ -1108,6 +1108,40 @@ add_action( 'carbon_fields_register_fields', function () {
 					->set_default_value( $h2_righe_def )
 					->set_header_template( '<%- lead %> <%- keyword %>' ),
 				Field::make( 'checkbox', 'h2_manifesto_hide', __( 'Nascondi il manifesto' ) )->set_option_value( 'yes' )->set_help_text( __( 'Acceso: la sezione non compare. Spento (default): compare con le promesse sopra, o con le quattro di default se non ce n\'e\' nessuna.' ) ),
+			) );
+		}
+		if ( 'recensioni' === $chiave ) {
+			// TICKET-124: recensioni a foglietti e fascia loghi. NESSUN default: finche' i campi sono vuoti la sezione (o la sola
+			// fascia loghi) non viene stampata. Solo recensioni vere e con consenso; loghi solo con autorizzazione scritta (SPEC §6).
+			$h2_campi[0]->set_help_text( __( 'Titolo della sezione (H2, maiuscolo da CSS). Vuoto = "Non lo diciamo solo noi." Compare solo se c\'e\' almeno una recensione.' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_recensioni_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Chi ci ha già scelto"' ) ),
+				Field::make( 'complex', 'h2_recensioni_items', __( 'Recensioni' ) )
+					->set_layout( 'tabbed-vertical' )
+					->setup_labels( array( 'plural_name' => __( 'Recensioni' ), 'singular_name' => __( 'Recensione' ) ) )
+					->set_help_text( __( '[ATTENZIONE] Solo recensioni vere, scritte da clienti reali e con il loro consenso; foto prima e dopo solo vere e con consenso. Nessuna riga = la sezione non compare. Una riga senza testo o senza nome e\' scartata. Il tema non emette nessun dato strutturato (Review, AggregateRating).' ) )
+					->add_fields( array(
+						Field::make( 'textarea', 'text', __( 'Testo della recensione' ) )->set_rows( 3 )->set_help_text( __( 'Una o due frasi, come l\'ha scritta il cliente.' ) ),
+						Field::make( 'text', 'name', __( 'Nome' ) )->set_help_text( __( 'Es. "Laura B." Le iniziali del cerchio si ricavano da qui.' ) ),
+						Field::make( 'text', 'zone', __( 'Zona' ) )->set_help_text( __( 'Es. "Prati". Facoltativa.' ) ),
+						Field::make( 'text', 'service', __( 'Servizio' ) )->set_help_text( __( 'Es. "Pulizie ordinarie". Facoltativo.' ) ),
+						Field::make( 'select', 'stars', __( 'Stelle' ) )->add_options( array( '5' => '5', '4' => '4', '3' => '3', '2' => '2', '1' => '1' ) )->set_help_text( __( 'Il voto dato dal cliente (default 5).' ) ),
+						Field::make( 'image', 'photo_before', __( 'Foto PRIMA' ) )->set_value_type( 'url' )->set_help_text( __( 'Facoltativa; esce solo se ci sono entrambe le foto (prima e dopo).' ) ),
+						Field::make( 'image', 'photo_after', __( 'Foto DOPO' ) )->set_value_type( 'url' )->set_help_text( __( 'Facoltativa; esce solo se ci sono entrambe le foto (prima e dopo).' ) ),
+						Field::make( 'image', 'avatar', __( 'Foto del cliente' ) )->set_value_type( 'url' )->set_help_text( __( 'Facoltativa. Vuoto = cerchio con le iniziali.' ) ),
+					) )
+					->set_header_template( '<%- name %> <%- zone %>' ),
+				Field::make( 'text', 'h2_loghi_label', __( 'Scritta della fascia loghi' ) )->set_help_text( __( 'Vuoto = "Lavoriamo con imprese e cleaner verificati"' ) ),
+				Field::make( 'complex', 'h2_loghi_items', __( 'Loghi e cleaner della fascia' ) )
+					->set_layout( 'tabbed-vertical' )
+					->setup_labels( array( 'plural_name' => __( 'Voci' ), 'singular_name' => __( 'Voce' ) ) )
+					->set_help_text( __( '[BLOCCO] I loghi di Igea Clean Service, Ready Solution e Disinfestazione Veloce si caricano solo con autorizzazione scritta dell\'impresa; le foto dei cleaner solo con il loro consenso. Nessuna riga = la fascia non compare. Una riga senza immagine e\' scartata. La fascia scorre in loop; con una sola voce le altre ripetono la stessa.' ) )
+					->add_fields( array(
+						Field::make( 'text', 'name', __( 'Nome' ) )->set_help_text( __( 'Testo alternativo dell\'immagine (es. "Igea Clean Service").' ) ),
+						Field::make( 'image', 'image', __( 'Logo o foto' ) )->set_value_type( 'url' ),
+						Field::make( 'select', 'kind', __( 'Tipo' ) )->add_options( array( 'logo' => __( 'Logo di un\'impresa' ), 'cleaner' => __( 'Foto di un cleaner verificato (con la spunta)' ) ) ),
+					) )
+					->set_header_template( '<%- name %>' ),
 			) );
 		}
 		if ( 'zone' === $chiave ) {

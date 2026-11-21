@@ -13240,3 +13240,410 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
 		padding: 0 16px;
 	}
 }
+
+/* =========================
+   TICKET-124: recensioni a foglietti e fascia loghi della Home v2. Figma 7903:7496 desktop, 7946:1871 mobile.
+   Solo selettori nuovi `.hv2-rev` (template-parts/home-reviews-notes.php). Componenti riusati: .tp-carousel (foglietti,
+   come Come funziona: da 1024 px sono in fila centrata, sotto un carosello a scorrimento) e .tp-marquee (fascia loghi).
+   La sezione e' trasparente (elenco "Sfondo continuo della Home v2" piu' in alto, tramite .hv2-section--recensioni).
+   Desktop-first: i valori mobile stanno in @media (max-width: 1023px). prefers-reduced-motion in fondo a questo blocco.
+   ========================= */
+.hv2-section.hv2-rev {
+	position: relative;
+	padding: 110px 0 96px;
+}
+.hv2-rev--solo-loghi {
+	padding: 0;
+}
+.hv2-rev__light {
+	position: absolute;
+	z-index: -1;
+	border-radius: 50%;
+	pointer-events: none;
+	background: radial-gradient(closest-side, rgba(55, 178, 153, 0.16), rgba(55, 178, 153, 0));
+}
+.hv2-rev__light--a {
+	left: -278px;
+	top: -122px;
+	width: 700px;
+	height: 560px;
+}
+.hv2-rev__light--b {
+	right: -176px;
+	top: 585px;
+	width: 640px;
+	height: 520px;
+}
+.hv2-rev__inner {
+	position: relative;
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: 0 clamp(24px, 6.667vw, 96px);
+}
+.hv2-rev__head {
+	text-align: center;
+}
+.hv2-rev__eyebrow {
+	margin: 0 0 12px;
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.12em;
+	line-height: 20px;
+	text-transform: uppercase;
+	color: var(--tp-v2-niente);
+}
+.hv2-rev__title {
+	margin: 0;
+	font-size: clamp(44px, 5vw, 72px);
+	font-weight: 900;
+	line-height: 1.5;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	color: var(--tp-v2-ink);
+}
+.hv2-rev__carousel {
+	margin-top: 72px;
+}
+/* Foglietti: fila centrata da 1024 px (pochi foglietti restano al centro), tutti dell'altezza del piu' alto */
+.hv2-rev__carousel .tp-carousel__track {
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 24px;
+	/* 16 px di margine interno compensato dal margine negativo: i foglietti ruotati escono dai bordi di qualche pixel e,
+	   senza questo spazio, la pista risulterebbe scorrevole (tp-carousel.js terrebbe il ruolo "carosello" su una fila) */
+	margin: 0 -16px;
+	padding: 0 16px;
+	overflow: visible;
+	scroll-snap-type: none;
+}
+.hv2-rev__carousel .tp-carousel__slide {
+	display: flex;
+	flex: 0 0 calc((100% - 48px) / 3);
+	min-width: 0;
+	scroll-snap-align: none;
+}
+.hv2-rev__carousel .tp-carousel__nav {
+	display: none;
+}
+.hv2-rev__note {
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	box-sizing: border-box;
+	width: 100%;
+	padding: 20px 20px 24px;
+	border-radius: 20px;
+	background: #fff;
+	box-shadow: 0 18px 40px -6px rgba(6, 42, 34, 0.12);
+	transform: rotate(var(--hv2-rev-rot, 0deg));
+	transition: transform 250ms var(--tp-ease-stage, ease);
+}
+@media (hover: hover) {
+	.hv2-rev__note:hover {
+		transform: translateY(-6px);
+	}
+}
+.hv2-rev__photos {
+	display: flex;
+	gap: 8px;
+}
+.hv2-rev__photo {
+	position: relative;
+	flex: 1 1 0;
+	min-width: 0;
+	height: 150px;
+	margin: 0;
+	overflow: hidden;
+	border-radius: 12px;
+	background: #E4EFEA;
+}
+.hv2-rev__photo img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.hv2-rev__tag {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	padding: 3px 8px;
+	border-radius: 6px;
+	font-size: 11px;
+	font-weight: 700;
+	line-height: 1.5;
+	text-transform: uppercase;
+	color: #fff;
+}
+.hv2-rev__tag--before {
+	background: var(--tp-v2-ink);
+}
+.hv2-rev__tag--after {
+	background: var(--tp-v2-green);
+}
+.hv2-rev__stars {
+	margin: 0;
+	font-size: 20px;
+	line-height: 1.5;
+	letter-spacing: 0;
+	color: #F2B84B;
+}
+.hv2-rev__stars-off {
+	color: rgba(6, 42, 34, 0.15);
+}
+.hv2-rev__text {
+	flex: 1 1 auto;
+	margin: 0;
+}
+.hv2-rev__text p {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 500;
+	line-height: 27px;
+	color: var(--tp-v2-ink);
+}
+.hv2-rev__author {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.hv2-rev__avatar {
+	display: flex;
+	flex: none;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+.hv2-rev__avatar--initials {
+	background: #D9F0E8;
+	font-size: 14px;
+	font-weight: 700;
+	line-height: 1;
+	color: var(--tp-v2-niente);
+}
+.hv2-rev__who {
+	display: flex;
+	flex-direction: column;
+	margin: 0;
+	min-width: 0;
+}
+.hv2-rev__name {
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 1.5;
+	color: var(--tp-v2-ink);
+}
+.hv2-rev__meta {
+	font-size: 13px;
+	line-height: 1.5;
+	color: #4F6660;
+}
+
+/* Fascia loghi: bianca a tutta larghezza, scorre (tp-marquee). Voci senza punto: lo spazio e' il padding destro */
+.hv2-rev__band {
+	margin-top: 80px;
+	border-top: 1px solid rgba(6, 42, 34, 0.08);
+	border-bottom: 1px solid rgba(6, 42, 34, 0.08);
+	background: #fff;
+}
+.hv2-rev--solo-loghi .hv2-rev__band {
+	margin-top: 0;
+}
+.hv2-rev__marquee {
+	padding: 22px 0;
+}
+.hv2-rev__marquee .tp-marquee__item {
+	padding-right: 64px;
+}
+.hv2-rev__band-label {
+	font-size: 13px;
+	font-weight: 700;
+	letter-spacing: 0.1em;
+	line-height: 1.5;
+	text-transform: uppercase;
+	white-space: nowrap;
+	color: var(--tp-v2-niente);
+}
+.hv2-rev__logo {
+	display: flex;
+	align-items: center;
+	height: 52px;
+	overflow: hidden;
+	border-radius: 12px;
+}
+.hv2-rev__logo img {
+	display: block;
+	width: auto;
+	max-width: none;
+	height: 44px;
+	object-fit: contain;
+}
+.hv2-rev__cleaner {
+	position: relative;
+	display: block;
+	flex: none;
+	width: 52px;
+	height: 52px;
+}
+.hv2-rev__cleaner img {
+	display: block;
+	width: 52px;
+	height: 52px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+.hv2-rev__verified {
+	position: absolute;
+	left: 34px;
+	top: 34px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	box-sizing: border-box;
+	width: 20px;
+	height: 20px;
+	border: 2px solid #fff;
+	border-radius: 50%;
+	background: var(--tp-v2-green);
+	color: #fff;
+}
+.hv2-rev__check {
+	width: 10px;
+	height: 10px;
+}
+
+@media (max-width: 1279px) and (min-width: 1024px) {
+	.hv2-rev__text p {
+		font-size: 16px;
+		line-height: 24px;
+	}
+	.hv2-rev__photo {
+		height: 120px;
+	}
+}
+
+@media (max-width: 1023px) {
+	.hv2-section.hv2-rev {
+		padding: 72px 0 56px;
+	}
+	.hv2-rev--solo-loghi {
+		padding: 0;
+	}
+	.hv2-rev__light--a {
+		left: 181px;
+		right: auto;
+		top: -66px;
+		width: 340px;
+		height: 280px;
+	}
+	.hv2-rev__light--b {
+		left: -121px;
+		right: auto;
+		top: 535px;
+		width: 320px;
+		height: 260px;
+	}
+	.hv2-rev__inner {
+		padding: 0;
+	}
+	.hv2-rev__head {
+		padding: 0 16px;
+		text-align: left;
+	}
+	.hv2-rev__eyebrow {
+		font-size: 12px;
+		letter-spacing: 0.12em;
+	}
+	.hv2-rev__title {
+		font-size: 40px;
+		line-height: 42px;
+	}
+	.hv2-rev__carousel {
+		margin-top: 14px;
+	}
+	/* Carosello: un foglietto e mezzo, il secondo si vede a meta' per far capire che si scorre */
+	.hv2-rev__carousel .tp-carousel__track {
+		flex-wrap: nowrap;
+		justify-content: flex-start;
+		gap: 12px;
+		margin: 0;
+		padding: 20px 16px 24px;
+		overflow-x: auto;
+		scroll-snap-type: x mandatory;
+		scroll-padding: 0 16px;
+	}
+	.hv2-rev__carousel .tp-carousel__slide {
+		flex: 0 0 min(300px, calc(100vw - 56px));
+		scroll-snap-align: center;
+	}
+	.hv2-rev__carousel .tp-carousel__nav {
+		display: flex;
+		padding: 0 16px;
+	}
+	.hv2-rev__carousel .tp-carousel__nav[hidden] {
+		display: none;
+	}
+	.hv2-rev__note {
+		gap: 10.5px;
+		padding: 15px 15px 18px;
+		border-radius: 15px;
+		box-shadow: 0 13.5px 30px -4.5px rgba(6, 42, 34, 0.12);
+	}
+	.hv2-rev__photos {
+		gap: 6px;
+	}
+	.hv2-rev__photo {
+		height: 112px;
+		border-radius: 9px;
+	}
+	.hv2-rev__tag {
+		top: 7px;
+		left: 7px;
+		padding: 2px 6px;
+		border-radius: 4.5px;
+		font-size: 8.25px;
+	}
+	.hv2-rev__stars {
+		font-size: 15px;
+	}
+	.hv2-rev__text p {
+		font-size: 13.5px;
+		line-height: 20.25px;
+	}
+	.hv2-rev__author {
+		gap: 7.5px;
+	}
+	.hv2-rev__avatar {
+		width: 30px;
+		height: 30px;
+	}
+	.hv2-rev__avatar--initials {
+		font-size: 11px;
+	}
+	.hv2-rev__name {
+		font-size: 11.25px;
+	}
+	.hv2-rev__meta {
+		font-size: 9.75px;
+	}
+	.hv2-rev__band {
+		margin-top: 8px;
+	}
+	.hv2-rev__marquee .tp-marquee__item {
+		padding-right: 32px;
+	}
+	.hv2-rev__band-label {
+		font-size: 12px;
+		letter-spacing: 0.1em;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.hv2-rev__note {
+		transition: none;
+	}
+}

@@ -17,7 +17,7 @@
  * | 03-servizi       | home-services-v2 (TICKET-121, fatto)        | 7903:6228, mobile 7946:668 |
  * | 04-come-funziona | home-steps-v2 (TICKET-122, fatto)           | 7903:6508, mobile 7946:947 |
  * | 05-manifesto     | home-manifesto (TICKET-123, fatto)          | 7903:7379, mobile 7946:1823 |
- * | 06-recensioni    | home-reviews-notes (TICKET-124)             | 7903:7496 |
+ * | 06-recensioni    | home-reviews-notes (TICKET-124, fatto)      | 7903:7496, mobile 7946:1871 |
  * | 07-zone          | home-zones-v2 (TICKET-125, fatto)           | 7903:7567, mobile 7946:1972 |
  * | 08-aziende       | home-b2b-band (TICKET-126)                  | 7903:7601 |
  * | 09-faq           | faq-accordion con fondatori (TICKET-126)    | 7903:7623 |
@@ -142,6 +142,12 @@ $hv2_sections = array(
 				'stamp'    => carbon_get_the_post_meta( 'h2_manifesto_stamp' ),
 				'items'    => $hv2_righe,
 			) );
+			++$hv2_i;
+			continue;
+		endif;
+		if ( 'recensioni' === $hv2_def[0] ) :
+			// Recensioni e fascia loghi (TICKET-124): senza recensioni e loghi compilati il template non stampa nulla (nessun default).
+			get_template_part( 'template-parts/home-reviews-notes', null, tp_home_v2_reviews_args( get_the_ID() ) );
 			++$hv2_i;
 			continue;
 		endif;
