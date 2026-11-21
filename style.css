@@ -14961,7 +14961,10 @@ html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__tent {
 	}
 	.faq--v2 .faq__item.is-open .faq__a-inner p {
 		translate: none;
+	}
+}
 
+/* =========================
    Giro 2 di revisione della Home v2 (tema 0.80.1). Solo regole che correggono quelle sopra, in fondo al file e senza
    forzature di priorita': a parita' di specificita' vince l'ordine. Per voce: P2-x e P3-x del pacchetto del revisore (review2).
    [ATTENZIONE] Il movimento (animazioni, riduci movimento) e' di TICKET-129: qui non si tocca.
@@ -15191,7 +15194,7 @@ html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__tent {
 	}
 	.faq.faq--v2 {
 		padding-top: var(--hv2-gap);
-		padding-bottom: 24px; /* + 72 di padding alto della chiusura = una distanza di 96 px fra i contenuti */
+		padding-bottom: calc(var(--hv2-gap) - 72px); /* + 72 di padding alto della chiusura = --hv2-gap fra i contenuti */
 	}
 	/* I pallini hanno un'area di tocco da 44 px ma il segno e' alto 8: 34 px di quell'area vuota non contano come distanza,
 	   cosi' dai pallini alla sezione dopo restano circa 80 px visibili (dalle schede 112). */

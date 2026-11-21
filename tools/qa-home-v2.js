@@ -946,6 +946,8 @@ async function checkGiro1() {
 /* Gruppo giro2 (revisione UI/UX giro 2, tema 0.80.1). Da lanciare a 1440, 768, 390 e 360. */
 async function checkGiro2() {
 	await withChrome(bin, 'about:blank', { port: 9565, width, height: width === 768 ? 1024 : 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-giro2', args: ['--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4'] }, async ({ send, ev, sleep }) => {
+		// Con "riduci movimento" gli ingressi non spostano nulla: le distanze si misurano a riposo, senza aspettare i 450 ms dei reveal
+		await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
 		await send('Page.navigate', { url });
 		await sleep(3500);
 		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
@@ -1022,13 +1024,13 @@ async function checkGiro2() {
 		eq('zone, CAP non servito: link WhatsApp con testo precompilato codificato, stesso numero, data-cta-position="zones_whatsapp"', !!nz.href && nz.href.startsWith(waBase) && /^https:\/\/wa\.me\/\d+/.test(nz.href) && new URL(nz.href).searchParams.get('text') === 'Ciao, il mio CAP è 00133: quando arrivate da me?' && /%C3%A8/.test(nz.href) && nz.pos === 'zones_whatsapp' && nz.label === 'Scrivici su WhatsApp', JSON.stringify(nz));
 
 		// Hover e focus (hover reale con il mouse)
-		const hov = async (sel, prop) => { const c = await J(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); e.scrollIntoView({ block: 'center', behavior: 'instant' }); const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+		const hov = async (sel, want) => { const c = await J(`(() => { const e = document.querySelector(${JSON.stringify(sel)}); e.scrollIntoView({ block: 'center', behavior: 'instant' }); const r = e.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
 			await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: c.x, y: c.y }); await sleep(1100);
-			const v = await J(`(() => { const s = getComputedStyle(document.querySelector(${JSON.stringify(sel)})); return { bg: s.backgroundColor, td: s.textDecorationLine }; })()`);
+			let v; for (let t = 0; t < 8; t++) { v = await J(`(() => { const s = getComputedStyle(document.querySelector(${JSON.stringify(sel)})); return { bg: s.backgroundColor, td: s.textDecorationLine }; })()`); if (v.bg === want || /underline/.test(v.td)) break; await sleep(500); }
 			await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 2, y: 2 }); await sleep(250); return v; };
 		if (wide) {
-			const h1 = await hov('.hv2-zones__submit'); eq('hover: "Controlla" #2A9580 come il primario', h1.bg === 'rgb(42, 149, 128)', JSON.stringify(h1));
-			const h2 = await hov('.hv2-cta__btn'); eq('hover: "Apri l’app" della chiusura #E6FFF5', h2.bg === 'rgb(230, 255, 245)', JSON.stringify(h2));
+			const h1 = await hov('.hv2-zones__submit', 'rgb(42, 149, 128)'); eq('hover: "Controlla" #2A9580 come il primario', h1.bg === 'rgb(42, 149, 128)', JSON.stringify(h1));
+			const h2 = await hov('.hv2-cta__btn', 'rgb(230, 255, 245)'); eq('hover: "Apri l’app" della chiusura #E6FFF5', h2.bg === 'rgb(230, 255, 245)', JSON.stringify(h2));
 			const h3 = await hov('.navbar__login'); eq('hover: "Accedi" sottolineato', /underline/.test(h3.td), JSON.stringify(h3));
 			const h4 = await hov('.site-footer-v2__contacts a'); eq('hover: telefono del footer sottolineato', /underline/.test(h4.td), JSON.stringify(h4));
 		} else {
