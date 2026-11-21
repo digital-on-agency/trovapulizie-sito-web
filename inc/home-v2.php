@@ -107,13 +107,13 @@ add_filter( 'wp_sitemaps_posts_query_args', function ( $args, $post_type ) {
 
 /* ---- Script per template ----------------------------------------------------------------------------------- */
 
-/* Solo gli ingressi (reveal) e la fisarmonica delle FAQ. Carosello, movimento e controllo CAP li aggiungono i ticket
+/* Gli ingressi (reveal), la fisarmonica delle FAQ e la pausa dei loop fuori schermo (tp-loops, TICKET-121). Carosello, movimento e controllo CAP li aggiungono i ticket
    delle rispettive sezioni. Niente Three.js (nessun importmap) e niente GSAP a questo livello. */
 add_action( 'wp_enqueue_scripts', function () {
 	if ( ! is_page_template( 'page-home-v2.php' ) ) {
 		return;
 	}
-	foreach ( array( 'reveal', 'faq-accordion' ) as $handle ) {
+	foreach ( array( 'reveal', 'faq-accordion', 'tp-loops' ) as $handle ) {
 		wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 	}
 } );
@@ -124,6 +124,72 @@ add_action( 'wp_enqueue_scripts', function () {
 		wp_enqueue_script( 'trovapulizie-navbar-v2', get_stylesheet_directory_uri() . '/assets/js/navbar-v2.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 	}
 } );
+
+/* ---- Servizi (TICKET-121) ---------------------------------------------------------------------------------- */
+
+/**
+ * Destinazione di un'icona della sezione Servizi: l'URL da usare come link, oppure '' se l'icona non deve essere un
+ * link. E' l'unica funzione che decide "link o span" (template-parts/home-services-v2.php). Restituisce '' se:
+ * il servizio e' segnato "presto"; l'URL e' vuoto; l'URL e' interno (percorso che comincia con "/" o stesso host) e la
+ * pagina di destinazione non esiste o non e' pubblicata (nessun link verso una 404). Un URL esterno vale cosi' com'e'.
+ * Risultato in cache per richiesta.
+ *
+ * @param string $url  URL o percorso interno (es. "/roma/pulizie-uffici/").
+ * @param bool   $soon True se il servizio e' "presto".
+ * @return string URL assoluto o ''.
+ */
+function tp_home_v2_service_href( $url, $soon = false ) {
+	static $cache = array();
+	$url = trim( (string) $url );
+	if ( $soon || '' === $url ) {
+		return '';
+	}
+	if ( isset( $cache[ $url ] ) ) {
+		return $cache[ $url ];
+	}
+	$host    = wp_parse_url( home_url(), PHP_URL_HOST );
+	$u_host  = wp_parse_url( $url, PHP_URL_HOST );
+	$interno = ( 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ) || ( $u_host && $u_host === $host );
+	if ( ! $interno && ! $u_host ) {
+		return $cache[ $url ] = '';
+	}
+	$abs = 0 === strpos( $url, '/' ) && 0 !== strpos( $url, '//' ) ? home_url( $url ) : $url;
+	if ( $interno ) {
+		$id = url_to_postid( $abs );
+		if ( ! $id || 'publish' !== get_post_status( $id ) ) {
+			return $cache[ $url ] = '';
+		}
+	}
+	return $cache[ $url ] = $abs;
+}
+
+/**
+ * Riga "Altri servizi a Roma": le sei pagine nell'ordine del Figma (sgrosso casa, post-ristrutturazione, trasloco,
+ * fine affitto, pulizie commerciali, guida ai prezzi), solo se pubblicate, percorso => anchor. Percorsi e anchor
+ * vengono da tp_service_pages() (unica fonte SEO): qui si sceglie soltanto quali voci mostrare e in che ordine, per
+ * chiave dell'array; nessun anchor o URL e' scritto nel template. Una voce che sparisce da tp_service_pages() sparisce
+ * anche da qui.
+ *
+ * @return array<string,string>
+ */
+function tp_home_v2_altri_servizi() {
+	$scelte = array(
+		'/roma/sgrosso-casa/',
+		'/roma/sgrosso-post-ristrutturazione/',
+		'/roma/sgrosso-trasloco/',
+		'/roma/sgrosso-fine-affitto/',
+		'/roma/sgrosso-commerciale/',
+		'/roma/prezzi-pulizie/',
+	);
+	$pubblicate = function_exists( 'tp_service_pages_published' ) ? tp_service_pages_published() : array();
+	$out        = array();
+	foreach ( $scelte as $percorso ) {
+		if ( isset( $pubblicate[ $percorso ] ) ) {
+			$out[ $percorso ] = $pubblicate[ $percorso ];
+		}
+	}
+	return $out;
+}
 
 /* ---- Precaricamento LCP ------------------------------------------------------------------------------------ */
 

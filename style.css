@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.73.0
+Version: 0.74.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -10871,6 +10871,17 @@ html.tp-reveal .hv2 [data-reveal].is-in {
 		transition: opacity var(--tp-dur-reduced) linear;
 		transition-delay: 0s;
 	}
+	/* TICKET-121: la fascia frasi e' ferma; il riquadro Servizi non entra da destra; l'icona non si solleva */
+	/* Specificita' piu' alta di proposito: questo blocco sta prima dei blocchi dei componenti nel file */
+	html .tp-marquee[data-direction] .tp-marquee__track {
+		animation: none;
+	}
+	html.tp-reveal .hv2 .hv2-services__panel[data-reveal] {
+		transform: none;
+	}
+	.hv2-services__item .hv2-services__tile {
+		transition: none;
+	}
 }
 
 /* =========================
@@ -11430,5 +11441,392 @@ body.tp-v2-header {
 		--tp-phone-screen-radius: calc(var(--hv2-stage) * 0.0513);
 		left: 32.56%;
 		top: 19.77%;
+	}
+}
+
+/* =========================
+   Fascia frasi e Servizi della Home v2 (TICKET-121). Figma 7903:6209 e 7903:6228 desktop, 7946:662 e 7946:668 mobile.
+   Solo selettori nuovi: .tp-marquee (componente generico, template-parts/tp-marquee.php), .hv2-frasi e .hv2-services.
+   Desktop-first: i valori mobile stanno in @media (max-width: 1023px), soglia --tp-bp-desktop (var() non vale dentro
+   @media). Le regole prefers-reduced-motion di questi blocchi stanno nel blocco unico della v2 (piu' in alto).
+   ========================= */
+
+/* ---- Fascia che scorre (componente) ---- */
+.tp-marquee {
+	overflow: hidden;
+	white-space: nowrap;
+}
+.tp-marquee__track {
+	display: flex;
+	width: max-content;
+	animation: tp-marquee-left var(--tp-marquee-dur, 30s) linear infinite;
+}
+.tp-marquee[data-direction="right"] .tp-marquee__track {
+	animation-name: tp-marquee-right;
+}
+.tp-marquee__group {
+	display: flex;
+	flex: none;
+	align-items: center;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.tp-marquee__item {
+	display: flex;
+	flex: none;
+	align-items: center;
+}
+.tp-marquee.is-paused .tp-marquee__track {
+	animation-play-state: paused;
+}
+@media (hover: hover) {
+	.tp-marquee:hover .tp-marquee__track {
+		animation-play-state: paused;
+	}
+}
+/* Un ciclo = un gruppo (100% / n della pista): a fine ciclo il gruppo successivo sta dove stava il primo */
+@keyframes tp-marquee-left {
+	from { transform: translateX(0); }
+	to { transform: translateX(calc(-100% / var(--tp-marquee-n, 4))); }
+}
+@keyframes tp-marquee-right {
+	from { transform: translateX(calc(-100% / var(--tp-marquee-n, 4))); }
+	to { transform: translateX(0); }
+}
+
+/* ---- Fascia frasi (Figma 7903:6209, 1440 x 85; mobile 7946:662, 390 x 58) ---- */
+.hv2-frasi {
+	background: var(--tp-v2-green);
+	border-top: 1px solid var(--tp-v2-ink);
+}
+.hv2-frasi__marquee {
+	padding: 18px 0;
+	font-family: var(--tp-font);
+	font-size: 32px;
+	font-weight: 800;
+	line-height: 1.5;
+	letter-spacing: -0.01em;
+	text-transform: uppercase;
+	color: var(--tp-v2-ink);
+}
+.hv2-frasi__marquee .tp-marquee__item {
+	gap: 40px;
+	padding-right: 40px;
+}
+.hv2-frasi__marquee .tp-marquee__dot {
+	flex: none;
+	width: 12px;
+	height: 12px;
+	border-radius: 50%;
+	background: var(--tp-v2-ink);
+}
+
+/* ---- Servizi (Figma 7903:6228, 1440 x 607; mobile 7946:668, 390 x 818) ---- */
+.hv2-services {
+	position: relative;
+	overflow: hidden;
+	isolation: isolate;
+	padding: 0;
+	background: var(--tp-v2-mint);
+}
+.hv2-services__light {
+	position: absolute;
+	z-index: -1;
+	border-radius: 50%;
+	pointer-events: none;
+	background: radial-gradient(closest-side, rgba(55, 178, 153, 0.16), rgba(55, 178, 153, 0));
+}
+.hv2-services__light--a {
+	left: 694px;
+	top: -338px;
+	width: 1060px;
+	height: 920px;
+}
+.hv2-services__light--b {
+	left: -388px;
+	top: 156px;
+	width: 920px;
+	height: 780px;
+}
+/* Due colonne: testo a sinistra (scritta, titolo, sottotitolo, poi la riga di link), riquadro a destra centrato in
+   verticale. Le righe 1 e 4 (1fr) tengono il testo al centro rispetto al riquadro. L'ordine del DOM e' quello della
+   lettura e del mobile: testo, riquadro, link. */
+.hv2-services__inner {
+	position: relative;
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	grid-template-rows: 1fr auto auto 1fr;
+	column-gap: 80px;
+	row-gap: 20px;
+	max-width: 1440px;
+	margin: 0 auto;
+	padding: 73px clamp(24px, 6.667vw, 96px);
+}
+.hv2-services__head {
+	grid-column: 1;
+	grid-row: 2;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+.hv2-services__panel {
+	grid-column: 2;
+	grid-row: 1 / 5;
+	align-self: center;
+}
+.hv2-services__more {
+	grid-column: 1;
+	grid-row: 3;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 10px;
+}
+html.tp-reveal .hv2-services__panel[data-reveal] {
+	transform: translateX(32px);
+}
+.hv2-services__eyebrow {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: normal;
+	text-transform: uppercase;
+	color: var(--tp-v2-niente);
+}
+.hv2-services__title {
+	margin: 0;
+	font-size: clamp(44px, 4.722vw, 68px);
+	font-weight: 800;
+	line-height: 1.03;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	color: var(--tp-v2-ink);
+}
+.hv2-services__subtitle {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 400;
+	line-height: 30px;
+	color: #4B5563;
+}
+.hv2-services__more-label {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: normal;
+	color: #4F6660;
+}
+.hv2-services__chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.hv2-services__chip {
+	display: inline-flex;
+	padding: 7px 12px;
+	border: 1px solid rgba(6, 42, 34, 0.12);
+	border-radius: 999px;
+	background: #fff;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: normal;
+	color: var(--tp-v2-ink);
+	text-decoration: none;
+	transition: border-color var(--tp-dur-fast) var(--tp-ease-stage);
+}
+.hv2-services__chip:hover {
+	border-color: var(--tp-v2-green);
+}
+.hv2-services__cta {
+	display: inline-flex;
+	gap: 8px;
+	margin-top: 10px;
+	padding-top: 8px;
+	font-size: 17px;
+	font-weight: 600;
+	line-height: normal;
+	color: var(--tp-v2-niente);
+	text-decoration: none;
+}
+.hv2-services__cta:hover {
+	text-decoration: underline;
+}
+.hv2-services__chip:focus-visible,
+.hv2-services__cta:focus-visible {
+	outline: 2px solid var(--tp-focus);
+	outline-offset: 3px;
+}
+
+/* Riquadro verde: tutto in em, 1em = 16 px a 1440. Da 1024 a 1279 px il corpo scende con la larghezza (1,25vw), cosi'
+   il riquadro (41,8em) e il testo stanno insieme; sotto 1024 vedi il blocco mobile. */
+.hv2-services__panel {
+	box-sizing: border-box;
+	width: 41.8em;
+	height: 28.8em;
+	padding: 3em;
+	border-radius: 2.5em;
+	background: linear-gradient(145.43deg, #37B299 0%, #2A9580 71.429%);
+	box-shadow: 0 1.875em 3.75em -0.625em rgba(55, 178, 153, 0.3);
+	font-size: min(16px, 1.25vw);
+}
+.hv2-services__grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	column-gap: 0.8em;
+	row-gap: 0.4em;
+	align-items: start;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.hv2-services__item {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.8em;
+	padding: 0.8em;
+	color: #fff;
+	text-decoration: none;
+}
+.hv2-services__item:focus-visible {
+	outline: 2px solid #fff;
+	outline-offset: -2px;
+	border-radius: 1.5em;
+}
+.hv2-services__tile {
+	display: grid;
+	place-items: center;
+	width: 7.2em;
+	height: 7.2em;
+	border-radius: 1.929em;
+	background: #fff;
+	box-shadow: 0 0.6em 0.8em rgba(0, 64, 51, 0.18);
+	transition: transform var(--tp-dur-fast) var(--tp-ease-stage);
+}
+.hv2-services__tile img {
+	display: block;
+	height: auto;
+	max-width: none;
+}
+/* Nome e, sotto, l'etichetta "presto" (nel flusso, come nel Figma: la riga che la contiene e' piu' alta). L'altezza
+   del riquadro e' fissa (28,8em = 460,8 px a 1440): un'etichetta in piu' non lo allunga. */
+.hv2-services__label {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	text-align: center;
+}
+.hv2-services__name {
+	display: block;
+	font-size: 1.2em;
+	font-weight: 600;
+	line-height: 1.333;
+	white-space: nowrap;
+	text-shadow: 0 0.1em 0.3em rgba(0, 51, 38, 0.35);
+}
+.hv2-services__soon {
+	padding: 2px 8px;
+	border-radius: 999px;
+	background: rgba(255, 255, 255, 0.9);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: normal;
+	color: #91400D;
+	text-shadow: none;
+	white-space: nowrap;
+}
+@media (hover: hover) {
+	a.hv2-services__item:hover .hv2-services__tile {
+		transform: translateY(-4px);
+	}
+	a.hv2-services__item:hover .hv2-services__name {
+		text-decoration: underline;
+	}
+}
+
+@media (max-width: 1023px) {
+	.hv2-frasi__marquee {
+		padding: 14px 0;
+		font-size: 20px;
+		line-height: 30px;
+	}
+	.hv2-frasi__marquee .tp-marquee__item {
+		gap: 32px;
+		padding-right: 32px;
+	}
+	.hv2-frasi__marquee .tp-marquee__dot {
+		width: 8px;
+		height: 8px;
+	}
+	.hv2-services__light--a {
+		left: 81px;
+		top: -143px;
+		width: 540px;
+		height: 450px;
+	}
+	.hv2-services__light--b {
+		left: -220px;
+		top: 500px;
+		width: 480px;
+		height: 390px;
+	}
+	.hv2-services__inner {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-rows: none;
+		row-gap: 16px;
+		padding: 64px 16px 48px;
+	}
+	.hv2-services__head,
+	.hv2-services__panel,
+	.hv2-services__more {
+		grid-column: 1;
+		grid-row: auto;
+	}
+	.hv2-services__head {
+		gap: 16px;
+	}
+	.hv2-services__panel {
+		align-self: auto;
+		justify-self: center;
+		height: auto;
+		padding-bottom: 0.36em;
+		font-size: calc(min(100vw - 32px, 560px) / 41.8);
+	}
+	html.tp-reveal .hv2-services__panel[data-reveal] {
+		transform: translateY(var(--tp-reveal-distance));
+	}
+	.hv2-services__eyebrow {
+		font-size: 12px;
+		letter-spacing: 0.1em;
+	}
+	.hv2-services__title {
+		font-size: 40px;
+		line-height: 42px;
+	}
+	.hv2-services__subtitle {
+		font-size: 16px;
+		line-height: 24px;
+	}
+	.hv2-services__more-label {
+		font-size: 16px;
+	}
+	/* 14 px e non i 16 del Figma: gli anchor SEO sono piu' lunghi delle sue etichette e a 16 occuperebbero una riga ciascuno */
+	.hv2-services__chip {
+		padding: 12px 14px;
+		font-size: 14px;
+	}
+	.hv2-services__cta {
+		margin-top: 6px;
+		padding-top: 0;
+		font-size: 16px;
+	}
+	.hv2-services__soon {
+		padding: 1px 7px;
+		font-size: 13px;
+		line-height: 18px;
 	}
 }

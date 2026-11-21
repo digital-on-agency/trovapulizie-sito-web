@@ -996,8 +996,8 @@ add_action( 'carbon_fields_register_fields', function () {
 	//
 	// | Tab (data-section)  | Campi oggi          | Ticket che aggiunge i campi |
 	// | 01-hero             | h2_hero_title, h2_hero_title_accent, h2_hero_label, h2_hero_subtitle, h2_hero_orbit, h2_google_badge, h2_google_rating | 120 (fatto) |
-	// | 02-frasi            | h2_frasi_title      | 121 |
-	// | 03-servizi          | h2_servizi_title    | 121 |
+	// | 02-frasi            | h2_frasi_title (titolo nascosto, per gli screen reader), h2_frasi_items, h2_frasi_speed | 121 (fatto) |
+	// | 03-servizi          | h2_servizi_title, h2_servizi_eyebrow, h2_servizi_subtitle, h2_servizi_more_label, h2_servizi_cta, h2_servizi_items | 121 (fatto) |
 	// | 04-come-funziona    | h2_come_funziona_title | 122 |
 	// | 05-manifesto        | h2_manifesto_title  | 123 |
 	// | 06-recensioni       | h2_recensioni_title | 124 |
@@ -1036,6 +1036,46 @@ add_action( 'carbon_fields_register_fields', function () {
 					->set_option_value( 'yes' )
 					->set_help_text( __( 'Spento di default. Accenderlo solo quando il profilo Google ha almeno 5 recensioni vere (decisione del 21/11). Senza il voto qui sotto il riquadro non esce comunque; al suo posto sale il riquadro del QR.' ) ),
 				Field::make( 'text', 'h2_google_rating', __( 'Voto Google (es. 4,9)' ) )->set_help_text( __( 'Il voto mostrato nel riquadro. Nessun dato strutturato (AggregateRating) viene mai emesso.' ) ),
+			) );
+		}
+		if ( 'frasi' === $chiave ) {
+			// TICKET-121: frasi della fascia che scorre. Senza righe valgono le tre del Figma (template page-home-v2.php).
+			$h2_campi[0]->set_help_text( __( 'Titolo della fascia, letto solo dagli screen reader (non e\' visibile). Vuoto = "In breve".' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'complex', 'h2_frasi_items', __( 'Frasi' ) )
+					->set_layout( 'tabbed-vertical' )
+					->setup_labels( array( 'plural_name' => __( 'Frasi' ), 'singular_name' => __( 'Frase' ) ) )
+					->set_help_text( __( 'Le frasi che scorrono, in ordine; il separatore (il punto) lo mette il tema. Nessuna riga = le tre di default: "La casa pulita. Il weekend libero.", "Il divano ringrazia.", "Lo sgrosso non è un hobby.". Il maiuscolo lo fa il tema.' ) )
+					->add_fields( array(
+						Field::make( 'text', 'text', __( 'Frase' ) ),
+					) )
+					->set_header_template( '<%- text %>' ),
+				Field::make( 'text', 'h2_frasi_speed', __( 'Secondi per giro' ) )
+					->set_attribute( 'type', 'number' )
+					->set_attribute( 'min', '10' )
+					->set_attribute( 'max', '120' )
+					->set_help_text( __( 'Tempo che la fascia impiega a fare un giro: piu\' alto = piu\' lenta. Vuoto = 30.' ) ),
+			) );
+		}
+		if ( 'servizi' === $chiave ) {
+			// TICKET-121: testi e icone della sezione Servizi. Vuoto = default del template (template-parts/home-services-v2.php).
+			$h2_campi[0]->set_help_text( __( 'Titolo della sezione (H2, maiuscolo da CSS; un a capo e\' rispettato). Vuoto = "Dalla casa all\'ufficio."' ) );
+			$h2_campi = array_merge( $h2_campi, array(
+				Field::make( 'text', 'h2_servizi_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "I servizi"' ) ),
+				Field::make( 'textarea', 'h2_servizi_subtitle', __( 'Sottotitolo' ) )->set_rows( 2 )->set_help_text( __( 'Vuoto = "Quattro servizi oggi, altri in arrivo. Scegli e vedi subito chi è libero."' ) ),
+				Field::make( 'text', 'h2_servizi_more_label', __( 'Etichetta della riga di link' ) )->set_help_text( __( 'Vuoto = "Altri servizi a Roma". I link della riga sono le pagine di servizio pubblicate, non si scrivono qui.' ) ),
+				Field::make( 'text', 'h2_servizi_cta', __( 'Testo del link all\'app' ) )->set_help_text( __( 'Vuoto = "Scopri i servizi nell\'app". Porta sempre all\'app.' ) ),
+				Field::make( 'complex', 'h2_servizi_items', __( 'Icone dei servizi' ) )
+					->set_layout( 'tabbed-vertical' )
+					->setup_labels( array( 'plural_name' => __( 'Servizi' ), 'singular_name' => __( 'Servizio' ) ) )
+					->set_help_text( __( 'Le icone del riquadro verde, in ordine (di solito sei). Nessuna riga = le sei di default: Casa -> /roma/, Affitti brevi (presto), Aziende -> /roma/pulizie-uffici/, Condomini -> /roma/pulizie-condomini/, Disinfestazione -> /roma/zanzare-disinfestazione/, Manutenzione (presto). Un\'icona e\' un link solo se l\'URL e\' compilato, il servizio non e\' "presto" e la pagina di destinazione e\' pubblicata: altrimenti resta visibile senza link.' ) )
+					->add_fields( array(
+						Field::make( 'text', 'name', __( 'Nome' ) ),
+						Field::make( 'image', 'icon', __( 'Icona' ) )->set_value_type( 'url' )->set_help_text( __( 'Vuoto = l\'icona di default della riga con lo stesso numero d\'ordine.' ) ),
+						Field::make( 'text', 'url', __( 'URL di destinazione' ) )->set_help_text( __( 'Percorso interno (es. /roma/pulizie-uffici/) o URL. Vuoto = nessun link.' ) ),
+						Field::make( 'checkbox', 'soon', __( 'Presto' ) )->set_option_value( 'yes' )->set_help_text( __( 'Mostra l\'etichetta "presto" e toglie il link.' ) ),
+					) )
+					->set_header_template( '<%- name %>' ),
 			) );
 		}
 		$h2_container->add_tab( __( $etichetta ), $h2_campi );
