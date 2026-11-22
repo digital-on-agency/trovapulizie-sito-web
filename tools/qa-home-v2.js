@@ -97,7 +97,7 @@
    Il click e' reale (dispatchEvent su un click intercettato in coda con preventDefault: nessuna navigazione).
 
    Gruppo "giro4" (revisione UI/UX giro 4, tema 0.82.0), a 1440 e 390: titolo FAQ su due righe, velo Aziende, anello hero dentro lo schermo, chip dei servizi a scorrimento sotto 768, alone del timbro, etichette delle zone, footer.
-   Gruppo "giro2" (revisione UI/UX giro 2, tema 0.80.1), da lanciare a 1440, 768 e 390 (e 360): etichette dei servizi #062A22 peso 700
+   Gruppo "giro2" (revisione UI/UX giro 2, tema 0.80.1), da lanciare a 1440, 768 e 390 (e 360): etichette dei servizi bianche (dal 22/11) peso 700
    senza ombra e riquadro col gradiente chiaro; velo dal basso su .hv2-steps__shade; CAP non servito con la frase intera e il
    link WhatsApp con testo precompilato "Ciao, il mio CAP e' <CAP>: quando arrivate da me?" (codificato) e lo stesso numero di
    data-wa-url; sotto 1024 distanze uniformi fra le sezioni (--hv2-gap, 96 px a 390); da 768 a 1023 hero con testo allineato a
@@ -1039,8 +1039,8 @@ async function checkGiro2() {
 				ft, soonC: qa('.hv2-services__soon').map(e => cs(e).color)
 			});
 		})()`));
-		eq('servizi: etichette #062A22, peso 700, senza ombra', i.nameC.every(c => c === 'rgb(6, 42, 34)') && i.nameW.every(w => w === '700') && i.nameS.every(t => t === 'none'), JSON.stringify([i.nameC[0], i.nameW[0], i.nameS[0]]));
-		eq('servizi: riquadro col gradiente #37B299 -> #31A58E', /rgb\(55, 178, 153\)/.test(i.panelBg) && /rgb\(49, 165, 142\)/.test(i.panelBg), i.panelBg);
+		eq('servizi: etichette bianche (scelta di brand di Guido, 22/11), peso 700, ombra leggera', i.nameC.every(c => c === 'rgb(255, 255, 255)') && i.nameW.every(w => w === '700') && i.nameS.every(t => t !== 'none'), JSON.stringify([i.nameC[0], i.nameW[0], i.nameS[0]]));
+		eq('servizi: riquadro col gradiente del Figma #37B299 -> #2A9580', /rgb\(55, 178, 153\)/.test(i.panelBg) && /rgb\(42, 149, 128\)/.test(i.panelBg), i.panelBg);
 		if (wide) eq('come funziona: da 1024 px solo la diagonale del Figma, nessun velo dal basso (giro 4, voce 4)', (i.shade.match(/linear-gradient/g) || []).length === 1 && /^linear-gradient\(160\.58deg/.test(i.shade), i.shade);
 		else eq('come funziona: sotto 1024 px velo dal basso .55 su 55% piu\' la diagonale (giro 4, voce 4)', (i.shade.match(/linear-gradient/g) || []).length === 2 && /^linear-gradient\(0deg, rgba\(6, 42, 34, 0\.55\) 0(?:px|%), rgba\(6, 42, 34, 0\) 55%\)/.test(i.shade), i.shade);
 		eq('come funziona: sottotitolo del passo 3 "Scegli giorno e ora, in due tocchi. Il professionista conferma."', i.step3 === 'Scegli giorno e ora, in due tocchi. Il professionista conferma.', String(i.step3));
