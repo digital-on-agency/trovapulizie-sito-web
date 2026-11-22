@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.81.3
+Version: 0.82.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -12088,12 +12088,12 @@ body.tp-v2-header {
 }
 .hv2-zones__svg path[data-state="none"] {
 	fill: #fff;
-	stroke: #CFE3DC;
+	stroke: rgba(207, 227, 220, 0.7);
 }
 .hv2-zones__svg path[data-state="active"] {
 	fill: #55BFA9;
-	stroke: #fff;
-	stroke-width: 0.8;
+	stroke: rgba(255, 255, 255, 0.45); /* giro 4: bordi dei quartieri piu' tenui */
+	stroke-width: 0.6;
 	transition: fill var(--tp-dur) var(--tp-ease-stage);
 }
 .hv2-zones__svg path.is-selected {
@@ -12199,19 +12199,6 @@ body.tp-v2-header {
 	max-width: none;
 	transform: translate(-50%, -50%);
 }
-.hv2-zones__mon-label {
-	position: absolute;
-	left: 0;
-	font-size: 12px;
-	font-style: normal;
-	font-weight: 600;
-	line-height: normal;
-	white-space: nowrap;
-	color: var(--tp-v2-ink);
-	transform: translateX(-50%);
-}
-.hv2-zones__mon-label--sotto { top: calc(28 / 744 * 100cqw); }
-.hv2-zones__mon-label--sopra { bottom: calc(28 / 744 * 100cqw); }
 .hv2-zones__stage > * {
 	scale: calc(1 / var(--zs));
 	transform-origin: 0 0;
@@ -12265,7 +12252,6 @@ html.tp-reveal .hv2 .hv2-zones__map[data-reveal].is-in {
 	.hv2-zones__check { margin-top: 24px; }
 	.hv2-zones__map { justify-self: center; }
 	.hv2-zones__tag { padding: 5px 10px; font-size: 12px; }
-	.hv2-zones__mon-label { font-size: 10px; }
 	.hv2-zones__mon--pantheon { display: none; }
 }
 
@@ -12457,13 +12443,15 @@ main.hv2 > .hv2-b2b {
 		height: 100%;
 		transform: none;
 	}
-	/* Stessa SVG della desktop (viewBox 820, raggio 339) ingrandita per portare la linea di base a 183 px su 390 e il
-	   corpo a circa 15 px: centro del cerchio (195, 240) nel disegno 390 x 470 (Figma 7946:40). */
+	/* Stessa SVG della desktop (viewBox 820, raggio 339) in scala 1,05 della scena: linea di base a 169 px su 390, ingombro
+	   del testo 358 px (Figma 7946:40, diametro ~358) e corpo a 14 px, tutto dentro lo schermo con 16 px di margine. Il
+	   centro e' quello del disco e del telefono (50% e 0,6026 della scena); la rotazione usa transform, quindi il
+	   centraggio e' fatto con left e top. */
 	.hv2-hero__orbit {
-		left: calc(var(--hv2-stage) * -0.0675);
-		top: calc(var(--hv2-stage) * 0.0478);
-		width: calc(var(--hv2-stage) * 1.135);
-		height: calc(var(--hv2-stage) * 1.135);
+		left: calc(var(--hv2-stage) * -0.025);
+		top: calc(var(--hv2-stage) * 0.0776);
+		width: calc(var(--hv2-stage) * 1.05);
+		height: calc(var(--hv2-stage) * 1.05);
 	}
 	.hv2-hero__disc {
 		left: 11.54%;
@@ -12632,8 +12620,9 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
 .hv2-services__eyebrow {
 	margin: 0;
 	font-size: 13px;
-	font-weight: 600;
+	font-weight: 700;
 	line-height: normal;
+	letter-spacing: 0.12em;
 	text-transform: uppercase;
 	color: var(--tp-v2-niente);
 }
@@ -12846,7 +12835,6 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
 	}
 	.hv2-services__eyebrow {
 		font-size: 12px;
-		letter-spacing: 0.1em;
 	}
 	.hv2-services__title {
 		font-size: 40px;
@@ -13838,15 +13826,19 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
 	outline: 2px solid var(--tp-focus, #7FE3C9);
 	outline-offset: 3px;
 }
-/* "Servizi a Roma": riga sotto le colonne (deviazione dichiarata dal Figma, link SEO del footer attuale). */
+/* "Servizi a Roma": riga sotto le colonne (deviazione dichiarata dal Figma, link SEO del footer attuale). Giro 4: stessa
+   scala e stesso colore dei link delle altre colonne, in griglia a cinque colonne e piu' compatta. */
 .site-footer-v2__services {
-	margin-top: 40px;
+	margin-top: 24px;
+}
+.site-footer-v2__services .site-footer-v2__group-title {
+	margin-bottom: 8px;
 }
 .site-footer-v2__services .site-footer-v2__links {
-	flex-direction: row;
-	flex-wrap: wrap;
-	gap: 10px 28px;
-	font-size: 14px;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(236px, 1fr));
+	gap: 0 24px;
+	font-size: 15px;
 }
 /* Riquadro aziende e condomini */
 .site-footer-v2__b2b {
@@ -14085,7 +14077,7 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
 	content: '';
 	position: absolute;
 	inset: 0;
-	background: linear-gradient(to right, rgba(6, 42, 34, 0.96) 0%, rgba(6, 42, 34, 0.9) 50%, rgba(6, 42, 34, 0.78) 100%);
+	background: linear-gradient(to right, rgba(6, 42, 34, 0.94) 0%, rgba(6, 42, 34, 0.88) 52%, rgba(6, 42, 34, 0.46) 100%); /* giro 4: la foto si vede a destra, dove stanno solo bottone e link; titolo e frase restano sul .88-.94 */
 }
 .hv2-b2b__text,
 .hv2-b2b__actions {
@@ -14182,6 +14174,10 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
 	color: #fff; /* bianco sottolineato (giro 1, voce 11): il verde chiaro sulla foto non arrivava a 4,5:1 */
 	text-decoration: underline;
 	text-underline-offset: 3px;
+	text-shadow: 0 1px 8px rgba(6, 42, 34, 0.6); /* giro 4: il link ora sta sulla parte piu' chiara della foto */
+	border-radius: 10px;
+	background: rgba(6, 42, 34, 0.3); /* velo locale sfumato dietro al solo link: porta il contrasto del bianco sopra 4,5:1 sui pixel piu' chiari */
+	box-shadow: 0 0 22px 14px rgba(6, 42, 34, 0.32);
 }
 .hv2-b2b__link:hover {
 	text-decoration-thickness: 2px;
@@ -14224,7 +14220,9 @@ html.tp-reveal .hv2-services__panel[data-reveal] {
 	font-size: 48px;
 	font-weight: 900;
 	line-height: 52px;
+	letter-spacing: -0.02em;
 	text-transform: uppercase;
+	text-wrap: balance; /* giro 4: due righe "LE CHIEDETE / SPESSO." come il Figma 7903:7627, niente orfano */
 	color: var(--tp-v2-ink);
 }
 .faq--v2 .faq__contact-cta {
@@ -14989,18 +14987,12 @@ html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__tent {
 	box-shadow: 0 0.6em 0.8em rgba(0, 64, 51, 0.1); /* l'ombra scende sotto l'etichetta: piu' leggera, il testo scuro non perde contrasto */
 }
 
-/* P2-2 - Come funziona: velo dal basso, oltre alla diagonale del Figma, perche' titolo e frase reggano le foto chiare */
-.hv2-steps__shade {
-	background:
-		linear-gradient(0deg, rgba(6, 42, 34, 0.62) 0, rgba(6, 42, 34, 0) 62%),
-		linear-gradient(160.58deg, rgba(6, 42, 34, 0) 39.286%, rgba(6, 42, 34, 0.82) 85.714%);
-}
-
-/* Sotto 1024 px il testo sta in basso a sinistra, dove la diagonale pesa meno: il velo dal basso sale */
+/* P2-2 - Come funziona sotto 1024 px: il testo sta in basso a sinistra, dove la diagonale pesa meno: velo dal basso ridotto
+   (giro 4: .55 su 55%). Da 1024 resta la sola diagonale del Figma. */
 @media (max-width: 1023px) {
 	.hv2-steps__shade {
 		background:
-			linear-gradient(0deg, rgba(6, 42, 34, 0.74) 0, rgba(6, 42, 34, 0) 70%),
+			linear-gradient(0deg, rgba(6, 42, 34, 0.55) 0, rgba(6, 42, 34, 0) 55%),
 			linear-gradient(160.58deg, rgba(6, 42, 34, 0) 39.286%, rgba(6, 42, 34, 0.82) 85.714%);
 	}
 }
@@ -15272,29 +15264,116 @@ html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__tent {
 		display: block;
 	}
 }
-/* C2 - Passi 1 e 2 a 1440: velo dal basso un po' piu' alto, i titoli da 112 px reggono le zone chiare delle foto. */
-@media (min-width: 1280px) {
-	.hv2-steps__shade {
-		background:
-			linear-gradient(0deg, rgba(6, 42, 34, 0.7) 0, rgba(6, 42, 34, 0) 70%),
-			linear-gradient(160.58deg, rgba(6, 42, 34, 0) 39.286%, rgba(6, 42, 34, 0.82) 85.714%);
-	}
-}
-/* C3 - Titolo della FAQ sulla stessa scala delle altre sezioni (72 px a 1440, 40 sotto 1024). */
-.faq--v2 .faq__title {
-	font-size: clamp(44px, 5vw, 72px);
-	line-height: 1;
-	letter-spacing: -0.02em;
-}
-@media (max-width: 1023px) {
-	.faq--v2 .faq__title {
-		font-size: 40px;
-	}
-}
 /* C4 - Stato al passaggio per "Vedi tutti i quartieri serviti". */
 @media (hover: hover) {
 	.hv2-zones__more summary:hover {
 		text-decoration: underline;
 		text-underline-offset: 3px;
+	}
+}
+
+/* =========================
+   Giro 4 revisione (22/11, Claude): correzioni del pacchetto review4 (occhio di designer, confronto col Figma).
+   Dove una regola dei giri 1-3 allontanava la pagina dal Figma e' stata tolta o riscritta sul posto (titolo FAQ C3, velo
+   di Come funziona P2-2 e C2, anello e velo Aziende, eyebrow Servizi, bordi delle zone, "Servizi a Roma" del footer);
+   qui sotto stanno solo le regole nuove.
+   ========================= */
+
+/* Titolo FAQ sotto 1024: 40/42 come gli altri titoli di colonna (la regola base e' 48/52 su due righe) */
+@media (max-width: 1023px) {
+	.faq--v2 .faq__title {
+		font-size: 40px;
+		line-height: 42px;
+	}
+}
+
+/* Come funziona, desktop: sola diagonale del Figma, il testo regge con un'ombra leggera (le foto restano calde) */
+@media (min-width: 1024px) {
+	.hv2-steps__step,
+	.hv2-steps__text {
+		text-shadow: 0 1px 14px rgba(6, 42, 34, 0.45);
+	}
+}
+
+/* Chiusura: la luce e il tentacolo non escono dal bordo alto e basso della sezione (macchiavano il bordo del footer) */
+.hv2-cta {
+	overflow-y: clip;
+}
+
+/* Servizi, desktop: i link SEO non si allargano oltre 560 px, due chip per riga */
+@media (min-width: 1024px) {
+	.hv2-services__chips {
+		max-width: 560px;
+	}
+}
+
+/* Servizi, mobile: una riga di chip a scorrimento, senza spingere il link "Scopri i servizi" fuori dal secondo schermo.
+   Il margine negativo porta la riga a filo schermo, la maschera sfuma il bordo destro; i link restano nel DOM e
+   raggiungibili con Tab (il browser fa scorrere la riga fino al chip con il focus). */
+@media (max-width: 767px) {
+	.hv2-services__more {
+		align-self: stretch;
+		min-width: 0;
+	}
+	.hv2-services__chips {
+		align-self: stretch;
+		flex-wrap: nowrap;
+		gap: 8px;
+		margin: -4px -16px;
+		padding: 4px 56px 4px 16px;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scroll-snap-type: x proximity;
+		scroll-padding-inline: 16px;
+		scrollbar-width: none;
+		-webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent);
+		mask-image: linear-gradient(90deg, #000 calc(100% - 48px), transparent);
+	}
+	.hv2-services__chips::-webkit-scrollbar {
+		display: none;
+	}
+	.hv2-services__chips > li {
+		flex: none;
+		scroll-snap-align: start;
+	}
+	.hv2-services__chip {
+		white-space: nowrap;
+	}
+}
+
+/* Hero mobile: "Come funziona" come link di testo (Figma 7946:3), area di tocco 44 px */
+@media (max-width: 767px) {
+	.hv2-hero__ghost {
+		min-height: 44px;
+		padding: 10px 24px;
+		border-color: transparent;
+		background: none;
+		text-decoration: underline;
+		text-underline-offset: 4px;
+	}
+}
+
+/* Manifesto: alone menta dietro il timbro (Figma 7903:7379), in proporzione al timbro (520 px su 300) */
+.hv2-man__stamp::before {
+	content: '';
+	position: absolute;
+	z-index: -1;
+	left: 50%;
+	top: 50%;
+	width: calc(var(--hvm-stamp) * 1.7333);
+	aspect-ratio: 1;
+	transform: translate(-50%, -50%);
+	background: radial-gradient(closest-side, rgba(55, 178, 153, 0.18), rgba(55, 178, 153, 0));
+	pointer-events: none;
+}
+
+/* Zone, desktop: disco +10% (622 -> 684 px) per dare aria ai marker */
+@media (min-width: 1024px) {
+	.hv2-zones__inner {
+		grid-template-columns: minmax(0, 540px) minmax(0, 684px);
+		column-gap: 24px; /* 540 + 24 + 684 = 1248, la larghezza utile a 1440 */
+	}
+	.hv2-zones__map {
+		max-width: 684px;
 	}
 }

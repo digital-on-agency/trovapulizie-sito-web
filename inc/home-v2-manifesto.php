@@ -37,6 +37,6 @@ function tp_home_v2_manifesto_defaults() {
 		array( 'lead' => 'Niente', 'keyword' => 'sconosciuti.', 'text' => 'Controlliamo documenti e identità di ognuno.', 'proof' => 'Documento verificato', 'icon' => 'spunta' ),
 		array( 'lead' => 'Niente', 'keyword' => 'sorprese.', 'text' => 'Il prezzo lo vedi prima di inviare la richiesta.', 'proof' => 'Esempio: totale 76 € · 4 ore', 'icon' => 'etichetta' ),
 		array( 'lead' => 'Niente', 'keyword' => 'anticipi a vuoto.', 'text' => 'L’addebito parte solo quando il professionista accetta.', 'proof' => 'Addebito dopo l’accettazione', 'icon' => 'carta' ),
-		array( 'lead' => 'Niente', 'keyword' => 'buchi.', 'text' => 'Se chi hai scelto non può, te ne proponiamo un altro.', 'proof' => 'Ti proponiamo un altro professionista, stesse condizioni', 'icon' => 'scambio' ),
+		array( 'lead' => 'Niente', 'keyword' => 'buchi.', 'text' => 'Se chi hai scelto non può, te ne proponiamo un altro.', 'proof' => 'Un altro professionista, stesse condizioni', 'icon' => 'scambio' ),
 	);
 }

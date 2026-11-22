@@ -47,13 +47,13 @@ $hz_pct  = static function ( $x, $y ) {
 };
 // Monumenti (lat/lon proiettati sull'SVG dei CAP) e impulsi delle due zone con etichetta.
 $hz_mon   = array(
-	array( 'san-pietro', 'San Pietro', 'zona-sanpietro.svg', 309, 164, 'sotto' ),
-	array( 'pantheon', 'Pantheon', 'zona-pantheon.svg', 346, 172, 'sopra' ),
-	array( 'colosseo', 'Colosseo', 'zona-colosseo.svg', 372, 191, 'sotto' ),
+	array( 'san-pietro', 'San Pietro', 'zona-sanpietro.svg', 305, 172, 'sotto' ),
+	array( 'pantheon', 'Pantheon', 'zona-pantheon.svg', 342, 184, 'sopra' ),
+	array( 'colosseo', 'Colosseo', 'zona-colosseo.svg', 376, 204, 'sotto' ),
 );
 $hz_pulse = array(
-	array( 'prati', 'Prati', 318, 148, 'sinistra' ),
-	array( 'centro', 'Centro storico', 356, 162, 'destra' ),
+	array( 'prati', 'Prati', 312, 146, 'sinistra' ),
+	array( 'centro', 'Centro storico', 360, 158, 'destra' ),
 );
 $hz_chips   = array();
 $hz_featured = array( '00186', '00192', '00183', '00153', '00184', '00196' );
@@ -122,7 +122,7 @@ $hz_img   = static function ( $f ) {
 					<?php endforeach; ?>
 					<?php foreach ( $hz_mon as $mo ) : ?>
 						<?php list( $mx, $my ) = $hz_pct( $mo[3], $mo[4] ); ?>
-						<span class="hv2-zones__mon hv2-zones__mon--<?php echo esc_attr( $mo[0] ); ?>" style="left: <?php echo esc_attr( $mx ); ?>%; top: <?php echo esc_attr( $my ); ?>%"><img src="<?php echo esc_url( $hz_img( $mo[2] ) ); ?>" alt="" width="75" height="75" decoding="async"><em class="hv2-zones__mon-label hv2-zones__mon-label--<?php echo esc_attr( $mo[5] ); ?>"><?php echo esc_html( $mo[1] ); ?></em></span>
+						<span class="hv2-zones__mon hv2-zones__mon--<?php echo esc_attr( $mo[0] ); ?>" style="left: <?php echo esc_attr( $mx ); ?>%; top: <?php echo esc_attr( $my ); ?>%"><img src="<?php echo esc_url( $hz_img( $mo[2] ) ); ?>" alt="" title="<?php echo esc_attr( $mo[1] ); ?>" width="75" height="75" decoding="async"></span>
 					<?php endforeach; ?>
 				</div>
 				<span class="hv2-zones__ring hv2-zones__ring--1"></span>

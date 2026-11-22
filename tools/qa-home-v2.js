@@ -96,6 +96,7 @@
    un link senza posizione e non verso app/WhatsApp non emette niente; tpTrackConfig.ctaAnywhere e' vero sull'anteprima.
    Il click e' reale (dispatchEvent su un click intercettato in coda con preventDefault: nessuna navigazione).
 
+   Gruppo "giro4" (revisione UI/UX giro 4, tema 0.82.0), a 1440 e 390: titolo FAQ su due righe, velo Aziende, anello hero dentro lo schermo, chip dei servizi a scorrimento sotto 768, alone del timbro, etichette delle zone, footer.
    Gruppo "giro2" (revisione UI/UX giro 2, tema 0.80.1), da lanciare a 1440, 768 e 390 (e 360): etichette dei servizi #062A22 peso 700
    senza ombra e riquadro col gradiente chiaro; velo dal basso su .hv2-steps__shade; CAP non servito con la frase intera e il
    link WhatsApp con testo precompilato "Ciao, il mio CAP e' <CAP>: quando arrivate da me?" (codificato) e lo stesso numero di
@@ -549,7 +550,7 @@ async function checkServiziBrowser() {
 		if (width <= 430) check('servizi: riquadro 358 px e icone 61,7 px a ' + width + ' px (letto ' + m.panel.w + ' e ' + m.tiles[0] + ')', Math.abs(m.panel.w - 358) <= 1 && m.tiles.every(t => Math.abs(t - 61.7) <= 1), JSON.stringify(m));
 		// La sezione e' piu' alta del Figma (607 e 818) perche' i chip portano gli anchor SEO di tp_service_pages(), piu' lunghi
 		// delle etichette del disegno: si misura il riquadro (460,8 px desktop, 264,7 mobile), non la sezione.
-		if (width >= 1440) check('servizi: riquadro alto ~388,8 px (84%, letto ' + m.panel.h + ')', Math.abs(m.panel.h - 388.8) <= 2, JSON.stringify(m.panel));
+		if (width >= 1440) check('servizi: riquadro alto almeno 388,8 px (84%, minimo 28,8em dal giro 3, altezza libera; letto ' + m.panel.h + ')', m.panel.h >= 388 && m.panel.h <= 460, JSON.stringify(m.panel));
 		if (width <= 430) check('servizi: riquadro alto ~268,5 px (letto ' + m.panel.h + ')', Math.abs(m.panel.h - 268.5) <= 3, JSON.stringify(m.panel));
 		check('servizi: nessuno scroll orizzontale', m.sw <= m.cw, m.sw + ' > ' + m.cw);
 		check('servizi: il riquadro e\' entrato (opacita\' 1 dopo il reveal)', m.op === '1', m.op);
@@ -686,7 +687,7 @@ const MANIFESTO = [
 	['Niente', 'sconosciuti.', 'Controlliamo documenti e identità di ognuno.', 'Documento verificato'],
 	['Niente', 'sorprese.', 'Il prezzo lo vedi prima di inviare la richiesta.', 'Esempio: totale 76 € · 4 ore'],
 	['Niente', 'anticipi a vuoto.', 'L’addebito parte solo quando il professionista accetta.', 'Addebito dopo l’accettazione'],
-	['Niente', 'buchi.', 'Se chi hai scelto non può, te ne proponiamo un altro.', 'Ti proponiamo un altro professionista, stesse condizioni'],
+	['Niente', 'buchi.', 'Se chi hai scelto non può, te ne proponiamo un altro.', 'Un altro professionista, stesse condizioni'],
 ];
 const dec = t => t.replace(/&#0?39;|&#8217;|&rsquo;/g, '’').replace(/&amp;/g, '&').replace(/&#8364;/g, '€').replace(/&euro;/g, '€').replace(/&middot;|&#183;/g, '·').replace(/&nbsp;/g, ' ');
 async function checkManifesto() {
@@ -914,7 +915,7 @@ async function checkGiro1() {
 			const stamp = q('.hv2-man__stamp'), mt = q('.hv2-man__title'), rg = document.createRange(); if (mt) rg.selectNodeContents(mt);
 			return JSON.stringify({ logo: L(q('.navbar__brand')), lefts, niente: cs(q('.hv2-man__lead')).color, eyebrow: cs(q('.hv2-services__eyebrow')).color, btn: cs(q('.hv2-hero__cta')).backgroundColor,
 				minFont: Math.min(...tiny), nomiUnaRiga: names.every(Boolean), summaryH: Math.round(R(sum).height), summaryTxt: sum && sum.textContent.trim(), chevron: sum && getComputedStyle(sum, '::after').content, labelZone: (q('.hv2-zones__list-label') || {}).textContent,
-				dots, ctaH: Math.round(R(cta).height), ghostH: Math.round(R(ghost).height), primH: Math.round(R(prim).height), ghostBorder: ghost && cs(ghost).borderTopWidth, faqH: Math.round(R(fq).height),
+				dots, ctaH: Math.round(R(cta).height), ghostH: Math.round(R(ghost).height), primH: Math.round(R(prim).height), ghostBorder: ghost && cs(ghost).borderTopWidth, ghostBc: ghost && cs(ghost).borderTopColor, ghostTd: ghost && cs(ghost).textDecorationLine, faqH: Math.round(R(fq).height),
 				stampLeft: stamp ? Math.round(stamp.getBoundingClientRect().left) : 0, stampTop: stamp ? Math.round(stamp.getBoundingClientRect().top) : 0, stampDisp: stamp ? cs(stamp).display : '', titleRight: mt ? Math.round(rg.getBoundingClientRect().right) : 0, titleTop: mt ? Math.round(mt.getBoundingClientRect().top) : 0,
 				subSteps: (q('.hv2-steps__subtitle--desktop') || {}).textContent, subStepsM: (q('.hv2-steps__subtitle--mobile') || {}).textContent, footTitle: (q('.site-footer-v2__b2b-title, .site-footer-v2__b2b h3, .site-footer-v2__b2b p') || {}).textContent,
 				faqRisposta: (qa('.faq--v2 .faq__a-inner p').find(p => /altro/.test(p.textContent)) || {}).textContent, navApp: (q('.navbar__app') || {}).textContent,
@@ -934,7 +935,8 @@ async function checkGiro1() {
 		eq('font: sei file Poppins self-hosted, nessuna richiesta a Google Fonts', reqs.filter(u => /poppins-latin-\d+\.woff2/.test(u)).length >= 2 && !reqs.some(u => /fonts\.(googleapis|gstatic)\.com/.test(u)), reqs.filter(u => /font/.test(u)).join(' '));
 		if (width < 1024) {
 			eq('aree di tocco 44: link servizi, riepilogo quartieri, pallini', i.ctaH >= 44 && i.summaryH >= 44 && i.dots.every(d => d[0] >= 44 && d[1] >= 44), JSON.stringify([i.ctaH, i.summaryH, i.dots]));
-			eq('hero mobile: "Come funziona" con bordo e alto come il primario (' + i.ghostH + ' / ' + i.primH + ')', i.ghostBorder === '1px' && Math.abs(i.ghostH - i.primH) <= 2, JSON.stringify([i.ghostBorder, i.ghostH, i.primH]));
+			if (width < 768) eq('hero mobile: "Come funziona" link di testo sottolineato, senza bordo visibile, area di tocco almeno 44 px (giro 4, voce 11) (' + i.ghostH + ')', i.ghostBc === 'rgba(0, 0, 0, 0)' && i.ghostTd === 'underline' && i.ghostH >= 44 && i.ghostH < i.primH, JSON.stringify([i.ghostBc, i.ghostTd, i.ghostH, i.primH]));
+			else eq('hero tablet: "Come funziona" con bordo e alto come il primario (' + i.ghostH + ' / ' + i.primH + ')', i.ghostBorder === '1px' && Math.abs(i.ghostH - i.primH) <= 2, JSON.stringify([i.ghostBorder, i.ghostH, i.primH]));
 			const lock = JSON.parse(await ev(`(async () => { const b = document.getElementById('nav-burger'); b.click(); await new Promise(r => setTimeout(r, 200)); const a = getComputedStyle(document.documentElement).overflow; b.click(); await new Promise(r => setTimeout(r, 200)); return JSON.stringify({ aperto: a, chiuso: getComputedStyle(document.documentElement).overflow }); })()`));
 			eq('menu mobile aperto: la pagina non scorre, chiuso torna a scorrere', lock.aperto === 'hidden' && lock.chiuso !== 'hidden', JSON.stringify(lock));
 			if (width < 400) eq('manifesto: il sigillo non tocca il titolo (sigillo da x ' + i.stampLeft + ', titolo fino a x ' + i.titleRight + ')', i.stampLeft >= i.titleRight || i.stampTop + 90 <= i.titleTop, JSON.stringify([i.stampLeft, i.titleRight, i.stampTop, i.titleTop]));
@@ -942,6 +944,59 @@ async function checkGiro1() {
 	});
 }
 
+
+/* Gruppo giro4 (revisione UI/UX giro 4, tema 0.82.0). Da lanciare a 1440 e 390. */
+async function checkGiro4() {
+	await withChrome(bin, 'about:blank', { port: 9567, width, height: 900, mobile: width < 1024, profile: '/tmp/cdp-profile-home-v2-giro4', args: ['--blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4'] }, async ({ send, ev, sleep }) => {
+		await send('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'reduce' }] });
+		await send('Page.navigate', { url });
+		await sleep(3500);
+		await ev('document.querySelector("#tp-consent")&&(document.querySelector("#tp-consent").style.display="none")');
+		const eq = (n, ok, d) => check('giro4: ' + n, ok, d);
+		const wide = width >= 1024, mob = width < 768;
+		const i = JSON.parse(await ev(`(async () => {
+			const q = s => document.querySelector(s), qa = s => [...document.querySelectorAll(s)], cs = e => getComputedStyle(e);
+			const lines = e => Math.round(e.getBoundingClientRect().height / parseFloat(cs(e).lineHeight));
+			const ft = q('.faq--v2 .faq__title'), ey = q('.hv2-services__eyebrow'), ph = q('.hv2-b2b__photo'), lk = q('.hv2-b2b__link');
+			const orb = q('.hv2-hero__orbit'), disc = q('.hv2-hero__disc'); const ob = orb.getBoundingClientRect(), db = disc.getBoundingClientRect();
+			const ch = q('.hv2-services__chips'); const last = ch.querySelector('li:last-child a');
+			last.focus(); await new Promise(r => setTimeout(r, 600));
+			const lr = last.getBoundingClientRect();
+			const stamp = q('.hv2-man__stamp'); const halo = getComputedStyle(stamp, '::before');
+			const proof = qa('.hv2-man__proof'); const svc = q('.site-footer-v2__services .site-footer-v2__links a');
+			const tags = qa('.hv2-zones__tag').map(e => parseFloat(cs(e).fontSize));
+			const stroke = cs(q('.hv2-zones__svg path[data-state="active"]'));
+			return JSON.stringify({
+				faq: { lines: lines(ft), fw: cs(ft).fontWeight, fs: cs(ft).fontSize, lh: cs(ft).lineHeight, ls: cs(ft).letterSpacing, wrap: cs(ft).textWrap },
+				ey: { fw: cs(ey).fontWeight, ls: cs(ey).letterSpacing },
+				veil: getComputedStyle(q('.hv2-b2b__photo'), '::after').backgroundImage, link: { c: cs(lk).color, td: cs(lk).textDecorationLine, sh: cs(lk).textShadow },
+				orbit: { cx: ob.left + ob.width / 2, dcx: db.left + db.width / 2, cy: ob.top + ob.height / 2 + scrollY, dcy: db.top + db.height / 2 + scrollY, outer: ob.width * 0.4373 * 2, vw: innerWidth },
+				chips: { scroll: ch.scrollWidth > ch.clientWidth + 1, ox: cs(ch).overflowX, snap: cs(ch).scrollSnapType, mask: cs(ch).webkitMaskImage || cs(ch).maskImage, lastVisible: lr.right <= innerWidth + 1 && lr.left >= 0, sl: Math.round(ch.scrollLeft), h: Math.round(ch.getBoundingClientRect().height), rows: Math.round(ch.getBoundingClientRect().height / 45) },
+				halo: { w: parseFloat(halo.width), bg: halo.backgroundImage.slice(0, 40), z: halo.zIndex }, stampOw: stamp.offsetWidth,
+				proofH: proof.map(e => e.getBoundingClientRect().height), proofTxt: proof.map(e => e.textContent.trim()),
+				monLabels: qa('.hv2-zones__mon-label').length, tags: tags, tagTxt: qa('.hv2-zones__tag').map(e => e.textContent), titles: qa('.hv2-zones__mon img').map(e => e.title),
+				stroke: { c: stroke.stroke, w: stroke.strokeWidth }, disc: Math.round(q('.hv2-zones__disc').getBoundingClientRect().width),
+				svc: { fs: cs(svc).fontSize, c: cs(svc).color, n: qa('.site-footer-v2__services .site-footer-v2__links a').length }, ref: cs(q('.site-footer-v2__links:not(.x) a')).color,
+				ctaOv: cs(q('.hv2-cta')).overflowY, social: qa('.site-footer-v2__social').length
+			});
+		})()`));
+		eq('FAQ: titolo 48/52 peso 800 su due righe, text-wrap balance, interlinea -0,02em (da 1024); 40/42 sotto', wide ? (i.faq.lines === 2 && i.faq.fs === '48px' && i.faq.lh === '52px' && i.faq.wrap === 'balance') : (i.faq.fs === '40px' && i.faq.lh === '42px'), JSON.stringify(i.faq));
+		eq('FAQ: peso 800', i.faq.fw === '800', i.faq.fw);
+		eq('Servizi: eyebrow peso 700 con letter-spacing', i.ey.fw === '700' && parseFloat(i.ey.ls) > 1, JSON.stringify(i.ey));
+		if (wide) eq('Aziende: velo da destra piu\' leggero (.94, .88, .46)', /0\.94/.test(i.veil) && /0\.88/.test(i.veil) && /0\.46/.test(i.veil), i.veil);
+		eq('Aziende: link bianco sottolineato con text-shadow', i.link.c === 'rgb(255, 255, 255)' && i.link.td === 'underline' && i.link.sh !== 'none', JSON.stringify(i.link));
+		if (width < 1024) eq('hero: anello interamente dentro lo schermo (ingombro ' + Math.round(i.orbit.outer) + ' su ' + i.orbit.vw + '), centrato sul disco', Math.abs(i.orbit.cx - i.orbit.dcx) <= 1 && Math.abs(i.orbit.cy - i.orbit.dcy) <= 1 && i.orbit.outer <= i.orbit.vw - 28 + 2, JSON.stringify(i.orbit));
+		if (mob) eq('Servizi: chip in una riga a scorrimento, snap, maschera, ultimo chip raggiungibile col focus', i.chips.scroll && i.chips.ox === 'auto' && /x/.test(i.chips.snap) && /gradient/.test(i.chips.mask) && i.chips.lastVisible && i.chips.sl > 0 && i.chips.rows <= 2, JSON.stringify(i.chips));
+		else if (width >= 1440) eq('Servizi: chip desktop in al massimo 3 righe nella colonna da 560', i.chips.h < 160, JSON.stringify(i.chips));
+		eq('Manifesto: alone menta dietro il timbro (1,73 volte il timbro)', Math.abs(i.halo.w / i.stampOw - 1.7333) < 0.02 && /radial-gradient/.test(i.halo.bg) && i.halo.z === '-1', JSON.stringify([i.halo, i.stampOw]));
+		eq('Manifesto: chip "Un altro professionista, stesse condizioni" su una riga', i.proofTxt.includes('Un altro professionista, stesse condizioni') && (!mob || i.proofH.every(h => h < 50)), JSON.stringify([i.proofTxt, i.proofH]));
+		eq('Zone: etichette solo Prati e Centro storico (nessuna etichetta dei monumenti, titoli sulle icone), testi almeno 12 px', i.monLabels === 0 && JSON.stringify(i.tagTxt) === JSON.stringify(['Prati', 'Centro storico']) && i.titles.length === 3 && i.tags.every(f => f >= 12), JSON.stringify([i.monLabels, i.tagTxt, i.titles, i.tags]));
+		eq('Zone: bordi dei quartieri attivi bianchi al 45% e 0,6', /rgba\(255, 255, 255, 0\.45\)/.test(i.stroke.c) && parseFloat(i.stroke.w) === 0.6, JSON.stringify(i.stroke));
+		if (width >= 1440) eq('Zone: disco circa 684 px (+10%, a 1440)', Math.abs(i.disc - 684) <= 2, String(i.disc));
+		eq('Footer: "Servizi a Roma" con link da 15 px come le altre colonne, nessuna icona social', i.svc.fs === '15px' && i.svc.c === i.ref && i.svc.n >= 1 && i.social === 0, JSON.stringify([i.svc, i.ref, i.social]));
+		eq('Chiusura: nessuna luce oltre il bordo (overflow-y clip)', i.ctaOv === 'clip', i.ctaOv);
+	});
+}
 
 /* Gruppo giro2 (revisione UI/UX giro 2, tema 0.80.1). Da lanciare a 1440, 768, 390 e 360. */
 async function checkGiro2() {
@@ -986,7 +1041,8 @@ async function checkGiro2() {
 		})()`));
 		eq('servizi: etichette #062A22, peso 700, senza ombra', i.nameC.every(c => c === 'rgb(6, 42, 34)') && i.nameW.every(w => w === '700') && i.nameS.every(t => t === 'none'), JSON.stringify([i.nameC[0], i.nameW[0], i.nameS[0]]));
 		eq('servizi: riquadro col gradiente #37B299 -> #31A58E', /rgb\(55, 178, 153\)/.test(i.panelBg) && /rgb\(49, 165, 142\)/.test(i.panelBg), i.panelBg);
-		eq('come funziona: velo dal basso (due gradienti sul velo, il primo a 0deg)', (i.shade.match(/linear-gradient/g) || []).length === 2 && /^linear-gradient\(0deg/.test(i.shade), i.shade);
+		if (wide) eq('come funziona: da 1024 px solo la diagonale del Figma, nessun velo dal basso (giro 4, voce 4)', (i.shade.match(/linear-gradient/g) || []).length === 1 && /^linear-gradient\(160\.58deg/.test(i.shade), i.shade);
+		else eq('come funziona: sotto 1024 px velo dal basso .55 su 55% piu\' la diagonale (giro 4, voce 4)', (i.shade.match(/linear-gradient/g) || []).length === 2 && /^linear-gradient\(0deg, rgba\(6, 42, 34, 0\.55\) 0(?:px|%), rgba\(6, 42, 34, 0\) 55%\)/.test(i.shade), i.shade);
 		eq('come funziona: sottotitolo del passo 3 "Scegli giorno e ora, in due tocchi. Il professionista conferma."', i.step3 === 'Scegli giorno e ora, in due tocchi. Il professionista conferma.', String(i.step3));
 		eq('come funziona: titolo con spazio non separabile in "due minuti."', i.stepsTitle === 'Spoiler: due minuti.', JSON.stringify(i.stepsTitle));
 		eq('come funziona: badge "N di 4" a 12 px', i.badgeFs === '12px', i.badgeFs);
@@ -1058,7 +1114,7 @@ async function checkGiro2() {
 }
 
 (async () => {
-	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona', 'chiusura', 'aziende', 'faq', 'tracking', 'giro1', 'giro2'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
+	if (!['base', 'hero', 'frasi', 'servizi', 'manifesto', 'come-funziona', 'chiusura', 'aziende', 'faq', 'tracking', 'giro1', 'giro2', 'giro4'].includes(gruppo)) { console.error('Gruppo sconosciuto: ' + gruppo); process.exit(2); }
 	if (gruppo === 'hero') {
 		const h = await checkHero();
 		if (h) await checkHeroBrowser(h.pre);
@@ -1078,6 +1134,8 @@ async function checkGiro2() {
 		await checkGiro1();
 	} else if (gruppo === 'giro2') {
 		await checkGiro2();
+	} else if (gruppo === 'giro4') {
+		await checkGiro4();
 	} else if (gruppo === 'tracking') {
 		await checkTracking();
 	} else if (gruppo === 'come-funziona') {
