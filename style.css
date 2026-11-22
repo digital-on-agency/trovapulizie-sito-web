@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.81.3
+Version: 0.81.4
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -15296,5 +15296,53 @@ html.tp-reveal .hv2 .hv2-cta__stage:not(.is-in) .hv2-cta__tent {
 	.hv2-zones__more summary:hover {
 		text-decoration: underline;
 		text-underline-offset: 3px;
+	}
+}
+
+/* =========================
+   22/11 (Guido): scorrimento morbido dei link interni della Home v2 e schede di Come funziona alte quanto lo schermo.
+   ========================= */
+/* "Come funziona" della hero (e ogni ancora interna della pagina): scorrimento morbido, statico con riduci movimento.
+   La sezione atterra sotto la barra fissa. */
+html:has(main.hv2) {
+	scroll-behavior: smooth;
+}
+@media (prefers-reduced-motion: reduce) {
+	html:has(main.hv2) {
+		scroll-behavior: auto;
+	}
+}
+main.hv2 #come-funziona {
+	scroll-margin-top: var(--tp-navbar-h);
+}
+/* Da desktop ogni scheda occupa lo schermo sotto la barra (resta lo spazio della pila: 24 sopra + 3 x 16 di sfalsamento +
+   24 sotto). Il telefono cresce con la scheda e mantiene le proporzioni del Figma (440 px di scheda = telefono da 201). */
+@media (min-width: 1024px) {
+	.hv2-steps {
+		--hv2-card-h: max(440px, calc(100vh - var(--tp-navbar-h) - 96px));
+		--hv2-card-h: max(440px, calc(100svh - var(--tp-navbar-h) - 96px));
+	}
+	.hv2-steps__card {
+		height: var(--hv2-card-h);
+		padding: 40px 48px;
+	}
+	.hv2-steps__phone {
+		left: calc(var(--hv2-card-h) * 0.22);
+		top: calc(var(--hv2-card-h) * 0.18);
+		width: calc(var(--hv2-card-h) * 0.457);
+		border-radius: calc(var(--hv2-card-h) * 0.073) calc(var(--hv2-card-h) * 0.073) 0 0;
+	}
+	.hv2-steps__screen {
+		border-radius: calc(var(--hv2-card-h) * 0.0585) calc(var(--hv2-card-h) * 0.0585) 0 0;
+	}
+	.hv2-steps__island {
+		left: 50%;
+		width: 30%;
+		height: auto;
+		aspect-ratio: 60 / 17;
+		transform: translateX(-50%);
+	}
+	.hv2-steps__text {
+		font-size: 19px;
 	}
 }
