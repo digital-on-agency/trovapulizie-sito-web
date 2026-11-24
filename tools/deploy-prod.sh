@@ -8,7 +8,7 @@ BASE="${1:?commit base}"
 KEY=/home/guido/.ssh/hostinger_mfm; PORT=65002; HOST=u528603797@76.13.12.182
 D='domains/trovapulizie.it/public_html/wp-content/themes/trovapulizie'
 cd "$(dirname "$0")/.."
-FILES=$(git diff --name-only "$BASE"..HEAD | grep -v -E '^(tools|docs)/' | tr '\n' ' ')  # tools/ e docs/ non vanno sul server
+FILES=$(git diff --name-only --diff-filter=d "$BASE"..HEAD | grep -v -E '^(tools|docs)/' | tr '\n' ' ')  # tools/ e docs/ non vanno sul server
 [ -n "$FILES" ] || { echo "nessun file da copiare"; exit 0; }
 echo "file: $(echo $FILES | wc -w)"
 TGZ=$(mktemp /tmp/tp-deploy.XXXXXX.tgz)
