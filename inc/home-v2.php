@@ -120,14 +120,15 @@ add_filter( 'wp_sitemaps_posts_query_args', function ( $args, $post_type ) {
 /* ---- Script per template ----------------------------------------------------------------------------------- */
 
 /* Ingressi (reveal), fisarmonica delle FAQ, pausa dei loop fuori schermo (tp-loops, TICKET-121), carosello (tp-carousel) e
-   pila delle schede di Come funziona (home-steps-stack, TICKET-122) e movimento della hero (home-v2-motion: pausa del testo
+   pila delle schede di Come funziona (home-steps-stack, TICKET-122; da 1024 px la sostituisce il telefono fermo col video
+   legato allo scroll, home-steps-scrub) e movimento della hero (home-v2-motion: pausa del testo
    circolare, parallasse, ken burns della foto aziende e scritta del footer da desktop con GSAP pigro, TICKET-129). Niente
    Three.js (nessun importmap); GSAP lo carica home-v2-motion.js da cdnjs, solo da 1024 px e con movimento consentito. */
 add_action( 'wp_enqueue_scripts', function () {
 	if ( ! is_page_template( 'page-home-v2.php' ) ) {
 		return;
 	}
-	foreach ( array( 'reveal', 'faq-accordion', 'tp-loops', 'tp-carousel', 'home-steps-stack', 'home-v2-motion' ) as $handle ) {
+	foreach ( array( 'reveal', 'faq-accordion', 'tp-loops', 'tp-carousel', 'home-steps-stack', 'home-steps-scrub', 'home-v2-motion' ) as $handle ) {
 		wp_enqueue_script( 'trovapulizie-' . $handle, get_stylesheet_directory_uri() . '/assets/js/' . $handle . '.js', array(), tp_theme_version(), array( 'strategy' => 'defer', 'in_footer' => true ) );
 	}
 } );

@@ -141,6 +141,42 @@ $hv2c_title = preg_replace( '/\s+(\S+)$/u', "\u{00A0}\$1", $hv2c_title );
 			<p class="hv2-steps__subtitle hv2-steps__subtitle--mobile"><?php echo esc_html( $hv2c_pick( $args['subtitle_mobile'], 'Quattro passi. L’ultimo lo fai sul divano.' ) ); ?></p>
 		</div>
 		<?php
+		// Telefono fermo con il video della prenotazione legato allo scroll (da 1024 px, movimento consentito): resta
+		// display:none finche' home-steps-scrub.js non mette .hv2-scrub-on su <html>; in quel caso sparisce il carosello.
+		// Tempi d'inizio dei passi sul video (assets/js/screen-timeline.js): con quattro passi seguono il copione del
+		// video, con un numero diverso il video si divide in parti uguali.
+		$hv2c_starts = 4 === $hv2c_total ? array( 0, 4.0, 8.0, 9.9 ) : array_map( static function ( $i ) use ( $hv2c_total ) {
+			return round( 12.6 * $i / $hv2c_total, 2 );
+		}, array_keys( $hv2c_rows ) );
+		?>
+		<div class="hv2-scrub" data-hv2-scrub>
+			<div class="hv2-scrub__stage">
+				<ol class="hv2-scrub__steps">
+					<?php foreach ( $hv2c_rows as $hv2c_i => $hv2c_r ) : ?>
+						<li class="hv2-scrub__step" data-t="<?php echo esc_attr( $hv2c_starts[ $hv2c_i ] ); ?>">
+							<span class="hv2-scrub__num" aria-hidden="true"><?php echo (int) ( $hv2c_i + 1 ); ?></span>
+							<span class="hv2-scrub__copy">
+								<span class="hv2-scrub__title"><?php echo esc_html( $hv2c_r['title'] ); ?></span>
+								<?php if ( '' !== $hv2c_r['text'] ) : ?>
+									<span class="hv2-scrub__text"><?php echo esc_html( $hv2c_r['text'] ); ?></span>
+								<?php endif; ?>
+							</span>
+						</li>
+					<?php endforeach; ?>
+				</ol>
+				<div class="hv2-scrub__device" aria-hidden="true">
+					<?php
+					get_template_part( 'template-parts/phone-mockup', null, array(
+						'video'  => tp_theme_asset( 'assets/video/come-funziona.mp4' ),
+						'poster' => tp_theme_asset( 'assets/img/come-funziona-hero-poster.jpg' ),
+						'lazy'   => true,
+						'class'  => 'hv2-scrub__phone',
+					) );
+					?>
+				</div>
+			</div>
+		</div>
+		<?php
 		get_template_part( 'template-parts/tp-carousel', null, array(
 			'slides'     => $hv2c_slides,
 			'label'      => 'I passi per prenotare',
