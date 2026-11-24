@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.84.1
+Version: 0.84.2
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -15398,6 +15398,16 @@ main.hv2 #come-funziona {
 	}
 	.hv2-steps__phone--pin .hv2-steps__screen {
 		position: relative;
+		border-radius: calc(var(--hv2-card-h) * 0.0585);
+	}
+	/* Il telefono fermo e' intero, con cornice e angoli anche in basso: tagliato dal bordo della scheda sembrava troncato
+	   quando le schede gli scorrono sotto. Larghezza ridotta perche' stia nella scheda con un margine sotto. */
+	.hv2-steps--pin .hv2-steps__phone--pin {
+		top: calc(var(--hv2-card-h) * 0.15);
+		bottom: auto;
+		width: calc(var(--hv2-card-h) * 0.42);
+		padding: calc(var(--hv2-card-h) * 0.0146);
+		border-radius: calc(var(--hv2-card-h) * 0.073);
 	}
 	.hv2-steps__pinshot {
 		display: block;

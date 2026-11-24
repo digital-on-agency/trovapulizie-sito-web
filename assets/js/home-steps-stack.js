@@ -59,6 +59,8 @@
 				cut = Math.max(0, Math.min(1, cut));
 				if (reduce.matches) cut = cut < 0.5 ? 0 : 1;
 				shots[i + 1].style.transform = 'translateY(' + (cut * 100).toFixed(2) + '%)';
+				// ferma sotto lo schermo, la schermata non deve lasciare l'ombra sul fondo
+				shots[i + 1].style.visibility = cut >= 1 ? 'hidden' : '';
 				if (cr) {
 					var top = cards[i + 1].getBoundingClientRect().top;
 					if (top <= cr.top + cr.height / 2) step = i + 2;
