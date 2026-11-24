@@ -28,7 +28,8 @@
  *
  * Immagini: WebP in assets/img/home-v2/step-N-bg.webp (foto a tutta scheda, con la variante -720 per il mobile) e
  * step-N-screen.webp (schermata dell'app ritagliata come nel Figma, 376 px = 2x) e step-N-screen-full.webp (la stessa schermata
- * intera con la barra in basso, 520x1125, per il telefono fermo da 1024 px), con width e height e loading="lazy"; `sizes` esplicito (da WordPress
+ * intera con la barra in basso, 520x1125, per il telefono fermo da 1024 px; il passo 4 e' -v2, con i margini
+ * bilanciati: la CDN di Hostinger tiene l'immagine vecchia se il nome non cambia), con width e height e loading="lazy"; `sizes` esplicito (da WordPress
  * 6.7 un `auto` davanti ridurrebbe la rendition scelta su un'immagine ritagliata con object-fit).
  * Il telefono e' disegnato in CSS (cornice, isola, angoli); la schermata e' un'immagine estratta dal Figma, ritagliata
  * dove il disegno la ritaglia (la scheda taglia il telefono in basso).
@@ -82,7 +83,7 @@ if ( $hv2c_in ) {
 			'bg_h'   => '' !== $bg ? 0 : ( $d ? $d['bg_h'] : 0 ),
 			'screen' => '' !== $sc ? $sc : ( $d ? $hv2c_img( 'step-' . ( $i + 1 ) . '-screen.webp' ) : '' ),
 			// una schermata propria da Carbon vale anche per il telefono fermo; altrimenti la versione intera del passo
-			'screen_full' => '' !== $sc ? $sc : ( $d ? $hv2c_img( 'step-' . ( $i + 1 ) . '-screen-full.webp' ) : '' ),
+			'screen_full' => '' !== $sc ? $sc : ( $d ? $hv2c_img( 'step-' . ( $i + 1 ) . ( 3 === $i ? '-screen-full-v2.webp' : '-screen-full.webp' ) ) : '' ),
 			'alt'    => $d ? $d['alt'] : '',
 		);
 	}
@@ -96,7 +97,7 @@ if ( $hv2c_in ) {
 			'bg_w'   => $d['bg_w'],
 			'bg_h'   => $d['bg_h'],
 			'screen' => $hv2c_img( 'step-' . ( $i + 1 ) . '-screen.webp' ),
-			'screen_full' => $hv2c_img( 'step-' . ( $i + 1 ) . '-screen-full.webp' ),
+			'screen_full' => $hv2c_img( 'step-' . ( $i + 1 ) . ( 3 === $i ? '-screen-full-v2.webp' : '-screen-full.webp' ) ),
 			'alt'    => $d['alt'],
 		);
 	}
