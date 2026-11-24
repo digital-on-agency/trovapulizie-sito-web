@@ -27,7 +27,8 @@
  *   d'ordine, se esiste; altrimenti la scheda esce senza.
  *
  * Immagini: WebP in assets/img/home-v2/step-N-bg.webp (foto a tutta scheda, con la variante -720 per il mobile) e
- * step-N-screen.webp (schermata dell'app, 376 px = 2x), con width e height e loading="lazy"; `sizes` esplicito (da WordPress
+ * step-N-screen.webp (schermata dell'app ritagliata come nel Figma, 376 px = 2x) e step-N-screen-full.webp (la stessa schermata
+ * intera con la barra in basso, 520x1125, per il telefono fermo da 1024 px), con width e height e loading="lazy"; `sizes` esplicito (da WordPress
  * 6.7 un `auto` davanti ridurrebbe la rendition scelta su un'immagine ritagliata con object-fit).
  * Il telefono e' disegnato in CSS (cornice, isola, angoli); la schermata e' un'immagine estratta dal Figma, ritagliata
  * dove il disegno la ritaglia (la scheda taglia il telefono in basso).
@@ -80,6 +81,8 @@ if ( $hv2c_in ) {
 			'bg_w'   => '' !== $bg ? 0 : ( $d ? $d['bg_w'] : 0 ),
 			'bg_h'   => '' !== $bg ? 0 : ( $d ? $d['bg_h'] : 0 ),
 			'screen' => '' !== $sc ? $sc : ( $d ? $hv2c_img( 'step-' . ( $i + 1 ) . '-screen.webp' ) : '' ),
+			// una schermata propria da Carbon vale anche per il telefono fermo; altrimenti la versione intera del passo
+			'screen_full' => '' !== $sc ? $sc : ( $d ? $hv2c_img( 'step-' . ( $i + 1 ) . '-screen-full.webp' ) : '' ),
 			'alt'    => $d ? $d['alt'] : '',
 		);
 	}
@@ -93,6 +96,7 @@ if ( $hv2c_in ) {
 			'bg_w'   => $d['bg_w'],
 			'bg_h'   => $d['bg_h'],
 			'screen' => $hv2c_img( 'step-' . ( $i + 1 ) . '-screen.webp' ),
+			'screen_full' => $hv2c_img( 'step-' . ( $i + 1 ) . '-screen-full.webp' ),
 			'alt'    => $d['alt'],
 		);
 	}
@@ -144,7 +148,7 @@ $hv2c_title = preg_replace( '/\s+(\S+)$/u', "\u{00A0}\$1", $hv2c_title );
 		// Telefono fermo (24/11, richiesta di Guido): da 1024 px un solo telefono resta fermo sopra la pila delle schede e
 		// cambia schermata mentre le schede scorrono (home-steps-stack.js mette .hv2-steps--pin sulla sezione e dissolve
 		// le schermate con lo scroll, con un contatore "N di M" fermo accanto). Senza JavaScript, sotto 1024 px o prima dello script restano i telefoni dentro le schede.
-		$hv2c_screens = array_values( array_filter( array_column( $hv2c_rows, 'screen' ) ) );
+		$hv2c_screens = array_values( array_filter( array_column( $hv2c_rows, 'screen_full' ) ) );
 		?>
 		<div class="hv2-steps__stack">
 		<?php
@@ -167,7 +171,7 @@ $hv2c_title = preg_replace( '/\s+(\S+)$/u', "\u{00A0}\$1", $hv2c_title );
 					<span class="hv2-steps__phone hv2-steps__phone--pin">
 						<span class="hv2-steps__screen">
 							<?php foreach ( $hv2c_screens as $hv2c_k => $hv2c_src ) : ?>
-								<img class="hv2-steps__pinshot" src="<?php echo esc_url( $hv2c_src ); ?>" alt="" loading="lazy" decoding="async" width="376" height="711" style="--k: <?php echo (int) $hv2c_k; ?>">
+								<img class="hv2-steps__pinshot" src="<?php echo esc_url( $hv2c_src ); ?>" alt="" loading="lazy" decoding="async" width="520" height="1125" style="--k: <?php echo (int) $hv2c_k; ?>">
 							<?php endforeach; ?>
 						</span>
 						<span class="hv2-steps__island"></span>
