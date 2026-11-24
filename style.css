@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.82.2
+Version: 0.83.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -15364,124 +15364,50 @@ main.hv2 #come-funziona {
 	text-shadow: 0 1px 2px rgba(6, 42, 34, 0.35);
 }
 
-/* ---- Come funziona v2: telefono fermo e video legato allo scroll (assets/js/home-steps-scrub.js) ------------------
-   Il blocco .hv2-scrub esce solo con .hv2-scrub-on su <html> (da 1024 px, movimento consentito, JavaScript attivo):
-   in quel caso il carosello delle schede sparisce. Il blocco e' alto 420vh e lo stage resta fermo sotto la barra mentre
-   lo scroll fa avanzare il video; i passi a sinistra seguono il video. Telefono alto quanto lo schermo lo consente. */
-.hv2-scrub {
+/* ---- Come funziona v2: telefono fermo sopra la pila (24/11, richiesta di Guido) -----------------------------------
+   Da 1024 px, con .hv2-steps--pin sulla sezione (lo mette home-steps-stack.js), i telefoni dentro le schede spariscono e
+   ne resta uno solo, in .hv2-steps__pin: un riquadro sticky grande quanto una scheda, sopra la pila, che non si muove
+   mentre le schede gli scorrono sotto. Le schede si fermano tutte alla stessa altezza (niente sfalsamento di 16 px),
+   cosi' il telefono combacia con ogni scheda. Le schermate si dissolvono una nell'altra con lo scroll (opacita' da JS). */
+.hv2-steps__stack {
+	position: relative;
+}
+.hv2-steps__pin {
 	display: none;
 }
 @media (min-width: 1024px) {
-	.hv2-scrub-on .hv2-scrub {
-		display: block;
-		position: relative;
-		height: 420vh;
+	.hv2-steps--pin .hv2-steps__carousel .tp-carousel__slide {
+		top: calc(var(--tp-navbar-h) + 24px);
 	}
-	.hv2-scrub-on .hv2-steps__carousel {
+	.hv2-steps--pin .hv2-steps__card .hv2-steps__phone {
 		display: none;
 	}
-	.hv2-scrub__stage {
-		position: sticky;
-		top: var(--tp-navbar-h);
-		height: calc(100svh - var(--tp-navbar-h));
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
-		align-items: center;
-		column-gap: clamp(48px, 7vw, 128px);
-		max-width: 1100px;
-		margin: 0 auto;
-	}
-	.hv2-scrub__steps {
-		position: relative;
-		margin: 0;
-		padding: 0;
-		list-style: none;
-		display: grid;
-		row-gap: clamp(20px, 3.2vh, 36px);
-	}
-	.hv2-scrub__step {
-		position: relative;
-		display: grid;
-		grid-template-columns: 48px minmax(0, 1fr);
-		column-gap: 24px;
-		align-items: start;
-		opacity: 0.42;
-		transition: opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1);
-	}
-	.hv2-scrub__step.is-active,
-	.hv2-scrub__step.is-done {
-		opacity: 1;
-	}
-	/* Linea fra i numeri: si colora fino al passo in corso */
-	.hv2-scrub__step:not(:last-child)::after {
-		content: '';
+	.hv2-steps--pin .hv2-steps__pin {
+		display: block;
 		position: absolute;
-		left: 23px;
-		top: 56px;
-		bottom: calc(-1 * clamp(20px, 3.2vh, 36px) + 8px);
-		width: 2px;
-		border-radius: 2px;
-		background: rgba(6, 42, 34, 0.12);
+		inset: 0;
+		z-index: 3;
+		pointer-events: none;
 	}
-	.hv2-scrub__step.is-done:not(:last-child)::after {
-		background: var(--tp-v2-green);
+	.hv2-steps__pinbox {
+		position: sticky;
+		top: calc(var(--tp-navbar-h) + 24px);
+		height: var(--hv2-card-h);
+		overflow: hidden;
+		border-radius: 24px;
 	}
-	.hv2-scrub__num {
-		display: grid;
-		place-items: center;
-		width: 48px;
-		height: 48px;
-		border-radius: 50%;
-		font-size: 18px;
-		font-weight: 800;
-		color: var(--tp-v2-ink);
-		background: #fff;
-		box-shadow: inset 0 0 0 2px rgba(6, 42, 34, 0.14);
-		transition: background-color 0.35s ease, color 0.35s ease, box-shadow 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+	.hv2-steps__phone--pin .hv2-steps__screen {
+		position: relative;
 	}
-	.hv2-scrub__step.is-done .hv2-scrub__num {
-		color: #fff;
-		background: var(--tp-v2-green);
-		box-shadow: none;
+	.hv2-steps__pinshot {
+		display: block;
+		width: 100%;
+		height: auto;
 	}
-	.hv2-scrub__step.is-active .hv2-scrub__num {
-		color: #fff;
-		background: var(--tp-v2-green);
-		box-shadow: 0 0 0 8px rgba(55, 178, 153, 0.18);
-		transform: scale(1.06);
-	}
-	.hv2-scrub__copy {
-		display: grid;
-		row-gap: 6px;
-		padding-top: 6px;
-	}
-	.hv2-scrub__title {
-		font-size: clamp(26px, 2.4vw, 34px);
-		font-weight: 800;
-		line-height: 1.15;
-		letter-spacing: -0.01em;
-		color: var(--tp-v2-ink);
-	}
-	.hv2-scrub__text {
-		max-width: 420px;
-		font-size: 17px;
-		font-weight: 500;
-		line-height: 26px;
-		color: #4F6660;
-	}
-	.hv2-scrub__device {
-		display: flex;
-		justify-content: center;
-		filter: drop-shadow(0 32px 48px rgba(0, 20, 15, 0.22));
-	}
-	/* Proporzioni del video (540 x 1170) piu' la cornice: altezza dallo schermo, larghezza ricavata */
-	.hv2-scrub__phone {
-		--tp-phone-h: min(660px, calc(100svh - var(--tp-navbar-h) - 96px));
-		--tp-phone-w: calc(var(--tp-phone-h) * 0.4885);
-		--tp-phone-radius: calc(var(--tp-phone-h) * 0.0855);
-		--tp-phone-screen-radius: calc(var(--tp-phone-h) * 0.069);
-	}
-	.hv2-scrub-on .hv2-steps__inner {
-		padding-bottom: 0;
+	.hv2-steps__pinshot + .hv2-steps__pinshot {
+		position: absolute;
+		left: 0;
+		top: 0;
+		opacity: 0;
 	}
 }

@@ -141,41 +141,12 @@ $hv2c_title = preg_replace( '/\s+(\S+)$/u', "\u{00A0}\$1", $hv2c_title );
 			<p class="hv2-steps__subtitle hv2-steps__subtitle--mobile"><?php echo esc_html( $hv2c_pick( $args['subtitle_mobile'], 'Quattro passi. L’ultimo lo fai sul divano.' ) ); ?></p>
 		</div>
 		<?php
-		// Telefono fermo con il video della prenotazione legato allo scroll (da 1024 px, movimento consentito): resta
-		// display:none finche' home-steps-scrub.js non mette .hv2-scrub-on su <html>; in quel caso sparisce il carosello.
-		// Tempi d'inizio dei passi sul video (assets/js/screen-timeline.js): con quattro passi seguono il copione del
-		// video, con un numero diverso il video si divide in parti uguali.
-		$hv2c_starts = 4 === $hv2c_total ? array( 0, 4.0, 8.0, 9.9 ) : array_map( static function ( $i ) use ( $hv2c_total ) {
-			return round( 12.6 * $i / $hv2c_total, 2 );
-		}, array_keys( $hv2c_rows ) );
+		// Telefono fermo (24/11, richiesta di Guido): da 1024 px un solo telefono resta fermo sopra la pila delle schede e
+		// cambia schermata mentre le schede scorrono (home-steps-stack.js mette .hv2-steps--pin sulla sezione e dissolve
+		// le schermate con lo scroll). Senza JavaScript, sotto 1024 px o prima dello script restano i telefoni dentro le schede.
+		$hv2c_screens = array_values( array_filter( array_column( $hv2c_rows, 'screen' ) ) );
 		?>
-		<div class="hv2-scrub" data-hv2-scrub>
-			<div class="hv2-scrub__stage">
-				<ol class="hv2-scrub__steps">
-					<?php foreach ( $hv2c_rows as $hv2c_i => $hv2c_r ) : ?>
-						<li class="hv2-scrub__step" data-t="<?php echo esc_attr( $hv2c_starts[ $hv2c_i ] ); ?>">
-							<span class="hv2-scrub__num" aria-hidden="true"><?php echo (int) ( $hv2c_i + 1 ); ?></span>
-							<span class="hv2-scrub__copy">
-								<span class="hv2-scrub__title"><?php echo esc_html( $hv2c_r['title'] ); ?></span>
-								<?php if ( '' !== $hv2c_r['text'] ) : ?>
-									<span class="hv2-scrub__text"><?php echo esc_html( $hv2c_r['text'] ); ?></span>
-								<?php endif; ?>
-							</span>
-						</li>
-					<?php endforeach; ?>
-				</ol>
-				<div class="hv2-scrub__device" aria-hidden="true">
-					<?php
-					get_template_part( 'template-parts/phone-mockup', null, array(
-						'video'  => tp_theme_asset( 'assets/video/come-funziona.mp4' ),
-						'poster' => tp_theme_asset( 'assets/img/come-funziona-hero-poster.jpg' ),
-						'lazy'   => true,
-						'class'  => 'hv2-scrub__phone',
-					) );
-					?>
-				</div>
-			</div>
-		</div>
+		<div class="hv2-steps__stack">
 		<?php
 		get_template_part( 'template-parts/tp-carousel', null, array(
 			'slides'     => $hv2c_slides,
@@ -186,6 +157,22 @@ $hv2c_title = preg_replace( '/\s+(\S+)$/u', "\u{00A0}\$1", $hv2c_title );
 			'next_label' => 'Passo successivo',
 		) );
 		?>
+		<?php if ( count( $hv2c_screens ) === $hv2c_total ) : ?>
+			<div class="hv2-steps__pin" aria-hidden="true">
+				<div class="hv2-steps__pinbox">
+					<span class="hv2-steps__phone hv2-steps__phone--pin">
+						<span class="hv2-steps__screen">
+							<?php foreach ( $hv2c_screens as $hv2c_k => $hv2c_src ) : ?>
+								<img class="hv2-steps__pinshot" src="<?php echo esc_url( $hv2c_src ); ?>" alt="" loading="lazy" decoding="async" width="376" height="711" style="--k: <?php echo (int) $hv2c_k; ?>">
+							<?php endforeach; ?>
+						</span>
+						<span class="hv2-steps__island"></span>
+					</span>
+				</div>
+			</div>
+		<?php endif; ?>
+		</div>
+
 		<?php if ( $hv2c_link ) : ?>
 			<p class="hv2-steps__more" data-reveal>
 				<a class="hv2-steps__link" href="<?php echo esc_url( $hv2c_link ); ?>" data-cta-position="steps"><span><?php echo esc_html( $hv2c_pick( $args['link_label'], 'Vedi come funziona nel dettaglio' ) ); ?></span><span aria-hidden="true">→</span></a>

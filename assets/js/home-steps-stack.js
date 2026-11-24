@@ -7,6 +7,8 @@
    la strada fatta dalla scheda successiva fra "ancora in fondo" (a distanza altezza + spazio dalla sua posizione di arresto) e
    "arrivata nella sua posizione di arresto": scala = 1 - 0,04 * progresso, con origine in alto al centro.
    Senza questo script le schede sono impilate lo stesso, senza il rimpicciolimento. Con "riduci movimento" non scala nulla.
+   Telefono fermo (24/11): mette .hv2-steps--pin sulla sezione e regola l'opacita' delle schermate di .hv2-steps__pin
+   (con "riduci movimento" cambio secco a meta' strada invece della dissolvenza).
    Sotto 1024 px (carosello) non fa nulla e toglie la trasformazione. Un solo gestore di scroll con requestAnimationFrame. */
 (function () {
 	'use strict';
@@ -20,20 +22,29 @@
 	var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 	var MIN = 0.96;
 	var raf = 0;
+	// Telefono fermo (24/11): un solo telefono sopra la pila; la schermata del passo i+1 compare mentre la scheda i+1
+	// sale, con la stessa misura di avanzamento che rimpicciolisce la scheda i.
+	var section = root.closest('.hv2-steps');
+	var shots = section ? Array.prototype.slice.call(section.querySelectorAll('.hv2-steps__pinshot')) : [];
+	var pin = shots.length === cards.length;
 
 	function reset() {
 		cards.forEach(function (c) { c.style.transform = ''; });
+		if (section) section.classList.remove('hv2-steps--pin');
 	}
 
 	function update() {
 		raf = 0;
-		if (!wide.matches || reduce.matches) { reset(); return; }
+		if (!wide.matches) { reset(); return; }
+		if (pin) section.classList.add('hv2-steps--pin');
 		for (var i = 0; i < cards.length - 1; i++) {
 			var next = slides[i + 1];
 			var stick = parseFloat(getComputedStyle(next).top) || 0;
 			var travel = next.offsetHeight + 16;
 			var p = 1 - (next.getBoundingClientRect().top - stick) / travel;
 			p = Math.max(0, Math.min(1, p));
+			if (pin) shots[i + 1].style.opacity = (reduce.matches ? (p > 0.5 ? 1 : 0) : p).toFixed(3);
+			if (reduce.matches) { cards[i].style.transform = ''; continue; }
 			cards[i].style.transform = p > 0 ? 'scale(' + (1 - (1 - MIN) * p).toFixed(4) + ')' : '';
 		}
 	}
