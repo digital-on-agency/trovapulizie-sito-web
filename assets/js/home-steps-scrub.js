@@ -2,8 +2,10 @@
  * Come funziona della Home v2: telefono fermo e video della prenotazione legato allo scroll (da 1024 px, movimento
  * consentito). Markup in template-parts/home-steps-v2.php (.hv2-scrub), CSS nel blocco .hv2-scrub di style.css.
  *
- * - Acceso: mette .hv2-scrub-on su <html>; il CSS mostra il blocco alto (sticky) e nasconde il carosello delle schede.
- *   Sotto 1024 px, con "riduci movimento" o senza JavaScript resta il carosello di sempre.
+ * - Acceso da 1024 px: mette .hv2-scrub-on su <html>; il CSS mostra il blocco alto (sticky) e nasconde il carosello delle
+ *   schede. Sotto 1024 px o senza JavaScript resta il carosello di sempre.
+ * - "Riduci movimento": telefono fermo lo stesso, ma lo schermo cambia a scatti, una schermata per passo (inizio del
+ *   passo sul video), senza scorrimento continuo.
  * - Video: data-src -> src solo quando la sezione si avvicina (5 MB, all-intra: ogni fotogramma e' un keyframe).
  * - Fluidita': il tempo del video insegue quello dato dallo scroll con un'interpolazione per fotogramma (niente salti
  *   quando la rotella scatta) e un solo seek alla volta (il successivo parte dopo 'seeked').
@@ -50,8 +52,12 @@
 		raf = 0;
 		if (!on || !inView) return;
 		var t = target();
+		if (mqCalm.matches) {
+			setStep(t);
+			t = starts[active] + 0.6;
+		}
 		var d = t - shown;
-		shown = Math.abs(d) < 0.004 ? t : shown + d * 0.14;
+		shown = Math.abs(d) < 0.004 || mqCalm.matches ? t : shown + d * 0.14;
 		setStep(shown);
 		seek();
 		if (Math.abs(t - shown) > 0.004 || seeking) raf = requestAnimationFrame(frame);
@@ -93,7 +99,8 @@
 		window.removeEventListener('resize', kick);
 	}
 	function update() {
-		if (mqDesk.matches && !mqCalm.matches && 'IntersectionObserver' in window) enable(); else disable();
+		if (mqDesk.matches && 'IntersectionObserver' in window) enable(); else disable();
+		kick();
 	}
 	if (video) {
 		video.addEventListener('seeked', function () { seeking = false; kick(); });
