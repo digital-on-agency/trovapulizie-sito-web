@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.84.2
+Version: 0.84.3
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -15376,6 +15376,12 @@ main.hv2 #come-funziona {
 	display: none;
 }
 @media (min-width: 1024px) {
+	/* Con il telefono fermo le schede si fermano tutte alla stessa altezza: niente sfalsamento da 3 x 16 px da lasciare
+	   libero, quindi la scheda occupa lo schermo sotto la barra meno 24 px sopra e 24 sotto. */
+	.hv2-steps--pin {
+		--hv2-card-h: max(440px, calc(100vh - var(--tp-navbar-h) - 48px));
+		--hv2-card-h: max(440px, calc(100svh - var(--tp-navbar-h) - 48px));
+	}
 	.hv2-steps--pin .hv2-steps__carousel .tp-carousel__slide {
 		top: calc(var(--tp-navbar-h) + 24px);
 	}
@@ -15403,9 +15409,12 @@ main.hv2 #come-funziona {
 	/* Il telefono fermo e' intero, con cornice e angoli anche in basso: tagliato dal bordo della scheda sembrava troncato
 	   quando le schede gli scorrono sotto. Larghezza ridotta perche' stia nella scheda con un margine sotto. */
 	.hv2-steps--pin .hv2-steps__phone--pin {
-		top: calc(var(--hv2-card-h) * 0.15);
+		/* il piu' lungo possibile: parte sotto il contatore e finisce al 4% dal fondo della scheda; la larghezza si ricava
+		   dall'altezza (schermata 376x711, cornice 1,46% dell'altezza della scheda per lato) */
+		--hv2-phone-top: max(calc(var(--hv2-card-h) * 0.13), 80px);
+		top: var(--hv2-phone-top);
 		bottom: auto;
-		width: calc(var(--hv2-card-h) * 0.42);
+		width: calc((var(--hv2-card-h) * 0.9308 - var(--hv2-phone-top)) / 1.891 + var(--hv2-card-h) * 0.0292);
 		padding: calc(var(--hv2-card-h) * 0.0146);
 		border-radius: calc(var(--hv2-card-h) * 0.073);
 	}
