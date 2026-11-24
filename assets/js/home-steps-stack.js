@@ -9,7 +9,8 @@
    Senza questo script le schede sono impilate lo stesso, senza il rimpicciolimento. Con "riduci movimento" non scala nulla.
    Telefono fermo (24/11): mette .hv2-steps--pin sulla sezione e scopre la schermata del passo successivo a tendina, seguendo
    il bordo superiore della scheda che sale sul telefono (niente dissolvenza: due schermate trasparenti si sovrappongono);
-   con "riduci movimento" cambio secco a meta' schermo.
+   con "riduci movimento" cambio secco a meta' schermo. Il contatore fermo (.hv2-steps__pincount) prende il numero della scheda
+   che ha raggiunto la sua altezza; le tacche si riempiono mentre ogni scheda sale nel riquadro.
    Sotto 1024 px (carosello) non fa nulla e toglie la trasformazione. Un solo gestore di scroll con requestAnimationFrame. */
 (function () {
 	'use strict';
@@ -29,6 +30,10 @@
 	var shots = section ? Array.prototype.slice.call(section.querySelectorAll('.hv2-steps__pinshot')) : [];
 	var screen = section ? section.querySelector('.hv2-steps__phone--pin .hv2-steps__screen') : null;
 	var pin = !!screen && shots.length === cards.length;
+	var count = section ? section.querySelector('.hv2-steps__pincount') : null;
+	var num = count ? count.querySelector('.hv2-steps__pinnum') : null;
+	var ticks = count ? Array.prototype.slice.call(count.querySelectorAll('.hv2-steps__ticks i')) : [];
+	var box = section ? section.querySelector('.hv2-steps__pinbox') : null;
 
 	function reset() {
 		cards.forEach(function (c) { c.style.transform = ''; });
@@ -40,6 +45,9 @@
 		if (!wide.matches) { reset(); return; }
 		if (pin) section.classList.add('hv2-steps--pin');
 		var sr = pin ? screen.getBoundingClientRect() : null;
+		var cr = pin && count ? count.getBoundingClientRect() : null;
+		var br = pin && box ? box.getBoundingClientRect() : null;
+		var step = 1;
 		for (var i = 0; i < cards.length - 1; i++) {
 			var next = slides[i + 1];
 			var stick = parseFloat(getComputedStyle(next).top) || 0;
@@ -51,10 +59,17 @@
 				cut = Math.max(0, Math.min(1, cut));
 				if (reduce.matches) cut = cut < 0.5 ? 0 : 1;
 				shots[i + 1].style.clipPath = 'inset(' + (cut * 100).toFixed(2) + '% 0 0 0)';
+				if (cr) {
+					var top = cards[i + 1].getBoundingClientRect().top;
+					if (top <= cr.top + cr.height / 2) step = i + 2;
+					var fill = Math.max(0, Math.min(1, (br.bottom - top) / br.height));
+					if (ticks[i + 1]) ticks[i + 1].style.setProperty('--f', reduce.matches ? (fill < 1 ? 0 : 1) : fill.toFixed(3));
+				}
 			}
 			if (reduce.matches) { cards[i].style.transform = ''; continue; }
 			cards[i].style.transform = p > 0 ? 'scale(' + (1 - (1 - MIN) * p).toFixed(4) + ')' : '';
 		}
+		if (num && cr && num.textContent !== String(step)) num.textContent = step;
 	}
 
 	function schedule() { if (!raf) raf = requestAnimationFrame(update); }

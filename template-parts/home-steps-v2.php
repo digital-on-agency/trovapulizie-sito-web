@@ -143,7 +143,7 @@ $hv2c_title = preg_replace( '/\s+(\S+)$/u', "\u{00A0}\$1", $hv2c_title );
 		<?php
 		// Telefono fermo (24/11, richiesta di Guido): da 1024 px un solo telefono resta fermo sopra la pila delle schede e
 		// cambia schermata mentre le schede scorrono (home-steps-stack.js mette .hv2-steps--pin sulla sezione e dissolve
-		// le schermate con lo scroll). Senza JavaScript, sotto 1024 px o prima dello script restano i telefoni dentro le schede.
+		// le schermate con lo scroll, con un contatore "N di M" fermo accanto). Senza JavaScript, sotto 1024 px o prima dello script restano i telefoni dentro le schede.
 		$hv2c_screens = array_values( array_filter( array_column( $hv2c_rows, 'screen' ) ) );
 		?>
 		<div class="hv2-steps__stack">
@@ -160,6 +160,10 @@ $hv2c_title = preg_replace( '/\s+(\S+)$/u', "\u{00A0}\$1", $hv2c_title );
 		<?php if ( count( $hv2c_screens ) === $hv2c_total ) : ?>
 			<div class="hv2-steps__pin" aria-hidden="true">
 				<div class="hv2-steps__pinbox">
+					<?php // Contatore unico (24/11): sta fermo col telefono al posto di quello delle schede, che il telefono coprirebbe. ?>
+					<span class="hv2-steps__badge hv2-steps__pincount"><span class="hv2-steps__pinnum">1</span> di <?php echo (int) $hv2c_total; ?>
+						<span class="hv2-steps__ticks"><?php echo str_repeat( '<i></i>', $hv2c_total ); ?></span>
+					</span>
 					<span class="hv2-steps__phone hv2-steps__phone--pin">
 						<span class="hv2-steps__screen">
 							<?php foreach ( $hv2c_screens as $hv2c_k => $hv2c_src ) : ?>

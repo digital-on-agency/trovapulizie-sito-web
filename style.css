@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.83.1
+Version: 0.84.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -15409,5 +15409,84 @@ main.hv2 #come-funziona {
 		left: 0;
 		top: 0;
 		clip-path: inset(100% 0 0 0);
+	}
+	/* Contatore fermo col telefono (24/11): quello delle schede finirebbe sotto il telefono mentre la scheda sale. Resta
+	   per gli screen reader (il riquadro fermo e' aria-hidden); a vista lo sostituisce .hv2-steps__pincount, nello stesso
+	   punto della scheda, con una tacca per passo che si riempie mentre la scheda sale. */
+	.hv2-steps--pin .hv2-steps__card .hv2-steps__badge {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+	.hv2-steps--pin .hv2-steps__copy {
+		margin-top: auto;
+	}
+	.hv2-steps__pincount {
+		position: absolute;
+		left: 48px;
+		top: 40px;
+		display: flex;
+		align-items: center;
+		gap: 0.35em;
+	}
+	.hv2-steps__ticks {
+		display: flex;
+		gap: 4px;
+		margin-left: 8px;
+	}
+	.hv2-steps__ticks i {
+		position: relative;
+		width: 16px;
+		height: 4px;
+		overflow: hidden;
+		border-radius: 2px;
+		background: rgba(6, 42, 34, 0.16);
+	}
+	.hv2-steps__ticks i::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background: currentColor;
+		transform: scaleX(var(--f, 0));
+		transform-origin: 0 50%;
+	}
+	.hv2-steps__ticks i:first-child {
+		--f: 1;
+	}
+	/* Sottotitolo sotto il titolo, allineato a sinistra: a destra in fondo restava staccato dal titolo */
+	.hv2-steps__head {
+		display: block;
+	}
+	.hv2-steps__subtitle--desktop {
+		margin-top: 4px;
+	}
+}
+
+/* Telefono delle schede sotto 1024 px un po' piu' grande (da 132 a 152 px), con la scheda alta 440 perche' non tocchi il
+   titolo. La foto del primo passo si sposta a destra: la professionista resta fuori dal telefono. */
+@media (max-width: 767px) {
+	.hv2-steps__card {
+		height: 440px;
+	}
+	.hv2-steps__phone {
+		width: 152px;
+		padding: 4.86px;
+		border-radius: 24px;
+	}
+	.hv2-steps__screen {
+		border-radius: 19.6px;
+	}
+	.hv2-steps__island {
+		left: 53.2px;
+		top: 8.5px;
+		width: 45.6px;
+		height: 12.8px;
+	}
+	.hv2-steps__card[data-step="1"] .hv2-steps__photo {
+		object-position: 85% 50%;
 	}
 }
