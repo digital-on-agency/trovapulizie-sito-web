@@ -7,9 +7,9 @@
    la strada fatta dalla scheda successiva fra "ancora in fondo" (a distanza altezza + spazio dalla sua posizione di arresto) e
    "arrivata nella sua posizione di arresto": scala = 1 - 0,04 * progresso, con origine in alto al centro.
    Senza questo script le schede sono impilate lo stesso, senza il rimpicciolimento. Con "riduci movimento" non scala nulla.
-   Telefono fermo (24/11): mette .hv2-steps--pin sulla sezione e scopre la schermata del passo successivo a tendina, seguendo
-   il bordo superiore della scheda che sale sul telefono (niente dissolvenza: due schermate trasparenti si sovrappongono);
-   con "riduci movimento" cambio secco a meta' schermo. Il contatore fermo (.hv2-steps__pincount) prende il numero della scheda
+   Telefono fermo (24/11): mette .hv2-steps--pin sulla sezione e fa salire la schermata del passo successivo intera, con il
+   bordo superiore in pari con quello della scheda che sale (niente dissolvenza: due schermate trasparenti si sovrappongono;
+   niente tendina: mostrava meta' di una schermata e meta' dell'altra); con "riduci movimento" cambio secco a meta' schermo. Il contatore fermo (.hv2-steps__pincount) prende il numero della scheda
    che ha raggiunto la sua altezza; le tacche si riempiono mentre ogni scheda sale nel riquadro.
    Sotto 1024 px (carosello) non fa nulla e toglie la trasformazione. Un solo gestore di scroll con requestAnimationFrame. */
 (function () {
@@ -24,8 +24,8 @@
 	var reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
 	var MIN = 0.96;
 	var raf = 0;
-	// Telefono fermo (24/11): un solo telefono sopra la pila; la schermata del passo i+1 si scopre dall'alto verso il basso
-	// in pari col bordo della scheda i+1 che attraversa lo schermo.
+	// Telefono fermo (24/11): un solo telefono sopra la pila; la schermata del passo i+1 sale intera dentro lo schermo,
+	// con il bordo superiore in pari con quello della scheda i+1 che lo attraversa.
 	var section = root.closest('.hv2-steps');
 	var shots = section ? Array.prototype.slice.call(section.querySelectorAll('.hv2-steps__pinshot')) : [];
 	var screen = section ? section.querySelector('.hv2-steps__phone--pin .hv2-steps__screen') : null;
@@ -58,7 +58,7 @@
 				var cut = (cards[i + 1].getBoundingClientRect().top - sr.top) / sr.height;
 				cut = Math.max(0, Math.min(1, cut));
 				if (reduce.matches) cut = cut < 0.5 ? 0 : 1;
-				shots[i + 1].style.clipPath = 'inset(' + (cut * 100).toFixed(2) + '% 0 0 0)';
+				shots[i + 1].style.transform = 'translateY(' + (cut * 100).toFixed(2) + '%)';
 				if (cr) {
 					var top = cards[i + 1].getBoundingClientRect().top;
 					if (top <= cr.top + cr.height / 2) step = i + 2;

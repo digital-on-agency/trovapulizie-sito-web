@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.84.0
+Version: 0.84.1
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -15368,7 +15368,7 @@ main.hv2 #come-funziona {
    Da 1024 px, con .hv2-steps--pin sulla sezione (lo mette home-steps-stack.js), i telefoni dentro le schede spariscono e
    ne resta uno solo, in .hv2-steps__pin: un riquadro sticky grande quanto una scheda, sopra la pila, che non si muove
    mentre le schede gli scorrono sotto. Le schede si fermano tutte alla stessa altezza (niente sfalsamento di 16 px),
-   cosi' il telefono combacia con ogni scheda. La schermata nuova si scopre a tendina seguendo il bordo della scheda che sale (clip-path da JS). */
+   cosi' il telefono combacia con ogni scheda. La schermata nuova sale intera, in pari con il bordo della scheda che sale (transform da JS). */
 .hv2-steps__stack {
 	position: relative;
 }
@@ -15408,7 +15408,11 @@ main.hv2 #come-funziona {
 		position: absolute;
 		left: 0;
 		top: 0;
-		clip-path: inset(100% 0 0 0);
+		transform: translateY(100%);
+		/* gli angoli neri disegnati nell'immagine non devono vedersi mentre la schermata sale */
+		border-radius: calc(var(--hv2-card-h) * 0.0585) calc(var(--hv2-card-h) * 0.0585) 0 0;
+		box-shadow: 0 -10px 24px rgba(6, 42, 34, 0.18);
+		will-change: transform;
 	}
 	/* Contatore fermo col telefono (24/11): quello delle schede finirebbe sotto il telefono mentre la scheda sale. Resta
 	   per gli screen reader (il riquadro fermo e' aria-hidden); a vista lo sostituisce .hv2-steps__pincount, nello stesso
