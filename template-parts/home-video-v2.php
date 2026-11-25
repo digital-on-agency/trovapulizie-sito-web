@@ -46,7 +46,9 @@ $hv2v_pick = static function ( $valore, $default ) {
 	$valore = trim( (string) $valore );
 	return '' !== $valore ? $valore : $default;
 };
-$hv2v_more     = tp_home_v2_altri_servizi();
+// Sotto il video solo tre link (Guido 25/11: le sei della sezione Servizi erano troppe): sgrosso casa, pulizie
+// commerciali, guida ai prezzi. Le altre landing restano raggiungibili da hub, menu e piede.
+$hv2v_more     = array_intersect_key( tp_home_v2_altri_servizi(), array_flip( array( '/roma/sgrosso-casa/', '/roma/sgrosso-commerciale/', '/roma/prezzi-pulizie/' ) ) );
 $hv2v_duration = $hv2v_pick( $args['duration'], '1:26' );
 $hv2v_sec      = (int) $args['seconds'] > 0 ? (int) $args['seconds'] : 86;
 $hv2v_label    = sprintf( 'Guarda il video di Trovapulizie, %d %s e %d', intdiv( $hv2v_sec, 60 ), 1 === intdiv( $hv2v_sec, 60 ) ? 'minuto' : 'minuti', $hv2v_sec % 60 );
