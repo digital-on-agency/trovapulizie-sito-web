@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.84.6
+Version: 0.84.7
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -12554,7 +12554,7 @@ main.hv2 > .hv2-b2b {
 	gap: 40px;
 	padding-right: 40px;
 }
-/* Frasi in bianco (Guido 21/11; il punto resta verde scuro). [ATTENZIONE] Bianco su #37B299 = 2,6:1, sotto la soglia
+/* Frasi in bianco (Guido 21/11); dal 25/11 anche il punto e' bianco (Guido). [ATTENZIONE] Bianco su #37B299 = 2,6:1, sotto la soglia
    AA anche per testo grande: accettato come scelta di brand su testo decorativo da 32 px in nero 800. */
 .hv2-frasi__marquee .tp-marquee__text {
 	color: #fff;
@@ -12564,7 +12564,14 @@ main.hv2 > .hv2-b2b {
 	width: 12px;
 	height: 12px;
 	border-radius: 50%;
-	background: var(--tp-v2-ink);
+	background: #fff;
+}
+/* La fascia frasi non si ferma al passaggio del mouse (Guido 25/11): resta la pausa fuori dal viewport e con
+   "riduci movimento". Le altre fasce tp-marquee (loghi) mantengono la pausa in hover. */
+@media (hover: hover) {
+	.hv2-frasi__marquee:not(.is-paused):hover .tp-marquee__track {
+		animation-play-state: running;
+	}
 }
 
 /* ---- Servizi (Figma 7903:6228, 1440 x 607; mobile 7946:668, 390 x 818) ---- */
