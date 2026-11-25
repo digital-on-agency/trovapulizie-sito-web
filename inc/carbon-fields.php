@@ -1030,6 +1030,7 @@ add_action( 'carbon_fields_register_fields', function () {
 	// | Tab (data-section)  | Campi oggi          | Ticket che aggiunge i campi |
 	// | 01-hero             | h2_hero_title, h2_hero_title_accent, h2_hero_title_end, h2_hero_label, h2_hero_subtitle, h2_hero_orbit, h2_google_badge, h2_google_rating | 120 (fatto) |
 	// | 02-frasi            | h2_frasi_title (titolo nascosto, per gli screen reader), h2_frasi_items, h2_frasi_speed | 121 (fatto) |
+	// | 03-video            | h2_video_file, h2_video_poster, h2_video_eyebrow, h2_video_title, h2_video_subtitle, h2_video_duration (e h2_services_hide nel tab Servizi) | 157 (fatto) |
 	// | 03-servizi          | h2_servizi_title, h2_servizi_eyebrow, h2_servizi_subtitle, h2_servizi_more_label, h2_servizi_cta, h2_servizi_items | 121 (fatto) |
 	// | 04-come-funziona    | h2_come_funziona_title, _eyebrow, _subtitle, _subtitle_mobile, _link_label, _link_url, _steps | 122 (fatto) |
 	// | 05-manifesto        | h2_manifesto_title, h2_manifesto_eyebrow, h2_manifesto_subtitle, h2_manifesto_stamp, h2_manifesto_items, h2_manifesto_hide | 123 (fatto) |
@@ -1042,6 +1043,7 @@ add_action( 'carbon_fields_register_fields', function () {
 	$h2_tabs  = array(
 		'hero'          => 'Hero',
 		'frasi'         => 'Fascia frasi',
+		'video'         => 'Video',
 		'servizi'       => 'Servizi',
 		'come_funziona' => 'Come funziona',
 		'manifesto'     => 'Manifesto',
@@ -1091,6 +1093,22 @@ add_action( 'carbon_fields_register_fields', function () {
 					->set_help_text( __( 'Tempo che la fascia impiega a fare un giro: piu\' alto = piu\' lenta. Vuoto = 30.' ) ),
 			) );
 		}
+		if ( 'video' === $chiave ) {
+			// TICKET-157: sezione video "Una luce" al posto di Servizi. Compare solo se h2_video_file e' compilato (inc/home-v2-video.php):
+			// finche' il campo e' vuoto la pagina e' identica a prima. Il video va nei media di WordPress, mai nel repository.
+			$h2_campi[0]->set_help_text( __( 'Titolo (H2, maiuscolo da CSS). Vuoto = "Trova. Prenota. Sorridi."' ) );
+			$h2_campi = array_merge( array(
+				Field::make( 'file', 'h2_video_file', __( 'File del video' ) )
+					->set_type( 'video' )
+					->set_help_text( __( 'Il video della sezione (MP4 H.264 + AAC, con faststart), caricato nei media di WordPress. Vuoto = la sezione video non compare (e, se non hai acceso "Nascondi i servizi" nel tab Servizi, resta la sezione Servizi). Il video si scarica solo al clic sul tasto play.' ) ),
+				Field::make( 'image', 'h2_video_poster', __( 'Copertina' ) )
+					->set_help_text( __( 'Vuoto = la copertina del tema (fotogramma 0:07 di "Una luce", 1920 x 1080). Se la scegli, usa un\'immagine 16:9.' ) ),
+				Field::make( 'text', 'h2_video_eyebrow', __( 'Scritta sopra il titolo' ) )->set_help_text( __( 'Vuoto = "Il video"' ) ),
+			), $h2_campi, array(
+				Field::make( 'textarea', 'h2_video_subtitle', __( 'Sottotitolo' ) )->set_rows( 2 )->set_help_text( __( 'Vuoto = "Chiedi una pulizia dal telefono. Al resto pensiamo noi."' ) ),
+				Field::make( 'text', 'h2_video_duration', __( 'Durata mostrata sulla copertina' ) )->set_help_text( __( 'Formato m:ss. Vuoto = "1:26". Serve anche al dato strutturato VideoObject (durata).' ) ),
+			) );
+		}
 		if ( 'servizi' === $chiave ) {
 			// TICKET-121: testi e icone della sezione Servizi. Vuoto = default del template (template-parts/home-services-v2.php).
 			$h2_campi[0]->set_help_text( __( 'Titolo della sezione (H2, maiuscolo da CSS; un a capo e\' rispettato). Vuoto = "Dalla casa all\'ufficio."' ) );
@@ -1110,6 +1128,7 @@ add_action( 'carbon_fields_register_fields', function () {
 						Field::make( 'checkbox', 'soon', __( 'Presto' ) )->set_option_value( 'yes' )->set_help_text( __( 'Mostra l\'etichetta "presto" e toglie il link.' ) ),
 					) )
 					->set_header_template( '<%- name %>' ),
+				Field::make( 'checkbox', 'h2_services_hide', __( 'Nascondi i servizi' ) )->set_option_value( 'yes' )->set_help_text( __( 'Acceso: la sezione Servizi non compare (TICKET-157: al suo posto va il video del tab Video, se il file e\' compilato). Spento (default): compare come sempre. Per tornare a Servizi basta spegnere questa casella, senza rilasci.' ) ),
 			) );
 		}
 		if ( 'manifesto' === $chiave ) {

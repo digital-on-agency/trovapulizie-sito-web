@@ -287,3 +287,4 @@ add_action( 'wp_head', function () {
 	}
 }, 2 );
 require_once __DIR__ . '/home-v2-manifesto.php'; // TICKET-123: default e icone del manifesto
+require_once __DIR__ . '/home-v2-video.php'; // TICKET-157: sezione video e interruttore dei Servizi

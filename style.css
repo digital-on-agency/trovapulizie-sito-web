@@ -2,7 +2,7 @@
 Theme Name: Trovapulizie
 Description: Tema custom per il sito marketing Trovapulizie (sito-web, scorporo da portale-transazionale React — ADR-001)
 Author: Digital On
-Version: 0.84.7
+Version: 0.85.0
 */
 
 /* Indice dei blocchi (nell'ordine del file). Dettagli di comportamento: docs/homepage.md.
@@ -15519,5 +15519,344 @@ main.hv2 #come-funziona {
 	}
 	.hv2-steps__card[data-step="1"] .hv2-steps__photo {
 		object-position: 85% 50%;
+	}
+}
+
+/* =========================
+   Sezione video "Una luce" (TICKET-157). template-parts/home-video-v2.php + assets/js/home-video.js.
+   Figma 8211:3486 (desktop) e 8211:3778 (mobile). Solo selettori nuovi `.hv2-video`. Ripete l'impianto di `.hv2-services`:
+   sfondo trasparente (quello e' del <main>), luci decorative, padding alto sul contenitore e basso 0 (fra due sezioni la
+   distanza e' una sola, quella del padding alto della sezione che segue). Impaginazione centrata; da telefono a sinistra.
+   Misure dal Figma: padding alto 80 (desktop) e 64 (telefono), testo e riquadro a distanza 32 (telefono 16), riquadro 960 x 540
+   con angoli 24 e ombra, telefono a tutta larghezza con angoli 18.
+   ========================= */
+main.hv2 > .hv2-video {
+	position: relative;
+	isolation: isolate;
+	padding: 0;
+	background: transparent;
+	overflow: visible;
+}
+.hv2-video__light {
+	position: absolute;
+	z-index: -1;
+	border-radius: 50%;
+	pointer-events: none;
+	background: radial-gradient(closest-side, rgba(55, 178, 153, 0.16), rgba(55, 178, 153, 0));
+}
+.hv2-video__light--a {
+	left: 694px;
+	top: -338px;
+	width: 1060px;
+	height: 920px;
+}
+.hv2-video__light--b {
+	left: -388px;
+	top: -22px;
+	width: 920px;
+	height: 780px;
+}
+.hv2-video__inner {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 32px;
+	padding: min(var(--hv2-sec-y), 80px) var(--hv2-px) 0;
+}
+.hv2-video__head {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 16px;
+	text-align: center;
+}
+.hv2-video__eyebrow {
+	margin: 0;
+	font-size: 13px;
+	font-weight: 600;
+	line-height: normal;
+	text-transform: uppercase;
+	color: var(--tp-v2-niente);
+}
+.hv2-video__title {
+	margin: 0;
+	font-size: clamp(44px, 4.722vw, 68px);
+	font-weight: 800;
+	line-height: 1.03;
+	letter-spacing: -0.02em;
+	text-transform: uppercase;
+	color: var(--tp-v2-ink);
+}
+.hv2-video__subtitle {
+	margin: 0;
+	font-size: 18px;
+	font-weight: 400;
+	line-height: 30px;
+	color: #4B5563;
+}
+
+/* Riquadro 16:9: copertina, velo, tasto play (occupa tutto il riquadro: si clicca ovunque) e, dopo il clic, il <video> */
+.hv2-video__frame {
+	position: relative;
+	box-sizing: border-box;
+	width: min(960px, 100%);
+	aspect-ratio: 16 / 9;
+	overflow: hidden;
+	border-radius: 24px;
+	background: #0F2921;
+	box-shadow: 0 20.571px 51.429px -6.857px rgba(5, 41, 33, 0.18);
+}
+.hv2-video__poster {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+.hv2-video__poster[hidden] {
+	display: none;
+}
+.hv2-video__play {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	font: inherit;
+	color: inherit;
+	text-decoration: none;
+	cursor: pointer;
+	-webkit-tap-highlight-color: transparent;
+}
+.hv2-video__veil {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(to bottom, rgba(0, 0, 0, 0) 55%, rgba(5, 26, 20, 0.55));
+}
+.hv2-video__disc {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	display: block;
+	width: 96px;
+	height: 96px;
+	margin: -48px 0 0 -48px;
+	border-radius: 50%;
+	box-shadow: 0 10.286px 27.429px rgba(0, 0, 0, 0.25);
+	transition: transform var(--tp-dur-fast) var(--tp-ease-stage);
+}
+.hv2-video__disc svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+.hv2-video__caption {
+	position: absolute;
+	left: 28.8px;
+	bottom: 28.8px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	color: #fff;
+	font-size: 16px;
+	font-weight: 600;
+	line-height: normal;
+	white-space: nowrap;
+}
+.hv2-video__duration {
+	padding: 6px 12px;
+	border-radius: 999px;
+	background: #fff;
+	font-size: 14px;
+	color: var(--tp-v2-ink);
+}
+.hv2-video__play:focus-visible {
+	outline: 3px solid var(--tp-focus);
+	outline-offset: -6px;
+	border-radius: 24px;
+}
+@media (hover: hover) {
+	.hv2-video__play:hover .hv2-video__disc {
+		transform: scale(1.06);
+	}
+}
+.hv2-video__video {
+	position: absolute;
+	inset: 0;
+	display: block;
+	width: 100%;
+	height: 100%;
+	border: 0;
+	background: #0F2921;
+	object-fit: contain;
+}
+
+/* Riga "Servizi a Roma" e link all'app */
+.hv2-video__more {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 10px;
+	width: 100%;
+}
+.hv2-video__more-label {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	line-height: normal;
+	color: #4F6660;
+}
+.hv2-video__chips-wrap {
+	position: relative;
+	width: 100%;
+}
+.hv2-video__chips {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 8px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+.hv2-video__chip {
+	display: inline-flex;
+	padding: 7px 12px;
+	border: 1px solid rgba(6, 42, 34, 0.12);
+	border-radius: 999px;
+	background: #fff;
+	font-size: 14px;
+	font-weight: 500;
+	line-height: normal;
+	color: var(--tp-v2-ink);
+	text-decoration: none;
+	white-space: nowrap;
+	transition: border-color var(--tp-dur-fast) var(--tp-ease-stage);
+}
+.hv2-video__chip:hover {
+	border-color: var(--tp-v2-green);
+	color: var(--tp-v2-niente);
+}
+.hv2-video__app {
+	display: inline-flex;
+	gap: 8px;
+	align-items: center;
+	margin-top: 22px;
+	padding-top: 8px;
+	font-size: 17px;
+	font-weight: 600;
+	line-height: normal;
+	color: var(--tp-v2-niente);
+	text-decoration: none;
+}
+.hv2-video__app:hover {
+	text-decoration: underline;
+}
+.hv2-video__chip:focus-visible,
+.hv2-video__app:focus-visible {
+	outline: 2px solid var(--tp-focus);
+	outline-offset: 3px;
+}
+
+@media (max-width: 1023px) {
+	.hv2-video__light--a {
+		left: 61px;
+		top: -178px;
+		width: 580px;
+		height: 520px;
+	}
+	.hv2-video__light--b {
+		left: -250px;
+		top: 455px;
+		width: 540px;
+		height: 480px;
+	}
+	.hv2-video__inner {
+		align-items: flex-start;
+		gap: 16px;
+		padding-top: 64px;
+	}
+	.hv2-video__head {
+		align-items: flex-start;
+		gap: 16px;
+		text-align: left;
+	}
+	.hv2-video__eyebrow {
+		font-size: 12px;
+		font-weight: 700;
+		letter-spacing: 0.12em;
+	}
+	.hv2-video__title {
+		font-size: 40px;
+		line-height: 42px;
+		letter-spacing: -0.02em;
+	}
+	.hv2-video__subtitle {
+		font-size: 16px;
+		line-height: normal;
+	}
+	.hv2-video__frame {
+		width: 100%;
+		border-radius: 18px;
+		box-shadow: 0 7.671px 19.179px -2.557px rgba(5, 41, 33, 0.18);
+	}
+	.hv2-video__play:focus-visible {
+		border-radius: 18px;
+	}
+	.hv2-video__disc {
+		width: 64px;
+		height: 64px;
+		margin: -32px 0 0 -32px;
+		box-shadow: 0 6.857px 18.286px rgba(0, 0, 0, 0.25);
+	}
+	.hv2-video__caption {
+		left: 19.2px;
+		bottom: 19.2px;
+		gap: 6px;
+		font-size: 12px;
+	}
+	.hv2-video__duration {
+		padding: 4px 8px;
+		font-size: 11px;
+	}
+	/* Link ai servizi su una sola riga che scorre di lato, senza barra visibile; la sfumatura a destra e' l'invito a scorrere */
+	.hv2-video__more {
+		align-items: flex-start;
+	}
+	.hv2-video__chips {
+		flex-wrap: nowrap;
+		justify-content: flex-start;
+		overflow-x: auto;
+		overscroll-behavior-x: contain;
+		scrollbar-width: none;
+		-webkit-overflow-scrolling: touch;
+		padding-right: 48px; /* l'ultima scheda esce dalla sfumatura a fine corsa */
+	}
+	.hv2-video__chips::-webkit-scrollbar {
+		display: none;
+	}
+	.hv2-video__chips-wrap::after {
+		content: "";
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		width: 48px;
+		background: linear-gradient(to right, rgba(243, 250, 247, 0), var(--tp-v2-mint));
+		pointer-events: none;
+	}
+	.hv2-video__chip {
+		padding: 12px 14px;
+	}
+	.hv2-video__app {
+		min-height: 44px; /* area di tocco */
+		margin-top: 6px;
+		padding-top: 0;
+		font-size: 15px;
 	}
 }

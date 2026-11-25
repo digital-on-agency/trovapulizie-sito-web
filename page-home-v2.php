@@ -14,7 +14,8 @@
  * | data-section     | Template-part (ticket)                      | Nodo Figma desktop |
  * | 01-hero          | home-hero-v2 (TICKET-120, fatto)            | 7903:5257, mobile 7946:3 |
  * | 02-frasi         | tp-marquee (TICKET-121, fatto)              | 7903:6209, mobile 7946:662 |
- * | 03-servizi       | home-services-v2 (TICKET-121, fatto)        | 7903:6228, mobile 7946:668 |
+ * | 03-video         | home-video-v2 (TICKET-157, fatto)           | 8211:3486, mobile 8211:3778; solo se h2_video_file e' compilato |
+ * | 03-servizi       | home-services-v2 (TICKET-121, fatto)        | 7903:6228, mobile 7946:668; spenta da h2_services_hide |
  * | 04-come-funziona | home-steps-v2 (TICKET-122, fatto)           | 7903:6508, mobile 7946:947 |
  * | 05-manifesto     | home-manifesto (TICKET-123, fatto)          | 7903:7379, mobile 7946:1823 |
  * | 06-recensioni    | home-reviews-notes (TICKET-124, fatto)      | 7903:7496, mobile 7946:1871 |
@@ -34,6 +35,7 @@ get_header();
 $hv2_sections = array(
 	'01-hero'          => array( 'hero', 'Trovapulizie' ),
 	'02-frasi'         => array( 'frasi', 'In breve' ),
+	'03-video'         => array( 'video', 'Video' ),
 	'03-servizi'       => array( 'servizi', 'Servizi' ),
 	'04-come-funziona' => array( 'come_funziona', 'Come funziona' ),
 	'05-manifesto'     => array( 'manifesto', 'Manifesto' ),
@@ -90,7 +92,21 @@ $hv2_sections = array(
 			++$hv2_i;
 			continue;
 		endif;
+		if ( 'video' === $hv2_def[0] ) :
+			// Video "Una luce" (TICKET-157): compare solo con h2_video_file compilato (inc/home-v2-video.php); senza, la pagina e' quella di prima.
+			$hv2_video = tp_home_v2_video_args( get_the_ID() );
+			if ( $hv2_video ) {
+				get_template_part( 'template-parts/home-video-v2', null, $hv2_video );
+			}
+			++$hv2_i;
+			continue;
+		endif;
 		if ( 'servizi' === $hv2_def[0] ) :
+			// Servizi spenti da WordPress con h2_services_hide (TICKET-157): la sezione non esce, il codice resta per tornare indietro.
+			if ( tp_home_v2_services_hidden( get_the_ID() ) ) {
+				++$hv2_i;
+				continue;
+			}
 			// Servizi (TICKET-121): template-part dedicato; senza righe in Carbon valgono le sei icone di default.
 			$hv2_righe = array();
 			foreach ( (array) carbon_get_the_post_meta( 'h2_servizi_items' ) as $hv2_riga ) {
