@@ -9,8 +9,8 @@
  * playsinline, preload="metadata"), lo avvia con audio, sposta il fuoco sul video e al primo avvio emette
  * tpTrack('video_play', { video: 'una-luce' }). Nessun autoplay.
  *
- * Riga "Servizi a Roma": tp_home_v2_altri_servizi() (solo pagine pubblicate, percorsi e anchor da tp_service_pages()), la
- * stessa della sezione Servizi. Link "Scopri i servizi nell'app": tp_app_url(), data-cta-position="video".
+ * Riga "Servizi a Roma": tre voci di tp_home_v2_altri_servizi() (sgrosso casa, pulizie commerciali, guida ai prezzi;
+ * solo pagine pubblicate, percorsi e anchor da tp_service_pages()). Link "Scopri i servizi nell'app": tp_app_url(), data-cta-position="video".
  *
  * Argomenti (le letture Carbon stanno in inc/home-v2-video.php; i testi vuoti prendono i default qui sotto):
  * - src (string, obbligatorio): URL del file mp4. mime (string): default video/mp4.
