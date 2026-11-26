@@ -3,11 +3,11 @@
  * (stessa fonte della validazione lato server) e invia tutto in una volta a POST /wp-json/tp/v1/serata all'ultima
  * domanda. Nessuna libreria, nessun tracking. Classi e pelle della Survey OnField (assets/css/survey.css).
  *
- * Flusso: benvenuto -> nome (gia' compilato dal link) -> voto -> ricordo -> chiarezza -> dubbio (solo se il modello
- * non era chiaro) -> servizi -> approfondire -> "E adesso?" con Invia -> grazie. Etichetta "N / 7": il dubbio condivide
- * il numero della domanda 4. Le scelte singole avanzano al tocco, tranne l'ultima, che chiede Invia.
- * Il video della serata compare nella schermata finale solo a chi ha scelto "Rivedere il video" nella domanda 6;
- * preload="none": il file si scarica solo quando si preme play.
+ * Flusso v0.3: benvenuto -> nome (gia' compilato dal link) -> recapito facoltativo -> tre voti 1-5 -> cosa migliorare
+ * -> aspetto piu' interessante -> investimento (con approfondimento solo se "No", stesso numero) -> "E adesso?" con Invia
+ * -> grazie. Le scelte singole e i voti avanzano al tocco, tranne l'ultima domanda, che chiede Invia.
+ * Il video della serata compare nella schermata finale solo con la risposta indicata in def.thanks.video_when
+ * ("Vorrei ricevere materiale"); preload="none": il file si scarica solo quando si preme play.
  */
 (function () {
 	'use strict';
@@ -106,7 +106,7 @@
 		screenEl.appendChild(logo());
 		screenEl.appendChild(el('h1', 'sv__title', w.title));
 		screenEl.appendChild(el('p', 'sv__body', w.body));
-		screenEl.appendChild(el('p', 'sv__sign', w.sign));
+		if (w.sign) screenEl.appendChild(el('p', 'sv__sign', w.sign));
 		screenEl.appendChild(cta(w.cta, function () { advance('welcome'); }));
 	}
 
@@ -120,7 +120,8 @@
 		screenEl.appendChild(el('h1', 'sv__title', t.title.replace('%s', name ? ', ' + name : '')));
 		screenEl.appendChild(el('p', 'sv__body', t.body));
 		screenEl.appendChild(el('p', 'sv__sign', t.sign));
-		if (cfg.video && (ans.approfondire || []).indexOf('video') !== -1) {
+		var vw = t.video_when;
+		if (cfg.video && vw && ans[vw[0]] === vw[1]) {
 			var box = el('div', 'sv__video');
 			box.appendChild(el('h2', 'sv__video-title', t.video));
 			var v = el('video');
@@ -163,17 +164,26 @@
 		if (!step.last && !step.required) btn.textContent = hasAnswer(step) ? ui.next : ui.skip;
 	}
 
+	// Stessa regola di tp_serata_contact_value(): email, oppure telefono con almeno 7 cifre.
+	function contactOk(v) {
+		if (v.indexOf('@') !== -1) return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+		return /^\+?[0-9 .\/()-]+$/.test(v) && v.replace(/\D+/g, '').length >= 7;
+	}
+
 	function textQ(step, msg) {
 		var area = step.type === 'textarea';
 		var inp = el(area ? 'textarea' : 'input', 'sv__input' + (area ? ' sv__textarea' : ''));
-		if (area) inp.rows = 4; else { inp.type = 'text'; inp.autocomplete = 'name'; }
+		if (area) inp.rows = 4; else { inp.type = 'text'; inp.autocomplete = step.autocomplete || 'off'; }
 		inp.maxLength = step.max;
 		inp.placeholder = step.placeholder || '';
 		inp.setAttribute('aria-label', step.title);
 		inp.value = ans[step.id] || '';
 		screenEl.appendChild(inp);
 		var btn = footer(step, msg, function () {
-			return step.required && !inp.value.trim() ? ui.required : '';
+			var v = inp.value.trim();
+			if (step.required && !v) return ui.required;
+			if (step.check === 'contact' && v && !contactOk(v)) { inp.setAttribute('aria-invalid', 'true'); return ui.contact_invalid; }
+			return '';
 		});
 		inp.addEventListener('input', function () {
 			ans[step.id] = inp.value;
@@ -192,6 +202,7 @@
 			(function (val) {
 				var b = el('button', 'sv__scale-opt', String(val));
 				b.type = 'button';
+				if (step.labels) { b.title = step.labels[val - 1]; b.setAttribute('aria-label', val + ' - ' + step.labels[val - 1]); }
 				b.setAttribute('role', 'radio');
 				b.setAttribute('aria-checked', ans[step.id] === val ? 'true' : 'false');
 				if (ans[step.id] === val) b.classList.add('is-on');
@@ -210,8 +221,8 @@
 		}
 		screenEl.appendChild(row);
 		var legend = el('div', 'sv__scale-legend');
-		legend.appendChild(el('span', '', step.low));
-		legend.appendChild(el('span', '', step.high));
+		legend.appendChild(el('span', '', step.labels ? step.labels[0] : step.low));
+		legend.appendChild(el('span', '', step.labels ? step.labels[step.labels.length - 1] : step.high));
 		screenEl.appendChild(legend);
 		// Il voto avanza al tocco: il bottone serve solo a chi torna indietro e vuole confermare.
 		if (ans[step.id]) footer(step, msg, function () { return ''; });
@@ -351,10 +362,12 @@
 				}
 				var text = ui.error;
 				if (res.status === 400 && res.body && res.body.data && res.body.data.fields) {
-					// Un campo obbligatorio di una schermata precedente: si torna li'.
-					var first = res.body.data.fields[0] === 'adesso_altro' ? 'adesso' : res.body.data.fields[0];
-					if (first !== 'adesso' && stepById[first]) { go(first); return; }
-					text = first === 'adesso' && res.body.data.fields.indexOf('adesso_altro') !== -1 ? ui.other_required : ui.required;
+					// Un campo di una schermata precedente: si torna li'. Il testo di "Altro" appartiene alla sua domanda.
+					var f = res.body.data.fields[0];
+					var owner = ids.filter(function (k) { return stepById[k].other_field === f; })[0] || f;
+					var last = ids[ids.length - 1];
+					if (owner !== last && stepById[owner]) { go(owner); return; }
+					text = f !== owner ? ui.other_required : ui.required;
 				} else if (res.status === 403) text = ui.expired;
 				else if (res.status === 429 && res.body && res.body.code === 'tp_survey_limit') text = ui.limit;
 				show(msg, text);

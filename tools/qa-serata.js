@@ -1,8 +1,9 @@
 // QA della survey della serata 25/11 (page-serata.php): percorso completo a 390 e 1280 px, nome dal link, domanda 4b
 // condizionata, opzioni esclusive, "Altro" obbligatorio, invio e schermata finale; prove dell'endpoint (honeypot, nonce,
 // tempo minimo, campi non validi); con "admin" anche l'elenco in Strumenti > Survey serata 25/11 e l'export CSV.
-// v0.2: logo, id del Contatto dal link (?c=), video nella schermata finale solo a chi lo sceglie nella domanda 6 (serve
-// l'opzione tp_serata_video_url impostata sul sito provato).
+// v0.3: logo, id del Contatto dal link (?c=), recapito facoltativo validato, tre voti, domanda di approfondimento solo con
+// investimento "No", video nella schermata finale solo con "Vorrei ricevere materiale" (serve l'opzione
+// tp_serata_video_url impostata sul sito provato).
 // Uso: node tools/qa-serata.js <chrome-bin> <base-url> <out-dir> [admin]
 //   admin = login con admin/password (WordPress Playground). Sullo slot di produzione NON lanciare le prove di scrittura
 //   senza cancellare subito dopo le risposte di prova dall'admin.
@@ -58,59 +59,61 @@ async function pick(c, t, wait) { ok(await c.ev(JS.opt(t)), `${c.label}: tocco "
 async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)) === 'clicked', `${c.label}: bottone "${l}"`); await sleep(350); }
 
 (async () => {
-	// A: link personale, telefono, modello poco chiaro (compare 4b), opzioni esclusive, "Altro" obbligatorio.
+	// A: link personale, telefono, recapito non valido poi corretto, "Altro" obbligatorio, investimento "No" (compare la
+	// domanda di approfondimento), materiale -> video nella schermata finale.
 	await run('A', 390, PAGE + '?n=Mario%20Rossi&c=recQAQAQAQAQAQAQA', async (c) => {
-		await expect(c, /Com'è andata la serata del 25\?/);
+		await expect(c, /II tappa del Wine Venture Club\?/);
 		ok(await c.ev(`(function(){var i=document.querySelector('.sv__logo img');return !!i&&i.complete&&i.naturalWidth>0&&i.alt==='Trovapulizie'})()`), `${c.label}: logo del marchio caricato`);
-		ok(/mercoledì sera/.test(await c.ev(`document.querySelector('.sv__body').textContent`)), `${c.label}: benvenuto con "mercoledì sera"`);
+		ok(/Ci vogliono solo 2 minuti/.test(await c.ev(`document.querySelector('.sv__body').textContent`)), `${c.label}: testo di benvenuto`);
 		await c.shot(`${outDir}/A-0-benvenuto.png`);
 		await press(c);
-		await expect(c, /Nome e cognome/, '1 / 7');
+		await expect(c, /Nome e cognome/, '1 / 9');
 		ok((await c.ev(JS.value('.sv__input'))) === 'Mario Rossi', `${c.label}: nome gia' compilato dal link`);
 		await press(c);
-		await expect(c, /nel complesso/, '2 / 7');
-		ok(await c.ev(JS.scaleRow), `${c.label}: scala 1-5 su una riga`);
-		await c.shot(`${outDir}/A-2-voto.png`);
-		await pick(c, '4');
-		await expect(c, /rimasto in mente/, '3 / 7');
-		ok((await c.ev(JS.cta)) === 'Salta', `${c.label}: domanda facoltativa vuota = "Salta"`);
-		await c.ev(JS.type('.sv__input', 'Il posto vuoto delle pulizie'));
-		ok((await c.ev(JS.cta)) === 'Avanti', `${c.label}: con testo il bottone diventa "Avanti"`);
+		await expect(c, /Email o telefono/, '2 / 9');
+		ok((await c.ev(JS.cta)) === 'Salta', `${c.label}: recapito facoltativo = "Salta"`);
+		await c.ev(JS.type('.sv__input', 'mario@'));
 		await press(c);
-		await expect(c, /modello di Trovapulizie/, '4 / 7');
-		await pick(c, 'Poco chiaro');
-		await expect(c, /Se hai un dubbio/, '4 / 7');
+		ok(/email o un numero di telefono validi/.test(await c.ev(JS.error)), `${c.label}: recapito non valido bloccato`);
+		await c.ev(JS.type('.sv__input', '+39 333 123 4567'));
+		await press(c);
+		await expect(c, /piaciuta la serata/, '3 / 9');
+		ok(await c.ev(JS.scaleRow), `${c.label}: scala 1-5 su una riga`);
+		ok(/Per niente/.test(await c.ev(`document.querySelector('.sv__scale-legend').textContent`)) && /Moltissimo/.test(await c.ev(`document.querySelector('.sv__scale-legend').textContent`)), `${c.label}: legenda Per niente / Moltissimo`);
+		await c.shot(`${outDir}/A-3-voto.png`);
+		await pick(c, '5');
+		await expect(c, /piace il progetto/, '4 / 9');
+		await pick(c, '4');
+		await expect(c, /chiaro il modello/, '5 / 9');
+		await pick(c, '3');
+		await expect(c, /Aiutaci a migliorare/, '6 / 9');
 		await c.ev(JS.type('.sv__input', 'Come guadagnate?'));
 		await press(c);
-		await expect(c, /servizi di pulizia/, '5 / 7');
-		await pick(c, 'Sì, per casa', 150);
-		await pick(c, 'No', 150);
-		ok((await c.ev(JS.on())) === 'No', `${c.label}: "No" toglie le altre risposte`);
-		await pick(c, "Sì, per un'azienda o un ufficio", 150);
-		ok((await c.ev(JS.on())) === "Sì, per un'azienda o un ufficio", `${c.label}: un'altra risposta toglie "No"`);
-		await press(c);
-		await expect(c, /approfondire/, '6 / 7');
-		await pick(c, 'Il team', 150);
-		await pick(c, 'Come partecipare al progetto', 150);
-		await pick(c, 'Rivedere il video della serata', 150);
-		await press(c);
-		await expect(c, /E adesso\?/, '7 / 7');
-		ok((await c.ev(JS.cta)) === 'Invia', `${c.label}: ultima domanda con "Invia"`);
-		ok(await c.ev(`!!document.querySelector('.sv__note a[href$="/privacy/"]')`), `${c.label}: link all'informativa sotto Invia`);
+		await expect(c, /più interessante/, '7 / 9');
 		await pick(c, 'Altro');
-		ok(await c.ev(`!document.querySelector('.sv__other').hidden`), `${c.label}: "Altro" apre il campo`);
 		await press(c);
 		ok(/Scrivi qualcosa/.test(await c.ev(JS.error)), `${c.label}: "Altro" vuoto bloccato`);
-		await c.shot(`${outDir}/A-7-altro-vuoto.png`);
-		await c.ev(JS.type('.sv__other .sv__input', 'Ci vediamo alla prossima serata'));
+		await c.ev(JS.type('.sv__other .sv__input', 'Il team'));
+		await press(c);
+		await expect(c, /investimento in Trovapulizie/, '8 / 9');
+		await c.shot(`${outDir}/A-8-investimento.png`);
+		await pick(c, 'No, non fa per me in questa fase');
+		await expect(c, /servirebbe vedere o chiarire/, '8 / 9');
+		await c.ev(JS.type('.sv__input', 'I numeri del primo anno'));
+		await press(c);
+		await expect(c, /E adesso\?/, '9 / 9');
+		ok((await c.ev(JS.cta)) === 'Invia', `${c.label}: ultima domanda con "Invia"`);
+		ok(await c.ev(`!!document.querySelector('.sv__note a[href$="/privacy/"]')`), `${c.label}: link all'informativa sotto Invia`);
+		await pick(c, 'Vorrei ricevere materiale (es. pitch deck, one-pager, link al video)');
+		await c.shot(`${outDir}/A-9-adesso.png`);
 		await press(c);
 		ok(await wait(c.ev, `/Grazie, Mario\\./.test(document.querySelector('.sv__title')&&document.querySelector('.sv__title').textContent)`, 20000), `${c.label}: schermata finale "Grazie, Mario."`);
 		ok(await c.ev(`document.querySelector('[data-sv-top]').hidden`), `${c.label}: nessuna barra nella schermata finale`);
-		ok(await c.ev(`(function(){var v=document.querySelector('.sv__video video');return !!v&&v.preload==='none'&&v.controls&&!!v.getAttribute('src')})()`), `${c.label}: video nella schermata finale, scaricato solo al play`);
-		await c.shot(`${outDir}/A-8-grazie.png`);
+		ok(await c.ev(`(function(){var v=document.querySelector('.sv__video video');return !!v&&v.preload==='none'&&v.controls&&!!v.getAttribute('src')})()`), `${c.label}: con "materiale" video nella schermata finale, scaricato solo al play`);
+		await c.shot(`${outDir}/A-10-grazie.png`);
 	});
 
-	// B: senza link personale, desktop, modello chiaro (4b saltata), facoltative saltate, scelta singola finale.
+	// B: senza link personale, desktop, recapito saltato, investimento "Forse" (niente approfondimento), niente video.
 	await run('B', 1280, PAGE, async (c) => {
 		await press(c);
 		ok((await c.ev(JS.value('.sv__input'))) === '', `${c.label}: senza ?n= il nome e' vuoto`);
@@ -118,36 +121,35 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 		ok(/Serve una risposta/.test(await c.ev(JS.error)), `${c.label}: nome obbligatorio`);
 		await c.ev(JS.type('.sv__input', 'Laura Bianchi'));
 		await press(c);
-		await pick(c, '5');
-		await press(c); // Salta
-		await pick(c, 'Sì, chiaro');
-		await expect(c, /servizi di pulizia/, '5 / 7');
-		await press(c); // Salta
-		await press(c); // Salta
-		await expect(c, /E adesso\?/, '7 / 7');
+		await press(c); // Salta il recapito
+		await pick(c, '4'); await pick(c, '5'); await pick(c, '5');
+		await press(c); // Salta "migliorare"
+		await pick(c, "L'intero progetto");
+		await expect(c, /investimento in Trovapulizie/, '8 / 9');
+		await pick(c, 'Forse, vorrei prima approfondire');
+		await expect(c, /E adesso\?/, '9 / 9');
 		await press(c);
 		ok(/Serve una risposta/.test(await c.ev(JS.error)), `${c.label}: ultima domanda obbligatoria`);
-		await pick(c, 'Sentiamoci');
+		await pick(c, 'Restiamo in contatto');
 		ok(/E adesso\?/.test(await c.ev(JS.title)), `${c.label}: la scelta finale non invia da sola`);
-		await c.shot(`${outDir}/B-7-adesso.png`);
 		await press(c);
 		ok(await wait(c.ev, `/Grazie, Laura\\./.test(document.querySelector('.sv__title')&&document.querySelector('.sv__title').textContent)`, 20000), `${c.label}: schermata finale "Grazie, Laura."`);
-		ok(await c.ev(`!document.querySelector('.sv__video')`), `${c.label}: senza la scelta del video nessun video`);
+		ok(await c.ev(`!document.querySelector('.sv__video')`), `${c.label}: senza "materiale" nessun video`);
 	});
 
 	// C: indietro e prove dell'endpoint dalla pagina (stessa origine).
 	await run('C', 390, PAGE + '?n=Prova%20Endpoint', async (c) => {
-		await press(c); await press(c); await pick(c, '3');
-		ok((await c.ev(`document.querySelector('[data-sv-back]').click(),document.querySelector('.sv__title').textContent`)).includes('nel complesso'), `${c.label}: indietro torna al voto`);
+		await press(c); await press(c); await press(c); await pick(c, '3');
+		ok((await c.ev(`document.querySelector('[data-sv-back]').click(),document.querySelector('.sv__title').textContent`)).includes('piaciuta la serata'), `${c.label}: indietro torna al voto`);
 		ok(await c.ev(`document.querySelector('.sv__scale-opt.is-on').textContent==='3'`), `${c.label}: il voto dato resta selezionato`);
 		const cfg = `JSON.parse(document.querySelector('[data-serata]').getAttribute('data-config'))`;
-		const post = body => `(function(){var c=${cfg};var b=Object.assign({nonce:c.nonce,ts:c.ts,sig:c.sig,name:'QA',rating:4,chiarezza:'chiaro',adesso:'piacere',servizi:[],approfondire:[]},${body});return fetch(c.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(j){return r.status+' '+(j.code||'')+' '+((j.data&&j.data.fields)||[]).join(',')})})})()`;
+		const post = body => `(function(){var c=${cfg};var b=Object.assign({nonce:c.nonce,ts:c.ts,sig:c.sig,name:'QA',serata:4,progetto:4,chiaro:4,interesse:'app',investimento:'forse',adesso:'prossima'},${body});return fetch(c.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(j){return r.status+' '+(j.code||'')+' '+((j.data&&j.data.fields)||[]).join(',')})})})()`;
 		ok((await c.ev(post(`{website:'x'}`))).startsWith('200'), `${c.label}: honeypot = 200 finto`);
 		ok((await c.ev(post(`{nonce:'x'}`))).startsWith('403 tp_survey_expired'), `${c.label}: nonce errato = 403`);
 		ok((await c.ev(post(`{}`))).startsWith('429 tp_survey_fast'), `${c.label}: invio troppo veloce = 429`);
 		await sleep(12500);
-		const bad = await c.ev(post(`{rating:9,chiarezza:'boh',adesso:'altro',servizi:['no','casa']}`));
-		ok(/^400 tp_survey_invalid .*rating.*chiarezza.*adesso_altro.*servizi/.test(bad), `${c.label}: campi non validi = 400 (${bad})`);
+		const bad = await c.ev(post(`{contatto:'abc',serata:9,interesse:'altro',investimento:'boh',adesso:'x'}`));
+		ok(/^400 tp_survey_invalid .*contatto.*serata.*investimento.*adesso.*interesse_altro/.test(bad), `${c.label}: campi non validi = 400 (${bad})`);
 	});
 
 	if (withAdmin) {
@@ -159,13 +161,13 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 			const txt = await c.ev(`document.querySelector('.wrap')?document.querySelector('.wrap').innerText:''`);
 			ok(/Survey serata 25\/11/.test(txt), `${c.label}: pagina in Strumenti`);
 			ok(/Mario Rossi/.test(txt) && /Laura Bianchi/.test(txt), `${c.label}: le due risposte nell'elenco`);
-			ok(/Ci vediamo alla prossima serata/.test(txt) && /Come guadagnate\?/.test(txt), `${c.label}: testo di "Altro" e dubbio visibili`);
-			ok(/Il team, Come partecipare al progetto, Rivedere il video della serata/.test(txt), `${c.label}: etichette leggibili delle scelte multiple`);
+			ok(/I numeri del primo anno/.test(txt) && /Come guadagnate\?/.test(txt) && /\+39 333 123 4567/.test(txt), `${c.label}: testi liberi e recapito visibili`);
+			ok(/No, non fa per me in questa fase/.test(txt) && /Restiamo in contatto/.test(txt), `${c.label}: etichette leggibili delle scelte`);
 			ok(/recQAQAQAQAQAQAQA/.test(txt), `${c.label}: id del Contatto dal link salvato`);
 			await c.shot(`${outDir}/admin-elenco.png`);
 			const href = await c.ev(`document.querySelector('.page-title-action').href`);
 			const csv = await c.ev(`fetch(${JSON.stringify('')}+document.querySelector('.page-title-action').href,{credentials:'same-origin'}).then(function(r){return r.text()})`);
-			ok(href.includes('tp_serata_csv') && /Nome/.test(csv) && /Mario Rossi/.test(csv) && /Sentiamoci/.test(csv), `${c.label}: export CSV con intestazioni ed etichette`);
+			ok(href.includes('tp_serata_csv') && /Nome/.test(csv) && /Mario Rossi/.test(csv) && /Vorrei ricevere materiale/.test(csv), `${c.label}: export CSV con intestazioni ed etichette`);
 		});
 	}
 

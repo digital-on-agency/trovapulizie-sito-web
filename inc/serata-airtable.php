@@ -6,10 +6,12 @@
  *
  * - Stesso schema della Survey OnField (inc/survey-airtable.php, di cui riusa tp_survey_at_request e il token
  *   TP_AIRTABLE_SURVEY_TOKEN): evento cron immediato a ogni risposta, giro ogni 15 minuti per le righe rimaste indietro.
- * - Contatto: solo se il link portava ?c=<id>. L'id si verifica prima di collegarlo (un id sbagliato farebbe fallire la
- *   copia): se il Contatto non esiste la risposta arriva senza collegamento, con l'errore nelle note della riga.
+ * - Contatto: dall'id del link (?c=<id>, verificato prima di collegarlo: un id sbagliato farebbe fallire la copia),
+ *   altrimenti cercato per email o telefono lasciati nella domanda 2 (tp_survey_at_find_contact). Nessun Contatto nuovo:
+ *   se non si trova, la risposta arriva senza collegamento e con la nota.
  * - Nessuna Opportunita': chi era in sala non e' un lead di servizio, e una nuova Opportunita' farebbe partire
- *   "TP - Notifica lead al team" (WhatsApp operativo). Il ricontatto si segue dalla spunta "Da ricontattare".
+ *   "TP - Notifica lead al team" (WhatsApp operativo). Il ricontatto si segue dalla spunta "Da ricontattare"
+ *   ("Vorrei ricevere materiale", "Restiamo in contatto" o interesse all'investimento "Sì" / "Forse").
  * - Manuale: wp tp-serata sync [<id>] [--all]
  */
 
@@ -19,15 +21,6 @@ const TP_SERATA_AT_MAX_TRIES = 5;
 /** True se la copia e' attiva: token presente e tabella configurata. */
 function tp_serata_at_enabled() {
 	return '' !== TP_SERATA_AT_TABLE && defined( 'TP_AIRTABLE_SURVEY_TOKEN' ) && '' !== TP_AIRTABLE_SURVEY_TOKEN;
-}
-
-/** Valori separati da virgola -> etichette (array), per i campi a scelta multipla. */
-function tp_serata_at_multi( $field, $csv ) {
-	$out = array();
-	foreach ( array_filter( explode( ',', (string) $csv ) ) as $v ) {
-		$out[] = tp_serata_label( $field, $v );
-	}
-	return $out;
 }
 
 /** Sincronizza una risposta. Ritorna true se e' su Airtable. */
@@ -63,25 +56,35 @@ function tp_serata_at_sync_row( $id ) {
 			$contact = '';
 		}
 	}
+	if ( '' === $contact && '' !== (string) $r['contatto'] ) {
+		$is_mail = false !== strpos( $r['contatto'], '@' );
+		list( $contact, $err ) = tp_survey_at_find_contact( $is_mail ? $r['contatto'] : '', $is_mail ? '' : preg_replace( '/\D+/', '', $r['contatto'] ) );
+		if ( $err ) {
+			return $fail( 'contatto (ricerca): ' . $err );
+		}
+		if ( '' === $contact ) {
+			$warn = trim( $warn . ' Nessun Contatto con questo recapito nel gestionale.' );
+		}
+	}
 
-	$approfondire = tp_serata_at_multi( 'approfondire', $r['approfondire'] );
-	$fields       = array(
-		'Risposta'          => 'Serata #' . $id . ' - ' . $r['name'],
-		'WP ID'             => (int) $id,
-		'Data'              => tp_survey_at_iso( $r['created_at'] ),
-		'Nome'              => $r['name'],
-		'Voto'              => (int) $r['rating'],
-		'Cosa è rimasto'    => $r['ricordo'],
-		'Modello chiaro'    => '' !== $r['chiarezza'] ? tp_serata_label( 'chiarezza', $r['chiarezza'] ) : null,
-		'Dubbio'            => $r['dubbio'],
-		'Usa servizi'       => tp_serata_at_multi( 'servizi', $r['servizi'] ),
-		'Da approfondire'   => $approfondire,
-		'E adesso'          => '' !== $r['adesso'] ? tp_serata_label( 'adesso', $r['adesso'] ) : null,
-		'E adesso (altro)'  => $r['adesso_altro'],
-		'Video richiesto'   => in_array( 'video', explode( ',', (string) $r['approfondire'] ), true ),
-		'Da ricontattare'   => in_array( $r['adesso'], array( 'sentiamoci', 'materiale' ), true ),
-		'Contatto'          => '' !== $contact ? array( $contact ) : array(),
-		'Note sincronizzazione' => $warn,
+	$fields = array(
+		'Risposta'                  => 'Serata #' . $id . ' - ' . $r['name'],
+		'WP ID'                     => (int) $id,
+		'Data'                      => tp_survey_at_iso( $r['created_at'] ),
+		'Nome'                      => $r['name'],
+		'Email o telefono'          => $r['contatto'],
+		'Serata'                    => (int) $r['serata'],
+		'Progetto'                  => (int) $r['progetto'],
+		'Modello chiaro'            => (int) $r['chiaro'],
+		'Da migliorare'             => (string) $r['migliorare'],
+		'Aspetto più interessante'  => '' !== $r['interesse'] ? tp_serata_label( 'interesse', $r['interesse'] ) : null,
+		'Aspetto (altro)'           => $r['interesse_altro'],
+		'Investimento'              => '' !== $r['investimento'] ? tp_serata_label( 'investimento', $r['investimento'] ) : null,
+		'Per valutare servirebbe'   => (string) $r['investimento_serve'],
+		'E adesso'                  => '' !== $r['adesso'] ? tp_serata_label( 'adesso', $r['adesso'] ) : null,
+		'Da ricontattare'           => in_array( $r['adesso'], array( 'materiale', 'contatto' ), true ) || in_array( $r['investimento'], array( 'si', 'forse' ), true ),
+		'Contatto'                  => '' !== $contact ? array( $contact ) : array(),
+		'Note sincronizzazione'     => $warn,
 	);
 	$record = array( 'fields' => $fields );
 	// typecast: un'etichetta nuova (es. l'opzione del video) crea la scelta nel campo invece di far fallire la copia.

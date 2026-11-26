@@ -9,8 +9,10 @@
  *   portare anche ?c=<id del Contatto nel gestionale> (recXXXXXXXXXXXXXX): la risposta si collega a quel Contatto.
  * - Salvataggio nella tabella {prefix}tp_serata_response, copia nel gestionale interno (inc/serata-airtable.php),
  *   nessuna notifica. Admin: inc/serata-admin.php (Strumenti > Survey serata 25/11: elenco, cancellazione, export CSV).
- * - Video della serata (v0.2, Guido 26/11): opzione "Rivedere il video della serata" nella domanda 6, presente solo se
- *   l'opzione WordPress tp_serata_video_url e' impostata; chi la sceglie trova il video nella schermata finale.
+ * - Domande v0.3 (testo incollato da Guido il 26/11): nome, recapito facoltativo, tre voti da 1 a 5, cosa migliorare,
+ *   aspetto piu' interessante, interesse a valutare un investimento (con domanda di approfondimento se "No"), "E adesso?".
+ * - Video della serata: chi sceglie "Vorrei ricevere materiale" trova il video nella schermata finale, se l'opzione
+ *   WordPress tp_serata_video_url e' impostata.
  * - Guardie riusate dalla Survey OnField (inc/survey.php): origine, nonce, tempo minimo firmato, honeypot, limite
  *   orario per IP hash contato solo dopo un salvataggio riuscito.
  * - Pagina noindex,nofollow, fuori dalla sitemap, mai in cache LiteSpeed, senza tracking ne' banner dei cookie.
@@ -19,7 +21,7 @@
  * chiunque abbia il link (art. 2468 c.c.). Trovapulizie era startup ospite: mai "evento Trovapulizie".
  */
 
-const TP_SERATA_DB_VERSION   = '2'; // 2: contact_ref e colonne at_* della copia nel gestionale (inc/serata-airtable.php)
+const TP_SERATA_DB_VERSION   = '3'; // 2: contact_ref e colonne at_*; 3: domande v0.3 (le colonne della v1 restano, vuote)
 const TP_SERATA_MAX_PER_HOUR = 10;
 
 /** True se la richiesta corrente e' la pagina della survey della serata. */
@@ -34,44 +36,41 @@ function tp_serata_video_url() {
 
 /** Domande e testi. Chiavi dei campi = colonne della tabella. */
 function tp_serata_definition() {
-	$approfondire = array(
-		array( 'modello', 'Come funziona il modello' ), array( 'team', 'Il team' ), array( 'tecnologia', "La tecnologia e l'app" ),
-		array( 'partecipare', 'Come partecipare al progetto' ), array( 'servizio', 'Provare il servizio' ),
-	);
-	if ( '' !== tp_serata_video_url() ) {
-		$approfondire[] = array( 'video', 'Rivedere il video della serata' );
-	}
-	$approfondire[] = array( 'niente', 'Niente per ora' );
+	$scale = array( 'Per niente', 'Poco', 'Abbastanza', 'Molto', 'Moltissimo' );
 	return array(
 		'brand'   => 'Trovapulizie',
-		'total'   => 7,
+		'total'   => 9,
 		'welcome' => array(
-			'title' => "Com'è andata la serata del 25?",
-			'body'  => "Grazie per essere stato con noi mercoledì sera da Beef Bazar. Sono sette domande e servono due minuti: ci aiutano a capire cosa è arrivato della serata e cosa no.",
-			'sign'  => 'Christian e Guido',
+			'title' => "Com'è andata la II tappa del Wine Venture Club?",
+			'body'  => 'Siamo Guido e Christian, founder di Trovapulizie. Nel ringraziarti di essere stato con noi da Beef Bazar, volevamo farti qualche domanda. Ci vogliono solo 2 minuti!',
+			'sign'  => '',
 			'cta'   => 'Inizia',
 		),
 		'steps'   => array(
-			array( 'id' => 'name', 'type' => 'text', 'count' => 1, 'required' => true, 'title' => 'Nome e cognome', 'placeholder' => 'Il tuo nome e cognome', 'max' => 120 ),
-			array( 'id' => 'rating', 'type' => 'scale', 'count' => 2, 'required' => true, 'title' => "Com'è andata la serata nel complesso?", 'min' => 1, 'max' => 5, 'low' => 'Così così', 'high' => 'Benissimo' ),
-			array( 'id' => 'ricordo', 'type' => 'textarea', 'count' => 3, 'required' => false, 'title' => 'Della presentazione di Trovapulizie, cosa ti è rimasto in mente?', 'placeholder' => 'Anche una parola', 'max' => 2000 ),
-			array( 'id' => 'chiarezza', 'type' => 'single', 'count' => 4, 'required' => true, 'title' => 'Il modello di Trovapulizie ti è risultato chiaro?', 'options' => tp_survey_opts( array(
-				array( 'chiaro', 'Sì, chiaro' ), array( 'dubbio', 'Abbastanza, ma ho qualche dubbio' ), array( 'poco', 'Poco chiaro' ),
+			array( 'id' => 'name', 'type' => 'text', 'count' => 1, 'required' => true, 'title' => 'Nome e cognome', 'placeholder' => 'Il tuo nome e cognome', 'max' => 120, 'autocomplete' => 'name' ),
+			array( 'id' => 'contatto', 'type' => 'text', 'count' => 2, 'required' => false, 'check' => 'contact', 'title' => 'Email o telefono', 'hint' => 'Facoltativo: ci serve per mandarti quello che ci chiedi.', 'placeholder' => 'Email o numero di telefono', 'max' => 120, 'autocomplete' => 'email' ),
+			array( 'id' => 'serata', 'type' => 'scale', 'count' => 3, 'required' => true, 'title' => 'Ti è piaciuta la serata?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
+			array( 'id' => 'progetto', 'type' => 'scale', 'count' => 4, 'required' => true, 'title' => 'Ti piace il progetto Trovapulizie?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
+			array( 'id' => 'chiaro', 'type' => 'scale', 'count' => 5, 'required' => true, 'title' => 'Ti è chiaro il modello di Trovapulizie?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
+			array( 'id' => 'migliorare', 'type' => 'textarea', 'count' => 6, 'required' => false, 'title' => 'Aiutaci a migliorare: cosa non ti è sembrato chiaro o cosa vorresti approfondire?', 'placeholder' => 'Scrivi qui', 'max' => 2000 ),
+			array( 'id' => 'interesse', 'type' => 'single', 'count' => 7, 'required' => true, 'title' => 'Quale aspetto trovi più interessante?', 'other_field' => 'interesse_altro', 'options' => tp_survey_opts( array(
+				array( 'piattaforma', 'La piattaforma (gestionale per aziende e professionisti)' ), array( 'app', "L'applicazione (marketplace)" ),
+				array( 'progetto', "L'intero progetto" ), array( 'altro', 'Altro', true ),
 			) ) ),
-			array( 'id' => 'dubbio', 'type' => 'textarea', 'count' => 4, 'required' => false, 'when' => array( 'chiarezza', array( 'dubbio', 'poco' ) ), 'title' => 'Se hai un dubbio, scrivilo qui: ti rispondiamo noi.', 'placeholder' => 'Il tuo dubbio', 'max' => 2000 ),
-			array( 'id' => 'servizi', 'type' => 'multi', 'count' => 5, 'required' => false, 'title' => 'Usi servizi di pulizia o manutenzione?', 'exclusive' => 'no', 'options' => tp_survey_opts( array(
-				array( 'casa', 'Sì, per casa' ), array( 'azienda', "Sì, per un'azienda o un ufficio" ), array( 'no', 'No' ),
+			array( 'id' => 'investimento', 'type' => 'single', 'count' => 8, 'required' => true, 'title' => 'Potrebbe interessarti valutare un investimento in Trovapulizie?', 'options' => tp_survey_opts( array(
+				array( 'si', 'Sì' ), array( 'forse', 'Forse, vorrei prima approfondire' ), array( 'no', 'No, non fa per me in questa fase' ),
 			) ) ),
-			array( 'id' => 'approfondire', 'type' => 'multi', 'count' => 6, 'required' => false, 'title' => 'Cosa ti piacerebbe approfondire?', 'hint' => 'Puoi scegliere più risposte.', 'exclusive' => 'niente', 'options' => tp_survey_opts( $approfondire ) ),
-			array( 'id' => 'adesso', 'type' => 'single', 'count' => 7, 'required' => true, 'last' => true, 'title' => 'E adesso?', 'other_field' => 'adesso_altro', 'options' => tp_survey_opts( array(
-				array( 'sentiamoci', 'Sentiamoci' ), array( 'materiale', 'Vorrei ricevere del materiale' ),
-				array( 'piacere', 'È stato un piacere conoscervi' ), array( 'altro', 'Altro', true ),
+			array( 'id' => 'investimento_serve', 'type' => 'textarea', 'count' => 8, 'required' => false, 'when' => array( 'investimento', array( 'no' ) ), 'title' => 'Cosa ti servirebbe vedere o chiarire per valutare un investimento?', 'placeholder' => 'Scrivi qui', 'max' => 2000 ),
+			array( 'id' => 'adesso', 'type' => 'single', 'count' => 9, 'required' => true, 'last' => true, 'title' => 'E adesso?', 'options' => tp_survey_opts( array(
+				array( 'materiale', 'Vorrei ricevere materiale (es. pitch deck, one-pager, link al video)' ), array( 'contatto', 'Restiamo in contatto' ),
+				array( 'prossima', 'Ci vediamo alla prossima tappa!' ),
 			) ) ),
 		),
-		'thanks'  => array( 'title' => 'Grazie%s.', 'body' => 'Ci sentiamo presto.', 'sign' => 'Christian e Guido', 'video' => 'Il video della serata' ),
+		'thanks'  => array( 'title' => 'Grazie%s.', 'body' => 'Ci sentiamo presto.', 'sign' => 'Christian e Guido', 'video' => 'Il video della serata', 'video_when' => array( 'adesso', 'materiale' ) ),
 		'ui'      => array(
 			'next' => 'Avanti', 'skip' => 'Salta', 'send' => 'Invia', 'sending' => 'Invio in corso…', 'back' => 'Indietro',
 			'other' => 'Scrivi qui', 'required' => 'Serve una risposta per andare avanti.', 'other_required' => 'Scrivi qualcosa nel campo, oppure scegli un’altra risposta.',
+			'contact_invalid' => 'Scrivi un’email o un numero di telefono validi, oppure lascia vuoto.',
 			'privacy' => 'Inviando accetti l’', 'privacy_link' => 'informativa privacy',
 			'error' => 'Qualcosa non è andato: riprova tra un momento.', 'expired' => 'La pagina è rimasta aperta troppo a lungo: ricaricala e riprova.',
 			'limit' => 'Troppi invii da questa connessione: riprova più tardi.', 'nojs' => 'Per rispondere serve JavaScript attivo nel browser.',
@@ -89,10 +88,21 @@ function tp_serata_install() {
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 	$charset = $wpdb->get_charset_collate();
 	$table   = tp_serata_table();
+	// Colonne dalla rating in giu' fino a adesso_altro (tranne adesso): domande della v1, non piu' scritte ma lasciate
+	// (dbDelta non toglie colonne). Le text NOT NULL della v1 ricevono '' in tp_serata_legacy_defaults().
 	dbDelta( "CREATE TABLE {$table} (
 		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 		created_at datetime NOT NULL,
 		name varchar(120) NOT NULL DEFAULT '',
+		contatto varchar(120) NOT NULL DEFAULT '',
+		serata tinyint(3) unsigned NOT NULL DEFAULT 0,
+		progetto tinyint(3) unsigned NOT NULL DEFAULT 0,
+		chiaro tinyint(3) unsigned NOT NULL DEFAULT 0,
+		migliorare text NULL,
+		interesse varchar(20) NOT NULL DEFAULT '',
+		interesse_altro varchar(255) NOT NULL DEFAULT '',
+		investimento varchar(10) NOT NULL DEFAULT '',
+		investimento_serve text NULL,
 		rating tinyint(3) unsigned NOT NULL DEFAULT 0,
 		ricordo text NOT NULL,
 		chiarezza varchar(20) NOT NULL DEFAULT '',
@@ -161,7 +171,7 @@ add_action( 'template_redirect', function () {
 } );
 
 add_filter( 'pre_get_document_title', function ( $title ) {
-	return tp_is_serata_page() ? "Com'è andata la serata del 25? · Trovapulizie" : $title;
+	return tp_is_serata_page() ? "Com'è andata la II tappa del Wine Venture Club? · Trovapulizie" : $title;
 }, 30 );
 
 add_action( 'wp_enqueue_scripts', function () {
@@ -227,15 +237,25 @@ add_action( 'rest_api_init', function () {
 	) );
 } );
 
+/** Recapito facoltativo: email valida oppure telefono con almeno 7 cifre. Ritorna [valore normalizzato, valido]. */
+function tp_serata_contact_value( $v ) {
+	$v = tp_survey_text( $v, 120 );
+	if ( '' === $v ) {
+		return array( '', true );
+	}
+	if ( false !== strpos( $v, '@' ) ) {
+		return is_email( $v ) ? array( strtolower( $v ), true ) : array( $v, false );
+	}
+	$ok = preg_match( '/^\+?[0-9 .\/()-]+$/', $v ) && strlen( preg_replace( '/\D+/', '', $v ) ) >= 7;
+	return array( $v, (bool) $ok );
+}
+
 /** Valida e normalizza le risposte. Ritorna [dati, errori[campo]=>true]. Funzione pura. */
 function tp_serata_validate( array $p, array $def ) {
 	$steps = array();
 	foreach ( $def['steps'] as $s ) {
 		$steps[ $s['id'] ] = $s;
 	}
-	$allowed = function ( $id ) use ( $steps ) {
-		return array_column( $steps[ $id ]['options'], 'v' );
-	};
 	$data = array();
 	$errs = array();
 
@@ -243,45 +263,40 @@ function tp_serata_validate( array $p, array $def ) {
 	if ( '' === $data['name'] ) {
 		$errs['name'] = true;
 	}
-	$rating = is_numeric( $p['rating'] ?? null ) ? (int) $p['rating'] : 0;
-	if ( $rating < 1 || $rating > 5 ) {
-		$errs['rating'] = true;
+	list( $data['contatto'], $ok ) = tp_serata_contact_value( $p['contatto'] ?? '' );
+	if ( ! $ok ) {
+		$errs['contatto'] = true;
 	}
-	$data['rating']  = $rating;
-	$data['ricordo'] = tp_survey_text( $p['ricordo'] ?? '', 2000 );
 	$data['contact_ref'] = tp_serata_contact_ref( $p['contact'] ?? '' );
 
-	foreach ( array( 'chiarezza', 'adesso' ) as $k ) {
+	foreach ( array( 'serata', 'progetto', 'chiaro' ) as $k ) {
+		$n = is_numeric( $p[ $k ] ?? null ) ? (int) $p[ $k ] : 0;
+		if ( $n < 1 || $n > 5 ) {
+			$errs[ $k ] = true;
+		}
+		$data[ $k ] = $n;
+	}
+	$data['migliorare'] = tp_survey_text( $p['migliorare'] ?? '', 2000 );
+
+	foreach ( array( 'interesse', 'investimento', 'adesso' ) as $k ) {
 		$v = is_scalar( $p[ $k ] ?? null ) ? (string) $p[ $k ] : '';
-		if ( ! in_array( $v, $allowed( $k ), true ) ) {
+		if ( ! in_array( $v, array_column( $steps[ $k ]['options'], 'v' ), true ) ) {
 			$errs[ $k ] = true;
 		}
 		$data[ $k ] = $v;
 	}
-	// Il dubbio vale solo se il modello non era chiaro; il testo di "Altro" solo con "Altro", e li' e' obbligatorio.
-	$data['dubbio']       = in_array( $data['chiarezza'], array( 'dubbio', 'poco' ), true ) ? tp_survey_text( $p['dubbio'] ?? '', 2000 ) : '';
-	$data['adesso_altro'] = 'altro' === $data['adesso'] ? tp_survey_text( $p['adesso_altro'] ?? '', 255 ) : '';
-	if ( 'altro' === $data['adesso'] && '' === $data['adesso_altro'] ) {
-		$errs['adesso_altro'] = true;
+	// Il testo di "Altro" vale solo con "Altro", e li' e' obbligatorio; la domanda di approfondimento solo con "No".
+	$data['interesse_altro'] = 'altro' === $data['interesse'] ? tp_survey_text( $p['interesse_altro'] ?? '', 255 ) : '';
+	if ( 'altro' === $data['interesse'] && '' === $data['interesse_altro'] ) {
+		$errs['interesse_altro'] = true;
 	}
-
-	foreach ( array( 'servizi', 'approfondire' ) as $k ) {
-		$in  = isset( $p[ $k ] ) && is_array( $p[ $k ] ) ? $p[ $k ] : array();
-		$ok  = $allowed( $k );
-		$out = array();
-		foreach ( $in as $v ) {
-			if ( is_scalar( $v ) && in_array( (string) $v, $ok, true ) && ! in_array( (string) $v, $out, true ) ) {
-				$out[] = (string) $v;
-			}
-		}
-		// L'opzione esclusiva ("No", "Niente per ora") non sta insieme alle altre.
-		$excl = $steps[ $k ]['exclusive'];
-		if ( in_array( $excl, $out, true ) && count( $out ) > 1 ) {
-			$errs[ $k ] = true;
-		}
-		$data[ $k ] = implode( ',', $out );
-	}
+	$data['investimento_serve'] = 'no' === $data['investimento'] ? tp_survey_text( $p['investimento_serve'] ?? '', 2000 ) : '';
 	return array( $data, $errs );
+}
+
+/** Valori per le colonne della v1 (text NOT NULL senza default): la riga nuova le lascia vuote. */
+function tp_serata_legacy_defaults() {
+	return array( 'ricordo' => '', 'dubbio' => '' );
 }
 
 function tp_serata_rest_create( WP_REST_Request $req ) {
@@ -304,7 +319,7 @@ function tp_serata_rest_create( WP_REST_Request $req ) {
 	if ( $errs ) {
 		return tp_survey_err( 'tp_survey_invalid', 'Invalid', 400, array( 'fields' => array_keys( $errs ) ) );
 	}
-	$row = array_merge( $data, array(
+	$row = array_merge( tp_serata_legacy_defaults(), $data, array(
 		'created_at' => current_time( 'mysql', true ),
 		'ip_hash'    => tp_survey_ip_hash(),
 		'user_agent' => mb_substr( (string) ( $_SERVER['HTTP_USER_AGENT'] ?? '' ), 0, 255 ),

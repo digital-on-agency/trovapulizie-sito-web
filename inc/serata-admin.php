@@ -30,11 +30,13 @@ function tp_serata_label( $field, $value ) {
 	return implode( ', ', $out );
 }
 
-/** Colonne dell'elenco e dell'export: campo => intestazione. */
+/** Colonne dell'elenco e dell'export: campo => intestazione (domande v0.3; le colonne della v1 restano solo nel DB). */
 function tp_serata_columns() {
 	return array(
-		'id' => 'ID', 'created_at' => 'Data', 'name' => 'Nome', 'rating' => 'Voto (1-5)', 'adesso' => 'E adesso?', 'adesso_altro' => 'E adesso? (altro)',
-		'chiarezza' => 'Modello chiaro', 'dubbio' => 'Dubbio', 'ricordo' => 'Cosa è rimasto', 'servizi' => 'Usa servizi', 'approfondire' => 'Da approfondire',
+		'id' => 'ID', 'created_at' => 'Data', 'name' => 'Nome', 'contatto' => 'Email o telefono', 'adesso' => 'E adesso?',
+		'investimento' => 'Investimento', 'investimento_serve' => 'Per valutare servirebbe', 'serata' => 'Serata (1-5)',
+		'progetto' => 'Progetto (1-5)', 'chiaro' => 'Modello chiaro (1-5)', 'migliorare' => 'Da migliorare',
+		'interesse' => 'Aspetto più interessante', 'interesse_altro' => 'Aspetto (altro)',
 		'contact_ref' => 'Contatto gestionale', 'at_status' => 'Copia gestionale',
 	);
 }
@@ -46,7 +48,7 @@ function tp_serata_cell( $k, array $r ) {
 	if ( 'at_status' === $k ) {
 		return 'ok' === $r['at_status'] ? 'ok' : $r['at_status'] . ( '' !== $r['at_error'] ? ' - ' . $r['at_error'] : '' );
 	}
-	return in_array( $k, array( 'chiarezza', 'servizi', 'approfondire', 'adesso' ), true ) ? tp_serata_label( $k, $r[ $k ] ) : (string) $r[ $k ];
+	return in_array( $k, array( 'interesse', 'investimento', 'adesso' ), true ) ? tp_serata_label( $k, $r[ $k ] ) : (string) $r[ $k ];
 }
 
 add_action( 'admin_post_tp_serata_csv', function () {
@@ -104,7 +106,7 @@ function tp_serata_admin_page() {
 	echo '<form method="post" action="' . esc_url( admin_url( 'admin-post.php' ) ) . '">';
 	wp_nonce_field( 'tp_serata_delete' );
 	echo '<input type="hidden" name="action" value="tp_serata_delete">';
-	echo '<table class="widefat striped"><thead><tr><td class="check-column"></td>';
+	echo '<div style="overflow-x:auto"><table class="widefat striped"><thead><tr><td class="check-column"></td>';
 	foreach ( tp_serata_columns() as $label ) {
 		echo '<th>' . esc_html( $label ) . '</th>';
 	}
@@ -119,7 +121,7 @@ function tp_serata_admin_page() {
 		}
 		echo '</tr>';
 	}
-	echo '</tbody></table>';
+	echo '</tbody></table></div>';
 	if ( $rows ) {
 		echo '<p><button class="button" onclick="return confirm(\'Cancellare le risposte selezionate? Non si torna indietro.\')">Cancella selezionate</button></p>';
 	}
