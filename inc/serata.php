@@ -9,7 +9,7 @@
  *   portare anche ?c=<id del Contatto nel gestionale> (recXXXXXXXXXXXXXX): la risposta si collega a quel Contatto.
  * - Salvataggio nella tabella {prefix}tp_serata_response, copia nel gestionale interno (inc/serata-airtable.php),
  *   nessuna notifica. Admin: inc/serata-admin.php (Strumenti > Survey serata 25/11: elenco, cancellazione, export CSV).
- * - Domande v0.3 (testo incollato da Guido il 26/11): nome, recapito facoltativo, tre voti da 1 a 5, cosa migliorare,
+ * - Domande v0.3 (testo incollato da Guido il 26/11): nome, telefono ed email facoltativi sulla stessa schermata, tre voti da 1 a 5, cosa migliorare,
  *   aspetto piu' interessante, interesse a valutare un investimento (con domanda di approfondimento se "No"), "E adesso?".
  * - Video della serata: chi sceglie "Vorrei ricevere materiale" trova il video nella schermata finale, se l'opzione
  *   WordPress tp_serata_video_url e' impostata.
@@ -21,7 +21,7 @@
  * chiunque abbia il link (art. 2468 c.c.). Trovapulizie era startup ospite: mai "evento Trovapulizie".
  */
 
-const TP_SERATA_DB_VERSION   = '3'; // 2: contact_ref e colonne at_*; 3: domande v0.3 (le colonne della v1 restano, vuote)
+const TP_SERATA_DB_VERSION   = '4'; // 2: contact_ref e colonne at_*; 3: domande v0.3 (le colonne della v1 restano, vuote); 4: telefono ed email separati
 const TP_SERATA_MAX_PER_HOUR = 10;
 
 /** True se la richiesta corrente e' la pagina della survey della serata. */
@@ -48,7 +48,10 @@ function tp_serata_definition() {
 		),
 		'steps'   => array(
 			array( 'id' => 'name', 'type' => 'text', 'count' => 1, 'required' => true, 'title' => 'Nome e cognome', 'placeholder' => 'Il tuo nome e cognome', 'max' => 120, 'autocomplete' => 'name' ),
-			array( 'id' => 'contatto', 'type' => 'text', 'count' => 2, 'required' => false, 'check' => 'contact', 'title' => 'Email o telefono', 'hint' => 'Facoltativo: ci serve per mandarti quello che ci chiedi.', 'placeholder' => 'Email o numero di telefono', 'max' => 120, 'autocomplete' => 'email' ),
+			array( 'id' => 'recapiti', 'type' => 'contact', 'count' => 2, 'required' => false, 'title' => 'Come ti ricontattiamo?', 'hint' => 'Facoltativi: basta uno dei due, ci serve per mandarti quello che ci chiedi.', 'fields' => array(
+				array( 'id' => 'telefono', 'label' => 'Numero di telefono', 'type' => 'tel', 'autocomplete' => 'tel', 'placeholder' => '+39 333 123 4567', 'max' => 40 ),
+				array( 'id' => 'email', 'label' => 'Email', 'type' => 'email', 'autocomplete' => 'email', 'placeholder' => 'nome@esempio.it', 'max' => 120 ),
+			) ),
 			array( 'id' => 'serata', 'type' => 'scale', 'count' => 3, 'required' => true, 'title' => 'Ti è piaciuta la serata?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
 			array( 'id' => 'progetto', 'type' => 'scale', 'count' => 4, 'required' => true, 'title' => 'Ti piace il progetto Trovapulizie?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
 			array( 'id' => 'chiaro', 'type' => 'scale', 'count' => 5, 'required' => true, 'title' => 'Ti è chiaro il modello di Trovapulizie?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
@@ -70,7 +73,8 @@ function tp_serata_definition() {
 		'ui'      => array(
 			'next' => 'Avanti', 'skip' => 'Salta', 'send' => 'Invia', 'sending' => 'Invio in corso…', 'back' => 'Indietro',
 			'other' => 'Scrivi qui', 'required' => 'Serve una risposta per andare avanti.', 'other_required' => 'Scrivi qualcosa nel campo, oppure scegli un’altra risposta.',
-			'contact_invalid' => 'Scrivi un’email o un numero di telefono validi, oppure lascia vuoto.',
+			'phone_invalid' => 'Il numero di telefono non sembra valido: controllalo oppure lascia vuoto.',
+			'email_invalid' => 'L’email non sembra valida: controllala oppure lascia vuoto.',
 			'privacy' => 'Inviando accetti l’', 'privacy_link' => 'informativa privacy',
 			'error' => 'Qualcosa non è andato: riprova tra un momento.', 'expired' => 'La pagina è rimasta aperta troppo a lungo: ricaricala e riprova.',
 			'limit' => 'Troppi invii da questa connessione: riprova più tardi.', 'nojs' => 'Per rispondere serve JavaScript attivo nel browser.',
@@ -94,7 +98,8 @@ function tp_serata_install() {
 		id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
 		created_at datetime NOT NULL,
 		name varchar(120) NOT NULL DEFAULT '',
-		contatto varchar(120) NOT NULL DEFAULT '',
+		telefono varchar(40) NOT NULL DEFAULT '',
+		email varchar(120) NOT NULL DEFAULT '',
 		serata tinyint(3) unsigned NOT NULL DEFAULT 0,
 		progetto tinyint(3) unsigned NOT NULL DEFAULT 0,
 		chiaro tinyint(3) unsigned NOT NULL DEFAULT 0,
@@ -237,17 +242,16 @@ add_action( 'rest_api_init', function () {
 	) );
 } );
 
-/** Recapito facoltativo: email valida oppure telefono con almeno 7 cifre. Ritorna [valore normalizzato, valido]. */
-function tp_serata_contact_value( $v ) {
-	$v = tp_survey_text( $v, 120 );
-	if ( '' === $v ) {
-		return array( '', true );
-	}
-	if ( false !== strpos( $v, '@' ) ) {
-		return is_email( $v ) ? array( strtolower( $v ), true ) : array( $v, false );
-	}
-	$ok = preg_match( '/^\+?[0-9 .\/()-]+$/', $v ) && strlen( preg_replace( '/\D+/', '', $v ) ) >= 7;
-	return array( $v, (bool) $ok );
+/** Telefono facoltativo: cifre, spazi e separatori, almeno 7 cifre. Ritorna [valore, valido]. */
+function tp_serata_phone_value( $v ) {
+	$v = tp_survey_text( $v, 40 );
+	return array( $v, '' === $v || ( preg_match( '/^\+?[0-9 .\/()-]+$/', $v ) && strlen( preg_replace( '/\D+/', '', $v ) ) >= 7 ) );
+}
+
+/** Email facoltativa. Ritorna [valore in minuscolo, valida]. */
+function tp_serata_email_value( $v ) {
+	$v = strtolower( tp_survey_text( $v, 120 ) );
+	return array( $v, '' === $v || (bool) is_email( $v ) );
 }
 
 /** Valida e normalizza le risposte. Ritorna [dati, errori[campo]=>true]. Funzione pura. */
@@ -263,9 +267,13 @@ function tp_serata_validate( array $p, array $def ) {
 	if ( '' === $data['name'] ) {
 		$errs['name'] = true;
 	}
-	list( $data['contatto'], $ok ) = tp_serata_contact_value( $p['contatto'] ?? '' );
+	list( $data['telefono'], $ok ) = tp_serata_phone_value( $p['telefono'] ?? '' );
 	if ( ! $ok ) {
-		$errs['contatto'] = true;
+		$errs['telefono'] = true;
+	}
+	list( $data['email'], $ok ) = tp_serata_email_value( $p['email'] ?? '' );
+	if ( ! $ok ) {
+		$errs['email'] = true;
 	}
 	$data['contact_ref'] = tp_serata_contact_ref( $p['contact'] ?? '' );
 

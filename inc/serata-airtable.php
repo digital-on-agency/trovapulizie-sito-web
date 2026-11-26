@@ -7,7 +7,7 @@
  * - Stesso schema della Survey OnField (inc/survey-airtable.php, di cui riusa tp_survey_at_request e il token
  *   TP_AIRTABLE_SURVEY_TOKEN): evento cron immediato a ogni risposta, giro ogni 15 minuti per le righe rimaste indietro.
  * - Contatto: dall'id del link (?c=<id>, verificato prima di collegarlo: un id sbagliato farebbe fallire la copia),
- *   altrimenti cercato per email o telefono lasciati nella domanda 2 (tp_survey_at_find_contact). Nessun Contatto nuovo:
+ *   altrimenti cercato per telefono o email lasciati nella domanda 2 (tp_survey_at_find_contact). Nessun Contatto nuovo:
  *   se non si trova, la risposta arriva senza collegamento e con la nota.
  * - Nessuna Opportunita': chi era in sala non e' un lead di servizio, e una nuova Opportunita' farebbe partire
  *   "TP - Notifica lead al team" (WhatsApp operativo). Il ricontatto si segue dalla spunta "Da ricontattare"
@@ -15,7 +15,7 @@
  * - Manuale: wp tp-serata sync [<id>] [--all]
  */
 
-const TP_SERATA_AT_TABLE     = '';  // "Survey Serata 25-11", id assegnato da Airtable alla creazione della tabella
+const TP_SERATA_AT_TABLE     = 'tbl7acCyAmt6QTlqR'; // "Survey Serata 25-11", creata il 26/11
 const TP_SERATA_AT_MAX_TRIES = 5;
 
 /** True se la copia e' attiva: token presente e tabella configurata. */
@@ -56,9 +56,8 @@ function tp_serata_at_sync_row( $id ) {
 			$contact = '';
 		}
 	}
-	if ( '' === $contact && '' !== (string) $r['contatto'] ) {
-		$is_mail = false !== strpos( $r['contatto'], '@' );
-		list( $contact, $err ) = tp_survey_at_find_contact( $is_mail ? $r['contatto'] : '', $is_mail ? '' : preg_replace( '/\D+/', '', $r['contatto'] ) );
+	if ( '' === $contact && ( '' !== (string) $r['telefono'] || '' !== (string) $r['email'] ) ) {
+		list( $contact, $err ) = tp_survey_at_find_contact( (string) $r['email'], preg_replace( '/\D+/', '', (string) $r['telefono'] ) );
 		if ( $err ) {
 			return $fail( 'contatto (ricerca): ' . $err );
 		}
@@ -72,7 +71,8 @@ function tp_serata_at_sync_row( $id ) {
 		'WP ID'                     => (int) $id,
 		'Data'                      => tp_survey_at_iso( $r['created_at'] ),
 		'Nome'                      => $r['name'],
-		'Email o telefono'          => $r['contatto'],
+		'Telefono'                  => $r['telefono'],
+		'Email'                     => '' !== $r['email'] ? $r['email'] : null,
 		'Serata'                    => (int) $r['serata'],
 		'Progetto'                  => (int) $r['progetto'],
 		'Modello chiaro'            => (int) $r['chiaro'],

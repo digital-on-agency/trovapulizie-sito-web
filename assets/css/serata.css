@@ -39,3 +39,7 @@
 .sv__video { margin: 8px 0 32px; }
 .sv__video-title { margin: 0 0 12px; text-align: center; font-size: 17px; font-weight: 700; color: var(--sv-ink); }
 .sv__video video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 12px; background: #000; }
+
+/* Recapiti: telefono ed email sulla stessa schermata */
+.sv__field { display: block; margin-bottom: 16px; }
+.sv__field-label { display: block; margin: 0 0 6px; font-size: 14px; font-weight: 600; color: var(--sv-ink); }

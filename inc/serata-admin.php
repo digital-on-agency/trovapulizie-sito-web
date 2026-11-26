@@ -33,7 +33,7 @@ function tp_serata_label( $field, $value ) {
 /** Colonne dell'elenco e dell'export: campo => intestazione (domande v0.3; le colonne della v1 restano solo nel DB). */
 function tp_serata_columns() {
 	return array(
-		'id' => 'ID', 'created_at' => 'Data', 'name' => 'Nome', 'contatto' => 'Email o telefono', 'adesso' => 'E adesso?',
+		'id' => 'ID', 'created_at' => 'Data', 'name' => 'Nome', 'telefono' => 'Telefono', 'email' => 'Email', 'adesso' => 'E adesso?',
 		'investimento' => 'Investimento', 'investimento_serve' => 'Per valutare servirebbe', 'serata' => 'Serata (1-5)',
 		'progetto' => 'Progetto (1-5)', 'chiaro' => 'Modello chiaro (1-5)', 'migliorare' => 'Da migliorare',
 		'interesse' => 'Aspetto più interessante', 'interesse_altro' => 'Aspetto (altro)',

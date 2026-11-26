@@ -1,7 +1,7 @@
 // QA della survey della serata 25/11 (page-serata.php): percorso completo a 390 e 1280 px, nome dal link, domanda 4b
 // condizionata, opzioni esclusive, "Altro" obbligatorio, invio e schermata finale; prove dell'endpoint (honeypot, nonce,
 // tempo minimo, campi non validi); con "admin" anche l'elenco in Strumenti > Survey serata 25/11 e l'export CSV.
-// v0.3: logo, id del Contatto dal link (?c=), recapito facoltativo validato, tre voti, domanda di approfondimento solo con
+// v0.3: logo, id del Contatto dal link (?c=), telefono ed email facoltativi e validati, tre voti, domanda di approfondimento solo con
 // investimento "No", video nella schermata finale solo con "Vorrei ricevere materiale" (serve l'opzione
 // tp_serata_video_url impostata sul sito provato).
 // Uso: node tools/qa-serata.js <chrome-bin> <base-url> <out-dir> [admin]
@@ -70,12 +70,18 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 		await expect(c, /Nome e cognome/, '1 / 9');
 		ok((await c.ev(JS.value('.sv__input'))) === 'Mario Rossi', `${c.label}: nome gia' compilato dal link`);
 		await press(c);
-		await expect(c, /Email o telefono/, '2 / 9');
-		ok((await c.ev(JS.cta)) === 'Salta', `${c.label}: recapito facoltativo = "Salta"`);
-		await c.ev(JS.type('.sv__input', 'mario@'));
+		await expect(c, /Come ti ricontattiamo/, '2 / 9');
+		ok(await c.ev(`document.querySelector('input[name=telefono]').type==='tel'&&document.querySelector('input[name=email]').type==='email'`), `${c.label}: campi telefono ed email sulla stessa schermata`);
+		ok((await c.ev(JS.cta)) === 'Salta', `${c.label}: recapiti facoltativi = "Salta"`);
+		await c.ev(JS.type('input[name=telefono]', '12ab'));
 		await press(c);
-		ok(/email o un numero di telefono validi/.test(await c.ev(JS.error)), `${c.label}: recapito non valido bloccato`);
-		await c.ev(JS.type('.sv__input', '+39 333 123 4567'));
+		ok(/numero di telefono non sembra valido/.test(await c.ev(JS.error)), `${c.label}: telefono non valido bloccato`);
+		await c.ev(JS.type('input[name=telefono]', '+39 333 123 4567'));
+		await c.ev(JS.type('input[name=email]', 'mario@'));
+		await press(c);
+		ok(/email non sembra valida/.test(await c.ev(JS.error)), `${c.label}: email non valida bloccata`);
+		await c.shot(`${outDir}/A-2-recapiti.png`);
+		await c.ev(JS.type('input[name=email]', 'mario.rossi@example.com'));
 		await press(c);
 		await expect(c, /piaciuta la serata/, '3 / 9');
 		ok(await c.ev(JS.scaleRow), `${c.label}: scala 1-5 su una riga`);
@@ -121,7 +127,7 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 		ok(/Serve una risposta/.test(await c.ev(JS.error)), `${c.label}: nome obbligatorio`);
 		await c.ev(JS.type('.sv__input', 'Laura Bianchi'));
 		await press(c);
-		await press(c); // Salta il recapito
+		await press(c); // Salta i recapiti
 		await pick(c, '4'); await pick(c, '5'); await pick(c, '5');
 		await press(c); // Salta "migliorare"
 		await pick(c, "L'intero progetto");
@@ -148,8 +154,8 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 		ok((await c.ev(post(`{nonce:'x'}`))).startsWith('403 tp_survey_expired'), `${c.label}: nonce errato = 403`);
 		ok((await c.ev(post(`{}`))).startsWith('429 tp_survey_fast'), `${c.label}: invio troppo veloce = 429`);
 		await sleep(12500);
-		const bad = await c.ev(post(`{contatto:'abc',serata:9,interesse:'altro',investimento:'boh',adesso:'x'}`));
-		ok(/^400 tp_survey_invalid .*contatto.*serata.*investimento.*adesso.*interesse_altro/.test(bad), `${c.label}: campi non validi = 400 (${bad})`);
+		const bad = await c.ev(post(`{telefono:'abc',email:'x@',serata:9,interesse:'altro',investimento:'boh',adesso:'x'}`));
+		ok(/^400 tp_survey_invalid .*telefono.*email.*serata.*investimento.*adesso.*interesse_altro/.test(bad), `${c.label}: campi non validi = 400 (${bad})`);
 	});
 
 	if (withAdmin) {
@@ -161,7 +167,7 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 			const txt = await c.ev(`document.querySelector('.wrap')?document.querySelector('.wrap').innerText:''`);
 			ok(/Survey serata 25\/11/.test(txt), `${c.label}: pagina in Strumenti`);
 			ok(/Mario Rossi/.test(txt) && /Laura Bianchi/.test(txt), `${c.label}: le due risposte nell'elenco`);
-			ok(/I numeri del primo anno/.test(txt) && /Come guadagnate\?/.test(txt) && /\+39 333 123 4567/.test(txt), `${c.label}: testi liberi e recapito visibili`);
+			ok(/I numeri del primo anno/.test(txt) && /Come guadagnate\?/.test(txt) && /\+39 333 123 4567/.test(txt) && /mario\.rossi@example\.com/.test(txt), `${c.label}: testi liberi e recapito visibili`);
 			ok(/No, non fa per me in questa fase/.test(txt) && /Restiamo in contatto/.test(txt), `${c.label}: etichette leggibili delle scelte`);
 			ok(/recQAQAQAQAQAQAQA/.test(txt), `${c.label}: id del Contatto dal link salvato`);
 			await c.shot(`${outDir}/admin-elenco.png`);

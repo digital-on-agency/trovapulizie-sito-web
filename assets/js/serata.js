@@ -3,7 +3,7 @@
  * (stessa fonte della validazione lato server) e invia tutto in una volta a POST /wp-json/tp/v1/serata all'ultima
  * domanda. Nessuna libreria, nessun tracking. Classi e pelle della Survey OnField (assets/css/survey.css).
  *
- * Flusso v0.3: benvenuto -> nome (gia' compilato dal link) -> recapito facoltativo -> tre voti 1-5 -> cosa migliorare
+ * Flusso v0.3: benvenuto -> nome (gia' compilato dal link) -> telefono ed email facoltativi (una schermata) -> tre voti 1-5 -> cosa migliorare
  * -> aspetto piu' interessante -> investimento (con approfondimento solo se "No", stesso numero) -> "E adesso?" con Invia
  * -> grazie. Le scelte singole e i voti avanzano al tocco, tranne l'ultima domanda, che chiede Invia.
  * Il video della serata compare nella schermata finale solo con la risposta indicata in def.thanks.video_when
@@ -139,6 +139,7 @@
 		var msg = errorBox();
 		if (step.type === 'text' || step.type === 'textarea') textQ(step, msg);
 		else if (step.type === 'scale') scaleQ(step, msg);
+		else if (step.type === 'contact') contactQ(step, msg);
 		else choiceQ(step, msg);
 	}
 
@@ -157,6 +158,7 @@
 		return btn;
 	}
 	function hasAnswer(step) {
+		if (step.fields) return step.fields.some(function (f) { return !!(ans[f.id] && String(ans[f.id]).trim()); });
 		var v = ans[step.id];
 		return Array.isArray(v) ? v.length > 0 : !!(v && String(v).trim());
 	}
@@ -164,10 +166,33 @@
 		if (!step.last && !step.required) btn.textContent = hasAnswer(step) ? ui.next : ui.skip;
 	}
 
-	// Stessa regola di tp_serata_contact_value(): email, oppure telefono con almeno 7 cifre.
-	function contactOk(v) {
-		if (v.indexOf('@') !== -1) return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-		return /^\+?[0-9 .\/()-]+$/.test(v) && v.replace(/\D+/g, '').length >= 7;
+	// Stesse regole di tp_serata_phone_value() e tp_serata_email_value().
+	function phoneOk(v) { return /^\+?[0-9 .\/()-]+$/.test(v) && v.replace(/\D+/g, '').length >= 7; }
+	function emailOk(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+	// Recapiti: piu' campi facoltativi sulla stessa schermata, ognuno con la sua etichetta.
+	function contactQ(step, msg) {
+		var inputs = {};
+		step.fields.forEach(function (f) {
+			var wrap = el('label', 'sv__field');
+			wrap.appendChild(el('span', 'sv__field-label', f.label));
+			var inp = el('input', 'sv__input');
+			inp.type = f.type; inp.autocomplete = f.autocomplete; inp.maxLength = f.max; inp.placeholder = f.placeholder;
+			inp.name = f.id;
+			if (f.type === 'tel') inp.inputMode = 'tel';
+			inp.value = ans[f.id] || '';
+			inp.addEventListener('input', function () { ans[f.id] = inp.value; inp.removeAttribute('aria-invalid'); msg.hidden = true; relabel(btn, step); });
+			inp.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); btn.click(); } });
+			wrap.appendChild(inp);
+			screenEl.appendChild(wrap);
+			inputs[f.id] = inp;
+		});
+		var btn = footer(step, msg, function () {
+			var tel = (inputs.telefono.value || '').trim(), mail = (inputs.email.value || '').trim();
+			if (tel && !phoneOk(tel)) { inputs.telefono.setAttribute('aria-invalid', 'true'); inputs.telefono.focus(); return ui.phone_invalid; }
+			if (mail && !emailOk(mail)) { inputs.email.setAttribute('aria-invalid', 'true'); inputs.email.focus(); return ui.email_invalid; }
+			return '';
+		});
 	}
 
 	function textQ(step, msg) {
@@ -180,10 +205,7 @@
 		inp.value = ans[step.id] || '';
 		screenEl.appendChild(inp);
 		var btn = footer(step, msg, function () {
-			var v = inp.value.trim();
-			if (step.required && !v) return ui.required;
-			if (step.check === 'contact' && v && !contactOk(v)) { inp.setAttribute('aria-invalid', 'true'); return ui.contact_invalid; }
-			return '';
+			return step.required && !inp.value.trim() ? ui.required : '';
 		});
 		inp.addEventListener('input', function () {
 			ans[step.id] = inp.value;
@@ -331,6 +353,7 @@
 		var p = { nonce: cfg.nonce, ts: cfg.ts, sig: cfg.sig, contact: cfg.contact || '', website: honey ? honey.value : '' };
 		ids.forEach(function (k) {
 			var st = stepById[k];
+			if (st.fields) { st.fields.forEach(function (f) { p[f.id] = ans[f.id] || ''; }); return; }
 			var v = ans[k];
 			if (!applies(st)) v = st.type === 'multi' ? [] : '';
 			p[k] = st.type === 'multi' ? (v || []) : (v === undefined ? '' : v);
@@ -364,10 +387,13 @@
 				if (res.status === 400 && res.body && res.body.data && res.body.data.fields) {
 					// Un campo di una schermata precedente: si torna li'. Il testo di "Altro" appartiene alla sua domanda.
 					var f = res.body.data.fields[0];
-					var owner = ids.filter(function (k) { return stepById[k].other_field === f; })[0] || f;
+					var owner = ids.filter(function (k) {
+						var st = stepById[k];
+						return st.other_field === f || (st.fields && st.fields.some(function (x) { return x.id === f; }));
+					})[0] || f;
 					var last = ids[ids.length - 1];
 					if (owner !== last && stepById[owner]) { go(owner); return; }
-					text = f !== owner ? ui.other_required : ui.required;
+					text = stepById[owner] && stepById[owner].other_field === f ? ui.other_required : ui.required;
 				} else if (res.status === 403) text = ui.expired;
 				else if (res.status === 429 && res.body && res.body.code === 'tp_survey_limit') text = ui.limit;
 				show(msg, text);
