@@ -49,7 +49,8 @@ function tp_serata_at_sync_row( $id ) {
 	if ( '' !== $contact ) {
 		list( , $err ) = tp_survey_at_request( 'GET', TP_SURVEY_AT_CONTACTS . '/' . rawurlencode( $contact ), null, array( 'fields[]' => 'Nome' ) );
 		if ( $err ) {
-			if ( 0 !== strpos( $err, 'HTTP 404' ) ) {
+			// Un id che non esiste torna come 404 oppure come 403 INVALID_PERMISSIONS_OR_MODEL_NOT_FOUND (visto il 26/11).
+			if ( 0 !== strpos( $err, 'HTTP 404' ) && false === strpos( $err, 'MODEL_NOT_FOUND' ) ) {
 				return $fail( 'contatto (verifica): ' . $err );
 			}
 			$warn    = 'Contatto ' . $contact . ' del link non trovato nel gestionale.';
@@ -66,6 +67,33 @@ function tp_serata_at_sync_row( $id ) {
 		}
 	}
 
+	// Risposte arrivate con le domande della v1 (26/11 mattina): voto nella colonna Serata, il resto nelle note.
+	$legacy = '';
+	if ( 0 === (int) $r['serata'] && (int) $r['rating'] > 0 ) {
+		$v1     = array(
+			'chiaro' => 'Sì, chiaro', 'dubbio' => 'Abbastanza, ma ho qualche dubbio', 'poco' => 'Poco chiaro',
+			'casa' => 'per casa', 'azienda' => "per un'azienda o un ufficio", 'no' => 'No',
+			'modello' => 'Come funziona il modello', 'team' => 'Il team', 'tecnologia' => "La tecnologia e l'app",
+			'partecipare' => 'Come partecipare al progetto', 'servizio' => 'Provare il servizio', 'video' => 'Rivedere il video', 'niente' => 'Niente per ora',
+			'sentiamoci' => 'Sentiamoci', 'materiale' => 'Vorrei ricevere del materiale', 'piacere' => 'È stato un piacere conoscervi', 'altro' => 'Altro',
+		);
+		$lab    = function ( $csv ) use ( $v1 ) {
+			return implode( ', ', array_map( function ( $x ) use ( $v1 ) { return $v1[ $x ] ?? $x; }, array_filter( explode( ',', (string) $csv ) ) ) );
+		};
+		$legacy = implode( "\n", array_filter( array(
+			'Risposta alle domande della v1 (26/11 mattina):',
+			'Cosa è rimasto: ' . ( '' !== (string) $r['ricordo'] ? $r['ricordo'] : '-' ),
+			'Modello chiaro: ' . $lab( $r['chiarezza'] ) . ( '' !== (string) $r['dubbio'] ? ' - dubbio: ' . $r['dubbio'] : '' ),
+			'Usa servizi: ' . ( $lab( $r['servizi'] ) ?: '-' ),
+			'Da approfondire: ' . ( $lab( $r['approfondire'] ) ?: '-' ),
+			'E adesso: ' . $lab( $r['adesso'] ) . ( '' !== (string) $r['adesso_altro'] ? ' - ' . $r['adesso_altro'] : '' ),
+		) ) );
+		$r['serata'] = $r['rating'];
+		$r['adesso'] = array( 'materiale' => 'materiale', 'sentiamoci' => 'contatto' )[ $r['adesso'] ] ?? '';
+	}
+	$score = function ( $n ) {
+		return (int) $n >= 1 ? (int) $n : null;
+	};
 	$fields = array(
 		'Risposta'                  => 'Serata #' . $id . ' - ' . $r['name'],
 		'WP ID'                     => (int) $id,
@@ -73,9 +101,9 @@ function tp_serata_at_sync_row( $id ) {
 		'Nome'                      => $r['name'],
 		'Telefono'                  => $r['telefono'],
 		'Email'                     => '' !== $r['email'] ? $r['email'] : null,
-		'Serata'                    => (int) $r['serata'],
-		'Progetto'                  => (int) $r['progetto'],
-		'Modello chiaro'            => (int) $r['chiaro'],
+		'Serata'                    => $score( $r['serata'] ),
+		'Progetto'                  => $score( $r['progetto'] ),
+		'Modello chiaro'            => $score( $r['chiaro'] ),
 		'Da migliorare'             => (string) $r['migliorare'],
 		'Aspetto più interessante'  => '' !== $r['interesse'] ? tp_serata_label( 'interesse', $r['interesse'] ) : null,
 		'Aspetto (altro)'           => $r['interesse_altro'],
@@ -84,7 +112,7 @@ function tp_serata_at_sync_row( $id ) {
 		'E adesso'                  => '' !== $r['adesso'] ? tp_serata_label( 'adesso', $r['adesso'] ) : null,
 		'Da ricontattare'           => in_array( $r['adesso'], array( 'materiale', 'contatto' ), true ) || in_array( $r['investimento'], array( 'si', 'forse' ), true ),
 		'Contatto'                  => '' !== $contact ? array( $contact ) : array(),
-		'Note sincronizzazione'     => $warn,
+		'Note sincronizzazione'     => trim( $legacy . ( '' !== $legacy && '' !== $warn ? "\n" : '' ) . $warn ),
 	);
 	$record = array( 'fields' => $fields );
 	// typecast: un'etichetta nuova (es. l'opzione del video) crea la scelta nel campo invece di far fallire la copia.
