@@ -5,9 +5,12 @@
  *
  * - tp_serata_definition(): unica fonte di domande e testi. Va in JSON alla pagina (assets/js/serata.js costruisce le
  *   schermate) e alla validazione lato server (tp_serata_validate, funzione pura).
- * - Il nome arriva gia' compilato dal link personale: ?n=Nome%20Cognome (ripulito qui, mai letto dal JS).
- * - Salvataggio nella tabella {prefix}tp_serata_response, nessuna copia su Airtable, nessuna notifica.
- *   Admin: inc/serata-admin.php (Strumenti > Survey serata 25/11: elenco, cancellazione, export CSV).
+ * - Il nome arriva gia' compilato dal link personale: ?n=Nome%20Cognome (ripulito qui, mai letto dal JS). Il link puo'
+ *   portare anche ?c=<id del Contatto nel gestionale> (recXXXXXXXXXXXXXX): la risposta si collega a quel Contatto.
+ * - Salvataggio nella tabella {prefix}tp_serata_response, copia nel gestionale interno (inc/serata-airtable.php),
+ *   nessuna notifica. Admin: inc/serata-admin.php (Strumenti > Survey serata 25/11: elenco, cancellazione, export CSV).
+ * - Video della serata (v0.2, Guido 26/11): opzione "Rivedere il video della serata" nella domanda 6, presente solo se
+ *   l'opzione WordPress tp_serata_video_url e' impostata; chi la sceglie trova il video nella schermata finale.
  * - Guardie riusate dalla Survey OnField (inc/survey.php): origine, nonce, tempo minimo firmato, honeypot, limite
  *   orario per IP hash contato solo dopo un salvataggio riuscito.
  * - Pagina noindex,nofollow, fuori dalla sitemap, mai in cache LiteSpeed, senza tracking ne' banner dei cookie.
@@ -16,7 +19,7 @@
  * chiunque abbia il link (art. 2468 c.c.). Trovapulizie era startup ospite: mai "evento Trovapulizie".
  */
 
-const TP_SERATA_DB_VERSION   = '1';
+const TP_SERATA_DB_VERSION   = '2'; // 2: contact_ref e colonne at_* della copia nel gestionale (inc/serata-airtable.php)
 const TP_SERATA_MAX_PER_HOUR = 10;
 
 /** True se la richiesta corrente e' la pagina della survey della serata. */
@@ -24,8 +27,21 @@ function tp_is_serata_page() {
 	return is_singular( 'page' ) && is_page_template( 'page-serata.php' );
 }
 
+/** URL del video della serata (file nella libreria media), '' se non ancora caricato. */
+function tp_serata_video_url() {
+	return (string) get_option( 'tp_serata_video_url', '' );
+}
+
 /** Domande e testi. Chiavi dei campi = colonne della tabella. */
 function tp_serata_definition() {
+	$approfondire = array(
+		array( 'modello', 'Come funziona il modello' ), array( 'team', 'Il team' ), array( 'tecnologia', "La tecnologia e l'app" ),
+		array( 'partecipare', 'Come partecipare al progetto' ), array( 'servizio', 'Provare il servizio' ),
+	);
+	if ( '' !== tp_serata_video_url() ) {
+		$approfondire[] = array( 'video', 'Rivedere il video della serata' );
+	}
+	$approfondire[] = array( 'niente', 'Niente per ora' );
 	return array(
 		'brand'   => 'Trovapulizie',
 		'total'   => 7,
@@ -46,16 +62,13 @@ function tp_serata_definition() {
 			array( 'id' => 'servizi', 'type' => 'multi', 'count' => 5, 'required' => false, 'title' => 'Usi servizi di pulizia o manutenzione?', 'exclusive' => 'no', 'options' => tp_survey_opts( array(
 				array( 'casa', 'Sì, per casa' ), array( 'azienda', "Sì, per un'azienda o un ufficio" ), array( 'no', 'No' ),
 			) ) ),
-			array( 'id' => 'approfondire', 'type' => 'multi', 'count' => 6, 'required' => false, 'title' => 'Cosa ti piacerebbe approfondire?', 'hint' => 'Puoi scegliere più risposte.', 'exclusive' => 'niente', 'options' => tp_survey_opts( array(
-				array( 'modello', 'Come funziona il modello' ), array( 'team', 'Il team' ), array( 'tecnologia', "La tecnologia e l'app" ),
-				array( 'partecipare', 'Come partecipare al progetto' ), array( 'servizio', 'Provare il servizio' ), array( 'niente', 'Niente per ora' ),
-			) ) ),
+			array( 'id' => 'approfondire', 'type' => 'multi', 'count' => 6, 'required' => false, 'title' => 'Cosa ti piacerebbe approfondire?', 'hint' => 'Puoi scegliere più risposte.', 'exclusive' => 'niente', 'options' => tp_survey_opts( $approfondire ) ),
 			array( 'id' => 'adesso', 'type' => 'single', 'count' => 7, 'required' => true, 'last' => true, 'title' => 'E adesso?', 'other_field' => 'adesso_altro', 'options' => tp_survey_opts( array(
 				array( 'sentiamoci', 'Sentiamoci' ), array( 'materiale', 'Vorrei ricevere del materiale' ),
 				array( 'piacere', 'È stato un piacere conoscervi' ), array( 'altro', 'Altro', true ),
 			) ) ),
 		),
-		'thanks'  => array( 'title' => 'Grazie%s.', 'body' => 'Ci sentiamo presto.', 'sign' => 'Christian e Guido' ),
+		'thanks'  => array( 'title' => 'Grazie%s.', 'body' => 'Ci sentiamo presto.', 'sign' => 'Christian e Guido', 'video' => 'Il video della serata' ),
 		'ui'      => array(
 			'next' => 'Avanti', 'skip' => 'Salta', 'send' => 'Invia', 'sending' => 'Invio in corso…', 'back' => 'Indietro',
 			'other' => 'Scrivi qui', 'required' => 'Serve una risposta per andare avanti.', 'other_required' => 'Scrivi qualcosa nel campo, oppure scegli un’altra risposta.',
@@ -88,8 +101,14 @@ function tp_serata_install() {
 		approfondire varchar(120) NOT NULL DEFAULT '',
 		adesso varchar(20) NOT NULL DEFAULT '',
 		adesso_altro varchar(255) NOT NULL DEFAULT '',
+		contact_ref varchar(17) NOT NULL DEFAULT '',
 		ip_hash char(16) NOT NULL DEFAULT '',
 		user_agent varchar(255) NOT NULL DEFAULT '',
+		at_record_id varchar(17) NOT NULL DEFAULT '',
+		at_status varchar(10) NOT NULL DEFAULT 'pending',
+		at_tries tinyint(3) unsigned NOT NULL DEFAULT 0,
+		at_error varchar(255) NOT NULL DEFAULT '',
+		at_synced_at datetime NULL DEFAULT NULL,
 		PRIMARY KEY  (id),
 		KEY created_at (created_at)
 	) {$charset};" );
@@ -174,6 +193,12 @@ function tp_serata_prefill_name() {
 	return mb_substr( $n, 0, 120 );
 }
 
+/** Id del Contatto nel gestionale (record Airtable): esattamente rec + 14 caratteri alfanumerici, altrimenti ''. */
+function tp_serata_contact_ref( $v ) {
+	$v = is_string( $v ) ? trim( $v ) : '';
+	return preg_match( '/^rec[A-Za-z0-9]{14}$/', $v ) ? $v : '';
+}
+
 /** Configurazione passata alla pagina: definizione, endpoint, nonce, tempo firmato, nome precompilato. */
 function tp_serata_page_config() {
 	$ts = time();
@@ -185,6 +210,10 @@ function tp_serata_page_config() {
 		'sig'      => tp_survey_sign( 'ts:' . $ts ),
 		'privacy'  => home_url( '/privacy/' ),
 		'name'     => tp_serata_prefill_name(),
+		'contact'  => tp_serata_contact_ref( isset( $_GET['c'] ) ? wp_unslash( $_GET['c'] ) : '' ),
+		'logo'     => tp_theme_asset( 'assets/img/logo.png' ),
+		'video'    => tp_serata_video_url(),
+		'poster'   => (string) get_option( 'tp_serata_video_poster', '' ),
 	);
 }
 
@@ -220,6 +249,7 @@ function tp_serata_validate( array $p, array $def ) {
 	}
 	$data['rating']  = $rating;
 	$data['ricordo'] = tp_survey_text( $p['ricordo'] ?? '', 2000 );
+	$data['contact_ref'] = tp_serata_contact_ref( $p['contact'] ?? '' );
 
 	foreach ( array( 'chiarezza', 'adesso' ) as $k ) {
 		$v = is_scalar( $p[ $k ] ?? null ) ? (string) $p[ $k ] : '';
@@ -283,7 +313,9 @@ function tp_serata_rest_create( WP_REST_Request $req ) {
 		return tp_survey_err( 'tp_survey_db', 'Error', 500 );
 	}
 	tp_survey_rate_limited( 's', TP_SERATA_MAX_PER_HOUR, true );
+	do_action( 'tp_serata_saved', (int) $wpdb->insert_id );
 	return new WP_REST_Response( array( 'ok' => true ), 201 );
 }
 
 require_once __DIR__ . '/serata-admin.php';
+require_once __DIR__ . '/serata-airtable.php';

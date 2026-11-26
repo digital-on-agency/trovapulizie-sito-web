@@ -6,6 +6,8 @@
  * Flusso: benvenuto -> nome (gia' compilato dal link) -> voto -> ricordo -> chiarezza -> dubbio (solo se il modello
  * non era chiaro) -> servizi -> approfondire -> "E adesso?" con Invia -> grazie. Etichetta "N / 7": il dubbio condivide
  * il numero della domanda 4. Le scelte singole avanzano al tocco, tranne l'ultima, che chiede Invia.
+ * Il video della serata compare nella schermata finale solo a chi ha scelto "Rivedere il video" nella domanda 6;
+ * preload="none": il file si scarica solo quando si preme play.
  */
 (function () {
 	'use strict';
@@ -91,9 +93,17 @@
 	}
 
 	/* ---- Schermate ---- */
+	function logo() {
+		var p = el('p', 'sv__logo sv__logo--img');
+		var img = el('img');
+		img.src = cfg.logo; img.alt = def.brand; img.width = 1356; img.height = 212;
+		p.appendChild(img);
+		return p;
+	}
+
 	function welcome() {
 		var w = def.welcome;
-		screenEl.appendChild(el('p', 'sv__logo', def.brand));
+		screenEl.appendChild(logo());
 		screenEl.appendChild(el('h1', 'sv__title', w.title));
 		screenEl.appendChild(el('p', 'sv__body', w.body));
 		screenEl.appendChild(el('p', 'sv__sign', w.sign));
@@ -110,6 +120,16 @@
 		screenEl.appendChild(el('h1', 'sv__title', t.title.replace('%s', name ? ', ' + name : '')));
 		screenEl.appendChild(el('p', 'sv__body', t.body));
 		screenEl.appendChild(el('p', 'sv__sign', t.sign));
+		if (cfg.video && (ans.approfondire || []).indexOf('video') !== -1) {
+			var box = el('div', 'sv__video');
+			box.appendChild(el('h2', 'sv__video-title', t.video));
+			var v = el('video');
+			v.src = cfg.video; v.controls = true; v.preload = 'none'; v.setAttribute('playsinline', '');
+			if (cfg.poster) v.poster = cfg.poster;
+			v.setAttribute('aria-label', t.video);
+			box.appendChild(v);
+			screenEl.appendChild(box);
+		}
 	}
 
 	function question(step) {
@@ -297,7 +317,7 @@
 
 	/* ---- Invio ---- */
 	function payload() {
-		var p = { nonce: cfg.nonce, ts: cfg.ts, sig: cfg.sig, website: honey ? honey.value : '' };
+		var p = { nonce: cfg.nonce, ts: cfg.ts, sig: cfg.sig, contact: cfg.contact || '', website: honey ? honey.value : '' };
 		ids.forEach(function (k) {
 			var st = stepById[k];
 			var v = ans[k];

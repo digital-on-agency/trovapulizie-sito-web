@@ -35,12 +35,16 @@ function tp_serata_columns() {
 	return array(
 		'id' => 'ID', 'created_at' => 'Data', 'name' => 'Nome', 'rating' => 'Voto (1-5)', 'adesso' => 'E adesso?', 'adesso_altro' => 'E adesso? (altro)',
 		'chiarezza' => 'Modello chiaro', 'dubbio' => 'Dubbio', 'ricordo' => 'Cosa è rimasto', 'servizi' => 'Usa servizi', 'approfondire' => 'Da approfondire',
+		'contact_ref' => 'Contatto gestionale', 'at_status' => 'Copia gestionale',
 	);
 }
 
 function tp_serata_cell( $k, array $r ) {
 	if ( 'created_at' === $k ) {
 		return get_date_from_gmt( $r['created_at'], 'Y-m-d H:i' );
+	}
+	if ( 'at_status' === $k ) {
+		return 'ok' === $r['at_status'] ? 'ok' : $r['at_status'] . ( '' !== $r['at_error'] ? ' - ' . $r['at_error'] : '' );
 	}
 	return in_array( $k, array( 'chiarezza', 'servizi', 'approfondire', 'adesso' ), true ) ? tp_serata_label( $k, $r[ $k ] ) : (string) $r[ $k ];
 }

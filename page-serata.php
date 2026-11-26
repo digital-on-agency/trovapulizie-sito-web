@@ -18,7 +18,7 @@ get_template_part( 'template-parts/head' );
 			<div class="sv__bar" role="presentation"><span class="sv__bar-fill" data-sv-fill></span></div>
 		</header>
 		<div class="sv__screen" data-sv-screen tabindex="-1" aria-live="polite">
-			<p class="sv__logo">Trovapulizie</p>
+			<p class="sv__logo sv__logo--img"><img src="<?php echo esc_url( $config['logo'] ); ?>" alt="Trovapulizie" width="1356" height="212"></p>
 			<noscript><p class="sv__title"><?php echo esc_html( $config['def']['ui']['nojs'] ); ?></p></noscript>
 		</div>
 	</div>

@@ -1,6 +1,8 @@
 // QA della survey della serata 25/11 (page-serata.php): percorso completo a 390 e 1280 px, nome dal link, domanda 4b
 // condizionata, opzioni esclusive, "Altro" obbligatorio, invio e schermata finale; prove dell'endpoint (honeypot, nonce,
 // tempo minimo, campi non validi); con "admin" anche l'elenco in Strumenti > Survey serata 25/11 e l'export CSV.
+// v0.2: logo, id del Contatto dal link (?c=), video nella schermata finale solo a chi lo sceglie nella domanda 6 (serve
+// l'opzione tp_serata_video_url impostata sul sito provato).
 // Uso: node tools/qa-serata.js <chrome-bin> <base-url> <out-dir> [admin]
 //   admin = login con admin/password (WordPress Playground). Sullo slot di produzione NON lanciare le prove di scrittura
 //   senza cancellare subito dopo le risposte di prova dall'admin.
@@ -57,8 +59,9 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 
 (async () => {
 	// A: link personale, telefono, modello poco chiaro (compare 4b), opzioni esclusive, "Altro" obbligatorio.
-	await run('A', 390, PAGE + '?n=Mario%20Rossi', async (c) => {
+	await run('A', 390, PAGE + '?n=Mario%20Rossi&c=recQAQAQAQAQAQAQA', async (c) => {
 		await expect(c, /Com'è andata la serata del 25\?/);
+		ok(await c.ev(`(function(){var i=document.querySelector('.sv__logo img');return !!i&&i.complete&&i.naturalWidth>0&&i.alt==='Trovapulizie'})()`), `${c.label}: logo del marchio caricato`);
 		ok(/mercoledì sera/.test(await c.ev(`document.querySelector('.sv__body').textContent`)), `${c.label}: benvenuto con "mercoledì sera"`);
 		await c.shot(`${outDir}/A-0-benvenuto.png`);
 		await press(c);
@@ -89,6 +92,7 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 		await expect(c, /approfondire/, '6 / 7');
 		await pick(c, 'Il team', 150);
 		await pick(c, 'Come partecipare al progetto', 150);
+		await pick(c, 'Rivedere il video della serata', 150);
 		await press(c);
 		await expect(c, /E adesso\?/, '7 / 7');
 		ok((await c.ev(JS.cta)) === 'Invia', `${c.label}: ultima domanda con "Invia"`);
@@ -102,6 +106,7 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 		await press(c);
 		ok(await wait(c.ev, `/Grazie, Mario\\./.test(document.querySelector('.sv__title')&&document.querySelector('.sv__title').textContent)`, 20000), `${c.label}: schermata finale "Grazie, Mario."`);
 		ok(await c.ev(`document.querySelector('[data-sv-top]').hidden`), `${c.label}: nessuna barra nella schermata finale`);
+		ok(await c.ev(`(function(){var v=document.querySelector('.sv__video video');return !!v&&v.preload==='none'&&v.controls&&!!v.getAttribute('src')})()`), `${c.label}: video nella schermata finale, scaricato solo al play`);
 		await c.shot(`${outDir}/A-8-grazie.png`);
 	});
 
@@ -127,6 +132,7 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 		await c.shot(`${outDir}/B-7-adesso.png`);
 		await press(c);
 		ok(await wait(c.ev, `/Grazie, Laura\\./.test(document.querySelector('.sv__title')&&document.querySelector('.sv__title').textContent)`, 20000), `${c.label}: schermata finale "Grazie, Laura."`);
+		ok(await c.ev(`!document.querySelector('.sv__video')`), `${c.label}: senza la scelta del video nessun video`);
 	});
 
 	// C: indietro e prove dell'endpoint dalla pagina (stessa origine).
@@ -154,7 +160,8 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 			ok(/Survey serata 25\/11/.test(txt), `${c.label}: pagina in Strumenti`);
 			ok(/Mario Rossi/.test(txt) && /Laura Bianchi/.test(txt), `${c.label}: le due risposte nell'elenco`);
 			ok(/Ci vediamo alla prossima serata/.test(txt) && /Come guadagnate\?/.test(txt), `${c.label}: testo di "Altro" e dubbio visibili`);
-			ok(/Il team, Come partecipare al progetto/.test(txt), `${c.label}: etichette leggibili delle scelte multiple`);
+			ok(/Il team, Come partecipare al progetto, Rivedere il video della serata/.test(txt), `${c.label}: etichette leggibili delle scelte multiple`);
+			ok(/recQAQAQAQAQAQAQA/.test(txt), `${c.label}: id del Contatto dal link salvato`);
 			await c.shot(`${outDir}/admin-elenco.png`);
 			const href = await c.ev(`document.querySelector('.page-title-action').href`);
 			const csv = await c.ev(`fetch(${JSON.stringify('')}+document.querySelector('.page-title-action').href,{credentials:'same-origin'}).then(function(r){return r.text()})`);

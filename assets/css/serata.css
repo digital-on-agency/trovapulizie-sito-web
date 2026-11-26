@@ -30,3 +30,12 @@
 @media (prefers-reduced-motion: reduce) {
 	.sv__scale-opt { transition: none; }
 }
+
+/* Logo del marchio al posto della scritta (v0.2) */
+.sv__logo--img { line-height: 0; }
+.sv__logo--img img { display: inline-block; width: 200px; max-width: 60%; height: auto; }
+
+/* Video della serata nella schermata finale (solo a chi l'ha chiesto nella domanda 6) */
+.sv__video { margin: 8px 0 32px; }
+.sv__video-title { margin: 0 0 12px; text-align: center; font-size: 17px; font-weight: 700; color: var(--sv-ink); }
+.sv__video video { display: block; width: 100%; aspect-ratio: 16 / 9; border-radius: 12px; background: #000; }
