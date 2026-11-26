@@ -29,9 +29,19 @@ function tp_is_serata_page() {
 	return is_singular( 'page' ) && is_page_template( 'page-serata.php' );
 }
 
-/** URL del video della serata (file nella libreria media), '' se non ancora caricato. */
+const TP_SERATA_VIDEO_ID = 112; // libreria media: "Una luce" (una-luce-sito-v1.mp4), video 1 proiettato in sala
+
+/**
+ * URL del video della serata: l'opzione tp_serata_video_url se impostata, altrimenti l'allegato TP_SERATA_VIDEO_ID.
+ * '' se nessuno dei due esiste. Allegato nel codice perche' le opzioni scritte da WP-CLI non arrivano al sito (cache
+ * degli oggetti solo lato web).
+ */
 function tp_serata_video_url() {
-	return (string) get_option( 'tp_serata_video_url', '' );
+	$url = (string) get_option( 'tp_serata_video_url', '' );
+	if ( '' === $url ) {
+		$url = (string) wp_get_attachment_url( TP_SERATA_VIDEO_ID );
+	}
+	return $url;
 }
 
 /** Domande e testi. Chiavi dei campi = colonne della tabella. */
