@@ -3,7 +3,7 @@
  * (stessa fonte della validazione lato server) e invia tutto in una volta a POST /wp-json/tp/v1/serata all'ultima
  * domanda. Nessuna libreria, nessun tracking. Classi e pelle della Survey OnField (assets/css/survey.css).
  *
- * Flusso v0.3: benvenuto -> nome (gia' compilato dal link) -> telefono ed email facoltativi (una schermata) -> tre voti 1-5 -> cosa migliorare
+ * Flusso v0.3: benvenuto -> nome (gia' compilato dal link) -> telefono o email, almeno uno (una schermata) -> tre voti 1-5 -> cosa migliorare
  * -> aspetto piu' interessante -> investimento (con approfondimento solo se "No", stesso numero) -> "E adesso?" con Invia
  * -> grazie. Le scelte singole e i voti avanzano al tocco, tranne l'ultima domanda, che chiede Invia.
  * Il video della serata compare nella schermata finale solo con la risposta indicata in def.thanks.video_when
@@ -170,7 +170,7 @@
 	function phoneOk(v) { return /^\+?[0-9 .\/()-]+$/.test(v) && v.replace(/\D+/g, '').length >= 7; }
 	function emailOk(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
-	// Recapiti: piu' campi facoltativi sulla stessa schermata, ognuno con la sua etichetta.
+	// Recapiti: piu' campi sulla stessa schermata, ognuno con la sua etichetta; con required basta uno dei due.
 	function contactQ(step, msg) {
 		var inputs = {};
 		step.fields.forEach(function (f) {
@@ -189,6 +189,7 @@
 		});
 		var btn = footer(step, msg, function () {
 			var tel = (inputs.telefono.value || '').trim(), mail = (inputs.email.value || '').trim();
+			if (step.required && !tel && !mail) { inputs.telefono.setAttribute('aria-invalid', 'true'); inputs.telefono.focus(); return ui.contact_required; }
 			if (tel && !phoneOk(tel)) { inputs.telefono.setAttribute('aria-invalid', 'true'); inputs.telefono.focus(); return ui.phone_invalid; }
 			if (mail && !emailOk(mail)) { inputs.email.setAttribute('aria-invalid', 'true'); inputs.email.focus(); return ui.email_invalid; }
 			return '';

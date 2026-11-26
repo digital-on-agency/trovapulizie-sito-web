@@ -9,7 +9,7 @@
  *   portare anche ?c=<id del Contatto nel gestionale> (recXXXXXXXXXXXXXX): la risposta si collega a quel Contatto.
  * - Salvataggio nella tabella {prefix}tp_serata_response, copia nel gestionale interno (inc/serata-airtable.php),
  *   nessuna notifica. Admin: inc/serata-admin.php (Strumenti > Survey serata 25/11: elenco, cancellazione, export CSV).
- * - Domande v0.3 (testo incollato da Guido il 26/11): nome, telefono ed email facoltativi sulla stessa schermata, tre voti da 1 a 5, cosa migliorare,
+ * - Domande v0.3 (testo incollato da Guido il 26/11): nome, telefono ed email sulla stessa schermata (almeno uno dei due), tre voti da 1 a 5, cosa migliorare,
  *   aspetto piu' interessante, interesse a valutare un investimento (con domanda di approfondimento se "No"), "E adesso?".
  * - Video della serata: chi sceglie "Vorrei ricevere materiale" trova il video nella schermata finale, se l'opzione
  *   WordPress tp_serata_video_url e' impostata.
@@ -58,7 +58,7 @@ function tp_serata_definition() {
 		),
 		'steps'   => array(
 			array( 'id' => 'name', 'type' => 'text', 'count' => 1, 'required' => true, 'title' => 'Nome e cognome', 'placeholder' => 'Il tuo nome e cognome', 'max' => 120, 'autocomplete' => 'name' ),
-			array( 'id' => 'recapiti', 'type' => 'contact', 'count' => 2, 'required' => false, 'title' => 'Come ti ricontattiamo?', 'hint' => 'Facoltativi: basta uno dei due, ci serve per mandarti quello che ci chiedi.', 'fields' => array(
+			array( 'id' => 'recapiti', 'type' => 'contact', 'count' => 2, 'required' => true, 'title' => 'Come ti ricontattiamo?', 'hint' => 'Basta uno dei due: ci serve per mandarti quello che ci chiedi.', 'fields' => array(
 				array( 'id' => 'telefono', 'label' => 'Numero di telefono', 'type' => 'tel', 'autocomplete' => 'tel', 'placeholder' => '+39 333 123 4567', 'max' => 40 ),
 				array( 'id' => 'email', 'label' => 'Email', 'type' => 'email', 'autocomplete' => 'email', 'placeholder' => 'nome@esempio.it', 'max' => 120 ),
 			) ),
@@ -83,6 +83,7 @@ function tp_serata_definition() {
 		'ui'      => array(
 			'next' => 'Avanti', 'skip' => 'Salta', 'send' => 'Invia', 'sending' => 'Invio in corso…', 'back' => 'Indietro',
 			'other' => 'Scrivi qui', 'required' => 'Serve una risposta per andare avanti.', 'other_required' => 'Scrivi qualcosa nel campo, oppure scegli un’altra risposta.',
+			'contact_required' => 'Lascia almeno il numero di telefono o l’email.',
 			'phone_invalid' => 'Il numero di telefono non sembra valido: controllalo oppure lascia vuoto.',
 			'email_invalid' => 'L’email non sembra valida: controllala oppure lascia vuoto.',
 			'privacy' => 'Inviando accetti l’', 'privacy_link' => 'informativa privacy',
@@ -284,6 +285,10 @@ function tp_serata_validate( array $p, array $def ) {
 	list( $data['email'], $ok ) = tp_serata_email_value( $p['email'] ?? '' );
 	if ( ! $ok ) {
 		$errs['email'] = true;
+	}
+	// Almeno un recapito (Guido 26/11 sera): l'errore va sul telefono, il client torna alla schermata dei recapiti.
+	if ( '' === $data['telefono'] && '' === $data['email'] ) {
+		$errs['telefono'] = true;
 	}
 	$data['contact_ref'] = tp_serata_contact_ref( $p['contact'] ?? '' );
 

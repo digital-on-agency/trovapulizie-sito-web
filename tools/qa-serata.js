@@ -1,7 +1,7 @@
 // QA della survey della serata 25/11 (page-serata.php): percorso completo a 390 e 1280 px, nome dal link, domanda 4b
 // condizionata, opzioni esclusive, "Altro" obbligatorio, invio e schermata finale; prove dell'endpoint (honeypot, nonce,
 // tempo minimo, campi non validi); con "admin" anche l'elenco in Strumenti > Survey serata 25/11 e l'export CSV.
-// v0.3: logo, id del Contatto dal link (?c=), telefono ed email facoltativi e validati, tre voti, domanda di approfondimento solo con
+// v0.3: logo, id del Contatto dal link (?c=), telefono o email (almeno uno) validati, tre voti, domanda di approfondimento solo con
 // investimento "No", video nella schermata finale solo con "Vorrei ricevere materiale" (serve l'opzione
 // tp_serata_video_url impostata sul sito provato).
 // Uso: node tools/qa-serata.js <chrome-bin> <base-url> <out-dir> [admin]
@@ -72,7 +72,9 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 		await press(c);
 		await expect(c, /Come ti ricontattiamo/, '2 / 9');
 		ok(await c.ev(`document.querySelector('input[name=telefono]').type==='tel'&&document.querySelector('input[name=email]').type==='email'`), `${c.label}: campi telefono ed email sulla stessa schermata`);
-		ok((await c.ev(JS.cta)) === 'Salta', `${c.label}: recapiti facoltativi = "Salta"`);
+		ok((await c.ev(JS.cta)) === 'Avanti', `${c.label}: recapiti obbligatori = "Avanti"`);
+		await press(c);
+		ok(/almeno il numero di telefono o/.test(await c.ev(JS.error)), `${c.label}: senza telefono ne' email bloccato`);
 		await c.ev(JS.type('input[name=telefono]', '12ab'));
 		await press(c);
 		ok(/numero di telefono non sembra valido/.test(await c.ev(JS.error)), `${c.label}: telefono non valido bloccato`);
@@ -127,7 +129,8 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 		ok(/Serve una risposta/.test(await c.ev(JS.error)), `${c.label}: nome obbligatorio`);
 		await c.ev(JS.type('.sv__input', 'Laura Bianchi'));
 		await press(c);
-		await press(c); // Salta i recapiti
+		await c.ev(JS.type('input[name=email]', 'laura.bianchi@example.com'));
+		await press(c); // solo email: basta uno dei due
 		await pick(c, '4'); await pick(c, '5'); await pick(c, '5');
 		await press(c); // Salta "migliorare"
 		await pick(c, "L'intero progetto");
@@ -145,11 +148,11 @@ async function press(c) { const l = await c.ev(JS.cta); ok((await c.ev(JS.press)
 
 	// C: indietro e prove dell'endpoint dalla pagina (stessa origine).
 	await run('C', 390, PAGE + '?n=Prova%20Endpoint', async (c) => {
-		await press(c); await press(c); await press(c); await pick(c, '3');
+		await press(c); await press(c); await c.ev(JS.type('input[name=telefono]', '3331234567')); await press(c); await pick(c, '3');
 		ok((await c.ev(`document.querySelector('[data-sv-back]').click(),document.querySelector('.sv__title').textContent`)).includes('piaciuta la serata'), `${c.label}: indietro torna al voto`);
 		ok(await c.ev(`document.querySelector('.sv__scale-opt.is-on').textContent==='3'`), `${c.label}: il voto dato resta selezionato`);
 		const cfg = `JSON.parse(document.querySelector('[data-serata]').getAttribute('data-config'))`;
-		const post = body => `(function(){var c=${cfg};var b=Object.assign({nonce:c.nonce,ts:c.ts,sig:c.sig,name:'QA',serata:4,progetto:4,chiaro:4,interesse:'app',investimento:'forse',adesso:'prossima'},${body});return fetch(c.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(j){return r.status+' '+(j.code||'')+' '+((j.data&&j.data.fields)||[]).join(',')})})})()`;
+		const post = body => `(function(){var c=${cfg};var b=Object.assign({nonce:c.nonce,ts:c.ts,sig:c.sig,name:'QA',telefono:'3331234567',serata:4,progetto:4,chiaro:4,interesse:'app',investimento:'forse',adesso:'prossima'},${body});return fetch(c.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(b)}).then(function(r){return r.json().then(function(j){return r.status+' '+(j.code||'')+' '+((j.data&&j.data.fields)||[]).join(',')})})})()`;
 		ok((await c.ev(post(`{website:'x'}`))).startsWith('200'), `${c.label}: honeypot = 200 finto`);
 		ok((await c.ev(post(`{nonce:'x'}`))).startsWith('403 tp_survey_expired'), `${c.label}: nonce errato = 403`);
 		ok((await c.ev(post(`{}`))).startsWith('429 tp_survey_fast'), `${c.label}: invio troppo veloce = 429`);
