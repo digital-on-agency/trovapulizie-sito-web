@@ -31,9 +31,10 @@ function tp_tracking_ids() {
 	);
 }
 
-/* La survey OnField non ha tracking ne' banner: raccoglie dati personali e non usa cookie (inc/survey.php). */
+/* La survey OnField e la survey della serata non hanno tracking ne' banner: raccolgono dati personali e non usano
+   cookie (inc/survey.php, inc/serata.php). */
 function tp_tracking_off() {
-	return function_exists( 'tp_is_survey_page' ) && tp_is_survey_page();
+	return ( function_exists( 'tp_is_survey_page' ) && tp_is_survey_page() ) || ( function_exists( 'tp_is_serata_page' ) && tp_is_serata_page() );
 }
 
 add_action( 'wp_head', function () {

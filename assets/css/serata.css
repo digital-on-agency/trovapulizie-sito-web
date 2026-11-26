@@ -1,0 +1,32 @@
+/**
+ * Survey della serata 25/11 (page-serata.php). Si carica dopo assets/css/survey.css e ne cambia solo colori e pochi
+ * elementi nuovi: firma, scala da 1 a 5.
+ * Verde Trovapulizie #37B299 (accento dal 16/11) con testo bianco nei bottoni pieni (Guido 20/11).
+ * [ATTENZIONE] Bianco su #37B299 = 2,6:1, sotto AA: stessa scelta consapevole delle CTA del sito.
+ */
+.sv--tp {
+	--sv-green: #37B299;
+	--sv-mint: #F0F8F5;
+}
+.sv--tp .sv__input:focus { box-shadow: 0 0 0 3px rgba(55, 178, 153, .22); }
+.sv--tp a:focus-visible, .sv--tp button:focus-visible, .sv--tp input:focus-visible, .sv--tp textarea:focus-visible { outline-color: #007A5C; }
+.sv--tp .sv__note a { color: #007A5C; text-decoration: underline; }
+.sv--tp .sv__error { margin-top: 12px; }
+
+/* Firma sotto i testi di benvenuto e di chiusura */
+.sv__sign { margin: -20px 0 32px; text-align: center; font-size: 15px; font-weight: 600; color: var(--sv-ink); }
+
+/* Scala 1-5: cinque tasti in riga, etichette agli estremi */
+.sv__scale { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 8px; }
+.sv__scale-opt {
+	min-height: 56px; border: 1.5px solid var(--sv-border); border-radius: 12px; background: #fff; color: var(--sv-ink);
+	font: 600 18px/1 'Inter', sans-serif; cursor: pointer; transition: border-color .15s, background .15s;
+	-webkit-tap-highlight-color: transparent;
+}
+.sv__scale-opt:hover { border-color: #C7CDD4; }
+.sv__scale-opt.is-on { border-color: var(--sv-green); background: var(--sv-green); color: #fff; }
+.sv__scale-legend { display: flex; justify-content: space-between; margin: 10px 2px 0; font-size: 13px; color: var(--sv-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+	.sv__scale-opt { transition: none; }
+}
