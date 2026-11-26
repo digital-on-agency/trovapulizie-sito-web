@@ -57,27 +57,27 @@ function tp_serata_definition() {
 			'cta'   => 'Inizia',
 		),
 		'steps'   => array(
-			array( 'id' => 'name', 'type' => 'text', 'count' => 1, 'required' => true, 'title' => 'Nome e cognome', 'placeholder' => 'Il tuo nome e cognome', 'max' => 120, 'autocomplete' => 'name' ),
-			array( 'id' => 'recapiti', 'type' => 'contact', 'count' => 2, 'required' => true, 'title' => 'Come ti ricontattiamo?', 'hint' => 'Basta uno dei due: ci serve per mandarti quello che ci chiedi.', 'fields' => array(
-				array( 'id' => 'telefono', 'label' => 'Numero di telefono', 'type' => 'tel', 'autocomplete' => 'tel', 'placeholder' => '+39 333 123 4567', 'max' => 40 ),
-				array( 'id' => 'email', 'label' => 'Email', 'type' => 'email', 'autocomplete' => 'email', 'placeholder' => 'nome@esempio.it', 'max' => 120 ),
-			) ),
-			array( 'id' => 'serata', 'type' => 'scale', 'count' => 3, 'required' => true, 'title' => 'Ti è piaciuta la serata?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
-			array( 'id' => 'progetto', 'type' => 'scale', 'count' => 4, 'required' => true, 'title' => 'Ti piace il progetto Trovapulizie?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
-			array( 'id' => 'chiaro', 'type' => 'scale', 'count' => 5, 'required' => true, 'title' => 'Ti è chiaro il modello di Trovapulizie?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
-			array( 'id' => 'migliorare', 'type' => 'textarea', 'count' => 6, 'required' => false, 'title' => 'Aiutaci a migliorare: cosa non ti è sembrato chiaro o cosa vorresti approfondire?', 'placeholder' => 'Scrivi qui', 'max' => 2000 ),
-			array( 'id' => 'interesse', 'type' => 'single', 'count' => 7, 'required' => true, 'title' => 'Quale aspetto trovi più interessante?', 'other_field' => 'interesse_altro', 'options' => tp_survey_opts( array(
+			array( 'id' => 'serata', 'type' => 'scale', 'count' => 1, 'required' => true, 'title' => 'Ti è piaciuta la serata?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
+			array( 'id' => 'progetto', 'type' => 'scale', 'count' => 2, 'required' => true, 'title' => 'Ti piace il progetto Trovapulizie?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
+			array( 'id' => 'chiaro', 'type' => 'scale', 'count' => 3, 'required' => true, 'title' => 'Ti è chiaro il modello di Trovapulizie?', 'min' => 1, 'max' => 5, 'labels' => $scale ),
+			array( 'id' => 'migliorare', 'type' => 'textarea', 'count' => 4, 'required' => false, 'title' => 'Aiutaci a migliorare: cosa non ti è sembrato chiaro o cosa vorresti approfondire?', 'placeholder' => 'Scrivi qui', 'max' => 2000 ),
+			array( 'id' => 'interesse', 'type' => 'single', 'count' => 5, 'required' => true, 'title' => 'Quale aspetto trovi più interessante?', 'other_field' => 'interesse_altro', 'options' => tp_survey_opts( array(
 				array( 'piattaforma', 'La piattaforma (gestionale per aziende e professionisti)' ), array( 'app', "L'applicazione (marketplace)" ),
 				array( 'progetto', "L'intero progetto" ), array( 'altro', 'Altro', true ),
 			) ) ),
-			array( 'id' => 'investimento', 'type' => 'single', 'count' => 8, 'required' => true, 'title' => 'Potrebbe interessarti valutare un investimento in Trovapulizie?', 'options' => tp_survey_opts( array(
+			array( 'id' => 'investimento', 'type' => 'single', 'count' => 6, 'required' => true, 'title' => 'Potrebbe interessarti valutare un investimento in Trovapulizie?', 'options' => tp_survey_opts( array(
 				array( 'si', 'Sì' ), array( 'forse', 'Forse, vorrei prima approfondire' ), array( 'no', 'No, non fa per me in questa fase' ),
 			) ) ),
-			array( 'id' => 'investimento_serve', 'type' => 'textarea', 'count' => 8, 'required' => false, 'when' => array( 'investimento', array( 'no' ) ), 'title' => 'Cosa ti servirebbe vedere o chiarire per valutare un investimento?', 'placeholder' => 'Scrivi qui', 'max' => 2000 ),
-			array( 'id' => 'adesso', 'type' => 'single', 'count' => 9, 'required' => true, 'last' => true, 'title' => 'E adesso?', 'options' => tp_survey_opts( array(
+			array( 'id' => 'investimento_serve', 'type' => 'textarea', 'count' => 6, 'required' => false, 'when' => array( 'investimento', array( 'no' ) ), 'title' => 'Cosa ti servirebbe vedere o chiarire per valutare un investimento?', 'placeholder' => 'Scrivi qui', 'max' => 2000 ),
+			array( 'id' => 'adesso', 'type' => 'single', 'count' => 7, 'required' => true, 'title' => 'E adesso?', 'options' => tp_survey_opts( array(
 				array( 'materiale', 'Vorrei ricevere materiale (es. pitch deck, one-pager, link al video)' ), array( 'contatto', 'Restiamo in contatto' ),
 				array( 'prossima', 'Ci vediamo alla prossima tappa!' ),
 			) ) ),
+			array( 'id' => 'name', 'type' => 'text', 'count' => 8, 'required' => true, 'title' => 'Nome e cognome', 'placeholder' => 'Il tuo nome e cognome', 'max' => 120, 'autocomplete' => 'name' ),
+			array( 'id' => 'recapiti', 'type' => 'contact', 'count' => 9, 'required' => true, 'last' => true, 'title' => 'Come ti ricontattiamo?', 'hint' => 'Basta uno dei due: ci serve per mandarti quello che ci chiedi.', 'fields' => array(
+				array( 'id' => 'telefono', 'label' => 'Numero di telefono', 'type' => 'tel', 'autocomplete' => 'tel', 'placeholder' => '+39 333 123 4567', 'max' => 40 ),
+				array( 'id' => 'email', 'label' => 'Email', 'type' => 'email', 'autocomplete' => 'email', 'placeholder' => 'nome@esempio.it', 'max' => 120 ),
+			) ),
 		),
 		'thanks'  => array( 'title' => 'Grazie%s.', 'body' => 'Ci sentiamo presto.', 'sign' => 'Christian e Guido', 'video' => 'Il video della serata', 'video_when' => array( 'adesso', 'materiale' ) ),
 		'ui'      => array(
