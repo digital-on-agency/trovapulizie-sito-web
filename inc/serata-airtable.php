@@ -12,7 +12,9 @@
  * - Nessuna Opportunita': chi era in sala non e' un lead di servizio, e una nuova Opportunita' farebbe partire
  *   "TP - Notifica lead al team" (WhatsApp operativo). Il ricontatto si segue dalla spunta "Da ricontattare"
  *   ("Vorrei ricevere materiale", "Restiamo in contatto" o interesse all'investimento "Sì" / "Forse").
- * - Manuale: wp tp-serata sync [<id>] [--all]
+ * - Ogni risposta finisce anche nella tabella comune "Risposte survey" (inc/survey-risposte.php), letta dalla pagina
+ *   /survey-risposte del gestionale. Se quella copia fallisce la riga resta in errore e il giro dopo riprova entrambe.
+ * - Manuale: wp tp-serata sync [<id>] [--all] [--resync]
  */
 
 const TP_SERATA_AT_TABLE     = 'tbl7acCyAmt6QTlqR'; // "Survey Serata 25-11", creata il 26/11
@@ -125,13 +127,61 @@ function tp_serata_at_sync_row( $id ) {
 	if ( $err ) {
 		return $fail( 'risposta: ' . $err );
 	}
+	// L'id va salvato prima della copia comune: se quella fallisce, il tentativo dopo aggiorna e non duplica.
+	$set( array( 'at_record_id' => (string) ( $res['records'][0]['id'] ?? $r['at_record_id'] ) ) );
+
+	list( , $err ) = tp_risposte_upsert( array(
+		'Risposta'              => $fields['Risposta'],
+		'Survey'                => 'Serata 25-11',
+		'Chiave origine'        => 'serata:' . $id,
+		'Data'                  => $fields['Data'],
+		'Nome'                  => $r['name'],
+		'Telefono'              => $r['telefono'],
+		'Email'                 => $fields['Email'],
+		'Contatto'              => $fields['Contatto'],
+		'Risposte'              => trim( tp_risposte_testo( tp_serata_risposte_pairs( $r ) ) . ( '' !== $legacy ? "\n\n" . $legacy : '' ) ),
+		'Da ricontattare'       => $fields['Da ricontattare'],
+		'Note sincronizzazione' => $warn,
+	) );
+	if ( $err ) {
+		return $fail( 'risposte survey: ' . $err );
+	}
 	$set( array(
-		'at_record_id' => (string) ( $res['records'][0]['id'] ?? $r['at_record_id'] ),
 		'at_status'    => 'ok',
 		'at_error'     => '',
 		'at_synced_at' => current_time( 'mysql', true ),
 	) );
 	return true;
+}
+
+/**
+ * Coppie [domanda, risposta] per il testo di "Risposte survey", nell'ordine della definizione. Nome e recapiti
+ * restano fuori: hanno i loro campi.
+ */
+function tp_serata_risposte_pairs( array $r ) {
+	$pairs = array();
+	foreach ( tp_serata_definition()['steps'] as $s ) {
+		$v = $r[ $s['id'] ] ?? '';
+		switch ( $s['type'] ) {
+			case 'scale':
+				$n = (int) $v;
+				$a = $n >= 1 ? $n . '/' . $s['max'] . ( isset( $s['labels'][ $n - 1 ] ) ? ' (' . $s['labels'][ $n - 1 ] . ')' : '' ) : '';
+				break;
+			case 'single':
+				$a = tp_serata_label( $s['id'], $v );
+				if ( '' !== $a && isset( $s['other_field'] ) && '' !== (string) ( $r[ $s['other_field'] ] ?? '' ) ) {
+					$a .= ' - ' . $r[ $s['other_field'] ];
+				}
+				break;
+			case 'textarea':
+				$a = (string) $v;
+				break;
+			default:
+				continue 2;
+		}
+		$pairs[] = array( $s['title'], $a );
+	}
+	return $pairs;
 }
 
 /* ---- Pianificazione ------------------------------------------------------------------------------- */
@@ -178,11 +228,15 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 	 * : Una sola risposta.
 	 * [--all]
 	 * : Tutte quelle non ancora sincronizzate, anche oltre il limite di tentativi.
+	 * [--resync]
+	 * : Tutte le risposte, anche quelle gia' sincronizzate (es. per riempire "Risposte survey").
 	 */
 	WP_CLI::add_command( 'tp-serata sync', function ( $args, $assoc ) {
 		global $wpdb;
 		if ( ! empty( $args[0] ) ) {
 			$ids = array( (int) $args[0] );
+		} elseif ( ! empty( $assoc['resync'] ) ) {
+			$ids = $wpdb->get_col( 'SELECT id FROM ' . tp_serata_table() . ' ORDER BY id' );
 		} else {
 			$where = empty( $assoc['all'] ) ? $wpdb->prepare( ' AND at_tries < %d', TP_SERATA_AT_MAX_TRIES ) : '';
 			$ids   = $wpdb->get_col( 'SELECT id FROM ' . tp_serata_table() . " WHERE at_status <> 'ok'" . $where . ' ORDER BY id' );

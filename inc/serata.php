@@ -356,4 +356,5 @@ function tp_serata_rest_create( WP_REST_Request $req ) {
 }
 
 require_once __DIR__ . '/serata-admin.php';
+require_once __DIR__ . '/survey-risposte.php';
 require_once __DIR__ . '/serata-airtable.php';

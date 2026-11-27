@@ -33,7 +33,10 @@ solo il nome: niente telefono ne' email (finiscono nei log del server e nella cr
 - Se l'invio arriva prima dei 12 s anti-bot (risposte a tocchi rapidi), il client riprova da solo fino a tre volte.
 - Pagina noindex,nofollow (meta e `X-Robots-Tag`), fuori dalla sitemap, mai in cache, senza GTM, Clarity ne' banner.
   Open Graph resta, per l'anteprima del link su WhatsApp.
-- Nessuna copia su Airtable, nessuna notifica: le risposte stanno solo in WordPress.
+- Nessuna notifica. Ogni risposta viene copiata nel gestionale interno (`inc/serata-airtable.php`): nella tabella
+  "Survey Serata 25-11", con i voti come numeri, e nella tabella comune "Risposte survey" (`inc/survey-risposte.php`),
+  letta dalla pagina `/survey-risposte`. Nessun Contatto nuovo, nessuna Opportunita'. Manuale:
+  `wp tp-serata sync [<id>] [--all] [--resync]`; `--resync` riprende anche le righe gia' sincronizzate.
 
 ## QA
 
@@ -44,5 +47,6 @@ prova vanno cancellate subito dall'admin.
 
 ## Fine vita
 
-Le risposte si cancellano dall'admin a fine ricontatti (indicativamente entro 90 giorni). Poi si puo' mettere la pagina
-in bozza; il codice resta finche' non serve una survey nuova.
+Le risposte si cancellano a fine ricontatti (indicativamente entro 90 giorni) in tre posti: admin di WordPress, tabella
+"Survey Serata 25-11" e righe con Survey "Serata 25-11" in "Risposte survey". Una risposta cancellata in WordPress resta
+su Airtable. Poi si puo' mettere la pagina in bozza; il codice resta finche' non serve una survey nuova.
